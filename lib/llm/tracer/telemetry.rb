@@ -223,7 +223,9 @@ module LLM
       require "opentelemetry/sdk" unless defined?(OpenTelemetry)
       @exporter ||= OpenTelemetry::SDK::Trace::Export::InMemorySpanExporter.new
       processor = OpenTelemetry::SDK::Trace::Export::BatchSpanProcessor.new(@exporter)
-      @tracer_provider = OpenTelemetry::SDK::Trace::TracerProvider.new
+      @tracer_provider = OpenTelemetry::SDK::Trace::TracerProvider.new(
+        sampler: OpenTelemetry::SDK::Trace::Samplers::ALWAYS_ON
+      )
       @tracer_provider.add_span_processor(processor)
       @tracer = @tracer_provider.tracer("llm.rb", LLM::VERSION)
     end
