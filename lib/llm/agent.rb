@@ -72,7 +72,11 @@ module LLM
     #  Returns the current skills when no argument is provided
     def self.skills(*skills, &block)
       return @skills if skills.empty? && !block
-      @skills = block || skills.flatten
+      if skills.size == 1 and skills.grep(Symbol).any?
+        @skills = skills.first
+      else
+        @skills = block || skills.flatten
+      end
     end
 
     ##
