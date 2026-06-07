@@ -67,6 +67,8 @@ Style/MethodCallWithoutArgsParentheses:
   Enabled: false
 Style/ParenthesesAroundCondition:
   Enabled: false
+Style/ConditionalAssignment:
+  Enabled: false
 Lint/ConstantDefinitionInBlock:
   Enabled: false
 Layout/ParameterAlignment:
