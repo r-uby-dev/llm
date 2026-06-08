@@ -55,6 +55,8 @@ class LLM::OpenAI
         LLM::UnauthorizedError.new("Authentication error").tap { _1.response = res }
       elsif res.rate_limited?
         LLM::RateLimitError.new("Too many requests").tap { _1.response = res }
+      elsif res.not_found?
+        LLM::NotFoundError.new("Server response: not found (404)").tap { _1.response = res }
       else
         error = body["error"] || {}
         case error["type"]

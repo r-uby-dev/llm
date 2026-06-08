@@ -53,7 +53,7 @@ class LLM::Bedrock
       elsif res.rate_limited?
         LLM::RateLimitError.new(message).tap { _1.response = res }
       elsif res.not_found?
-        LLM::Error.new("Bedrock model not found: #{message}").tap { _1.response = res }
+        LLM::NotFoundError.new("Server response: not found (404)").tap { _1.response = res }
       else
         LLM::Error.new(message).tap { _1.response = res }
       end

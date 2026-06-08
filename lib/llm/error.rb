@@ -36,6 +36,10 @@ module LLM
   ServerError = Class.new(Error)
 
   ##
+  # HTTPNotFound
+  NotFoundError = Class.new(Error)
+
+  ##
   # When an given an input object that is not understood
   FormatError = Class.new(Error)
 

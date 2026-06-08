@@ -4,6 +4,12 @@
 
 ### Add
 
+* **Raise `LLM::NotFoundError` for provider 404 responses** <br>
+  Raise `LLM::NotFoundError` when a provider returns HTTP 404. One
+  example is calling the embeddings API on DeepSeek
+  (`LLM.deepseek(...).embed(["foobar"])`), which returns 404 because
+  DeepSeek does not implement that endpoint.
+
 * **Add Symbol resolution to `LLM::Agent.confirm`** <br>
   When `confirm` receives a single Symbol argument, it stores it
   as-is instead of converting it to a string array. At initialization

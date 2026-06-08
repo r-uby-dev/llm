@@ -60,6 +60,8 @@ class LLM::Google
         end
       elsif res.rate_limited?
         LLM::RateLimitError.new("Too many requests").tap { _1.response = res }
+      elsif res.not_found?
+        LLM::NotFoundError.new("Server response: not found (404)").tap { _1.response = res }
       else
         LLM::Error.new("Unexpected response").tap { _1.response = res }
       end
