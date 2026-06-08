@@ -13,6 +13,7 @@
 /script
 /bench/
 /tasks/benchmark.rake
+/*.pdf
 
 # rspec failure tracking
 .rspec_status
