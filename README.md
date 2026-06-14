@@ -36,10 +36,9 @@ The llm.rb runtime and its forks
 ([mruby-llm](https://github.com/llmrb/mruby-llm),
 [wasm-llm](https://github.com/llmrb/wasm-llm))
 power a growing family of AI applications, and
-services.
-
-The following applications are publicly accessible over SSH and are
-free to try. No account required. Nothing to install. Have fun :)
+services. The following applications are publicly
+accessible over SSH and are free to try. No account
+required. Nothing to install.
 
 #### matz - the mruby expert
 
