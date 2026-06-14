@@ -36,13 +36,13 @@ and fork (via xchan.rb gem).
 
 > ssh matz@r.uby.dev
 
-See [https://r.uby.dev](https://r.uby.dev) for more information.
+See [https://r.uby.dev/matz](https://r.uby.dev/matz) for more information.
 
 #### robert - the freebsd expert
 
 > ssh robert@4.4bsd.dev
 
-See [https://4.4bsd.dev](https://4.4bsd.dev) for more information.
+See [https://4.4bsd.dev/robert](https://4.4bsd.dev/robert) for more information.
 
 ## Quick start
 
