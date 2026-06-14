@@ -30,7 +30,16 @@ also includes built-in ActiveRecord and Sequel support, plus concurrent
 tool execution through threads, tasks (via async gem), fibers, ractors,
 and fork (via xchan.rb gem).
 
-## Applications
+## Services
+
+The llm.rb runtime and its forks
+([mruby-llm](https://github.com/llmrb/mruby-llm),
+[wasm-llm](https://github.com/llmrb/wasm-llm))
+power a growing family of AI applications, and
+services.
+
+The following applications are publicly accessible over SSH and are
+free to try. No account required. Nothing to install. Have fun :)
 
 #### matz - the mruby expert
 
