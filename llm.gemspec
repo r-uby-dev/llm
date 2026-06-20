@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.authors = ["0x1eef (Robert)", "Antar Azri", "Rodrigo Serrano"]
   spec.email = ["robert@4.4bsd.dev"]
 
-  spec.summary = "Ruby's most capable AI runtime"
+  spec.summary = "Ruby's capable AI runtime"
   spec.description = <<~DESC
-  llm.rb is Ruby's most capable AI runtime.
+  llm.rb is Ruby's capable AI runtime.
 
   It runs on Ruby's standard library by default. loads optional pieces
   only when needed, and offers a single runtime for providers, agents,
@@ -28,10 +28,10 @@ Gem::Specification.new do |spec|
   spec.license = "0BSD"
   spec.required_ruby_version = ">= 3.3.0"
 
-  spec.homepage = "https://llmrb.github.io"
+  spec.homepage = "https://r.uby.dev/llm/"
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/llmrb/llm.rb"
-  spec.metadata["documentation_uri"] = "https://llmrb.github.io/llm.rb"
+  spec.metadata["documentation_uri"] = spec.homepage
   spec.metadata["changelog_uri"] = "https://0x1eef.github.io/x/llm.rb/file.CHANGELOG.html"
 
   spec.files = Dir[
