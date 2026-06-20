@@ -1,7 +1,7 @@
 <p align="center">
   <a href="https://r.uby.dev">
     <img
-      src="https://github.com/llmrb/llm.rb/raw/main/rubydev.svg"
+      src="https://github.com/r-uby-dev/llm.rb/raw/main/rubydev.svg"
       width="400"
       height="200"
       border="0"
