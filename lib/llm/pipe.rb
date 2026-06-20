@@ -3,7 +3,7 @@
 module LLM
   ##
   # The {LLM::Pipe LLM::Pipe} class wraps a pair of IO objects created by
-  # {IO.pipe}. It is used by llm.rb internals to manage process and stream
+  # `IO.pipe`. It is used by llm.rb internals to manage process and stream
   # communication through one small interface.
   class Pipe
     ##

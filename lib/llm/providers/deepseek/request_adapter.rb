@@ -18,7 +18,7 @@ class LLM::DeepSeek
     private
 
     ##
-    # @param [Hash] params
+    # @param [Array<LLM::Function>] tools
     # @return [Hash]
     def adapt_tools(tools)
       (tools.nil? || tools.empty?) ? {} : {tools: tools.map { _1.adapt(self) }}

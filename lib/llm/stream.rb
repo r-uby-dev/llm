@@ -15,7 +15,7 @@ module LLM
   #   therefore block streaming progress and should generally return as
   #   quickly as possible.
   #
-  # The most common callback is {#on_content}, which also maps to {#<<}.
+  # The most common callback is {#on_content}, which also maps to `#<<`.
   # Providers may also call {#on_reasoning_content} and {#on_tool_call} when
   # that data is available. Runtime features such as context compaction may
   # also emit lifecycle callbacks like {#on_transform} or {#on_compaction}.

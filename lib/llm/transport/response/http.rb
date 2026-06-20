@@ -3,7 +3,7 @@
 class LLM::Transport::Response
   ##
   # {LLM::Transport::Response::HTTP LLM::Transport::Response::HTTP}
-  # adapts a {Net::HTTPResponse Net::HTTPResponse} to the
+  # adapts a `Net::HTTPResponse` to the
   # {LLM::Transport::Response LLM::Transport::Response} interface.
   #
   # This is the default wrapper for responses produced by the built-in

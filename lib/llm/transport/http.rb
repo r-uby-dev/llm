@@ -5,7 +5,7 @@ require "net/http"
 class LLM::Transport
   ##
   # The {LLM::Transport::HTTP LLM::Transport::HTTP} transport is the
-  # built-in adapter for Ruby's {Net::HTTP Net::HTTP}. It manages
+  # built-in adapter for Ruby's `Net::HTTP`. It manages
   # transient HTTP connections, tracks active requests by owner, and
   # interrupts in-flight requests when needed.
   #
@@ -69,7 +69,7 @@ class LLM::Transport
 
     ##
     # Performs a request on the current HTTP transport.
-    # Accepts both {Net::HTTPRequest} and {LLM::Transport::Request}.
+    # Accepts both `Net::HTTPRequest` and {LLM::Transport::Request}.
     #
     # @param [Net::HTTPRequest, LLM::Transport::Request] request
     # @param [Fiber] owner

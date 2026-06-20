@@ -128,7 +128,7 @@ class ReadFile < LLM::Tool
   required %i[path]
 
   def call(path:)
-    {contents: File.read(path)}
+    { contents: File.read(path) }
   end
 end
 ```
@@ -214,7 +214,7 @@ require "llm"
 
 a2a = LLM::A2A.rest(
   url: "https://remote-agent.example.com",
-  headers: {"Authorization" => "Bearer token"}
+  headers: { "Authorization" => "Bearer token" }
 )
 llm = LLM.openai(key: ENV["KEY"])
 agent = LLM::Agent.new(llm, tools: a2a.skills)
@@ -542,7 +542,7 @@ agent = LLM::Agent.new(
   llm,
   model: "gpt-5.4-mini",
   mode: :responses,
-  reasoning: {effort: "medium"},
+  reasoning: { effort: "medium" },
   stream: Stream.new
 )
 agent.talk("Solve 17 * 19 and show your work.")
@@ -599,7 +599,7 @@ class Context < Sequel::Model
   end
 
   def set_context
-    {model: "gpt-5.4-mini", mode: :responses, store: false}
+    { model: "gpt-5.4-mini", mode: :responses, store: false }
   end
 end
 
@@ -634,7 +634,7 @@ class Context < ApplicationRecord
   end
 
   def set_context
-    {model: "gpt-5.4-mini", mode: :responses, store: false}
+    { model: "gpt-5.4-mini", mode: :responses, store: false }
   end
 end
 
@@ -661,7 +661,7 @@ class Context < ApplicationRecord
   end
 
   def set_context
-    {model: model_name, mode: :responses, store: false}
+    { model: model_name, mode: :responses, store: false }
   end
 end
 ```
@@ -695,7 +695,7 @@ class Ticket < ApplicationRecord
   end
 
   def set_context
-    {mode: :responses, store: false}
+    { mode: :responses, store: false }
   end
 end
 
@@ -720,7 +720,7 @@ class Ticket < ApplicationRecord
   end
 
   def set_context
-    {mode: :responses, store: false}
+    { mode: :responses, store: false }
   end
 end
 ```
@@ -741,7 +741,7 @@ require "net/http/persistent"
 llm = LLM.openai(key: ENV["KEY"], persistent: true)
 mcp = LLM::MCP.http(
   url: "https://api.githubcopilot.com/mcp/",
-  headers: {"Authorization" => "Bearer #{ENV["GITHUB_PAT"]}"},
+  headers: { "Authorization" => "Bearer " + ENV["GITHUB_PAT"].to_s },
   persistent: true
 )
 

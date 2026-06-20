@@ -5,11 +5,11 @@ module LLM::Bedrock::RequestAdapter
   # Adapts a single message to Bedrock Converse content blocks.
   #
   # Bedrock Converse content blocks include:
-  #   - {text: "..."}
-  #   - {image: {format: "png", source: {bytes: "..."}}}
-  #   - {document: {format: "pdf", name: "...", source: {bytes: "..."}}}
-  #   - {toolUse: {toolUseId: "...", name: "...", input: {...}}}
-  #   - {toolResult: {toolUseId: "...", content: [{text: "..."}]}}
+  #   - { text: "..." }
+  #   - { image: { format: "png", source: { bytes: "..." } } }
+  #   - { document: { format: "pdf", name: "...", source: { bytes: "..." } } }
+  #   - { toolUse: { toolUseId: "...", name: "...", input: ... } }
+  #   - {toolResult: {toolUseId: "...", content: [{ text: "..." }]}}
   #
   # @api private
   class Completion

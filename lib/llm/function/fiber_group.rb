@@ -3,7 +3,7 @@
 class LLM::Function
   ##
   # The {LLM::Function::FiberGroup} class wraps an array of
-  # {Fiber} objects that are running {LLM::Function} calls
+  # `Fiber` objects that are running {LLM::Function} calls
   # concurrently using scheduler-backed fibers.
   #
   # This class provides the same interface as {LLM::Function::ThreadGroup}
@@ -26,7 +26,7 @@ class LLM::Function
     # of fiber objects.
     #
     # @param [Array<Fiber>] fibers
-    #   An array of fibers, each running an {LLM::Function#spawn_fiber} call.
+    #   An array of fibers, each running an `LLM::Function#spawn_fiber` call.
     #
     # @return [LLM::Function::FiberGroup]
     #   Returns a new fiber group.

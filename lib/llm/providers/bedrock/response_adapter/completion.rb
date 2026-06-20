@@ -8,9 +8,9 @@ module LLM::Bedrock::ResponseAdapter
   #   {
   #     "output" => {"message" => {
   #       "role" => "assistant",
-  #       "content" => [{"text" => "..."}, {"toolUse" => {...}}]
+  #       "content" => `[ { "text" => "..." }, { "toolUse" => ... } ]`
   #     }},
-  #     "usage" => {"inputTokens" => N, "outputTokens" => N},
+  #     "usage" => `{ "inputTokens" => N, "outputTokens" => N }`,
   #     "modelId" => "anthropic.claude-sonnet-4-20250514-v1:0",
   #     "stopReason" => "end_turn"
   #   }

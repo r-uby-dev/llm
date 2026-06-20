@@ -6,8 +6,8 @@ class LLM::Bedrock
   #
   # Bedrock Converse returns:
   #   {
-  #     output: {message: {role: "assistant", content: [{...}, ...]}},
-  #     usage: {inputTokens: N, outputTokens: N},
+  #     output: `{ message: { role: "assistant", content: [ ... ] } }`,
+  #     usage: `{ inputTokens: N, outputTokens: N }`,
   #     modelId: "anthropic.claude-...",
   #     stopReason: "end_turn" | "tool_use" | "max_tokens" | ...
   #   }

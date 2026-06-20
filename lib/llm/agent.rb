@@ -192,7 +192,7 @@ module LLM
     end
 
     ##
-    # @param [LLM::Provider] provider
+    # @param [LLM::Provider] llm
     #  A provider
     # @param [Hash] params
     #  The parameters to maintain throughout the conversation.

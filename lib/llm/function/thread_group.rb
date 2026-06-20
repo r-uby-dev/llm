@@ -3,7 +3,7 @@
 class LLM::Function
   ##
   # The {LLM::Function::ThreadGroup} class wraps an array of
-  # {Thread} objects that are running {LLM::Function} calls
+  # `Thread` objects that are running {LLM::Function} calls
   # concurrently. It provides a single {#wait} method that
   # collects the {LLM::Function::Return} values from those
   # threads.
@@ -27,11 +27,11 @@ class LLM::Function
   class ThreadGroup
     ##
     # Creates a new {LLM::Function::ThreadGroup} from an array
-    # of {Thread} objects.
+    # of `Thread` objects.
     #
     # @param [Array<Thread>] threads
     #   An array of threads, each running an {LLM::Function#spawn}
-    #   call. The thread's {Thread#value} will be an
+    #   call. The thread's `Thread#value` will be an
     #   {LLM::Function::Return}.
     #
     # @return [LLM::Function::ThreadGroup]

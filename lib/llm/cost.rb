@@ -37,7 +37,7 @@ class LLM::Cost < Struct.new(
 )
   ##
   # Build a cost breakdown from token usage and model pricing.
-  # @param [LLM::Context]
+  # @param [LLM::Context] ctx
   #  Context used to resolve provider, model, and token usage
   # @return [LLM::Cost]
   def self.from(ctx)

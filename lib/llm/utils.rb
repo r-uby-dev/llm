@@ -45,7 +45,7 @@ module LLM
     # Returns the Ruby module or class name for an object.
     #
     # This bypasses overridden `#name` implementations by binding
-    # {Module#name} directly.
+    # `Module#name` directly.
     #
     # @param [Module] obj
     # @return [String, nil]

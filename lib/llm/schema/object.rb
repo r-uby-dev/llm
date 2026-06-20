@@ -12,7 +12,7 @@ class LLM::Schema
     attr_reader :properties
 
     ##
-    # @param params [Hash]
+    # @param [Hash] properties
     #  A hash of properties
     # @return [LLM::Schema::Object]
     def initialize(properties)

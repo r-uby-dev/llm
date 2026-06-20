@@ -29,7 +29,7 @@ class LLM::Google
     end
 
     ##
-    # @param [Hash] params
+    # @param [Array<LLM::Function>] tools
     # @return [Hash]
     def adapt_tools(tools)
       return {} unless tools&.any?

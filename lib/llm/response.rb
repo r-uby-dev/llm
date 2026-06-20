@@ -14,7 +14,7 @@ module LLM
   # through {#res}. When the default net/http transport is in use,
   # {LLM::Transport::Response::HTTP
   # LLM::Transport::Response::HTTP} keeps the
-  # original {Net::HTTPResponse Net::HTTPResponse} available through
+  # original `Net::HTTPResponse` available through
   # its own {LLM::Transport::Response::HTTP#res #res}.
   class Response
     require "json"

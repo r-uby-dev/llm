@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+# @!parse
+#   module ::ActiveRecord
+#     class Base
+#     end
+#   end
+
 module LLM::ActiveRecord
   ##
   # ActiveRecord integration for persisting {LLM::Agent LLM::Agent} state.
@@ -134,4 +140,5 @@ module LLM::ActiveRecord
   end
 end
 
+# @!parse ::ActiveRecord::Base.extend(LLM::ActiveRecord::ActsAsAgent)
 ::ActiveRecord::Base.extend(LLM::ActiveRecord::ActsAsAgent)

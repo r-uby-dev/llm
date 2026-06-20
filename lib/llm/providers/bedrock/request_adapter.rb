@@ -5,10 +5,10 @@ class LLM::Bedrock
   # Adapts llm.rb internal message format to Bedrock Converse API format.
   #
   # Bedrock Converse uses:
-  #   - system: [{text: "..."}]  (top-level, separate from messages)
-  #   - messages: [{role: "user"|"assistant", content: [{...}, ...]}]
+  #   - system: `[ { text: "..." } ]`  (top-level, separate from messages)
+  #   - messages: `[ { role: "user"|"assistant", content: [ ... ] } ]`
   #   - Content blocks: text, image, document, toolUse, toolResult
-  #   - toolConfig: {tools: [{toolSpec: {name:, description:, inputSchema: {json: ...}}}]}
+  #   - toolConfig: `{ tools: [ { toolSpec: { name:, description:, inputSchema: { json: ... } } } ] }`
   #
   # @api private
   module RequestAdapter

@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+# @!parse
+#   module ::ActiveRecord
+#     class Base
+#     end
+#   end
+
 module LLM::ActiveRecord
   ##
   # ActiveRecord integration for persisting {LLM::Context LLM::Context} state.
@@ -222,4 +228,5 @@ module LLM::ActiveRecord
   end
 end
 
+# @!parse ::ActiveRecord::Base.extend(LLM::ActiveRecord::ActsAsLLM)
 ::ActiveRecord::Base.extend(LLM::ActiveRecord::ActsAsLLM)

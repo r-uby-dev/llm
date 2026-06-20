@@ -12,7 +12,7 @@ class LLM::Registry
   ##
   # @raise [LLM::Error]
   #  Might raise an error
-  # @param [Symbol]
+  # @param [Symbol] name
   #  A provider name
   # @return [LLM::Registry]
   def self.for(name)
@@ -71,7 +71,7 @@ class LLM::Registry
   end
 
   ##
-  # Similar to #{find} but returns the block's return value
+  # Similar to `#find` but returns the block's return value
   # @return [Object, nil]
   def find_map(pair)
     result = nil

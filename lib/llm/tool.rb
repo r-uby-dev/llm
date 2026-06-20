@@ -63,7 +63,7 @@ class LLM::Tool
   ##
   # @param [LLM::A2A] a2a
   #  The A2A client that will execute the tool call
-  # @param [LLM::A2A::Card::Skill]
+  # @param [LLM::A2A::Card::Skill] skill
   #  An A2A tool
   # @return [Class<LLM::Tool>]
   #  Returns a subclass of LLM::Tool
@@ -124,7 +124,7 @@ class LLM::Tool
 
   ##
   # Registers the tool as a function when inherited
-  # @param [Class] klass The subclass
+  # @param [Class] tool The subclass
   # @return [void]
   def self.inherited(tool)
     LLM.lock(:inherited) do

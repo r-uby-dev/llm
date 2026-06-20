@@ -181,16 +181,19 @@ module LLM
   end
 
   ##
-  # @param [Hash, nil] stdio
-  # @option stdio [Array<String>] :argv
+  # @param [Hash] opts
+  #  MCP client options
+  # @option opts [Hash, nil] :stdio
+  #  Standard I/O transport options
+  # @option opts [Array<String>] :stdio/:argv
   #  The command to run for the MCP process
-  # @option stdio [Hash] :env
+  # @option opts [Hash] :stdio/:env
   #  The environment variables to set for the MCP process
-  # @option stdio [String, nil] :cwd
+  # @option opts [String, nil] :stdio/:cwd
   #  The working directory for the MCP process
   # @return [LLM::MCP]
-  def mcp(**)
-    LLM::MCP.new(**)
+  def mcp(**opts)
+    LLM::MCP.new(**opts)
   end
 
   ##
@@ -234,7 +237,7 @@ module LLM
   ##
   # Provides a thread-safe lock
   # @param [Symbol] name The name of the lock
-  # @param [Proc] & The block to execute within the lock
+  # @param [Proc] block The block to execute within the lock
   # @return [void]
-  def lock(name, &) = @monitors[name].synchronize(&)
+  def lock(name, &block) = @monitors[name].synchronize(&block)
 end

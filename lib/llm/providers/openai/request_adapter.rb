@@ -42,7 +42,7 @@ class LLM::OpenAI
     end
 
     ##
-    # @param [Hash] params
+    # @param [Array<LLM::Function>] tools
     # @return [Hash]
     def adapt_tools(tools)
       if tools.nil? || tools.empty?

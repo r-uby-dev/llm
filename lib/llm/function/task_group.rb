@@ -3,7 +3,7 @@
 class LLM::Function
   ##
   # The {LLM::Function::TaskGroup} class wraps an array of
-  # {Async::Task} objects that are running {LLM::Function} calls
+  # `Async::Task` objects that are running {LLM::Function} calls
   # concurrently using the async gem.
   #
   # This class provides the same interface as {LLM::Function::ThreadGroup}
@@ -27,7 +27,7 @@ class LLM::Function
     # of async task objects.
     #
     # @param [Array<Async::Task>] tasks
-    #   An array of async tasks, each running an {LLM::Function#spawn_async} call.
+    #   An array of async tasks, each running an `LLM::Function#spawn_async` call.
     #
     # @return [LLM::Function::TaskGroup]
     #   Returns a new task group.

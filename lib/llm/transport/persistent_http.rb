@@ -81,7 +81,7 @@ class LLM::Transport
 
     ##
     # Performs a request on the current HTTP transport.
-    # Accepts both {Net::HTTPRequest} and {LLM::Transport::Request}.
+    # Accepts both `Net::HTTPRequest` and {LLM::Transport::Request}.
     #
     # @param [Net::HTTPRequest, LLM::Transport::Request] request
     # @param [Fiber] owner

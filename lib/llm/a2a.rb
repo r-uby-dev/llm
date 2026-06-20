@@ -177,7 +177,7 @@ class LLM::A2A
   ##
   # Sends a message to the agent and returns the response.
   # @param [String] text The message text to send
-  # @param [Hash] config
+  # @param [Hash] configuration
   #  Optional configuration (accepted_output_modes, return_immediately)
   # @param [Hash, nil] metadata
   #  Optional metadata to attach to the request
@@ -198,7 +198,7 @@ class LLM::A2A
   # The block is called for each {LLM::Object} event in the stream
   # (Task, Message, TaskStatusUpdateEvent, TaskArtifactUpdateEvent).
   # @param [String] text The message text to send
-  # @param [Hash] config Optional configuration
+  # @param [Hash] configuration Optional configuration
   # @yieldparam [LLM::Object] event A stream event
   # @return [void]
   def send_streaming_message(text, configuration = {}, &on_event)
