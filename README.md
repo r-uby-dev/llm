@@ -17,7 +17,7 @@
 
 ## About
 
-llm.rb is Ruby's most capable AI runtime.
+llm.rb is Ruby's capable AI runtime.
 
 It runs on Ruby's standard library by default. loads optional pieces
 only when needed, and offers a single runtime for providers, agents,
@@ -443,7 +443,7 @@ gem install llm.rb
 
 This example uses [`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html)
 for an interactive REPL. <br> See the
-[deepdive (web)](https://llmrb.github.io/llm.rb/) or
+[deepdive (web)](https://r.uby.dev/llm/) or
 [deepdive (markdown)](resources/deepdive.md) for more examples.
 
 ```ruby
@@ -496,7 +496,7 @@ different model from the main conversation. `token_threshold:` accepts either a
 fixed token count or a percentage string like `"90%"`, which resolves
 against the active model context window and triggers compaction once total
 token usage goes over that percentage. See the
-[deepdive (web)](https://llmrb.github.io/llm.rb/) or
+[deepdive (web)](https://r.uby.dev/llm/) or
 [deepdive (markdown)](resources/deepdive.md) for more examples.
 
 ```ruby
@@ -529,7 +529,7 @@ agent = LLM::Agent.new(
 This example uses [`LLM::Stream`](https://0x1eef.github.io/x/llm.rb/LLM/Stream.html)
 with the OpenAI Responses API so reasoning output is streamed separately from
 visible assistant output. See the
-[deepdive (web)](https://llmrb.github.io/llm.rb/) or
+[deepdive (web)](https://r.uby.dev/llm/) or
 [deepdive (markdown)](resources/deepdive.md) for more examples.
 
 To use the Responses API (OpenAI-specific), initialize an agent with
@@ -563,7 +563,7 @@ agent.talk("Solve 17 * 19 and show your work.")
 
 Need to cancel a stream? llm.rb has you covered through
 [`LLM::Agent#interrupt!`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html#interrupt-21-instance_method).
-<br> See the [deepdive (web)](https://llmrb.github.io/llm.rb/)
+<br> See the [deepdive (web)](https://r.uby.dev/llm/)
 or [deepdive (markdown)](resources/deepdive.md) for more examples.
 
 ```ruby
@@ -591,7 +591,7 @@ The `plugin :llm` integration wraps
 wrappers, its built-in persistence contract is the serialized `data` column,
 while `provider:` resolves a real `LLM::Provider` instance and `context:`
 injects defaults such as `model:`. <br> See the
-[deepdive (web)](https://llmrb.github.io/llm.rb/) or
+[deepdive (web)](https://r.uby.dev/llm/) or
 [deepdive (markdown)](resources/deepdive.md) for more examples.
 
 ```ruby
@@ -627,7 +627,7 @@ one serialized `data` column. If your app has provider, model, or usage
 columns, provide them to llm.rb through `provider:` and `context:` instead of
 relying on reserved wrapper columns.
 
-See the [deepdive (web)](https://llmrb.github.io/llm.rb/)
+See the [deepdive (web)](https://r.uby.dev/llm/)
 or [deepdive (markdown)](resources/deepdive.md) for more examples.
 
 ```ruby
@@ -684,7 +684,7 @@ manages tool execution for you. Like `acts_as_llm`, its built-in persistence
 contract is one serialized `data` column. If your app has provider or model
 columns, provide them to llm.rb through your hooks and agent DSL.
 
-See the [deepdive (web)](https://llmrb.github.io/llm.rb/)
+See the [deepdive (web)](https://r.uby.dev/llm/)
 or [deepdive (markdown)](resources/deepdive.md) for more examples.
 
 ```ruby
@@ -742,7 +742,7 @@ This example uses [`LLM::MCP`](https://0x1eef.github.io/x/llm.rb/LLM/MCP.html)
 over HTTP so remote GitHub MCP tools run through the same
 `LLM::Agent` tool path as local tools. It expects a GitHub token in
 `ENV["GITHUB_PAT"]`. See the
-[deepdive (web)](https://llmrb.github.io/llm.rb/) or
+[deepdive (web)](https://r.uby.dev/llm/) or
 [deepdive (markdown)](resources/deepdive.md) for more examples.
 
 ```ruby
@@ -762,7 +762,7 @@ agent.talk("Pull information about my GitHub account.")
 
 ## Resources
 
-- [deepdive (web)](https://llmrb.github.io/llm.rb/) and
+- [deepdive (web)](https://r.uby.dev/llm/) and
   [deepdive (markdown)](resources/deepdive.md) are the examples guide.
 - [relay](https://github.com/llmrb/relay) shows a real application built on
   top of llm.rb.
