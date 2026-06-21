@@ -5,8 +5,8 @@ require_relative "lib/llm/version"
 Gem::Specification.new do |spec|
   spec.name = "llm.rb"
   spec.version = LLM::VERSION
-  spec.authors = ["0x1eef (Robert)", "Antar Azri", "Rodrigo Serrano"]
-  spec.email = ["robert@4.4bsd.dev"]
+  spec.authors = ["Robert (0x1eef)", "Antar Azri", "Rodrigo Serrano"]
+  spec.email = ["robert@r.uby.dev"]
 
   spec.summary = "Ruby's capable AI runtime"
   spec.description = <<~DESC
@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/llmrb/llm.rb"
   spec.metadata["documentation_uri"] = spec.homepage
-  spec.metadata["changelog_uri"] = "https://0x1eef.github.io/x/llm.rb/file.CHANGELOG.html"
+  spec.metadata["changelog_uri"] = "https://r.uby.dev/api-docs/llm.rb/file.CHANGELOG.html"
 
   spec.files = Dir[
     "README.md", "LICENSE",
@@ -44,7 +44,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "webmock", "~> 3.24.0"
   spec.add_development_dependency "yard", "~> 0.9.37"
-  spec.add_development_dependency "kramdown", "~> 2.4"
+  spec.add_development_dependency "redcarpet", "~> 3.6"
   spec.add_development_dependency "webrick", "~> 1.8"
   spec.add_development_dependency "test-cmd.rb", "~> 0.12.0"
   spec.add_development_dependency "rake", "~> 13.0"
