@@ -46,13 +46,13 @@ See [https://4.4bsd.dev/robert](https://4.4bsd.dev/robert) for more information.
 #### LLM::Context
 
 The
-[LLM::Context](https://0x1eef.github.io/x/llm.rb/LLM/Context.html)
+[LLM::Context](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html)
 object is at the heart of the runtime. Almost all other features build
 on top of it. It is a low-level interface to a model, and requires tool
 execution to be managed manually. The
-[LLM::Agent](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html)
+[LLM::Agent](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html)
 class is almost the same as
-[LLM::Context](https://0x1eef.github.io/x/llm.rb/LLM/Context.html)
+[LLM::Context](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html)
 but it manages tool execution for you - we'll cover agents next:
 
 ```ruby
@@ -66,9 +66,9 @@ ctx.talk "Hello world"
 #### LLM::Agent
 
 The
-[LLM::Agent](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html)
+[LLM::Agent](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html)
 object is implemented on top of
-[LLM::Context](https://0x1eef.github.io/x/llm.rb/LLM/Context.html).
+[LLM::Context](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html).
 It provides the same interface, but manages tool execution for you. It
 also has builtin features such as a loop guard that detects repeated
 tool call patterns, and another guard that detects infinite tool call
@@ -90,7 +90,7 @@ executed. When a matching tool is called, llm.rb runs
 `on_tool_confirmation`. That callback must decide whether to cancel the
 tool call or approve it and execute it by calling
 `fn.spawn(strategy).wait`, and it must always return an instance of
-[`LLM::Function::Return`](https://0x1eef.github.io/x/llm.rb/LLM/Function/Return.html):
+[`LLM::Function::Return`](https://r.uby.dev/api-docs/llm.rb/LLM/Function/Return.html):
 
 ```ruby
 require "llm"
@@ -116,7 +116,7 @@ Agent.new(llm, stream: $stdout).talk("Delete /tmp/example.txt.")
 #### Tools
 
 The
-[LLM::Tool](https://0x1eef.github.io/x/llm.rb/LLM/Tool.html)
+[LLM::Tool](https://r.uby.dev/api-docs/llm.rb/LLM/Tool.html)
 class can be subclassed to implement your own tools that can extend the
 abilities of a model:
 
@@ -136,15 +136,15 @@ end
 #### MCP
 
 The
-[LLM::MCP](https://0x1eef.github.io/x/llm.rb/LLM/MCP.html)
+[LLM::MCP](https://r.uby.dev/api-docs/llm.rb/LLM/MCP.html)
 object lets llm.rb use tools provided by an MCP server. Those tools are
 exposed through the same runtime as local tools, so you can pass them
 to either
-[LLM::Context](https://0x1eef.github.io/x/llm.rb/LLM/Context.html)
+[LLM::Context](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html)
 or
-[LLM::Agent](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html).
+[LLM::Agent](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html).
 In this example, the MCP server runs over stdio and
-[LLM::Agent](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html)
+[LLM::Agent](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html)
 manages the tool loop. For **stdio**, `mcp.session` is the preferred
 pattern because it keeps one MCP session alive across discovery and
 tool calls:
@@ -180,7 +180,7 @@ The HTTP transport can be used with or without the `session` method,
 and unlike the stdio transport it can remain efficient without the
 `session` method through a persistent connection pool that is available
 through the
-[LLM::Transport.net_http_persistent](https://0x1eef.github.io/x/llm.rb/LLM/Transport.html#method-c-net_http_persistent)
+[LLM::Transport.net_http_persistent](https://r.uby.dev/api-docs/llm.rb/LLM/Transport.html#method-c-net_http_persistent)
 transport:
 
 ```ruby
@@ -199,13 +199,13 @@ agent.talk("Use the available tools to inspect the environment.")
 #### A2A (Agent 2 Agent)
 
 The
-[LLM::A2A](https://0x1eef.github.io/x/llm.rb/LLM/A2A.html)
+[LLM::A2A](https://r.uby.dev/api-docs/llm.rb/LLM/A2A.html)
 object lets llm.rb use skills provided by a remote A2A agent. Those
 skills are exposed through the same runtime as local tools, so you can
 pass them to either
-[LLM::Context](https://0x1eef.github.io/x/llm.rb/LLM/Context.html)
+[LLM::Context](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html)
 or
-[LLM::Agent](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html).
+[LLM::Agent](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html).
 
 Use remote skills as local tools:
 
@@ -234,7 +234,7 @@ a2a = LLM::A2A.rest(
 
 For more on direct messaging, task operations, push notification
 configs, and JSON-RPC, see the
-[LLM::A2A API docs](https://0x1eef.github.io/x/llm.rb/LLM/A2A.html).
+[LLM::A2A API docs](https://r.uby.dev/api-docs/llm.rb/LLM/A2A.html).
 
 #### Transports
 
@@ -244,9 +244,9 @@ or provide a transport shortcut when you want a different backend.
 `transport: :curb` uses libcurl through the optional `curb` gem.
 
 Custom transports can implement the
-[LLM::Transport](https://0x1eef.github.io/x/llm.rb/LLM/Transport.html)
+[LLM::Transport](https://r.uby.dev/api-docs/llm.rb/LLM/Transport.html)
 interface and receive transport-agnostic
-[LLM::Transport::Request](https://0x1eef.github.io/x/llm.rb/LLM/Transport/Request.html)
+[LLM::Transport::Request](https://r.uby.dev/api-docs/llm.rb/LLM/Transport/Request.html)
 objects from providers.
 
 ```ruby
@@ -291,7 +291,7 @@ ReleaseAgent.new(llm, stream: $stdout).talk("Prepare the next release.")
 
 A skill can also have its sub-agent inherit the parents tools through the
 `inherit` directive. The `inherit` directive has coverage for the "classic"
-tools (a subclass of [LLM::Tool](https://0x1eef.github.io/x/llm.rb/LLM/Tool.html)),
+tools (a subclass of [LLM::Tool](https://r.uby.dev/api-docs/llm.rb/LLM/Tool.html)),
 MCP tools, and A2A tools that a parent context or agent has access to:
 
 ```yaml
@@ -305,7 +305,7 @@ MCP tools, and A2A tools that a parent context or agent has access to:
 #### LLM::Stream
 
 The
-[LLM::Stream](https://0x1eef.github.io/x/llm.rb/LLM/Stream.html)
+[LLM::Stream](https://r.uby.dev/api-docs/llm.rb/LLM/Stream.html)
 object lets you observe output and runtime events as they happen. You
 can subclass it to handle streamed content in your own application:
 
@@ -326,7 +326,7 @@ agent.talk "Write a haiku about Ruby."
 #### LLM::Stream (advanced)
 
 The
-[LLM::Stream](https://0x1eef.github.io/x/llm.rb/LLM/Stream.html)
+[LLM::Stream](https://r.uby.dev/api-docs/llm.rb/LLM/Stream.html)
 object can also resolve tool calls while output is still streaming. In
 `on_tool_call`, you can spawn the tool, push the work onto the stream
 queue, and later drain it with `wait`:
@@ -356,7 +356,7 @@ ctx.talk(ctx.wait) while ctx.functions?
 llm.rb can run tool work concurrently. This is useful when a model calls
 multiple tools and you want to resolve them in parallel instead of one
 at a time. On
-[LLM::Agent](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html),
+[LLM::Agent](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html),
 you can enable this with `concurrency`. Common options are `:call` for
 sequential execution, `:thread`, or `:task` for concurrent IO-bound work, and
 `:ractor` or `:fork` for more isolated CPU-bound work:
@@ -377,7 +377,7 @@ agent.talk "Read README.md and CHANGELOG.md and compare them."
 
 #### Serialization
 
-The [`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html)
+The [`LLM::Agent`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html)
 object can be serialized to JSON, which makes it suitable for storing
 in a file, a database column, or a Redis queue. The built-in
 ActiveRecord and Sequel plugins are built on top of the same underlying
@@ -401,12 +401,12 @@ agent2.talk "What is my favorite language?"
 
 #### ask
 
-[`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html)
+[`LLM::Agent`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html)
 also provides `ask`, a convenience interface that is compatible with
 RubyLLM's `ask` method. It accepts a prompt, an optional `with:`
 attachment path or paths, an optional `stream:` target, and an optional
 block that chunks are yielded to. It returns an
-[`LLM::Response`](https://0x1eef.github.io/x/llm.rb/LLM/Response.html),
+[`LLM::Response`](https://r.uby.dev/api-docs/llm.rb/LLM/Response.html),
 so use `.content` when you want the text directly:
 
 ```ruby
@@ -430,7 +430,7 @@ gem install llm.rb
 
 #### REPL
 
-This example uses [`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html)
+This example uses [`LLM::Agent`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html)
 for an interactive REPL. <br> See the
 [deepdive (web)](https://r.uby.dev/llm/) or
 [deepdive (markdown)](resources/deepdive.md) for more examples.
@@ -450,18 +450,18 @@ end
 
 #### Multimodal: Local Files
 
-In llm.rb, a prompt can be a string, an [`LLM::Prompt`](https://0x1eef.github.io/x/llm.rb/LLM/Prompt.html), or an array.
+In llm.rb, a prompt can be a string, an [`LLM::Prompt`](https://r.uby.dev/api-docs/llm.rb/LLM/Prompt.html), or an array.
 When you use an array, each element can be plain text or a tagged object such as
-[`agent.image_url(...)`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html#image_url-instance_method),
-[`agent.local_file(...)`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html#local_file-instance_method),
-or [`agent.remote_file(...)`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html#remote_file-instance_method).
+[`agent.image_url(...)`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#image_url-instance_method),
+[`agent.local_file(...)`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#local_file-instance_method),
+or [`agent.remote_file(...)`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#remote_file-instance_method).
 Those tagged objects carry the metadata the provider adapter needs to turn one
 Ruby prompt into the provider-specific multimodal request schema.
 
 If the model understands that file type, you can attach a local file directly
 with `agent.ask(..., with: path)` instead of uploading it first through a
 provider Files API. Under the hood, llm.rb tags the path as a
-[`agent.local_file(...)`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html#local_file-instance_method)
+[`agent.local_file(...)`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#local_file-instance_method)
 object:
 
 ```ruby
@@ -474,9 +474,9 @@ puts agent.ask("Summarize this document.", with: "README.md").content
 
 #### Context Compaction
 
-This example uses [`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html),
-[`LLM::Compactor`](https://0x1eef.github.io/x/llm.rb/LLM/Compactor.html), and
-[`LLM::Stream`](https://0x1eef.github.io/x/llm.rb/LLM/Stream.html) together so
+This example uses [`LLM::Agent`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html),
+[`LLM::Compactor`](https://r.uby.dev/api-docs/llm.rb/LLM/Compactor.html), and
+[`LLM::Stream`](https://r.uby.dev/api-docs/llm.rb/LLM/Stream.html) together so
 long-lived conversations can summarize older history and expose the lifecycle
 through stream hooks. This approach is inspired by General Intelligence
 Systems. The
@@ -515,7 +515,7 @@ agent = LLM::Agent.new(
 
 #### Reasoning
 
-This example uses [`LLM::Stream`](https://0x1eef.github.io/x/llm.rb/LLM/Stream.html)
+This example uses [`LLM::Stream`](https://r.uby.dev/api-docs/llm.rb/LLM/Stream.html)
 with the OpenAI Responses API so reasoning output is streamed separately from
 visible assistant output. See the
 [deepdive (web)](https://r.uby.dev/llm/) or
@@ -551,7 +551,7 @@ agent.talk("Solve 17 * 19 and show your work.")
 #### Request Cancellation
 
 Need to cancel a stream? llm.rb has you covered through
-[`LLM::Agent#interrupt!`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html#interrupt-21-instance_method).
+[`LLM::Agent#interrupt!`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#interrupt-21-instance_method).
 <br> See the [deepdive (web)](https://r.uby.dev/llm/)
 or [deepdive (markdown)](resources/deepdive.md) for more examples.
 
@@ -575,7 +575,7 @@ worker.join
 #### Sequel (ORM)
 
 The `plugin :llm` integration wraps
-[`LLM::Context`](https://0x1eef.github.io/x/llm.rb/LLM/Context.html) on a
+[`LLM::Context`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html) on a
 `Sequel::Model` and keeps tool execution explicit. Like the ActiveRecord
 wrappers, its built-in persistence contract is the serialized `data` column,
 while `provider:` resolves a real `LLM::Provider` instance and `context:`
@@ -610,7 +610,7 @@ puts ctx.talk("What is my favorite language?").content
 
 #### ActiveRecord (ORM): acts_as_llm
 
-The `acts_as_llm` method wraps [`LLM::Context`](https://0x1eef.github.io/x/llm.rb/LLM/Context.html) and
+The `acts_as_llm` method wraps [`LLM::Context`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html) and
 provides full control over tool execution. Its built-in persistence contract is
 one serialized `data` column. If your app has provider, model, or usage
 columns, provide them to llm.rb through `provider:` and `context:` instead of
@@ -668,7 +668,7 @@ end
 
 #### ActiveRecord (ORM): acts_as_agent
 
-The `acts_as_agent` method wraps [`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html) and
+The `acts_as_agent` method wraps [`LLM::Agent`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html) and
 manages tool execution for you. Like `acts_as_llm`, its built-in persistence
 contract is one serialized `data` column. If your app has provider or model
 columns, provide them to llm.rb through your hooks and agent DSL.
@@ -727,7 +727,7 @@ end
 
 #### MCP
 
-This example uses [`LLM::MCP`](https://0x1eef.github.io/x/llm.rb/LLM/MCP.html)
+This example uses [`LLM::MCP`](https://r.uby.dev/api-docs/llm.rb/LLM/MCP.html)
 over HTTP so remote GitHub MCP tools run through the same
 `LLM::Agent` tool path as local tools. It expects a GitHub token in
 `ENV["GITHUB_PAT"]`. See the
@@ -748,14 +748,6 @@ mcp = LLM::MCP.http(
 agent = LLM::Agent.new(llm, stream: $stdout, tools: mcp.tools)
 agent.talk("Pull information about my GitHub account.")
 ```
-
-## Resources
-
-- [deepdive (web)](https://r.uby.dev/llm/) and
-  [deepdive (markdown)](resources/deepdive.md) are the examples guide.
-- [relay](https://github.com/llmrb/relay) shows a real application built on
-  top of llm.rb.
-- [doc site](https://0x1eef.github.io/x/llm.rb?rebuild=1) has the API docs.
 
 ## License
 
