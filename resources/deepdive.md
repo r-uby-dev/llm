@@ -116,3 +116,57 @@ a2a   = LLM::A2A.jsonrpc(url: "https://agent.example.com")
 agent = LLM::Agent.new(llm, tools: a2a.skills)
 agent.talk "What's happening, fellow agent?"
 ```
+
+## Transports
+
+The [`LLM::Provider`](https://r.uby.dev/api-docs/llm.rb/LLM/Provider.html),
+[`LLM::MCP`](https://r.uby.dev/api-docs/llm.rb/LLM/MCP.html), and
+[`LLM::A2A`](https://r.uby.dev/api-docs/llm.rb/LLM/A2A.html) classes
+all accept a `transport` option that decides which library
+will be used for HTTP communication. There are three options out
+of the box:
+[`net-http`](https://github.com/ruby/net-http),
+[`net-http-persistent`](https://github.com/drbrain/net-http-persistent),
+and [`curb`](https://github.com/taf2/curb).
+
+#### net/http
+
+The [`net/http`](https://github.com/ruby/net-http) transport is represented by the symbol `:net_http`. <br>
+It is the default transport.
+
+```ruby
+require "llm"
+
+llm = LLM.deepseek(key: "...", transport: :net_http)
+mcp = LLM::MCP.http(url: "...", transport: :net_http)
+a2a = LLM::A2A.rest(url: "...", transport: :net_http)
+```
+
+#### net/http/persistent
+
+The [`net/http/persistent`](https://github.com/drbrain/net-http-persistent) transport is represented by the symbol `:net_http_persistent`. <br>
+It maintains a connection pool so the cost of tearing down and
+setting up a connection repeatedly is kept low, and it is built
+on top of [`net/http`](https://github.com/ruby/net-http).
+
+```ruby
+require "llm"
+
+llm = LLM.deepseek(key: "...", transport: :net_http_persistent)
+mcp = LLM::MCP.http(url: "...", transport: :net_http_persistent)
+a2a = LLM::A2A.rest(url: "...", transport: :net_http_persistent)
+```
+
+#### curb
+
+The [`curb`](https://github.com/taf2/curb) transport is represented by the symbol `:curb`. <br>
+It provides bindings for libcurl &ndash; a widely used, highly portable
+and feature-rich HTTP library written in C.
+
+```ruby
+require "llm"
+
+llm = LLM.deepseek(key: "...", transport: :curb)
+mcp = LLM::MCP.http(url: "...", transport: :curb)
+a2a = LLM::A2A.rest(url: "...", transport: :curb)
+```
