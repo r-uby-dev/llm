@@ -231,3 +231,102 @@ class Stream < LLM::Stream
   end
 end
 ```
+
+## ORM
+
+Both ActiveRecord, and Sequel have first-class support on the
+llm.rb runtime. In both cases an ActiveRecord or Sequel model
+can be turned into a model that has the same capabilities as
+[`LLM::Context`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html),
+or [`LLM::Agent`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html).
+
+The main difference is that the runtime persists directly into
+the database with no requirements beyond a single column on a
+single row. That means it is usually trivial to turn an existing
+model into an AI-aware model.
+
+#### ActiveRecord
+
+The ActiveRecord interface for
+[`LLM::Agent`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html)
+is
+[`acts_as_agent`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord/ActsAsAgent.html).
+It yields an instance of
+[`LLM::Agent`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html),
+and that can be used
+to configure the agent (eg which model, instructions, skills,
+tools, etc).
+
+An interesting option is the `format` option, by default it
+defaults to `:string` but it can also be changed to `:json`
+or `:jsonb` depending on the configuration and type of underlying
+column. The JSONB column type is recommended.
+
+```ruby
+require "active_record"
+require "llm"
+require "llm/active_record"
+
+class Agent < ApplicationRecord
+  acts_as_agent(format: :jsonb) do |agent|
+    agent.model "deepseek-v4-pro"
+    agent.instructions "solve the user's query"
+    agent.tools [Research, FinalizeResearch, ActOnResearch]
+  end
+
+  private
+
+  ##
+  # By convention, this method defines the provider
+  # for a model. If neccessary, it can be renamed and
+  # configured via `provider: :your_method` instead.
+  def set_provider
+    LLM.deepseek(key: ENV["KEY"])
+  end
+
+  ##
+  # By convention, this method should return what is
+  # given as the second argument to `LLM::Context` or
+  # `LLM::Agent`.
+  #
+  # Often, there is no need to set it, so it can be left
+  # undefined or it can be reassigned in the same way as
+  # `set_provider`. For example: `context: :your_method`
+  def set_context
+    {}
+  end
+end
+
+agent = Agent.create!
+agent.talk "perform research"
+```
+
+#### Sequel
+
+The following is a Sequel equivalent to the ActiveRecord example,
+but to keep it interesting and informative, this example also
+configures a per-model tracer that logs to `$stdout`. Works the
+same for ActiveRecord.
+
+```ruby
+require "sequel"
+require "llm"
+
+class Agent < Sequel::Model
+  plugin(:agent, format: :jsonb) do |agent|
+    agent.model "deepseek-v4-pro"
+    agent.instructions "solve the user's query"
+    agent.tools [Research, FinalizeResearch, ActOnResearch]
+    agent.tracer { LLM::Tracer::Logger.new(llm, io: $stdout) }
+  end
+
+  private
+
+  def set_provider
+    LLM.deepseek(key: ENV["DEEPSEEK_SECRET"])
+  end
+end
+
+agent = Agent.create
+agent.talk "perform research"
+```
