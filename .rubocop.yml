@@ -79,3 +79,5 @@ Style/RedundantArrayConstructor:
   Enabled: false
 Style/RescueModifier:
   Enabled: false
+Style/TrailingCommaInHashLiteral:
+  Enabled: false
