@@ -6,8 +6,8 @@ module LLM::ActiveRecord
     data_column: :data,
     format: :string,
     tracer: nil,
-    provider: nil,
-    context: EMPTY_HASH
+    provider: :set_provider,
+    context: :set_context,
   }.freeze
 
   ##

@@ -92,13 +92,15 @@ module LLM::ActiveRecord
     #   Evaluated in the model class after the wrapper is installed, so agent
     #   DSL methods such as `model`, `tools`, `schema`, `instructions`, and
     #   `concurrency` can be configured inline.
+    # @yieldparam [LLM::Agent] agent
+    #  Yields an instance of {LLM::Agent LLM::Agent}.
     # @return [void]
     def acts_as_agent(options = EMPTY_HASH, &block)
       options = DEFAULTS.merge(options)
       class_attribute :llm_plugin_options, instance_accessor: false, default: DEFAULTS unless respond_to?(:llm_plugin_options)
       self.llm_plugin_options = options.freeze
       extend Hooks
-      class_exec(&block) if block
+      block_given? ? class_exec(agent, &block) : nil
     end
 
     module InstanceMethods

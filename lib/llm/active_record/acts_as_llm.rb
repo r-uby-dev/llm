@@ -205,6 +205,18 @@ module LLM::ActiveRecord
       private
 
       ##
+      # @return [LLM::Provider]
+      def set_provider
+        raise NotImplementedError, "implement the set_provider callback"
+      end
+
+      ##
+      # @return [Hash]
+      def set_context
+        EMPTY_HASH.dup
+      end
+
+      ##
       # @return [LLM::Context]
       def ctx
         @ctx ||= begin
