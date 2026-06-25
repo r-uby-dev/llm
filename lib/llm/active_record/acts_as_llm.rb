@@ -217,6 +217,12 @@ module LLM::ActiveRecord
       end
 
       ##
+      # @return [LLM::Tracer]
+      def set_tracer
+        nil
+      end
+
+      ##
       # @return [LLM::Context]
       def ctx
         @ctx ||= begin

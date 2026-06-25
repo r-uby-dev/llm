@@ -17,7 +17,7 @@ RSpec.describe "plugin :agent" do
 
   let(:agent) do
     Class.new(model) do
-      plugin :agent, tracer: :set_tracer do |agent|
+      plugin :agent do |agent|
         agent.model "gpt-5.4-mini"
         agent.instructions "You are concise."
         agent.concurrency :thread
@@ -75,7 +75,7 @@ RSpec.describe "plugin :agent" do
           vcr: {cassette_name: "openai/chat/completion_contract"} do
     let(:agent) do
       Class.new(model) do
-        plugin :agent, tracer: :set_tracer do |agent|
+        plugin :agent do |agent|
           agent.model "gpt-4.1"
         end
 

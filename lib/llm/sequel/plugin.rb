@@ -16,6 +16,13 @@ module LLM::Sequel
   # JSON typecasting for the model. `provider:`, `context:`, and `tracer:`
   # can also be configured as symbols that are called on the model.
   module Plugin
+    DEFAULTS = {
+      data_column: :data,
+      format: :string,
+      provider: :set_provider,
+      context: :set_context,
+      tracer: :set_tracer
+    }.freeze
     EMPTY_HASH = {}.freeze
 
     ##
@@ -94,13 +101,6 @@ module LLM::Sequel
         end
       end
     end
-    DEFAULTS = {
-      data_column: :data,
-      format: :string,
-      tracer: nil,
-      provider: :set_provider,
-      context: :set_context
-    }.freeze
 
     ##
     # Called by Sequel when the plugin is first applied to a model class.
@@ -314,6 +314,12 @@ module LLM::Sequel
     # @return [Hash]
     def set_context
       Plugin::EMPTY_HASH.dup
+    end
+
+    ##
+    # @return [LLM::Tracer]
+    def set_tracer
+      nil
     end
 
     ##

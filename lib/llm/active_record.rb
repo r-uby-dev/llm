@@ -5,9 +5,9 @@ module LLM::ActiveRecord
   DEFAULTS = {
     data_column: :data,
     format: :string,
-    tracer: nil,
     provider: :set_provider,
     context: :set_context,
+    tracer: :set_tracer
   }.freeze
 
   ##
