@@ -98,8 +98,8 @@ module LLM::Sequel
       data_column: :data,
       format: :string,
       tracer: nil,
-      provider: nil,
-      context: EMPTY_HASH
+      provider: :set_provider,
+      context: :set_context
     }.freeze
 
     ##
@@ -303,6 +303,18 @@ module LLM::Sequel
     end
 
     private
+
+    ##
+    # @return [LLM::Provider]
+    def set_provider
+      raise NotImplementedError, "implement the set_provider callback"
+    end
+
+    ##
+    # @return [Hash]
+    def set_context
+      Plugin::EMPTY_HASH.dup
+    end
 
     ##
     # @return [LLM::Context]

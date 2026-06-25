@@ -17,11 +17,12 @@ RSpec.describe "plugin :agent" do
 
   let(:agent) do
     Class.new(model) do
-      plugin :agent, provider: :set_provider, context: :set_context, tracer: :set_tracer
-      model "gpt-5.4-mini"
-      instructions "You are concise."
-      concurrency :thread
-      confirm "delete-file"
+      plugin :agent, tracer: :set_tracer do |agent|
+        agent.model "gpt-5.4-mini"
+        agent.instructions "You are concise."
+        agent.concurrency :thread
+        agent.confirm "delete-file"
+      end
 
       private
 
@@ -51,8 +52,9 @@ RSpec.describe "plugin :agent" do
     let(:agent) do
       tool = self.tool
       Class.new(model) do
-        plugin :agent, provider: :set_provider
-        tools { [tool] }
+        plugin :agent do |agent|
+          agent.tools { [tool] }
+        end
 
         private
 
@@ -73,8 +75,9 @@ RSpec.describe "plugin :agent" do
           vcr: {cassette_name: "openai/chat/completion_contract"} do
     let(:agent) do
       Class.new(model) do
-        plugin :agent, provider: :set_provider, tracer: :set_tracer
-        model "gpt-4.1"
+        plugin :agent, tracer: :set_tracer do |agent|
+          agent.model "gpt-4.1"
+        end
 
         private
 
@@ -112,8 +115,9 @@ RSpec.describe "plugin :agent" do
       end
       let(:agent) do
         Class.new(model) do
-          plugin :agent, provider: :set_provider, format: :jsonb
-          model "gpt-4.1"
+          plugin :agent, format: :jsonb do |agent|
+            agent.model "gpt-4.1"
+          end
 
           private
 

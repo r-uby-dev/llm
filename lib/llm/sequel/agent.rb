@@ -7,8 +7,7 @@ module LLM::Sequel
   # This wrapper reuses the same record-backed runtime surface as
   # {LLM::Sequel::Plugin}, but builds an {LLM::Agent LLM::Agent} instead of an
   # {LLM::Context LLM::Context}. Agent defaults such as model, tools, schema,
-  # instructions, and concurrency are configured on the model class and
-  # forwarded to an internal agent subclass.
+  # instructions, and concurrency are configured on an internal agent subclass.
   module Agent
     require_relative "plugin"
     EMPTY_HASH = LLM::Sequel::Plugin::EMPTY_HASH
@@ -25,52 +24,12 @@ module LLM::Sequel
       options = DEFAULTS.merge(options)
       model.db.extension :pg_json if %i[json jsonb].include?(options[:format])
       model.instance_variable_set(:@llm_agent_options, options.freeze)
-      model.instance_exec(&block) if block
+      block_given? ? model.instance_exec(model.agent, &block) : nil
     end
 
     module ClassMethods
       def llm_plugin_options
         @llm_agent_options || Agent::DEFAULTS
-      end
-
-      def model(model = nil, &block)
-        return agent.model if model.nil? && !block
-        agent.model(model, &block)
-      end
-
-      def tools(*tools, &block)
-        return agent.tools if tools.empty? && !block
-        agent.tools(*tools, &block)
-      end
-
-      def skills(*skills, &block)
-        return agent.skills if skills.empty? && !block
-        agent.skills(*skills, &block)
-      end
-
-      def schema(schema = nil, &block)
-        return agent.schema if schema.nil? && !block
-        agent.schema(schema, &block)
-      end
-
-      def instructions(instructions = nil)
-        return agent.instructions if instructions.nil?
-        agent.instructions(instructions)
-      end
-
-      def concurrency(concurrency = nil)
-        return agent.concurrency if concurrency.nil?
-        agent.concurrency(concurrency)
-      end
-
-      def confirm(*tool_names, &block)
-        return agent.confirm if tool_names.empty? && !block
-        agent.confirm(*tool_names, &block)
-      end
-
-      def tracer(tracer = nil, &block)
-        return agent.tracer if tracer.nil? && !block
-        agent.tracer(tracer, &block)
       end
 
       def agent

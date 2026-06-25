@@ -11,7 +11,7 @@ RSpec.describe "plugin :llm" do
 
   let(:context) do
     Class.new(model) do
-      plugin :llm, provider: :set_provider, context: :set_context, tracer: :set_tracer
+      plugin :llm, tracer: :set_tracer
 
       private
 
@@ -39,7 +39,7 @@ RSpec.describe "plugin :llm" do
           vcr: {cassette_name: "openai/chat/completion_contract"} do
     let(:context) do
       Class.new(model) do
-        plugin :llm, provider: :set_provider, context: :set_context, tracer: :set_tracer
+        plugin :llm, tracer: :set_tracer
 
         private
 
@@ -81,7 +81,7 @@ RSpec.describe "plugin :llm" do
       end
       let(:context) do
         Class.new(model) do
-          plugin :llm, provider: :set_provider, context: :set_context, format: :jsonb
+          plugin :llm, format: :jsonb
 
           private
 
