@@ -147,7 +147,7 @@ require "llm"
 
 llm   = LLM.deepseek(key: ENV["KEY"])
 a2a   = LLM::A2A.rest(url: "https://remote-agent.example.com")
-agent = LLM::Agent.new(llm, stream: $stdout, tools: a2a.tools)
+agent = LLM::Agent.new(llm, stream: $stdout, tools: a2a.skills)
 agent.talk "Run the skill"
 ```
 
