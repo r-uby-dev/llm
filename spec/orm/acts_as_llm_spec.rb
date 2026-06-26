@@ -11,7 +11,7 @@ RSpec.describe "acts_as_llm" do
 
   let(:context) do
     Class.new(model) do
-      acts_as_llm provider: :set_provider, context: :set_context
+      acts_as_llm
 
       private
 
@@ -39,7 +39,7 @@ RSpec.describe "acts_as_llm" do
           vcr: {cassette_name: "openai/chat/completion_contract"} do
     let(:context) do
       Class.new(model) do
-        acts_as_llm provider: :set_provider, context: :set_context
+        acts_as_llm
 
         private
 
