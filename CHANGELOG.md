@@ -66,6 +66,12 @@ major release: `v12.0.0`.
 
 ### Add
 
+* **xAI: add `LLM::XAI::Images#edit`** <br>
+  With this change it is possible to both generate images
+  from a prompt, and edit an existing image with a prompt.
+  xAI now has the same edit and create capabilities that
+  OpenAI has.
+
 * **Add `LLM::Schema.defaults`** <br>
   This method lets you map multiple property names to
   different default values. It is similar to `LLM::Schema.required`
