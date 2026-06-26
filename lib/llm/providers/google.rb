@@ -53,7 +53,7 @@ module LLM
     # @param params (see LLM::Provider#embed)
     # @raise (see LLM::Provider#request)
     # @return [LLM::Response]
-    def embed(input, model: "gemini-embedding-001", **params)
+    def embed(input, model: "gemini-embedding-2", **params)
       model = model.respond_to?(:id) ? model.id : model
       path = ["/v1beta/models/#{model}", "embedContent?key=#{@key}"].join(":")
       req = LLM::Transport::Request.post(path, headers)
