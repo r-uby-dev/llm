@@ -7,7 +7,7 @@ http_interactions:
       encoding: UTF-8
       string: '{"input":[{"role":"user","content":[{"type":"input_text","text":"You
         are a bot that can run UNIX commands"}]},{"role":"user","content":[{"type":"input_text","text":"What
-        is the date?"}]}],"model":"gpt-4.1","tools":[{"type":"function","name":"system","description":"Runs
+        is the date?"}]}],"model":"gpt-5.4-mini","store":false,"tools":[{"type":"function","name":"system","description":"Runs
         system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"],"additionalProperties":false},"strict":false}]}'
     headers:
       User-Agent:
@@ -28,7 +28,7 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Fri, 26 Jun 2026 01:38:21 GMT
+      - Fri, 26 Jun 2026 02:45:27 GMT
       Content-Type:
       - application/json
       Transfer-Encoding:
@@ -36,7 +36,7 @@ http_interactions:
       Connection:
       - keep-alive
       Cf-Ray:
-      - a1187def59c8cb7f-GRU
+      - a118e03b7e95768e-GRU
       Cf-Cache-Status:
       - DYNAMIC
       Server:
@@ -52,7 +52,7 @@ http_interactions:
       Openai-Organization:
       - user-j1pztzt5nogpcsid23u7gskj
       Openai-Processing-Ms:
-      - '681'
+      - '703'
       Openai-Project:
       - proj_YSiqu4bByPgi6EwPnLiY8irR
       Openai-Version:
@@ -60,51 +60,51 @@ http_interactions:
       X-Ratelimit-Limit-Requests:
       - '5000'
       X-Ratelimit-Limit-Tokens:
-      - '800000'
+      - '4000000'
       X-Ratelimit-Remaining-Requests:
       - '4999'
       X-Ratelimit-Remaining-Tokens:
-      - '800000'
+      - '4000000'
       X-Ratelimit-Reset-Requests:
       - 12ms
       X-Ratelimit-Reset-Tokens:
       - 0s
       X-Request-Id:
-      - req_abe314a167bc48f3bd480a73d62f3915
+      - req_3c80d96a65d94a6b932c857fcab9c7f5
       Set-Cookie:
-      - __cf_bm=IKGwK4cE_ymuTduHidbHmnMX6W9v0pWwXdhjSc77XGE-1782437900.6922846-1.0.1.1-NiwYOKCWGY921njqnIPvhjU77B9IxGc2Oh_PnI8wV0W90MnhEhSGDxSn2LElkL0DdFn.isC7WEDxUv2CJaH9bATMLwi1jrU2KRYo0I8JhpKHa9ZA6fnNAPHfYOBD_6b_;
+      - __cf_bm=rVWJrwH3et0gHDdMRpSHxDhGghm6dpqCmvsIKyqGN1A-1782441926.958984-1.0.1.1-62WZ5ZIluS4FVkTC4z26nqHcfbS59N9YynLm1cKYY_iUXqOpHJzVCruD2tBmGIPFYb_qeFUpAgBy3Y8wzX3Ie.mLZGtWC.AETLoDnLn9RwNm8D3bD.4EiA91KXlGREVX;
         HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri,
-        26 Jun 2026 02:08:21 GMT
+        26 Jun 2026 03:15:27 GMT
       Alt-Svc:
       - h3=":443"; ma=86400
     body:
       encoding: ASCII-8BIT
       string: |-
         {
-          "id": "resp_03e7af16e4c56087006a3dd80cd084819c9019786ae67ed414",
+          "id": "resp_0a7b963cdff4f5b3016a3de7c710ec81a0b8e5c7b54810daf7",
           "object": "response",
-          "created_at": 1782437900,
+          "created_at": 1782441927,
           "status": "completed",
           "background": false,
           "billing": {
             "payer": "developer"
           },
-          "completed_at": 1782437901,
+          "completed_at": 1782441927,
           "error": null,
           "frequency_penalty": 0.0,
           "incomplete_details": null,
           "instructions": null,
           "max_output_tokens": null,
           "max_tool_calls": null,
-          "model": "gpt-4.1-2025-04-14",
+          "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "output": [
             {
-              "id": "fc_03e7af16e4c56087006a3dd80d2354819c9a18bd3ee3af9f06",
+              "id": "fc_0a7b963cdff4f5b3016a3de7c78f7081a08c988e3e6c85ad58",
               "type": "function_call",
               "status": "completed",
               "arguments": "{\"command\":\"date\"}",
-              "call_id": "call_qffCnomZrKmxK7xXc3i9k2nb",
+              "call_id": "call_6CIMLheYiktBHoAn2u0JAXs8",
               "name": "system"
             }
           ],
@@ -112,15 +112,15 @@ http_interactions:
           "presence_penalty": 0.0,
           "previous_response_id": null,
           "prompt_cache_key": null,
-          "prompt_cache_retention": "in_memory",
+          "prompt_cache_retention": "24h",
           "reasoning": {
-            "context": null,
-            "effort": null,
+            "context": "current_turn",
+            "effort": "none",
             "summary": null
           },
           "safety_identifier": null,
           "service_tier": "default",
-          "store": true,
+          "store": false,
           "temperature": 1.0,
           "text": {
             "format": {
@@ -168,29 +168,32 @@ http_interactions:
             }
           ],
           "top_logprobs": 0,
-          "top_p": 1.0,
+          "top_p": 0.98,
           "truncation": "disabled",
           "usage": {
-            "input_tokens": 52,
+            "input_tokens": 57,
             "input_tokens_details": {
               "cached_tokens": 0
             },
-            "output_tokens": 14,
+            "output_tokens": 17,
             "output_tokens_details": {
               "reasoning_tokens": 0
             },
-            "total_tokens": 66
+            "total_tokens": 74
           },
           "user": null,
           "metadata": {}
         }
-  recorded_at: Fri, 26 Jun 2026 01:38:14 GMT
+  recorded_at: Fri, 26 Jun 2026 02:45:20 GMT
 - request:
     method: post
     uri: https://api.openai.com/v1/responses
     body:
       encoding: UTF-8
-      string: '{"input":[{"type":"function_call_output","call_id":"call_qffCnomZrKmxK7xXc3i9k2nb","output":"{\"success\":\"2025-08-24\"}"}],"model":"gpt-4.1","previous_response_id":"resp_03e7af16e4c56087006a3dd80cd084819c9019786ae67ed414","tools":[{"type":"function","name":"system","description":"Runs
+      string: '{"input":[{"role":"user","content":[{"type":"input_text","text":"You
+        are a bot that can run UNIX commands"}]},{"role":"user","content":[{"type":"input_text","text":"What
+        is the date?"}]},{"id":"fc_0a7b963cdff4f5b3016a3de7c78f7081a08c988e3e6c85ad58","type":"function_call","status":"completed","arguments":"{\"command\":\"date\"}","call_id":"call_6CIMLheYiktBHoAn2u0JAXs8","name":"system"},{"type":"function_call_output","call_id":"call_6CIMLheYiktBHoAn2u0JAXs8","output":"{\"cancelled\":true,\"reason\":\"function
+        call cancelled\"}"},{"type":"function_call_output","call_id":"call_6CIMLheYiktBHoAn2u0JAXs8","output":"{\"success\":\"2025-08-24\"}"}],"model":"gpt-5.4-mini","store":false,"tools":[{"type":"function","name":"system","description":"Runs
         system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"],"additionalProperties":false},"strict":false}]}'
     headers:
       User-Agent:
@@ -211,7 +214,7 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Fri, 26 Jun 2026 01:38:22 GMT
+      - Fri, 26 Jun 2026 02:45:28 GMT
       Content-Type:
       - application/json
       Transfer-Encoding:
@@ -219,7 +222,7 @@ http_interactions:
       Connection:
       - keep-alive
       Cf-Ray:
-      - a1187df4e9131da1-GRU
+      - a118e0411c7bf1f6-GRU
       Cf-Cache-Status:
       - DYNAMIC
       Server:
@@ -235,7 +238,7 @@ http_interactions:
       Openai-Organization:
       - user-j1pztzt5nogpcsid23u7gskj
       Openai-Processing-Ms:
-      - '892'
+      - '806'
       Openai-Project:
       - proj_YSiqu4bByPgi6EwPnLiY8irR
       Openai-Version:
@@ -243,47 +246,47 @@ http_interactions:
       X-Ratelimit-Limit-Requests:
       - '5000'
       X-Ratelimit-Limit-Tokens:
-      - '800000'
+      - '4000000'
       X-Ratelimit-Remaining-Requests:
       - '4999'
       X-Ratelimit-Remaining-Tokens:
-      - '800000'
+      - '4000000'
       X-Ratelimit-Reset-Requests:
       - 12ms
       X-Ratelimit-Reset-Tokens:
       - 0s
       X-Request-Id:
-      - req_d8c0fc80fccd424ea24afecba94107fc
+      - req_d64ddd113ac34d71964b834eefed4e80
       Set-Cookie:
-      - __cf_bm=O6Elg_Q14gKBnMNN0YfNCocpWh_QtHm9mfeRYG4eB3w-1782437901.5899267-1.0.1.1-zADe3Qk1B31wZZzv7JPDiFr5RFkDcr4nG9BIPWBf5IpwC.XKYbiNvfWMH68cwYhpW05bHzlyCho9.HD5Gm_eu66ajBiMH1NjVPUI7IJkG5pYsa8NyqwJBgiq.SkPuurY;
+      - __cf_bm=7i4Scuiq7RZPTE4k1f6C2DXmBN.Ax0DXXpKLpUbh8WI-1782441927.8573754-1.0.1.1-Z7OzxUyVgDxifDTbAtU0ZQbZlum2NR10r3tVmxLYPuZDdcJTwO_CP1DFvPQcYU4g30meki1sepW_tKnZmpq6hmS6W5HFls.C6y2gx1c.m4lNHXPHFV.HjVZZNtqSL.ky;
         HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri,
-        26 Jun 2026 02:08:22 GMT
+        26 Jun 2026 03:15:28 GMT
       Alt-Svc:
       - h3=":443"; ma=86400
     body:
       encoding: ASCII-8BIT
       string: |-
         {
-          "id": "resp_03e7af16e4c56087006a3dd80dba44819ca2df6f4f4b383f33",
+          "id": "resp_0a7b963cdff4f5b3016a3de7c7f54c81a0aa4a4c07c7d6e152",
           "object": "response",
-          "created_at": 1782437901,
+          "created_at": 1782441927,
           "status": "completed",
           "background": false,
           "billing": {
             "payer": "developer"
           },
-          "completed_at": 1782437902,
+          "completed_at": 1782441928,
           "error": null,
           "frequency_penalty": 0.0,
           "incomplete_details": null,
           "instructions": null,
           "max_output_tokens": null,
           "max_tool_calls": null,
-          "model": "gpt-4.1-2025-04-14",
+          "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "output": [
             {
-              "id": "msg_03e7af16e4c56087006a3dd80e5ec4819caa21caaa183241f2",
+              "id": "msg_0a7b963cdff4f5b3016a3de7c8803c81a0a8d24f4b41002677",
               "type": "message",
               "status": "completed",
               "content": [
@@ -291,25 +294,26 @@ http_interactions:
                   "type": "output_text",
                   "annotations": [],
                   "logprobs": [],
-                  "text": "Today's date is 2025-08-24."
+                  "text": "2025-08-24"
                 }
               ],
+              "phase": "final_answer",
               "role": "assistant"
             }
           ],
           "parallel_tool_calls": true,
           "presence_penalty": 0.0,
-          "previous_response_id": "resp_03e7af16e4c56087006a3dd80cd084819c9019786ae67ed414",
+          "previous_response_id": null,
           "prompt_cache_key": null,
-          "prompt_cache_retention": "in_memory",
+          "prompt_cache_retention": "24h",
           "reasoning": {
-            "context": null,
-            "effort": null,
+            "context": "current_turn",
+            "effort": "none",
             "summary": null
           },
           "safety_identifier": null,
           "service_tier": "default",
-          "store": true,
+          "store": false,
           "temperature": 1.0,
           "text": {
             "format": {
@@ -357,21 +361,21 @@ http_interactions:
             }
           ],
           "top_logprobs": 0,
-          "top_p": 1.0,
+          "top_p": 0.98,
           "truncation": "disabled",
           "usage": {
-            "input_tokens": 83,
+            "input_tokens": 114,
             "input_tokens_details": {
               "cached_tokens": 0
             },
-            "output_tokens": 13,
+            "output_tokens": 10,
             "output_tokens_details": {
               "reasoning_tokens": 0
             },
-            "total_tokens": 96
+            "total_tokens": 124
           },
           "user": null,
           "metadata": {}
         }
-  recorded_at: Fri, 26 Jun 2026 01:38:15 GMT
+  recorded_at: Fri, 26 Jun 2026 02:45:21 GMT
 recorded_with: VCR 6.4.0

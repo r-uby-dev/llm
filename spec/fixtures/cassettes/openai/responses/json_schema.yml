@@ -6,7 +6,7 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"input":[{"role":"user","content":[{"type":"input_text","text":"What
-        is the capital of France?"}]}],"model":"gpt-4.1","text":{"format":{"type":"json_schema","name":"JSONSchema","schema":{"type":"object","properties":{"answer":{"type":"string"}},"required":["answer"],"additionalProperties":false}}}}'
+        is the capital of France?"}]}],"model":"gpt-5.4-mini","text":{"format":{"type":"json_schema","name":"JSONSchema","schema":{"type":"object","properties":{"answer":{"type":"string"}},"required":["answer"],"additionalProperties":false}}}}'
     headers:
       User-Agent:
       - llm.rb v11.3.1
@@ -26,7 +26,7 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Fri, 26 Jun 2026 01:39:21 GMT
+      - Fri, 26 Jun 2026 02:47:31 GMT
       Content-Type:
       - application/json
       Transfer-Encoding:
@@ -34,7 +34,7 @@ http_interactions:
       Connection:
       - keep-alive
       Cf-Ray:
-      - a1187f665cc1c075-GRU
+      - a118e3436ef4e0df-GRU
       Cf-Cache-Status:
       - DYNAMIC
       Server:
@@ -50,7 +50,7 @@ http_interactions:
       Openai-Organization:
       - user-j1pztzt5nogpcsid23u7gskj
       Openai-Processing-Ms:
-      - '418'
+      - '626'
       Openai-Project:
       - proj_YSiqu4bByPgi6EwPnLiY8irR
       Openai-Version:
@@ -58,47 +58,47 @@ http_interactions:
       X-Ratelimit-Limit-Requests:
       - '5000'
       X-Ratelimit-Limit-Tokens:
-      - '800000'
+      - '4000000'
       X-Ratelimit-Remaining-Requests:
       - '4999'
       X-Ratelimit-Remaining-Tokens:
-      - '800000'
+      - '4000000'
       X-Ratelimit-Reset-Requests:
       - 12ms
       X-Ratelimit-Reset-Tokens:
       - 0s
       X-Request-Id:
-      - req_6041a581f15e47e98449ff2215b8da87
+      - req_abab856e779146828b4c806dcb951c96
       Set-Cookie:
-      - __cf_bm=k1isubZ5TNNajxx9QBL7bkz63WAmArm9dijKdJEugI8-1782437960.697319-1.0.1.1-8_eS7M5hm_BB9zbj3zybiE2ttAbscRsiDWsx5e4vhNwRKJSDJA2ixKwcNAvWt1ExYTVK3hOBGSxPuJ3.EHTs_7MW9mfriemGPSZO4Tz8Er49QMdswr1dxfGJfiEoShzs;
+      - __cf_bm=oUesMPZsl4LtTICIE7IuF8ziPiKvnBwfNWp4VMZWeFQ-1782442051.1033103-1.0.1.1-ghiiZimLizs4Nb7P9MbCKdUfspForNZDfRyxvqcsoU9KHbibX5LKRBDA5gSdexQFLkjChroWTUtPNDSdr69CYTbu9wpXj70mGIn4ZJdFBSlxMjspuX_PD7kD.YhNdyI8;
         HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri,
-        26 Jun 2026 02:09:21 GMT
+        26 Jun 2026 03:17:31 GMT
       Alt-Svc:
       - h3=":443"; ma=86400
     body:
       encoding: ASCII-8BIT
       string: |-
         {
-          "id": "resp_0004e73f58ea70b8006a3dd848d08c81a281a1064c5a67fc2d",
+          "id": "resp_0e398a35083d6584006a3de843375c81918354d3e8cbe411b1",
           "object": "response",
-          "created_at": 1782437960,
+          "created_at": 1782442051,
           "status": "completed",
           "background": false,
           "billing": {
             "payer": "developer"
           },
-          "completed_at": 1782437961,
+          "completed_at": 1782442051,
           "error": null,
           "frequency_penalty": 0.0,
           "incomplete_details": null,
           "instructions": null,
           "max_output_tokens": null,
           "max_tool_calls": null,
-          "model": "gpt-4.1-2025-04-14",
+          "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "output": [
             {
-              "id": "msg_0004e73f58ea70b8006a3dd849055481a2896a2537515ce059",
+              "id": "msg_0e398a35083d6584006a3de843913c8191ab4510155fdf5d6a",
               "type": "message",
               "status": "completed",
               "content": [
@@ -106,9 +106,10 @@ http_interactions:
                   "type": "output_text",
                   "annotations": [],
                   "logprobs": [],
-                  "text": "{\"answer\":\"The capital of France is Paris.\"}"
+                  "text": "{\"answer\":\"Paris.\"}"
                 }
               ],
+              "phase": "final_answer",
               "role": "assistant"
             }
           ],
@@ -116,10 +117,10 @@ http_interactions:
           "presence_penalty": 0.0,
           "previous_response_id": null,
           "prompt_cache_key": null,
-          "prompt_cache_retention": "in_memory",
+          "prompt_cache_retention": "24h",
           "reasoning": {
-            "context": null,
-            "effort": null,
+            "context": "current_turn",
+            "effort": "none",
             "summary": null
           },
           "safety_identifier": null,
@@ -168,14 +169,14 @@ http_interactions:
           },
           "tools": [],
           "top_logprobs": 0,
-          "top_p": 1.0,
+          "top_p": 0.98,
           "truncation": "disabled",
           "usage": {
-            "input_tokens": 37,
+            "input_tokens": 35,
             "input_tokens_details": {
               "cached_tokens": 0
             },
-            "output_tokens": 12,
+            "output_tokens": 14,
             "output_tokens_details": {
               "reasoning_tokens": 0
             },
@@ -184,5 +185,5 @@ http_interactions:
           "user": null,
           "metadata": {}
         }
-  recorded_at: Fri, 26 Jun 2026 01:39:14 GMT
+  recorded_at: Fri, 26 Jun 2026 02:47:24 GMT
 recorded_with: VCR 6.4.0

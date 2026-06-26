@@ -6,7 +6,7 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"input":[{"role":"user","content":[{"type":"input_text","text":"What
-        was a positive news story from today?"}]}],"model":"gpt-4.1","tools":[{"type":"web_search"}]}'
+        was a positive news story from today?"}]}],"model":"gpt-5.4-mini","tools":[{"type":"web_search"}]}'
     headers:
       User-Agent:
       - llm.rb v11.3.1
@@ -26,7 +26,7 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Fri, 26 Jun 2026 01:39:34 GMT
+      - Fri, 26 Jun 2026 02:47:41 GMT
       Content-Type:
       - application/json
       Transfer-Encoding:
@@ -34,7 +34,7 @@ http_interactions:
       Connection:
       - keep-alive
       Cf-Ray:
-      - a1187fa60b2b9a69-GRU
+      - a118e36fb82a9423-GRU
       Cf-Cache-Status:
       - DYNAMIC
       Server:
@@ -50,7 +50,7 @@ http_interactions:
       Openai-Organization:
       - user-j1pztzt5nogpcsid23u7gskj
       Openai-Processing-Ms:
-      - '3791'
+      - '2820'
       Openai-Project:
       - proj_YSiqu4bByPgi6EwPnLiY8irR
       Openai-Version:
@@ -58,59 +58,61 @@ http_interactions:
       X-Ratelimit-Limit-Requests:
       - '5000'
       X-Ratelimit-Limit-Tokens:
-      - '800000'
+      - '4000000'
       X-Ratelimit-Remaining-Requests:
       - '4999'
       X-Ratelimit-Remaining-Tokens:
-      - '782645'
+      - '3996345'
       X-Ratelimit-Reset-Requests:
       - 12ms
       X-Ratelimit-Reset-Tokens:
-      - 1.301s
+      - 54ms
       X-Request-Id:
-      - req_a1925febe9a341e38f2a9636a0ba20dd
+      - req_1474e1d8de144beb84fda6cc14ab44ed
       Set-Cookie:
-      - __cf_bm=Hd6.RAC5gk6NgBOOKYNvXrrVHfA8g6wrlhR4M1Pxwi0-1782437970.8872101-1.0.1.1-KEfa2XmIdVuMzdwRg1owWiljFRb800Nblz20BhoUJQwROD27S.SSeGSZcz2aBMLDmzGCjQyLEXZW7lc_9s33sICRTQy4zajeDw7QzyIL7llvGEhbFYCcEWdUT6ISyFWl;
+      - __cf_bm=6Owirn7r7V0p3BxbU_3wBnIPVm9z8IHi1TdbLN2RILU-1782442058.1909204-1.0.1.1-r6y.fKjr3vFqB9KqwAplMtwUxCKwVzfOXF_JPQye1T.uXT8HZ.d5aM4puc6dZR_1rY8D.l_0wcKQVSuFm2BvmehSQWv4V1bVh6tfZLTH8W5eDll6MrlyAjSwmHIhOcOk;
         HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri,
-        26 Jun 2026 02:09:34 GMT
+        26 Jun 2026 03:17:41 GMT
       Alt-Svc:
       - h3=":443"; ma=86400
     body:
       encoding: ASCII-8BIT
       string: |-
         {
-          "id": "resp_0bc12d5a34f21d2b006a3dd852ffa081a0b41ddccdebebef6c",
+          "id": "resp_008f8fbae0f5ebc3006a3de84a4a54819c8916aebd1f346009",
           "object": "response",
-          "created_at": 1782437971,
+          "created_at": 1782442058,
           "status": "completed",
           "background": false,
           "billing": {
             "payer": "developer"
           },
-          "completed_at": 1782437974,
+          "completed_at": 1782442060,
           "error": null,
           "frequency_penalty": 0.0,
           "incomplete_details": null,
           "instructions": null,
           "max_output_tokens": null,
           "max_tool_calls": null,
-          "model": "gpt-4.1-2025-04-14",
+          "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "output": [
             {
-              "id": "ws_0bc12d5a34f21d2b006a3dd8536c1481a091914b7ce26443c7",
+              "id": "ws_008f8fbae0f5ebc3006a3de84adc1c819c87f0d18ed2df6f0c",
               "type": "web_search_call",
               "status": "completed",
               "action": {
                 "type": "search",
                 "queries": [
-                  "positive news story today"
+                  "positive news story June 26 2026 today uplifting news world June 26 2026",
+                  "June 26 2026 positive news story today uplifting Reuters",
+                  "June 26 2026 good news today CNN positive story"
                 ],
-                "query": "positive news story today"
+                "query": "positive news story June 26 2026 today uplifting news world June 26 2026"
               }
             },
             {
-              "id": "msg_0bc12d5a34f21d2b006a3dd85522c481a0ba4d7453dfde96c7",
+              "id": "msg_008f8fbae0f5ebc3006a3de84c258c819cbc942107c5c3cb5a",
               "type": "message",
               "status": "completed",
               "content": [
@@ -119,16 +121,17 @@ http_interactions:
                   "annotations": [
                     {
                       "type": "url_citation",
-                      "end_index": 1185,
-                      "start_index": 1003,
-                      "title": "Hill Day 2026: United in purpose, nurses take crucial issues to policymakers",
-                      "url": "https://www.nursingworld.org/news/news-releases/2026-news-releases/hill-day-2026-united-in-purpose-nurses-take-crucial-issues-to-policymakers/?utm_source=openai"
+                      "end_index": 398,
+                      "start_index": 305,
+                      "title": "Today in History: June 26, US Supreme Court legalizes same-sex marriage",
+                      "url": "https://apnews.com/article/dee4fb2d4f0ffcbbf018b3fb2f40065b?utm_source=openai"
                     }
                   ],
                   "logprobs": [],
-                  "text": "Here\u2019s a positive news story from **today, Friday, June 26, 2026**:\n\nOn **June 25, 2026**, hundreds of nurses from across the United States gathered on Capitol Hill for the American Nurses Association\u2019s (ANA) annual **Hill Day** to directly engage with members of Congress. Over 500 nurses participated\u2014representing 49 states, the District of Columbia, Guam, and the U.S. Virgin Islands\u2014and conducted **357 meetings** with lawmakers and their staff (including **87 meetings with members of Congress themselves**) to advocate on key issues like workforce protections, student loan recognition for nursing degrees, and expanded patient access to care. ANA President Jennifer Mensik Kennedy emphasized the importance of nurses sharing their lived experiences to influence policymaking. The event highlights the powerful role that healthcare professionals are playing in shaping public health legislation\u2014a meaningful and hopeful development for both the nursing profession and the communities they serve  \n([nursingworld.org](https://www.nursingworld.org/news/news-releases/2026-news-releases/hill-day-2026-united-in-purpose-nurses-take-crucial-issues-to-policymakers/?utm_source=openai)).\n\nThis initiative not only showcases civic engagement and advocacy in action but also underscores how collective voices\u2014especially from trusted and essential professionals like nurses\u2014can shape policy and enhance healthcare outcomes.\n\nIf you\u2019d like more uplifting news or stories in other areas (science, environment, community, etc.), just let me know!"
+                  "text": "One positive story from today: **June 26 has a major historic milestone for LGBTQ+ rights in the U.S.** On this date in 2015, the Supreme Court\u2019s *Obergefell v. Hodges* decision legalized same-sex marriage nationwide. That\u2019s often remembered as a hopeful anniversary and a meaningful civil-rights moment. ([apnews.com](https://apnews.com/article/dee4fb2d4f0ffcbbf018b3fb2f40065b?utm_source=openai))\n\nIf you want, I can also find a **truly fresh, same-day feel-good news story** from today\u2019s headlines."
                 }
               ],
+              "phase": "final_answer",
               "role": "assistant"
             }
           ],
@@ -136,10 +139,10 @@ http_interactions:
           "presence_penalty": 0.0,
           "previous_response_id": null,
           "prompt_cache_key": null,
-          "prompt_cache_retention": "in_memory",
+          "prompt_cache_retention": "24h",
           "reasoning": {
-            "context": null,
-            "effort": null,
+            "context": "current_turn",
+            "effort": "none",
             "summary": null
           },
           "safety_identifier": null,
@@ -189,21 +192,21 @@ http_interactions:
             }
           ],
           "top_logprobs": 0,
-          "top_p": 1.0,
+          "top_p": 0.98,
           "truncation": "disabled",
           "usage": {
-            "input_tokens": 17390,
+            "input_tokens": 8255,
             "input_tokens_details": {
-              "cached_tokens": 0
+              "cached_tokens": 4224
             },
-            "output_tokens": 293,
+            "output_tokens": 207,
             "output_tokens_details": {
-              "reasoning_tokens": 0
+              "reasoning_tokens": 92
             },
-            "total_tokens": 17683
+            "total_tokens": 8462
           },
           "user": null,
           "metadata": {}
         }
-  recorded_at: Fri, 26 Jun 2026 01:39:27 GMT
+  recorded_at: Fri, 26 Jun 2026 02:47:34 GMT
 recorded_with: VCR 6.4.0

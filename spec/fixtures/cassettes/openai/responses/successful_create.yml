@@ -5,7 +5,7 @@ http_interactions:
     uri: https://api.openai.com/v1/responses
     body:
       encoding: UTF-8
-      string: '{"input":[{"role":"developer","content":[{"type":"input_text","text":"Hello"}]}],"model":"gpt-4.1"}'
+      string: '{"input":[{"role":"developer","content":[{"type":"input_text","text":"Hello"}]}],"model":"gpt-5.4-mini"}'
     headers:
       User-Agent:
       - llm.rb v11.3.1
@@ -25,7 +25,7 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Fri, 26 Jun 2026 01:39:18 GMT
+      - Fri, 26 Jun 2026 02:47:29 GMT
       Content-Type:
       - application/json
       Transfer-Encoding:
@@ -33,7 +33,7 @@ http_interactions:
       Connection:
       - keep-alive
       Cf-Ray:
-      - a1187f50dada016e-GRU
+      - a118e331ddeef2e4-GRU
       Cf-Cache-Status:
       - DYNAMIC
       Server:
@@ -49,7 +49,7 @@ http_interactions:
       Openai-Organization:
       - user-j1pztzt5nogpcsid23u7gskj
       Openai-Processing-Ms:
-      - '608'
+      - '628'
       Openai-Project:
       - proj_YSiqu4bByPgi6EwPnLiY8irR
       Openai-Version:
@@ -57,47 +57,47 @@ http_interactions:
       X-Ratelimit-Limit-Requests:
       - '5000'
       X-Ratelimit-Limit-Tokens:
-      - '800000'
+      - '4000000'
       X-Ratelimit-Remaining-Requests:
       - '4999'
       X-Ratelimit-Remaining-Tokens:
-      - '800000'
+      - '4000000'
       X-Ratelimit-Reset-Requests:
       - 12ms
       X-Ratelimit-Reset-Tokens:
       - 0s
       X-Request-Id:
-      - req_86856a84139f4af69b347ba21d8c0d23
+      - req_b46f8b78cb654511b365d82ad2e45ff3
       Set-Cookie:
-      - __cf_bm=VIl9kERF7ExfOVLNj4D.w15zsW5Z7a9h_qbKHBA4F1Q-1782437957.2573261-1.0.1.1-_3TQfhx0Pj8N4RWXxvQWyF3sxEjwGlTAbVtFIgujm.bY2UiTtHZt.ZU070AYlZxYlW.nxkvDB6yQfDiZQf9lCMe1QaKcIo.c8afcfNm5OT5fH3cBqA5ykpNT5Ade8nFC;
+      - __cf_bm=EEPIw2XgHn7mvhYa8LVL1pc8ozSlIoFCepfULBhoHHQ-1782442048.2930424-1.0.1.1-8cSII6zTxZicBWqs3Aja80D49jTfs0Oc1Wr45qb6PCbglBJc50dILJ9WOswXdjUmmiXmMEyVA5_4JuV_YYM1H5Ul_y.7sjJ9YA9EAU95zbmdJ8JVTfD4n4qre0oDM90h;
         HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri,
-        26 Jun 2026 02:09:18 GMT
+        26 Jun 2026 03:17:29 GMT
       Alt-Svc:
       - h3=":443"; ma=86400
     body:
       encoding: ASCII-8BIT
       string: |-
         {
-          "id": "resp_02acffee733b11dc006a3dd8455c9481a1ba58aa2704d366ad",
+          "id": "resp_08c366aef05d2dc6006a3de840641c81a2b26158465c229c00",
           "object": "response",
-          "created_at": 1782437957,
+          "created_at": 1782442048,
           "status": "completed",
           "background": false,
           "billing": {
             "payer": "developer"
           },
-          "completed_at": 1782437957,
+          "completed_at": 1782442048,
           "error": null,
           "frequency_penalty": 0.0,
           "incomplete_details": null,
           "instructions": null,
           "max_output_tokens": null,
           "max_tool_calls": null,
-          "model": "gpt-4.1-2025-04-14",
+          "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "output": [
             {
-              "id": "msg_02acffee733b11dc006a3dd845c97481a1a89c3d908b3fade7",
+              "id": "msg_08c366aef05d2dc6006a3de840ba5481a29d652db9cc69e4bb",
               "type": "message",
               "status": "completed",
               "content": [
@@ -105,9 +105,10 @@ http_interactions:
                   "type": "output_text",
                   "annotations": [],
                   "logprobs": [],
-                  "text": "Hello! How can I help you today? \ud83d\ude0a"
+                  "text": "Hello! How can I help you today?"
                 }
               ],
+              "phase": "final_answer",
               "role": "assistant"
             }
           ],
@@ -115,10 +116,10 @@ http_interactions:
           "presence_penalty": 0.0,
           "previous_response_id": null,
           "prompt_cache_key": null,
-          "prompt_cache_retention": "in_memory",
+          "prompt_cache_retention": "24h",
           "reasoning": {
-            "context": null,
-            "effort": null,
+            "context": "current_turn",
+            "effort": "none",
             "summary": null
           },
           "safety_identifier": null,
@@ -152,21 +153,21 @@ http_interactions:
           },
           "tools": [],
           "top_logprobs": 0,
-          "top_p": 1.0,
+          "top_p": 0.98,
           "truncation": "disabled",
           "usage": {
-            "input_tokens": 8,
+            "input_tokens": 7,
             "input_tokens_details": {
               "cached_tokens": 0
             },
-            "output_tokens": 11,
+            "output_tokens": 13,
             "output_tokens_details": {
               "reasoning_tokens": 0
             },
-            "total_tokens": 19
+            "total_tokens": 20
           },
           "user": null,
           "metadata": {}
         }
-  recorded_at: Fri, 26 Jun 2026 01:39:11 GMT
+  recorded_at: Fri, 26 Jun 2026 02:47:22 GMT
 recorded_with: VCR 6.4.0

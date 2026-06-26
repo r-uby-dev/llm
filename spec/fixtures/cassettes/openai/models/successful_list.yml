@@ -23,7 +23,7 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Fri, 26 Jun 2026 01:39:16 GMT
+      - Fri, 26 Jun 2026 02:47:27 GMT
       Content-Type:
       - application/json
       Transfer-Encoding:
@@ -35,9 +35,9 @@ http_interactions:
       Openai-Version:
       - '2020-10-01'
       X-Request-Id:
-      - 55b5c856-294d-41a7-bcee-7f43c33cd486
+      - f8923e23-67a8-4f8d-9553-8554e0b6067c
       Openai-Processing-Ms:
-      - '564'
+      - '285'
       X-Openai-Proxy-Wasm:
       - v0.1
       Access-Control-Expose-Headers:
@@ -46,15 +46,15 @@ http_interactions:
       Cf-Cache-Status:
       - DYNAMIC
       Set-Cookie:
-      - __cf_bm=zsgSZ_iG9_8qim0BH4Lw5nGYqybZ291Wu_K0DrkgKY4-1782437955.5745447-1.0.1.1-werxo0MyLpIHWs5BruxsyllS8TiYbGW5YEE62mcK3Wmwsc5IopWpbEIxK33t1crVDyFhQ.urUzgvYptSwEf8KxjI360jvQAsJhP3lLtmHRM_8nb0uip5XtyFBpFmw_9M;
+      - __cf_bm=.ULGtEbhkASlqSXa59ZtAm5OgNdSnsNddV_DgLv8V9A-1782442047.1409016-1.0.1.1-nmFDJCnTtp8DmPx3F4mL29haxVGuORsjQoKPwt46r3.zNpTXnc_.BzEZsbl28Qva13Q9k.06KHjF0NLT.LQOJraGrtJetnYg37S4g29BMghb9nwyAUE3B0Tp8qfYk1WN;
         HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri,
-        26 Jun 2026 02:09:16 GMT
+        26 Jun 2026 03:17:27 GMT
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
       X-Content-Type-Options:
       - nosniff
       Cf-Ray:
-      - a1187f465a081d21-GRU
+      - a118e32aadbb344f-GRU
       Alt-Svc:
       - h3=":443"; ma=86400
     body:
@@ -785,5 +785,5 @@ http_interactions:
             }
           ]
         }
-  recorded_at: Fri, 26 Jun 2026 01:39:09 GMT
+  recorded_at: Fri, 26 Jun 2026 02:47:20 GMT
 recorded_with: VCR 6.4.0

@@ -6,7 +6,7 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"input":[{"role":"user","content":[{"type":"input_text","text":"Summarize
-        today''s news"}]}],"model":"gpt-4.1","store":false,"tools":[{"type":"web_search"}]}'
+        today''s news"}]}],"model":"gpt-5.4-mini","store":false,"tools":[{"type":"web_search"}]}'
     headers:
       User-Agent:
       - llm.rb v11.3.1
@@ -26,7 +26,7 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Fri, 26 Jun 2026 01:38:13 GMT
+      - Fri, 26 Jun 2026 02:45:22 GMT
       Content-Type:
       - application/json
       Transfer-Encoding:
@@ -34,7 +34,7 @@ http_interactions:
       Connection:
       - keep-alive
       Cf-Ray:
-      - a1187d8b7f04df6c-GRU
+      - a118dff62d1da5be-GRU
       Cf-Cache-Status:
       - DYNAMIC
       Server:
@@ -50,7 +50,7 @@ http_interactions:
       Openai-Organization:
       - user-j1pztzt5nogpcsid23u7gskj
       Openai-Processing-Ms:
-      - '8035'
+      - '5316'
       Openai-Project:
       - proj_YSiqu4bByPgi6EwPnLiY8irR
       Openai-Version:
@@ -58,59 +58,75 @@ http_interactions:
       X-Ratelimit-Limit-Requests:
       - '5000'
       X-Ratelimit-Limit-Tokens:
-      - '800000'
+      - '4000000'
       X-Ratelimit-Remaining-Requests:
       - '4999'
       X-Ratelimit-Remaining-Tokens:
-      - '782041'
+      - '3995911'
       X-Ratelimit-Reset-Requests:
       - 12ms
       X-Ratelimit-Reset-Tokens:
-      - 1.346s
+      - 61ms
       X-Request-Id:
-      - req_165811d493ea4a1e882fe8b3f697c0a3
+      - req_3c36f092ebc2417baad35b119d1627e1
       Set-Cookie:
-      - __cf_bm=BCT96JgpBEQF60.H3Bc3xB0.FTa7WoT0CKjDqaMGrKk-1782437884.7125766-1.0.1.1-ZolLHKE4F9YbuVzynZ3n0dLtPVa.sHKlUeibRMIgpGsC7zAM2ncXUPrgXyqMepeX9srswyokqkuyNt3Y6iFHz9KVy8p_nQ1QcHWXNR2QvZiUS0lxMqVKnUVgKhxN13uq;
+      - __cf_bm=eQuay4WBZ3FYb_n7.HkgxhqBS91X0j6DdZNElRfPmZU-1782441915.866958-1.0.1.1-9RqXU0nOQU3H479RqldWj9mDzujH7SxUftMrpVpYavMySkjVbw5bOR9y6UK.2dyAKis0O2YQ3iSrr.CgSf5SDugoixeXn8CBPS6PzCB8ns72FbLlhvuJqtCDvK7krqDv;
         HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri,
-        26 Jun 2026 02:08:13 GMT
+        26 Jun 2026 03:15:22 GMT
       Alt-Svc:
       - h3=":443"; ma=86400
     body:
       encoding: ASCII-8BIT
       string: |-
         {
-          "id": "resp_07255d95a90d9bb0016a3dd7fd02b481928623978d6f3e3b34",
+          "id": "resp_0a301f4e0f753512016a3de7bcc29081a3a251aa6504581b64",
           "object": "response",
-          "created_at": 1782437885,
+          "created_at": 1782441916,
           "status": "completed",
           "background": false,
           "billing": {
             "payer": "developer"
           },
-          "completed_at": 1782437892,
+          "completed_at": 1782441922,
           "error": null,
           "frequency_penalty": 0.0,
           "incomplete_details": null,
           "instructions": null,
           "max_output_tokens": null,
           "max_tool_calls": null,
-          "model": "gpt-4.1-2025-04-14",
+          "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "output": [
             {
-              "id": "ws_07255d95a90d9bb0016a3dd7fdbf9c81928f9124616dcd85bd",
+              "id": "ws_0a301f4e0f753512016a3de7bed8a881a3bc5ee79c0346e6b5",
               "type": "web_search_call",
               "status": "completed",
               "action": {
                 "type": "search",
                 "queries": [
-                  "today's top news summary"
+                  "June 26 2026 news headlines United States world today",
+                  "June 26 2026 AP News today world politics business",
+                  "June 26 2026 Reuters June 26 2026 top stories"
                 ],
-                "query": "today's top news summary"
+                "query": "June 26 2026 news headlines United States world today"
               }
             },
             {
-              "id": "msg_07255d95a90d9bb0016a3dd7ff237c819296967be3dc38a53f",
+              "id": "ws_0a301f4e0f753512016a3de7bfa89081a39c4cad7fcf135e3e",
+              "type": "web_search_call",
+              "status": "completed",
+              "action": {
+                "type": "search",
+                "queries": [
+                  "site:reuters.com June 26 2026 Reuters world news June 26 2026",
+                  "site:apnews.com June 26 2026 AP News June 26 2026",
+                  "site:bbc.com/news June 26 2026 top stories"
+                ],
+                "query": "site:reuters.com June 26 2026 Reuters world news June 26 2026"
+              }
+            },
+            {
+              "id": "msg_0a301f4e0f753512016a3de7c0cfd881a386ac51f3f181925f",
               "type": "message",
               "status": "completed",
               "content": [
@@ -119,128 +135,17 @@ http_interactions:
                   "annotations": [
                     {
                       "type": "url_citation",
-                      "end_index": 569,
-                      "start_index": 434,
-                      "title": "Europe's record-breaking heatwave has claimed hundreds of lives, health authorities say - ABC News",
-                      "url": "https://www.abc.net.au/news/2026-06-26/hundreds-of-deaths-recorded-as-heatwave-grips-europe/106843702?utm_source=openai"
-                    },
-                    {
-                      "type": "url_citation",
-                      "end_index": 817,
-                      "start_index": 682,
-                      "title": "Europe's record-breaking heatwave has claimed hundreds of lives, health authorities say - ABC News",
-                      "url": "https://www.abc.net.au/news/2026-06-26/hundreds-of-deaths-recorded-as-heatwave-grips-europe/106843702?utm_source=openai"
-                    },
-                    {
-                      "type": "url_citation",
-                      "end_index": 1125,
-                      "start_index": 990,
-                      "title": "Europe's record-breaking heatwave has claimed hundreds of lives, health authorities say - ABC News",
-                      "url": "https://www.abc.net.au/news/2026-06-26/hundreds-of-deaths-recorded-as-heatwave-grips-europe/106843702?utm_source=openai"
-                    },
-                    {
-                      "type": "url_citation",
-                      "end_index": 1476,
-                      "start_index": 1341,
-                      "title": "Europe's record-breaking heatwave has claimed hundreds of lives, health authorities say - ABC News",
-                      "url": "https://www.abc.net.au/news/2026-06-26/hundreds-of-deaths-recorded-as-heatwave-grips-europe/106843702?utm_source=openai"
-                    },
-                    {
-                      "type": "url_citation",
-                      "end_index": 1755,
-                      "start_index": 1620,
-                      "title": "Europe's record-breaking heatwave has claimed hundreds of lives, health authorities say - ABC News",
-                      "url": "https://www.abc.net.au/news/2026-06-26/hundreds-of-deaths-recorded-as-heatwave-grips-europe/106843702?utm_source=openai"
-                    },
-                    {
-                      "type": "url_citation",
-                      "end_index": 2029,
-                      "start_index": 1894,
-                      "title": "Europe's record-breaking heatwave has claimed hundreds of lives, health authorities say - ABC News",
-                      "url": "https://www.abc.net.au/news/2026-06-26/hundreds-of-deaths-recorded-as-heatwave-grips-europe/106843702?utm_source=openai"
-                    },
-                    {
-                      "type": "url_citation",
-                      "end_index": 2223,
-                      "start_index": 2088,
-                      "title": "Europe's record-breaking heatwave has claimed hundreds of lives, health authorities say - ABC News",
-                      "url": "https://www.abc.net.au/news/2026-06-26/hundreds-of-deaths-recorded-as-heatwave-grips-europe/106843702?utm_source=openai"
-                    },
-                    {
-                      "type": "url_citation",
-                      "end_index": 2506,
-                      "start_index": 2371,
-                      "title": "Europe's record-breaking heatwave has claimed hundreds of lives, health authorities say - ABC News",
-                      "url": "https://www.abc.net.au/news/2026-06-26/hundreds-of-deaths-recorded-as-heatwave-grips-europe/106843702?utm_source=openai"
-                    },
-                    {
-                      "type": "url_citation",
-                      "end_index": 2972,
-                      "start_index": 2834,
-                      "title": "High-level U.S.-Iran talks conclude with a road map for peace, mediators say - The Washington Post",
-                      "url": "https://www.washingtonpost.com/world/2026/06/21/us-iranian-meet-switzerland-hash-out-peace-plan/?utm_source=openai"
-                    },
-                    {
-                      "type": "url_citation",
-                      "end_index": 3250,
-                      "start_index": 3112,
-                      "title": "High-level U.S.-Iran talks conclude with a road map for peace, mediators say - The Washington Post",
-                      "url": "https://www.washingtonpost.com/world/2026/06/21/us-iranian-meet-switzerland-hash-out-peace-plan/?utm_source=openai"
-                    },
-                    {
-                      "type": "url_citation",
-                      "end_index": 3634,
-                      "start_index": 3496,
-                      "title": "High-level U.S.-Iran talks conclude with a road map for peace, mediators say - The Washington Post",
-                      "url": "https://www.washingtonpost.com/world/2026/06/21/us-iranian-meet-switzerland-hash-out-peace-plan/?utm_source=openai"
-                    },
-                    {
-                      "type": "url_citation",
-                      "end_index": 4254,
-                      "start_index": 4132,
-                      "title": "Supreme Court sides with Trump over stripping deportation protections from Syrians and Haitians - CBS News",
-                      "url": "https://www.cbsnews.com/news/supreme-court-temporary-protected-status-syrians-haitians/?utm_source=openai"
-                    },
-                    {
-                      "type": "url_citation",
-                      "end_index": 4553,
-                      "start_index": 4431,
-                      "title": "Supreme Court sides with Trump over stripping deportation protections from Syrians and Haitians - CBS News",
-                      "url": "https://www.cbsnews.com/news/supreme-court-temporary-protected-status-syrians-haitians/?utm_source=openai"
-                    },
-                    {
-                      "type": "url_citation",
-                      "end_index": 5195,
-                      "start_index": 5056,
-                      "title": "FERC Launches Aggressive Targeted Action to Speed Large Load Integration | Federal Energy Regulatory Commission",
-                      "url": "https://www.ferc.gov/news-events/news/ferc-launches-aggressive-targeted-action-speed-large-load-integration?utm_source=openai"
-                    },
-                    {
-                      "type": "url_citation",
-                      "end_index": 5594,
-                      "start_index": 5455,
-                      "title": "FERC Launches Aggressive Targeted Action to Speed Large Load Integration | Federal Energy Regulatory Commission",
-                      "url": "https://www.ferc.gov/news-events/news/ferc-launches-aggressive-targeted-action-speed-large-load-integration?utm_source=openai"
-                    },
-                    {
-                      "type": "url_citation",
-                      "end_index": 5874,
-                      "start_index": 5735,
-                      "title": "FERC Launches Aggressive Targeted Action to Speed Large Load Integration | Federal Energy Regulatory Commission",
-                      "url": "https://www.ferc.gov/news-events/news/ferc-launches-aggressive-targeted-action-speed-large-load-integration?utm_source=openai"
-                    },
-                    {
-                      "type": "url_citation",
-                      "end_index": 6198,
-                      "start_index": 6059,
-                      "title": "FERC Launches Aggressive Targeted Action to Speed Large Load Integration | Federal Energy Regulatory Commission",
-                      "url": "https://www.ferc.gov/news-events/news/ferc-launches-aggressive-targeted-action-speed-large-load-integration?utm_source=openai"
+                      "end_index": 378,
+                      "start_index": 285,
+                      "title": "Today in History: June 26, US Supreme Court legalizes same-sex marriage",
+                      "url": "https://apnews.com/article/dee4fb2d4f0ffcbbf018b3fb2f40065b?utm_source=openai"
                     }
                   ],
                   "logprobs": [],
-                  "text": "Here\u2019s a detailed and fully up-to-date summary of today\u2019s top global and U.S. news\u2014Friday, June 26, 2026:\n\n---\n\n## International News\n\n**1. Europe Suffers Deadly Record-Breaking Heatwave**  \nEurope continues to reel under an extreme heatwave, with multiple countries grappling with dangerously high temperatures and tragic loss of life.\n\n  - More than 101 million Europeans are expected to experience temperatures above 35\u202f\u00b0C (95\u202f\u00b0F) ([abc.net.au](https://www.abc.net.au/news/2026-06-26/hundreds-of-deaths-recorded-as-heatwave-grips-europe/106843702?utm_source=openai)).  \n  - Between Sunday and Wednesday, Spain\u2019s MoMo mortality monitoring system attributed 212 deaths to the heat ([abc.net.au](https://www.abc.net.au/news/2026-06-26/hundreds-of-deaths-recorded-as-heatwave-grips-europe/106843702?utm_source=openai)).  \n  - The UK recorded its hottest-ever June day\u201436.4\u202f\u00b0C in Somerset\u2014prompting a surge in emergency \"Category\u202f1\" calls, with 642 life-threatening incidents in a single day ([abc.net.au](https://www.abc.net.au/news/2026-06-26/hundreds-of-deaths-recorded-as-heatwave-grips-europe/106843702?utm_source=openai)).  \n  - In France, heat-related incidents have increased sharply: a three-year-old boy died in a hot vehicle outside Paris, two other children reportedly died in similar circumstances, and at least 48 people drowned ([abc.net.au](https://www.abc.net.au/news/2026-06-26/hundreds-of-deaths-recorded-as-heatwave-grips-europe/106843702?utm_source=openai)). Paramedics in Paris reported 25 cardiac arrests in 24 hours, compared to fewer than 10 on a typical day, and emergency room visits quadrupled ([abc.net.au](https://www.abc.net.au/news/2026-06-26/hundreds-of-deaths-recorded-as-heatwave-grips-europe/106843702?utm_source=openai)). Authorities have also banned public alcohol consumption in Paris from midday onward to prevent exacerbating dehydration and health risks ([abc.net.au](https://www.abc.net.au/news/2026-06-26/hundreds-of-deaths-recorded-as-heatwave-grips-europe/106843702?utm_source=openai)).  \n  - Switzerland broke June records with 38\u202f\u00b0C in Basel ([abc.net.au](https://www.abc.net.au/news/2026-06-26/hundreds-of-deaths-recorded-as-heatwave-grips-europe/106843702?utm_source=openai)). The Netherlands issued its first-ever red alert for heat, while Germany, Austria, Italy, and the Czech Republic also face escalating temperatures ([abc.net.au](https://www.abc.net.au/news/2026-06-26/hundreds-of-deaths-recorded-as-heatwave-grips-europe/106843702?utm_source=openai)).\n\n**2. U.S.\u2013Iran Peace Talks Advance Roadmap Agreement**  \nHigh-level diplomatic talks between the United States and Iran concluded successfully, with mediators reporting promising progress.\n\n  - Hosted in Switzerland, the negotiations resulted in a collective roadmap designed to culminate in a final agreement within 60 days ([washingtonpost.com](https://www.washingtonpost.com/world/2026/06/21/us-iranian-meet-switzerland-hash-out-peace-plan/?utm_source=openai)).  \n  - A de-escalation working group\u2014featuring Lebanon, alongside the U.S. and Iran\u2014will address the conflict between Israel and Hezbollah ([washingtonpost.com](https://www.washingtonpost.com/world/2026/06/21/us-iranian-meet-switzerland-hash-out-peace-plan/?utm_source=openai)).  \n  - Despite the encouraging trajectory, developments were shaken by President Trump\u2019s pre-talk threats, which included warnings of potential U.S. military action and seizure of the Strait of Hormuz if Iran interfered with maritime navigation ([washingtonpost.com](https://www.washingtonpost.com/world/2026/06/21/us-iranian-meet-switzerland-hash-out-peace-plan/?utm_source=openai)).\n\n---\n\n## U.S. News\n\n**3. Supreme Court Rules to End Deportation Protections for Syrians and Haitians**  \nIn a significant ruling, the U.S. Supreme Court has sided with the Trump administration in halting judicial delays on ending Temporary Protected Status (TPS) for Syrian and Haitian immigrants.\n\n  - The Court affirmed that the TPS statute bars judicial review of non\u2011constitutional challenges\u2014effectively permitting the administration to terminate protections without court-imposed reprieves ([cbsnews.com](https://www.cbsnews.com/news/supreme-court-temporary-protected-status-syrians-haitians/?utm_source=openai)).  \n  - The decision affects more than 356,000 individuals (over 6,000 from Syria and 350,000 from Haiti) by allowing the termination of their legal protections to move forward ([cbsnews.com](https://www.cbsnews.com/news/supreme-court-temporary-protected-status-syrians-haitians/?utm_source=openai)).\n\n---\n\n## U.S. Domestic and Policy News\n\n**4. FERC Orders Grid Reform to Support Large Energy Loads**  \nThe Federal Energy Regulatory Commission (FERC) has taken steps to modernize the U.S. electric grid in response to the growing demands of large energy users like data centers and manufacturers.\n\n  - On June 18, FERC issued show-cause orders to all six regional grid operators\u2014PJM, MISO, SPP, CAISO, ISO-NE, and NYISO\u2014requiring them to justify or reform their tariffs for large loads within 60 days ([ferc.gov](https://www.ferc.gov/news-events/news/ferc-launches-aggressive-targeted-action-speed-large-load-integration?utm_source=openai)).  \n  - The reforms target five key areas: streamlining transmission applications, ensuring cost transparency, accommodating behind\u2011the\u2011meter generation, offering new services for flexible loads, and improving infrastructure planning for co-located generators ([ferc.gov](https://www.ferc.gov/news-events/news/ferc-launches-aggressive-targeted-action-speed-large-load-integration?utm_source=openai)).  \n  - Within 30 days, each operator must also provide plans for ensuring sufficient generation capacity to meet current and future demands ([ferc.gov](https://www.ferc.gov/news-events/news/ferc-launches-aggressive-targeted-action-speed-large-load-integration?utm_source=openai)). FERC Chair Laura Swett emphasized that the initiative aims to serve innovation, support AI-driven industries, and strengthen U.S. manufacturing while maintaining consumer protections ([ferc.gov](https://www.ferc.gov/news-events/news/ferc-launches-aggressive-targeted-action-speed-large-load-integration?utm_source=openai)).\n\n---\n\n## Summary Overview\n\n- **Europe faces a catastrophic heatwave**, causing hundreds of deaths and widespread strain on healthcare and emergency systems.\n- **U.S.\u2013Iran talks show glimmer of diplomatic progress**, with a roadmap aimed at peace and de-escalation protocols underway.\n- **Domestic U.S. policy sees major shifts**: Supreme Court limits deportation protections for Syrians and Haitians, and FERC mandates grid reform to support energy-intensive economic growth.\n\n---\n\nLet me know if you\u2019d like a deeper dive into any of these stories or a focus on another region or topic!"
+                  "text": "I can summarize **today\u2019s news**, but I need a reliable set of current headlines to do it well. I wasn\u2019t able to pull a clean, broad set of top stories from live news sources just now, so I don\u2019t want to guess.\n\nWhat I *was* able to confirm is that **today is Friday, June 26, 2026**. ([apnews.com](https://apnews.com/article/dee4fb2d4f0ffcbbf018b3fb2f40065b?utm_source=openai))\n\nIf you want, I can still help in one of these ways:\n1. **Give you a quick news roundup** if you tell me the region or topic you care about most:\n   - U.S.\n   - world\n   - business/markets\n   - politics\n   - tech\n   - sports\n2. **Summarize headlines you paste here**\n3. **Try again with a narrower search**, and I\u2019ll produce a concise \u201ctoday in news\u201d brief with citations."
                 }
               ],
+              "phase": "final_answer",
               "role": "assistant"
             }
           ],
@@ -248,10 +153,10 @@ http_interactions:
           "presence_penalty": 0.0,
           "previous_response_id": null,
           "prompt_cache_key": null,
-          "prompt_cache_retention": "in_memory",
+          "prompt_cache_retention": "24h",
           "reasoning": {
-            "context": null,
-            "effort": null,
+            "context": "current_turn",
+            "effort": "none",
             "summary": null
           },
           "safety_identifier": null,
@@ -280,7 +185,7 @@ http_interactions:
               "total_tokens": 0
             },
             "web_search": {
-              "num_requests": 1
+              "num_requests": 2
             }
           },
           "tools": [
@@ -301,21 +206,21 @@ http_interactions:
             }
           ],
           "top_logprobs": 0,
-          "top_p": 1.0,
+          "top_p": 0.98,
           "truncation": "disabled",
           "usage": {
-            "input_tokens": 17095,
+            "input_tokens": 8638,
             "input_tokens_details": {
               "cached_tokens": 0
             },
-            "output_tokens": 1189,
+            "output_tokens": 364,
             "output_tokens_details": {
-              "reasoning_tokens": 0
+              "reasoning_tokens": 170
             },
-            "total_tokens": 18284
+            "total_tokens": 9002
           },
           "user": null,
           "metadata": {}
         }
-  recorded_at: Fri, 26 Jun 2026 01:38:06 GMT
+  recorded_at: Fri, 26 Jun 2026 02:45:15 GMT
 recorded_with: VCR 6.4.0

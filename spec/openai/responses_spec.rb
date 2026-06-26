@@ -186,7 +186,7 @@ RSpec.describe "LLM::OpenAI::Responses" do
     before { ctx.talk(prompt) }
 
     it "calls the function(s)" do
-      expect(Kernel).to receive(:system).with("date").and_return("2024-01-01")
+      expect(Kernel).to receive(:system).with(/date/).and_return("2024-01-01")
       ctx.talk ctx.wait(:call)
       expect(ctx.functions).to be_empty
     end

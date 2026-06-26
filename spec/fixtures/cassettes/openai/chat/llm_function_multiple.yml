@@ -8,7 +8,7 @@ http_interactions:
       string: '{"input":[{"role":"user","content":[{"type":"input_text","text":"You
         are a bot that can run UNIX commands"}]},{"role":"user","content":[{"type":"input_text","text":"Can
         you run the date command ? Can you run the pwd command ? Can you run the whoami
-        command ?"}]}],"model":"gpt-4.1","tools":[{"type":"function","name":"system","description":"Run
+        command ?"}]}],"model":"gpt-5.4-mini","store":false,"tools":[{"type":"function","name":"system","description":"Run
         a shell command","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"],"additionalProperties":false},"strict":false}]}'
     headers:
       User-Agent:
@@ -29,7 +29,7 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Fri, 26 Jun 2026 01:38:26 GMT
+      - Fri, 26 Jun 2026 02:45:32 GMT
       Content-Type:
       - application/json
       Transfer-Encoding:
@@ -37,7 +37,7 @@ http_interactions:
       Connection:
       - keep-alive
       Cf-Ray:
-      - a1187e06ee63e90b-GRU
+      - a118e053bef9d283-GRU
       Cf-Cache-Status:
       - DYNAMIC
       Server:
@@ -53,7 +53,7 @@ http_interactions:
       Openai-Organization:
       - user-j1pztzt5nogpcsid23u7gskj
       Openai-Processing-Ms:
-      - '2070'
+      - '1167'
       Openai-Project:
       - proj_YSiqu4bByPgi6EwPnLiY8irR
       Openai-Version:
@@ -61,67 +61,67 @@ http_interactions:
       X-Ratelimit-Limit-Requests:
       - '5000'
       X-Ratelimit-Limit-Tokens:
-      - '800000'
+      - '4000000'
       X-Ratelimit-Remaining-Requests:
       - '4999'
       X-Ratelimit-Remaining-Tokens:
-      - '800000'
+      - '4000000'
       X-Ratelimit-Reset-Requests:
       - 12ms
       X-Ratelimit-Reset-Tokens:
       - 0s
       X-Request-Id:
-      - req_00cf41d6dda040028f41bc8d0263f4b8
+      - req_4a61eee81a2a401fb2ef3b2e554f1727
       Set-Cookie:
-      - __cf_bm=XIIPn30x2kG2f28vXpClzLBtzNL_5RRAUaZvvmSWwIg-1782437904.4656374-1.0.1.1-Vpaek6EexYGd.elwk4iLQPjteWhWGW1Ode5Jc9RgmN4GYkU4hfcBz0nxmuhXF6TBfowU3HzSJXb.Z0jgOpTDC2W4UEzNnOU9QffGPlXr5eWQ0yXLb38miRwgmlkV4ViJ;
+      - __cf_bm=ZeqfxLzWIXqghqjdPFtqAJl3TZmFWWWrxe3BXDHKlNk-1782441930.8343394-1.0.1.1-C4nCm_mRv2zbbf7Tg5j45BWhxKKzkaKIsoH86PlGFl4URHL8yRXZezSx0Jx_oLGD65evDatGdy5JK7ljKw3fmS7UKWS6tuB66VO4SviOsjOCGSfCMC79cBDY1YgVUorv;
         HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri,
-        26 Jun 2026 02:08:26 GMT
+        26 Jun 2026 03:15:32 GMT
       Alt-Svc:
       - h3=":443"; ma=86400
     body:
       encoding: ASCII-8BIT
       string: |-
         {
-          "id": "resp_0efa6980e6f924a1006a3dd81170fc81a1ab13ed3b5c44d749",
+          "id": "resp_096253895aad808e016a3de7caf060819d87327f7fe157aa87",
           "object": "response",
-          "created_at": 1782437905,
+          "created_at": 1782441930,
           "status": "completed",
           "background": false,
           "billing": {
             "payer": "developer"
           },
-          "completed_at": 1782437906,
+          "completed_at": 1782441932,
           "error": null,
           "frequency_penalty": 0.0,
           "incomplete_details": null,
           "instructions": null,
           "max_output_tokens": null,
           "max_tool_calls": null,
-          "model": "gpt-4.1-2025-04-14",
+          "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "output": [
             {
-              "id": "fc_0efa6980e6f924a1006a3dd812698c81a1837d1be12810ede3",
+              "id": "fc_096253895aad808e016a3de7cbe7e8819db9cc1f98b25a2415",
               "type": "function_call",
               "status": "completed",
               "arguments": "{\"command\":\"date\"}",
-              "call_id": "call_Dv3kTb9AflyDh8yiHZdtW7PH",
+              "call_id": "call_JQJJOODe2hobebx5d40vqOiA",
               "name": "system"
             },
             {
-              "id": "fc_0efa6980e6f924a1006a3dd81269e081a1a604962971d4786b",
+              "id": "fc_096253895aad808e016a3de7cbe7fc819dafafd20fddb7aa73",
               "type": "function_call",
               "status": "completed",
               "arguments": "{\"command\":\"pwd\"}",
-              "call_id": "call_mC0TrlB25ylXNVdjoRcg9j24",
+              "call_id": "call_rcN941GohLdslB9pYo45p2NA",
               "name": "system"
             },
             {
-              "id": "fc_0efa6980e6f924a1006a3dd81269f081a1b70168a9f9790454",
+              "id": "fc_096253895aad808e016a3de7cbe808819d994c5d8ac2396ee5",
               "type": "function_call",
               "status": "completed",
               "arguments": "{\"command\":\"whoami\"}",
-              "call_id": "call_n9JukXXfJFARKOotMA5ST7DQ",
+              "call_id": "call_XqxTH3lXxK2ahSGAq3DclsTR",
               "name": "system"
             }
           ],
@@ -129,15 +129,15 @@ http_interactions:
           "presence_penalty": 0.0,
           "previous_response_id": null,
           "prompt_cache_key": null,
-          "prompt_cache_retention": "in_memory",
+          "prompt_cache_retention": "24h",
           "reasoning": {
-            "context": null,
-            "effort": null,
+            "context": "current_turn",
+            "effort": "none",
             "summary": null
           },
           "safety_identifier": null,
           "service_tier": "default",
-          "store": true,
+          "store": false,
           "temperature": 1.0,
           "text": {
             "format": {
@@ -185,30 +185,33 @@ http_interactions:
             }
           ],
           "top_logprobs": 0,
-          "top_p": 1.0,
+          "top_p": 0.98,
           "truncation": "disabled",
           "usage": {
-            "input_tokens": 70,
+            "input_tokens": 75,
             "input_tokens_details": {
               "cached_tokens": 0
             },
-            "output_tokens": 57,
+            "output_tokens": 60,
             "output_tokens_details": {
               "reasoning_tokens": 0
             },
-            "total_tokens": 127
+            "total_tokens": 135
           },
           "user": null,
           "metadata": {}
         }
-  recorded_at: Fri, 26 Jun 2026 01:38:19 GMT
+  recorded_at: Fri, 26 Jun 2026 02:45:25 GMT
 - request:
     method: post
     uri: https://api.openai.com/v1/responses
     body:
       encoding: UTF-8
-      string: '{"input":[{"type":"function_call_output","call_id":"call_Dv3kTb9AflyDh8yiHZdtW7PH","output":"{\"stderr\":\"\",\"stdout\":\"Fri
-        Jun 26 01:38:19 UTC 2026\\n\"}"},{"type":"function_call_output","call_id":"call_mC0TrlB25ylXNVdjoRcg9j24","output":"{\"stderr\":\"\",\"stdout\":\"/home/robert/projects/llm.rb/\\n\"}"},{"type":"function_call_output","call_id":"call_n9JukXXfJFARKOotMA5ST7DQ","output":"{\"stderr\":\"\",\"stdout\":\"robert\\n\"}"}],"model":"gpt-4.1","previous_response_id":"resp_0efa6980e6f924a1006a3dd81170fc81a1ab13ed3b5c44d749","tools":[{"type":"function","name":"system","description":"Run
+      string: '{"input":[{"role":"user","content":[{"type":"input_text","text":"You
+        are a bot that can run UNIX commands"}]},{"role":"user","content":[{"type":"input_text","text":"Can
+        you run the date command ? Can you run the pwd command ? Can you run the whoami
+        command ?"}]},{"id":"fc_096253895aad808e016a3de7cbe7e8819db9cc1f98b25a2415","type":"function_call","status":"completed","arguments":"{\"command\":\"date\"}","call_id":"call_JQJJOODe2hobebx5d40vqOiA","name":"system"},{"id":"fc_096253895aad808e016a3de7cbe7fc819dafafd20fddb7aa73","type":"function_call","status":"completed","arguments":"{\"command\":\"pwd\"}","call_id":"call_rcN941GohLdslB9pYo45p2NA","name":"system"},{"id":"fc_096253895aad808e016a3de7cbe808819d994c5d8ac2396ee5","type":"function_call","status":"completed","arguments":"{\"command\":\"whoami\"}","call_id":"call_XqxTH3lXxK2ahSGAq3DclsTR","name":"system"},{"type":"function_call_output","call_id":"call_JQJJOODe2hobebx5d40vqOiA","output":"{\"stderr\":\"\",\"stdout\":\"Fri
+        Jun 26 02:45:25 UTC 2026\\n\"}"},{"type":"function_call_output","call_id":"call_rcN941GohLdslB9pYo45p2NA","output":"{\"stderr\":\"\",\"stdout\":\"/home/robert/projects/llm.rb/\\n\"}"},{"type":"function_call_output","call_id":"call_XqxTH3lXxK2ahSGAq3DclsTR","output":"{\"stderr\":\"\",\"stdout\":\"robert\\n\"}"}],"model":"gpt-5.4-mini","store":false,"tools":[{"type":"function","name":"system","description":"Run
         a shell command","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"],"additionalProperties":false},"strict":false}]}'
     headers:
       User-Agent:
@@ -229,7 +232,7 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Fri, 26 Jun 2026 01:38:27 GMT
+      - Fri, 26 Jun 2026 02:45:33 GMT
       Content-Type:
       - application/json
       Transfer-Encoding:
@@ -237,7 +240,7 @@ http_interactions:
       Connection:
       - keep-alive
       Cf-Ray:
-      - a1187e15485560aa-GRU
+      - a118e05c4b3301af-GRU
       Cf-Cache-Status:
       - DYNAMIC
       Server:
@@ -253,7 +256,7 @@ http_interactions:
       Openai-Organization:
       - user-j1pztzt5nogpcsid23u7gskj
       Openai-Processing-Ms:
-      - '938'
+      - '1600'
       Openai-Project:
       - proj_YSiqu4bByPgi6EwPnLiY8irR
       Openai-Version:
@@ -261,47 +264,47 @@ http_interactions:
       X-Ratelimit-Limit-Requests:
       - '5000'
       X-Ratelimit-Limit-Tokens:
-      - '800000'
+      - '4000000'
       X-Ratelimit-Remaining-Requests:
       - '4999'
       X-Ratelimit-Remaining-Tokens:
-      - '800000'
+      - '4000000'
       X-Ratelimit-Reset-Requests:
       - 12ms
       X-Ratelimit-Reset-Tokens:
       - 0s
       X-Request-Id:
-      - req_aff3f1227fe244779cef5d7d5619c7c3
+      - req_45a950a20b07413fa336c00d97aa42c3
       Set-Cookie:
-      - __cf_bm=aOHsJ0fIxExa1rRUWowmL44cmRReJ_pIyEtbYo9pn_I-1782437906.763859-1.0.1.1-.T7O0bns4JzqjOIShbX7aryFT9aMr7SoTzCGG_Oc6M4xXnAGgBvoWl7lipYejjHs94gmkqUz4a7GaH_ENhhY5d40r8X9VKnzJZRMKqH0r7BSo4luLbILhZE_bkgGggUw;
+      - __cf_bm=cBIYeb2n8UgWbIVoIIoQMW2wYvrpgEOMUKi5JpjdcAw-1782441932.2076356-1.0.1.1-EPRUq7dS0rBbIGroKyJzFA6el2lUowvtqhZ9naUbTVlOBcBrkLiay7Ban4P0O7X8WkZDqR8tKfiXZqVFBKEYAAjRNEkIO5bdiwl72EszNpstHrjH4paA0wq1yk.1X9kU;
         HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri,
-        26 Jun 2026 02:08:27 GMT
+        26 Jun 2026 03:15:33 GMT
       Alt-Svc:
       - h3=":443"; ma=86400
     body:
       encoding: ASCII-8BIT
       string: |-
         {
-          "id": "resp_0efa6980e6f924a1006a3dd812df7081a18fdf0e3ef608b85c",
+          "id": "resp_096253895aad808e016a3de7cc4ea4819dada88faf00dce310",
           "object": "response",
-          "created_at": 1782437906,
+          "created_at": 1782441932,
           "status": "completed",
           "background": false,
           "billing": {
             "payer": "developer"
           },
-          "completed_at": 1782437907,
+          "completed_at": 1782441933,
           "error": null,
           "frequency_penalty": 0.0,
           "incomplete_details": null,
           "instructions": null,
           "max_output_tokens": null,
           "max_tool_calls": null,
-          "model": "gpt-4.1-2025-04-14",
+          "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "output": [
             {
-              "id": "msg_0efa6980e6f924a1006a3dd8135ba481a181196c01a5ec2994",
+              "id": "msg_096253895aad808e016a3de7cd6e7c819d8ff0facdc7649753",
               "type": "message",
               "status": "completed",
               "content": [
@@ -309,25 +312,26 @@ http_interactions:
                   "type": "output_text",
                   "annotations": [],
                   "logprobs": [],
-                  "text": "Here are the outputs for the commands you asked about:\n\n- date: Fri Jun 26 01:38:19 UTC 2026\n- pwd: /home/robert/projects/llm.rb/\n- whoami: robert\n\nLet me know if you need to run anything else!"
+                  "text": "Yes \u2014 here are the results:\n\n- `date`: `Fri Jun 26 02:45:25 UTC 2026`\n- `pwd`: `/home/robert/projects/llm.rb/`\n- `whoami`: `robert`"
                 }
               ],
+              "phase": "final_answer",
               "role": "assistant"
             }
           ],
           "parallel_tool_calls": true,
           "presence_penalty": 0.0,
-          "previous_response_id": "resp_0efa6980e6f924a1006a3dd81170fc81a1ab13ed3b5c44d749",
+          "previous_response_id": null,
           "prompt_cache_key": null,
-          "prompt_cache_retention": "in_memory",
+          "prompt_cache_retention": "24h",
           "reasoning": {
-            "context": null,
-            "effort": null,
+            "context": "current_turn",
+            "effort": "none",
             "summary": null
           },
           "safety_identifier": null,
           "service_tier": "default",
-          "store": true,
+          "store": false,
           "temperature": 1.0,
           "text": {
             "format": {
@@ -375,21 +379,21 @@ http_interactions:
             }
           ],
           "top_logprobs": 0,
-          "top_p": 1.0,
+          "top_p": 0.98,
           "truncation": "disabled",
           "usage": {
-            "input_tokens": 173,
+            "input_tokens": 209,
             "input_tokens_details": {
               "cached_tokens": 0
             },
-            "output_tokens": 63,
+            "output_tokens": 56,
             "output_tokens_details": {
               "reasoning_tokens": 0
             },
-            "total_tokens": 236
+            "total_tokens": 265
           },
           "user": null,
           "metadata": {}
         }
-  recorded_at: Fri, 26 Jun 2026 01:38:21 GMT
+  recorded_at: Fri, 26 Jun 2026 02:45:26 GMT
 recorded_with: VCR 6.4.0

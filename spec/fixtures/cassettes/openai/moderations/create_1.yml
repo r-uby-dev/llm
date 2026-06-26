@@ -23,7 +23,7 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Fri, 26 Jun 2026 01:39:17 GMT
+      - Fri, 26 Jun 2026 02:47:28 GMT
       Content-Type:
       - application/json
       Transfer-Encoding:
@@ -39,9 +39,9 @@ http_interactions:
       Openai-Project:
       - proj_YSiqu4bByPgi6EwPnLiY8irR
       X-Request-Id:
-      - req_6b84235aabf34d7ea06de9f70a5d95a1
+      - req_88ec09af35e1491e863438b8b71a6e4b
       Openai-Processing-Ms:
-      - '432'
+      - '255'
       X-Openai-Proxy-Wasm:
       - v0.1
       Cf-Cache-Status:
@@ -53,18 +53,18 @@ http_interactions:
       X-Content-Type-Options:
       - nosniff
       Set-Cookie:
-      - __cf_bm=PsA4tNuOGKUQ8j6k9F_9lfC0saTwqUoZjetXdTEXG9I-1782437956.6020784-1.0.1.1-faP7fSNJ45Ji3xxCPW4TEYRt8_c6.sS.N769BZIU3Kj6Mnqe6sdzH.WaRO8U2RMsywwkQo4lq1vt31rj21HYbDV6eHxccWBgYKz7.c8EuSW4qUlT1KiPdscG3loTQyb6;
+      - __cf_bm=TbJ0YKF16RlxOrv9ZyWnwjTjftcrfp_xz3uwQXGVfGg-1782442047.8120372-1.0.1.1-KQcvHGdNHgrp.7rscgPKUU_s8LKA9Zqj16YKmrZN78yMImv1dvtAYdvQZcgcWEuW3JIcqvrMoinDe5Kqmt9DJsDhmNkUqqI0gdAd2n6SI60c1_MTIJug6Npn4Pu_ouVp;
         HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri,
-        26 Jun 2026 02:09:17 GMT
+        26 Jun 2026 03:17:28 GMT
       Cf-Ray:
-      - a1187f4ccc74e967-GRU
+      - a118e32edbb1b2c2-GRU
       Alt-Svc:
       - h3=":443"; ma=86400
     body:
       encoding: ASCII-8BIT
       string: |-
         {
-          "id": "modr-9377",
+          "id": "modr-5556",
           "model": "omni-moderation-latest",
           "results": [
             {
@@ -143,5 +143,5 @@ http_interactions:
             }
           ]
         }
-  recorded_at: Fri, 26 Jun 2026 01:39:10 GMT
+  recorded_at: Fri, 26 Jun 2026 02:47:21 GMT
 recorded_with: VCR 6.4.0

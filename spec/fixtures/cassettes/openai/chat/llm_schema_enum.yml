@@ -7,7 +7,7 @@ http_interactions:
       encoding: UTF-8
       string: '{"input":[{"role":"user","content":[{"type":"input_text","text":"Your
         favorite fruit is pineapple"}]},{"role":"user","content":[{"type":"input_text","text":"What
-        fruit is your favorite?"}]}],"model":"gpt-4.1","text":{"format":{"type":"json_schema","name":"JSONSchema","schema":{"type":"object","properties":{"fruit":{"description":"The
+        fruit is your favorite?"}]}],"model":"gpt-5.4-mini","store":false,"text":{"format":{"type":"json_schema","name":"JSONSchema","schema":{"type":"object","properties":{"fruit":{"description":"The
         favorite fruit","enum":["apple","pineapple","orange"],"type":"string"}},"required":["fruit"],"additionalProperties":false}}}}'
     headers:
       User-Agent:
@@ -28,7 +28,7 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Fri, 26 Jun 2026 01:38:32 GMT
+      - Fri, 26 Jun 2026 02:45:37 GMT
       Content-Type:
       - application/json
       Transfer-Encoding:
@@ -36,7 +36,7 @@ http_interactions:
       Connection:
       - keep-alive
       Cf-Ray:
-      - a1187e3379dd0320-GRU
+      - a118e074dcbe402c-GRU
       Cf-Cache-Status:
       - DYNAMIC
       Server:
@@ -52,7 +52,7 @@ http_interactions:
       Openai-Organization:
       - user-j1pztzt5nogpcsid23u7gskj
       Openai-Processing-Ms:
-      - '534'
+      - '725'
       Openai-Project:
       - proj_YSiqu4bByPgi6EwPnLiY8irR
       Openai-Version:
@@ -60,47 +60,47 @@ http_interactions:
       X-Ratelimit-Limit-Requests:
       - '5000'
       X-Ratelimit-Limit-Tokens:
-      - '800000'
+      - '4000000'
       X-Ratelimit-Remaining-Requests:
       - '4999'
       X-Ratelimit-Remaining-Tokens:
-      - '800000'
+      - '4000000'
       X-Ratelimit-Reset-Requests:
       - 12ms
       X-Ratelimit-Reset-Tokens:
       - 0s
       X-Request-Id:
-      - req_a94da3f49a044dca9bff032226924a6e
+      - req_ea5de61dbc3942f389715a770008a191
       Set-Cookie:
-      - __cf_bm=SixfFo6WW_kSS8sMaW4FpYJuexzlRanCNFZCNGEsktc-1782437911.6019516-1.0.1.1-CNc_YtrNUi0PskIpkcXGokkE.h922ww.gR_WU.JTXhGounsnQU1jDmEPkYNT6hDbxc.1T4lHfc.00TUUT2zUV3H9jwaeBinwsoZI6ArVUW.rDYBI4XWv5qO6pOY6vLEc;
+      - __cf_bm=tzKNu5ai7SjHOJP6HiA6cUqaQwHgV5Zuy.q1_b9.3LQ-1782441936.1310756-1.0.1.1-DtVxQF14eylOQ_yGufR851dUgz9xNitR04mxtCVEINZD8mB6_3bWKvmhe9z8jRHrdk5tYb6g7T6fJ1rnOWBdLhPBKOYHizFv3eOxg4MmFmWGNZb.rzUy6yWZJobvF9Lw;
         HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri,
-        26 Jun 2026 02:08:32 GMT
+        26 Jun 2026 03:15:37 GMT
       Alt-Svc:
       - h3=":443"; ma=86400
     body:
       encoding: ASCII-8BIT
       string: |-
         {
-          "id": "resp_027c5d86e230567f006a3dd817bcd48192ba720e53449db8ea",
+          "id": "resp_034c3ca3586f0a8c016a3de7d03e748192ab10ee258fd7dca1",
           "object": "response",
-          "created_at": 1782437911,
+          "created_at": 1782441936,
           "status": "completed",
           "background": false,
           "billing": {
             "payer": "developer"
           },
-          "completed_at": 1782437912,
+          "completed_at": 1782441936,
           "error": null,
           "frequency_penalty": 0.0,
           "incomplete_details": null,
           "instructions": null,
           "max_output_tokens": null,
           "max_tool_calls": null,
-          "model": "gpt-4.1-2025-04-14",
+          "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "output": [
             {
-              "id": "msg_027c5d86e230567f006a3dd81810508192b77fe1051d5d3264",
+              "id": "msg_034c3ca3586f0a8c016a3de7d0aa248192bf1dcbbdd74866bb",
               "type": "message",
               "status": "completed",
               "content": [
@@ -111,6 +111,7 @@ http_interactions:
                   "text": "{\"fruit\":\"pineapple\"}"
                 }
               ],
+              "phase": "final_answer",
               "role": "assistant"
             }
           ],
@@ -118,15 +119,15 @@ http_interactions:
           "presence_penalty": 0.0,
           "previous_response_id": null,
           "prompt_cache_key": null,
-          "prompt_cache_retention": "in_memory",
+          "prompt_cache_retention": "24h",
           "reasoning": {
-            "context": null,
-            "effort": null,
+            "context": "current_turn",
+            "effort": "none",
             "summary": null
           },
           "safety_identifier": null,
           "service_tier": "default",
-          "store": true,
+          "store": false,
           "temperature": 1.0,
           "text": {
             "format": {
@@ -176,21 +177,21 @@ http_interactions:
           },
           "tools": [],
           "top_logprobs": 0,
-          "top_p": 1.0,
+          "top_p": 0.98,
           "truncation": "disabled",
           "usage": {
-            "input_tokens": 61,
+            "input_tokens": 59,
             "input_tokens_details": {
               "cached_tokens": 0
             },
-            "output_tokens": 7,
+            "output_tokens": 14,
             "output_tokens_details": {
               "reasoning_tokens": 0
             },
-            "total_tokens": 68
+            "total_tokens": 73
           },
           "user": null,
           "metadata": {}
         }
-  recorded_at: Fri, 26 Jun 2026 01:38:25 GMT
+  recorded_at: Fri, 26 Jun 2026 02:45:30 GMT
 recorded_with: VCR 6.4.0
