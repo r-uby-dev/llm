@@ -90,6 +90,7 @@ module LLM
       tools = [*params.delete(:tools), *load_skills(params.delete(:skills))]
       @params = {model: llm.default_model, schema: nil}.compact.merge!(params)
       @params[:tools] = tools unless tools.empty?
+      @params[:store] = false if @mode == :responses
       @messages = LLM::Buffer.new(llm)
     end
 
