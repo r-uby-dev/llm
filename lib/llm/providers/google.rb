@@ -196,7 +196,7 @@ module LLM
     def normalize_complete_params(params)
       params = {role: :user, model: default_model}.merge!(params)
       tools  = resolve_tools(params.delete(:tools))
-      params = [params, adapt_schema(params), adapt_tools(tools)].inject({}, &:merge!).compact
+      params = [params, adapt_generation_config(params), adapt_tools(tools)].inject({}, &:merge!).compact
       role, model, stream = [:role, :model, :stream].map { params.delete(_1) }
       [params, stream, tools, role, model]
     end

@@ -21,11 +21,17 @@ class LLM::Google
     ##
     # @param [Hash] params
     # @return [Hash]
-    def adapt_schema(params)
-      return {} unless params and params[:schema]
-      schema = params.delete(:schema)
-      schema = schema.respond_to?(:object) ? schema.object : schema
-      {generationConfig: {response_mime_type: "application/json", response_schema: schema}}
+    def adapt_generation_config(params)
+      return {} unless params
+      config = {}
+      if params[:schema]
+        schema = params.delete(:schema)
+        schema = schema.respond_to?(:object) ? schema.object : schema
+        config.merge!(response_mime_type: "application/json", response_schema: schema)
+      end
+      params_map.each { config[_1] = params.delete(_2) if params.key?(_2) }
+      config.merge!(params)
+      config.empty? ? {} : {generationConfig: config}
     end
 
     ##
@@ -35,6 +41,18 @@ class LLM::Google
       return {} unless tools&.any?
       platform, functions = [tools.grep(LLM::ServerTool), tools.grep(LLM::Function)]
       {tools: [*platform, {functionDeclarations: functions.map { _1.adapt(self) }}]}
+    end
+
+    ##
+    # @return [Hash]
+    def params_map
+      {
+        temperature: :temperature,
+        topP: :top_p,
+        topK: :top_k,
+        maxOutputTokens: :max_tokens,
+        stopSequences: :stop
+      }
     end
   end
 end
