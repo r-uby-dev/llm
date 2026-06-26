@@ -45,6 +45,8 @@ module LLM::OpenAI::RequestAdapter
 
     def adapt_message
       case content
+      when LLM::Function::Return
+        adapt_returns([content])
       when Array
         adapt_array
       else
@@ -56,10 +58,14 @@ module LLM::OpenAI::RequestAdapter
       if content.empty?
         nil
       elsif returns.any?
-        returns.map { {type: "function_call_output", call_id: _1.id, output: LLM.json.dump(_1.value)} }
+        adapt_returns(returns)
       else
         {role: message.role, content: content.flat_map { adapt_content(_1, role: message.role) }}
       end
+    end
+
+    def adapt_returns(returns)
+      returns.map { {type: "function_call_output", call_id: _1.id, output: LLM.json.dump(_1.value)} }
     end
 
     def adapt_remote_file(content)

@@ -16,10 +16,8 @@ RSpec.describe "LLM::Google::Files" do
     end
 
     it "returns a file object" do
-      expect(file).to have_attributes(
-        name: instance_of(String),
-        display_name: "bismillah.mp3"
-      )
+      expect(file.name).to be_instance_of(String)
+      expect(file.display_name).to eq("bismillah.mp3")
     end
   end
 
@@ -44,10 +42,8 @@ RSpec.describe "LLM::Google::Files" do
     end
 
     it "returns a file object" do
-      is_expected.to have_attributes(
-        name: instance_of(String),
-        display_name: "bismillah.mp3"
-      )
+      expect(subject.name).to be_instance_of(String)
+      expect(subject.display_name).to eq("bismillah.mp3")
     end
   end
 
@@ -115,18 +111,8 @@ RSpec.describe "LLM::Google::Files" do
     end
 
     it "returns an array of file objects" do
-      expect(response.files).to match_array(
-        [
-          have_attributes(
-            name: instance_of(String),
-            displayName: "bismillah.mp3"
-          ),
-          have_attributes(
-            name: instance_of(String),
-            displayName: "alhamdullilah.mp3"
-          )
-        ]
-      )
+      expect(response.files.map(&:name)).to all(be_instance_of(String))
+      expect(response.files.map(&:displayName)).to contain_exactly("bismillah.mp3", "alhamdullilah.mp3")
     end
   end
 end

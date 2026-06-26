@@ -240,6 +240,7 @@ RSpec.describe LLM::Agent do
 
     describe "#talk" do
       let(:agent) { agent_class.new(provider) }
+      let(:responses) { provider.responses }
       let(:prompt) do
         LLM::Prompt.new(provider) do
           system "You are helpful"
@@ -248,9 +249,16 @@ RSpec.describe LLM::Agent do
       end
 
       it "sends the prompt through the provider" do
-        expect(agent.llm).to receive(:complete)
-          .with(prompt, instance_of(Hash))
-          .and_return(double(choices: [LLM::Message.new("assistant", "hello")]))
+        if provider.name == :openai
+          allow(agent.llm).to receive(:responses).and_return(responses)
+          expect(responses).to receive(:create)
+            .with(prompt, instance_of(Hash))
+            .and_return(double(choices: [LLM::Message.new("assistant", "hello")]))
+        else
+          expect(agent.llm).to receive(:complete)
+            .with(prompt, instance_of(Hash))
+            .and_return(double(choices: [LLM::Message.new("assistant", "hello")]))
+        end
         agent.talk(prompt)
       end
 
@@ -268,9 +276,16 @@ RSpec.describe LLM::Agent do
         end
 
         it "injects instructions" do
-          expect(agent.llm).to receive(:complete)
-            .with(expected_prompt, hash_including(messages: existing_messages))
-            .and_return(double(choices: [LLM::Message.new("assistant", "hello")]))
+          if provider.name == :openai
+            allow(agent.llm).to receive(:responses).and_return(responses)
+            expect(responses).to receive(:create)
+              .with(expected_prompt, hash_including(input: existing_messages))
+              .and_return(double(choices: [LLM::Message.new("assistant", "hello")]))
+          else
+            expect(agent.llm).to receive(:complete)
+              .with(expected_prompt, hash_including(messages: existing_messages))
+              .and_return(double(choices: [LLM::Message.new("assistant", "hello")]))
+          end
           agent.talk("hello")
         end
       end
@@ -649,8 +664,9 @@ RSpec.describe LLM::Agent do
   end
 
   describe "DSL tracer scoping" do
-    let(:tracer) { Object.new }
+    let(:tracer) { LLM::Tracer::Null.new(provider) }
     let(:res) { Struct.new(:choices).new([LLM::Message.new("assistant", "hello")]) }
+    let(:responses) { provider.responses }
     let(:tool) do
       Class.new(LLM::Tool) do
         name "echo"
@@ -666,12 +682,13 @@ RSpec.describe LLM::Agent do
       Class.new(described_class) do
         tools tool_class
         tracer { tracer }
-      end.new(provider)
+      end.new(provider, mode: :responses)
     end
 
     describe "#talk" do
       it "scopes the tracer to the turn" do
-        expect(provider).to receive(:complete) do
+        allow(provider).to receive(:responses).and_return(responses)
+        expect(responses).to receive(:create) do
           expect(provider.tracer).to equal(tracer)
           res
         end

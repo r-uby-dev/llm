@@ -75,13 +75,15 @@ module LLM
     #  The parameters to maintain throughout the conversation.
     #  Any parameter the provider supports can be included and
     #  not only those listed here.
-    # @option params [Symbol] :mode Defaults to :completions
+    # @option params [Symbol] :mode
+    #   Defaults to `:responses` for OpenAI, otherwise it defaults
+    #   to `:completions`.
     # @option params [String] :model Defaults to the provider's default model
     # @option params [Array<LLM::Function>, nil] :tools Defaults to nil
     # @option params [Array<String>, nil] :skills Defaults to nil
     def initialize(llm, params = {})
       @llm = llm
-      @mode = params.delete(:mode) || :completions
+      @mode = params.delete(:mode) || (llm.name == :openai ? :responses : :completions)
       @compactor = params.delete(:compactor)
       @guard = params.delete(:guard)
       @transformer = params.delete(:transformer)
@@ -548,7 +550,8 @@ module LLM
       prompt, params = transform(prompt, params)
       bind!(params[:stream], params[:model], params[:tools])
       res_id = params[:store] == false ? nil : @messages.find(&:assistant?)&.response&.response_id
-      params = params.merge(previous_response_id: res_id, input: @messages.to_a).compact
+      input = res_id ? [] : @messages.to_a
+      params = params.merge(previous_response_id: res_id, input:).compact
       [prompt, params, @llm.responses.create(prompt, params)]
     end
 
@@ -597,7 +600,7 @@ module LLM
       [*message.extra.tool_calls].each do |tool|
         next if returns.any? { _1.id == tool[:id] }
         attrs = {cancelled: true, reason: "function call cancelled"}
-        cancelled << LLM::Function::Return.new(tool.id, tool.name, attrs)
+        cancelled << LLM::Function::Return.new(tool[:id], tool[:name], attrs)
       end
       messages << LLM::Message.new(@llm.tool_role, cancelled) unless cancelled.empty?
     end

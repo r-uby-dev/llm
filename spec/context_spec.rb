@@ -500,6 +500,7 @@ RSpec.describe LLM::Context do
       end.new
     end
     let(:ctx) { LLM::Context.new(provider, model:, transformer:) }
+    let(:responses) { provider.responses }
     let(:response) { double(choices: [LLM::Message.new("assistant", "hello")]) }
     let(:compactor) { instance_double(LLM::Compactor, compact?: false) }
     let(:stream_class) do
@@ -526,12 +527,14 @@ RSpec.describe LLM::Context do
     end
 
     it "rewrites the prompt before talk" do
-      expect(provider).to receive(:complete).with("hello [scrubbed]", hash_including(store: false)).and_return(response)
+      allow(provider).to receive(:responses).and_return(responses)
+      expect(responses).to receive(:create).with("hello [scrubbed]", hash_including(store: false)).and_return(response)
       ctx.talk("hello")
     end
 
     it "stores the transformed prompt in message history" do
-      allow(provider).to receive(:complete).and_return(response)
+      allow(provider).to receive(:responses).and_return(responses)
+      allow(responses).to receive(:create).and_return(response)
       ctx.talk("hello")
       expect(ctx.messages.first.content).to eq("hello [scrubbed]")
     end
@@ -546,13 +549,15 @@ RSpec.describe LLM::Context do
     end
 
     it "notifies the stream when transform starts" do
-      allow(provider).to receive(:complete).and_return(response)
+      allow(provider).to receive(:responses).and_return(responses)
+      allow(responses).to receive(:create).and_return(response)
       ctx.talk("hello", stream:)
       expect(stream.events.first).to eq([:start, ctx, transformer])
     end
 
     it "notifies the stream when transform finishes" do
-      allow(provider).to receive(:complete).and_return(response)
+      allow(provider).to receive(:responses).and_return(responses)
+      allow(responses).to receive(:create).and_return(response)
       ctx.talk("hello", stream:)
       expect(stream.events.last).to eq([:finish, ctx, transformer])
     end
@@ -625,6 +630,7 @@ RSpec.describe LLM::Context do
     let(:stream) { LLM::Stream.new }
     let(:ctx) { LLM::Context.new(provider, model:, stream:) }
     let(:per_call_stream) { LLM::Stream.new }
+    let(:responses) { provider.responses }
     let(:response) { double(choices: [LLM::Message.new("assistant", "hello", model:)]) }
     let(:guard) do
       Class.new do
@@ -679,7 +685,8 @@ RSpec.describe LLM::Context do
 
       before do
         allow(ctx).to receive(:compactor).and_return(instance_double(LLM::Compactor, compact?: false))
-        allow(provider).to receive(:complete).and_return(response)
+        allow(provider).to receive(:responses).and_return(responses)
+        allow(responses).to receive(:create).and_return(response)
         ctx.talk("hello", stream: per_call_stream)
         per_call_stream.queue << result
       end
@@ -727,6 +734,7 @@ RSpec.describe LLM::Context do
   context "#interrupt!" do
     let(:provider) { LLM.openai(key: "test") }
     let(:model) { "gpt-5.4" }
+    let(:responses) { provider.responses }
 
     it "forwards to the provider" do
       owner = Fiber.new {}
@@ -737,9 +745,8 @@ RSpec.describe LLM::Context do
 
     it "tracks the executing fiber as the interrupt owner" do
       owner = Fiber.new do
-        allow(provider).to receive(:complete).and_return(
-          double(choices: [LLM::Message.new("assistant", "hello")])
-        )
+        allow(provider).to receive(:responses).and_return(responses)
+        allow(responses).to receive(:create).and_return(double(choices: [LLM::Message.new("assistant", "hello")]))
         ctx.talk("hello")
         expect(provider).to receive(:interrupt!).with(Fiber.current).and_return(nil)
         expect(ctx.interrupt!).to be_nil
@@ -844,6 +851,7 @@ RSpec.describe LLM::Context do
   context "#talk" do
     let(:provider) { LLM.openai(key: "test") }
     let(:model) { "gpt-5.4" }
+    let(:responses) { provider.responses }
     let(:response) { double(choices: [LLM::Message.new("assistant", "hello")]) }
     let(:compactor) { instance_double(LLM::Compactor, compact?: true, compact!: nil) }
 
@@ -851,7 +859,8 @@ RSpec.describe LLM::Context do
       allow(ctx).to receive(:compactor).and_return(compactor)
       expect(compactor).to receive(:compact?).with("hello").ordered.and_return(true)
       expect(compactor).to receive(:compact!).with("hello").ordered.and_return(nil)
-      expect(provider).to receive(:complete).ordered.and_return(response)
+      allow(provider).to receive(:responses).and_return(responses)
+      expect(responses).to receive(:create).ordered.and_return(response)
       ctx.talk("hello")
     end
 
@@ -859,7 +868,8 @@ RSpec.describe LLM::Context do
       stream = LLM::Stream.new
       ctx = described_class.new(provider, model:, stream:)
       allow(ctx).to receive(:compactor).and_return(instance_double(LLM::Compactor, compact?: false))
-      expect(provider).to receive(:complete).ordered.and_return(response)
+      allow(provider).to receive(:responses).and_return(responses)
+      expect(responses).to receive(:create).ordered.and_return(response)
       ctx.talk("hello")
       expect(stream.ctx).to eq(ctx)
     end
@@ -886,7 +896,8 @@ RSpec.describe LLM::Context do
       it "does not compact before sending tool returns" do
         allow(ctx).to receive(:compactor).and_return(compactor)
         expect(compactor).to receive(:compact?).with([result]).ordered.and_return(false)
-        expect(provider).to receive(:complete).ordered.and_return(response)
+        allow(provider).to receive(:responses).and_return(responses)
+        expect(responses).to receive(:create).ordered.and_return(response)
         ctx.talk([result])
       end
     end
@@ -895,6 +906,7 @@ RSpec.describe LLM::Context do
   context "#compactor" do
     let(:provider) { LLM.openai(key: "test") }
     let(:model) { "gpt-5.4" }
+    let(:responses) { provider.responses }
     let(:compactor_options) { {message_threshold: 2, retention_window: 1} }
     let(:ctx) { LLM::Context.new(provider, model:, compactor: compactor_options) }
     let(:summary_text) { "Summary of the earlier conversation" }
@@ -1035,6 +1047,8 @@ RSpec.describe LLM::Context do
     context "#compact!" do
       before do
         allow(provider).to receive(:complete).and_return(response)
+        allow(provider).to receive(:responses).and_return(responses)
+        allow(responses).to receive(:create).and_return(response)
       end
 
       context "when given a stream" do

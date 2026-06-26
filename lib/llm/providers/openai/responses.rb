@@ -100,6 +100,7 @@ class LLM::OpenAI
     def adapt_schema(params)
       return {} unless params && params[:schema]
       schema = params.delete(:schema)
+      schema = schema.respond_to?(:object) ? schema.object : schema
       schema = schema.to_h.merge(additionalProperties: false)
       name = "JSONSchema"
       {text: {format: {type: "json_schema", name:, schema:}}}

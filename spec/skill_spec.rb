@@ -37,6 +37,7 @@ RSpec.describe LLM::Skill do
 
   let(:skill_dir) { File.join(@dir, "weather") }
   let(:provider) { LLM.openai(key: "test") }
+  let(:responses) { provider.responses }
   let(:stream) { LLM::Stream.new }
   let(:ctx) { LLM::Context.new(provider, tools: [EchoTool], model: "gpt-5.4-mini", stream:) }
 
@@ -221,7 +222,8 @@ RSpec.describe LLM::Skill do
 
     context "when calling the skill" do
       it "uses an internal agent and returns tool-shaped output" do
-        expect(provider).to receive(:complete) do |prompt, params|
+        allow(provider).to receive(:responses).and_return(responses)
+        expect(responses).to receive(:create) do |prompt, params|
           expect(prompt.to_a.any? { _1.content == "Solve the user's query." }).to eq(true)
           expect(params).to include(model: "gpt-5.4-mini")
           res
@@ -269,7 +271,8 @@ RSpec.describe LLM::Skill do
       end
 
       it "inherits the concurrency" do
-        expect(provider).to receive(:complete).ordered.and_return(first_response, res)
+        allow(provider).to receive(:responses).and_return(responses)
+        expect(responses).to receive(:create).ordered.and_return(first_response, res)
         expect(call_skill).to eq({content: "It is raining"})
         expect(threads.pop).not_to eq(Thread.current)
       end
@@ -279,7 +282,8 @@ RSpec.describe LLM::Skill do
       let(:ctx) { LLM::Context.new(provider, model: "gpt-5.4-mini", schema: :schema, stream:) }
 
       it "does not pass the schema into the nested agent request" do
-        expect(provider).to receive(:complete) do |prompt, params|
+        allow(provider).to receive(:responses).and_return(responses)
+        expect(responses).to receive(:create) do |prompt, params|
           expect(prompt.to_a.any? { _1.content == "Solve the user's query." }).to eq(true)
           expect(params).not_to have_key(:schema)
           res
@@ -298,9 +302,10 @@ RSpec.describe LLM::Skill do
       end
 
       it "inherits a curated slice of parent messages" do
-        expect(provider).to receive(:complete) do |prompt, params|
+        allow(provider).to receive(:responses).and_return(responses)
+        expect(responses).to receive(:create) do |prompt, params|
           expect(prompt.to_a.any? { _1.content == "Solve the user's query." }).to eq(true)
-          expect(params[:messages].map(&:content)).to eq(["Recent context:", "What is today's date?", "Let me check."])
+          expect(params[:input].map(&:content)).to eq(["Recent context:", "What is today's date?", "Let me check."])
           res
         end
         call_skill

@@ -6,28 +6,6 @@ RSpec.describe "LLM::OpenAI::Images" do
   let(:key) { ENV["OPENAI_SECRET"] || "TOKEN" }
   let(:provider) { LLM.openai(key:) }
 
-  context "when given a successful create operation (urls)",
-          vcr: {cassette_name: "openai/images/successful_create_urls"} do
-    subject(:response) do
-      provider.images.create(
-        prompt: "A dog on a rocket to the moon",
-        response_format: "url"
-      )
-    end
-
-    it "is successful" do
-      expect(response).to be_instance_of(LLM::Response)
-    end
-
-    it "returns an array of urls" do
-      expect(response.urls).to be_instance_of(Array)
-    end
-
-    it "returns a url" do
-      expect(response.urls[0]).to be_instance_of(String)
-    end
-  end
-
   context "when given a successful create operation (base64)",
           vcr: {cassette_name: "openai/images/successful_create_base64"} do
     subject(:response) do
@@ -54,8 +32,7 @@ RSpec.describe "LLM::OpenAI::Images" do
     subject(:response) do
       provider.images.edit(
         image: "spec/fixtures/images/bluebook.png",
-        prompt: "Add white background",
-        response_format: "url"
+        prompt: "Add white background"
       )
     end
 
@@ -64,11 +41,11 @@ RSpec.describe "LLM::OpenAI::Images" do
     end
 
     it "returns data" do
-      expect(response.urls).to be_instance_of(Array)
+      expect(response.images).to be_instance_of(Array)
     end
 
-    it "returns a url" do
-      expect(response.urls[0]).to be_instance_of(String)
+    it "returns an IO-like object" do
+      expect(response.images[0]).to be_instance_of(StringIO)
     end
   end
 end
