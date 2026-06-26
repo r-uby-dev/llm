@@ -399,7 +399,7 @@ require "llm"
 require "pp"
 
 class Estimation < LLM::Schema
-  property :age, String, "The estimated age of the person"
+  property :age, Integer, "The estimated age of the person"
   property :confidence, Number, "Your confidence in the estimate"
   property :comments, String, "Any additional comments or context"
 end
