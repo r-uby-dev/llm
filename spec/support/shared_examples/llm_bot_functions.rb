@@ -79,7 +79,7 @@ RSpec.shared_examples "LLM::Context: functions" do |dirname, options = {}|
       LLM.function(:system) do |fn|
         fn.description "Runs system commands"
         fn.params { _1.object(command: _1.string.required) }
-        fn.define { |command:| {success: Kernel.system(command)} }
+        fn.define { |command:| {success: Kernel.system(command.chomp)} }
       end
     end
     include_examples "system", "What is the date?"
@@ -92,7 +92,7 @@ RSpec.shared_examples "LLM::Context: functions" do |dirname, options = {}|
         description "Runs system commands"
         params { _1.object(command: _1.string.required) }
         def call(command:)
-          {success: Kernel.system(command)}
+          {success: Kernel.system(command.chomp)}
         end
       end
     end

@@ -5,7 +5,7 @@ require "setup"
 RSpec.describe "LLM::Context: google" do
   let(:provider) { LLM.google(key:) }
   let(:llm) { provider }
-  let(:key) { ENV["GEMINI_SECRET"] || "TOKEN" }
+  let(:key) { ENV["GOOGLE_SECRET"] || "TOKEN" }
   let(:ctx) { LLM::Context.new(provider, params) }
   let(:params) { {} }
 

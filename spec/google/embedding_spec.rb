@@ -4,7 +4,7 @@ require "setup"
 
 RSpec.describe "LLM::OpenAI: embeddings" do
   let(:google) { LLM.google(key:) }
-  let(:key) { ENV["GEMINI_SECRET"] || "TOKEN" }
+  let(:key) { ENV["GOOGLE_SECRET"] || "TOKEN" }
 
   context "when given a successful response",
           vcr: {cassette_name: "google/embeddings/successful_response", match_requests_on: [:method]} do

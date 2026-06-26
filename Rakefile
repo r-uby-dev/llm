@@ -47,7 +47,7 @@ task :console do
   require "dotenv"
   Dotenv.load
   openai = LLM.openai(key: ENV["OPENAI_SECRET"])
-  google = LLM.google(key: ENV["GEMINI_SECRET"])
+  google = LLM.google(key: ENV["GOOGLE_SECRET"])
   anthropic = LLM.anthropic(key: ENV["ANTHROPIC_SECRET"])
   deepseek = LLM.deepseek(key: ENV["DEEPSEEK_SECRET"])
   xai = LLM.xai(key: ENV["XAI_SECRET"])

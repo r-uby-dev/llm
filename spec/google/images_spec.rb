@@ -3,7 +3,7 @@
 require "setup"
 
 RSpec.describe "LLM::Google::Images" do
-  let(:key) { ENV["GEMINI_SECRET"] || "TOKEN" }
+  let(:key) { ENV["GOOGLE_SECRET"] || "TOKEN" }
   let(:provider) { LLM.google(key:) }
 
   context "when given a successful create operation",
