@@ -47,7 +47,6 @@ class LLM::Google
     # @return [Hash]
     def params_map
       {
-        temperature: :temperature,
         topP: :top_p,
         topK: :top_k,
         maxOutputTokens: :max_tokens,
