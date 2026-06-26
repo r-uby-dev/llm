@@ -122,6 +122,19 @@ class LLM::Schema
   end
 
   ##
+  # @param [Hash] defaults
+  # @return [LLM::Schema::Object]
+  def self.defaults(defaults)
+    lock do
+      object.tap do |schema|
+        defaults.each do |name, val|
+          Utils.fetch(schema.properties, name).default(val)
+        end
+      end
+    end
+  end
+
+  ##
   # @api private
   # @return [LLM::Schema]
   def self.schema

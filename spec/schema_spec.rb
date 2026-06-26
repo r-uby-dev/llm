@@ -7,6 +7,7 @@ RSpec.describe LLM::Schema do
     let(:all_properties) { [*required_properties, *unrequired_properties] }
     let(:required_properties) { %w[name age height] }
     let(:unrequired_properties) { %w[active location addresses] }
+    let(:default_properties) { %w[name age] }
 
     let(:schema) do
       Class.new(LLM::Schema) do
@@ -16,11 +17,17 @@ RSpec.describe LLM::Schema do
         property :active, LLM::Schema::Boolean, "active description"
         property :location, LLM::Schema::Null, "location description"
         property :addresses, LLM::Schema::Array[LLM::Schema::String], "addresses description"
+        defaults(name: "john", age: 18)
       end
     end
 
     it "has properties" do
       expect(schema.object.keys).to eq(all_properties)
+    end
+
+    it "has defaults" do
+      actual = schema.object.properties.select { _2.default }.keys
+      expect(actual).to eq(default_properties)
     end
 
     it "sets properties" do
