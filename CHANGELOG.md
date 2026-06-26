@@ -2,6 +2,81 @@
 
 ## Unreleased
 
+Changes since `v11.3.1`
+
+### Breaking
+
+* **Default OpenAI contexts to the Responses API** <br>
+  Route `LLM::Context#talk` through the Responses API by default instead
+  of Chat Completions. Chat Completions remain available through the
+  provider's `complete` method or by passing `mode: :completions` on the
+  context, but the default `talk` path now uses the newer Responses
+  endpoint.
+
+### Add
+
+* **Add `LLM::Schema.defaults`** <br>
+  Add class-level `defaults` to `LLM::Schema` so schema subclasses can
+  define default values for properties.
+
+* **Default OpenAI to `gpt-5.4-mini`** <br>
+  Change `LLM::OpenAI#default_model` to `gpt-5.4-mini` for the current
+  preferred chat model.
+
+* **Default Google to `gemini-3.1-flash-lite`** <br>
+  Change `LLM::Google#default_model` to `gemini-3.1-flash-lite` for the
+  current preferred chat model, and default embeddings to
+  `gemini-embedding-2`.
+
+* **Support OpenAI gpt-image models** <br>
+  Add support for OpenAI's `gpt-image` models so image generation
+  requests can use the gpt-image endpoint.
+
+* **Return base64-encoded images from xAI** <br>
+  Make the xAI provider return base64-encoded image data by default,
+  matching the existing OpenAI behavior.
+
+* **Adopt `set_tracer` convention in ORM wrappers** <br>
+  Let the ActiveRecord and Sequel wrappers call `set_tracer` by
+  convention, matching the `set_provider` and `set_context` pattern.
+
+* **Reduce ActiveRecord wrapper model pollution** <br>
+  Move helper methods into shared utilities so wrapped models include
+  fewer internal helper methods.
+
+* **Reduce Sequel wrapper model pollution** <br>
+  Apply the same model-surface reduction to the Sequel plugin, matching
+  the ActiveRecord wrapper changes.
+
+### Fix
+
+* **Fix Google `temperature` parameter fall-through** <br>
+  Ensure provider-level `temperature` and other `generationConfig`
+  parameters are forwarded to the API correctly instead of being
+  silently dropped.
+
+* **Fix Google `generationConfig` collisions** <br>
+  Prevent duplicate or conflicting `generationConfig` keys in the
+  Google request adapter.
+
+* **Fix xAI registry spec for grok models** <br>
+  Correct the xAI model registry entry so grok model metadata resolves
+  properly.
+
+* **Refresh model metadata** <br>
+  Update `data/models.dev` files with current provider model listings,
+  pricing, and capabilities.
+
+### Change
+
+* **Optimize gemspec description for rubygems.org** <br>
+  Reformat the gemspec description for better layout on the rubygems.org
+  gem page.
+
+* **Expand deepdive documentation** <br>
+  Add dedicated deepdive sections for ActiveRecord and Sequel ORM
+  integration, stream configuration, and HTTP transport options.
+
 ## v11.3.1
 
 Changes since `v11.3.0`.
