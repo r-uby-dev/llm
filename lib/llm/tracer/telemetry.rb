@@ -30,8 +30,7 @@ module LLM
   #   require "llm"
   #   require "opentelemetry-exporter-otlp"
   #
-  #   endpoint = "https://api.smith.langchain.com/otel/v1/traces"
-  #   exporter = OpenTelemetry::Exporter::OTLP::Exporter.new(endpoint:)
+  #   exporter = OpenTelemetry::Exporter::OTLP::Exporter.new
   #
   #   llm = LLM.openai(key: ENV["KEY"])
   #   llm.tracer = LLM::Tracer::Telemetry.new(llm, exporter:)
@@ -59,7 +58,6 @@ module LLM
     # @return [self]
     def start_trace(trace_group_id: nil, name: "llm", attributes: {}, metadata: nil)
       return self if trace_group_id.to_s.empty?
-
       span_context = span_context_from_trace_group_id(trace_group_id.to_s)
       parent_ctx = ::OpenTelemetry::Trace.context_with_span(
         ::OpenTelemetry::Trace.non_recording_span(span_context)
@@ -316,7 +314,7 @@ module LLM
       set_span_attributes(span, consume_extra_outputs.merge(outputs || {}))
       finish_metadata = consume_finish_metadata_proc(res)
       metadata = (metadata || {}).merge(finish_metadata || {})
-      set_span_attributes(span, metadata.transform_keys { "langsmith.metadata.#{_1}" })
+      set_span_attributes(span, metadata.transform_keys { "llm.metadata.#{_1}" })
       span.add_event("gen_ai.request.finish")
       span.tap(&:finish)
     end
@@ -326,7 +324,7 @@ module LLM
         "gen_ai.operation.name" => operation
       }.merge!(finish_attributes(operation, res)).compact
       chunks_json = retrieval_chunks_json(res)
-      attributes["langsmith.metadata.chunks"] = chunks_json if chunks_json
+      attributes["llm.metadata.chunks"] = chunks_json if chunks_json
       attributes.each { span.set_attribute(_1, _2) }
       span.add_event("gen_ai.request.finish")
       span.tap(&:finish)
@@ -334,7 +332,7 @@ module LLM
 
     ##
     # @api private
-    # Serialize retrieval response chunks for span attributes (e.g. langsmith.metadata.chunks).
+    # Serialize retrieval response chunks for span attributes.
     # Returns a JSON string or nil when res has no data.
     def consume_finish_metadata_proc(res)
       key = LLM::Tracer::FINISH_METADATA_PROC_KEY

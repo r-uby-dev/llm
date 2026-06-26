@@ -11,7 +11,6 @@ module LLM
   class Tracer
     require_relative "tracer/logger"
     require_relative "tracer/telemetry"
-    require_relative "tracer/langsmith"
     require_relative "tracer/null"
 
     ##
@@ -45,7 +44,7 @@ module LLM
     # @param [Object, nil] span
     # @param [String] model
     # @param [Hash, nil] outputs Optional span attributes (e.g. gen_ai.output.messages) from llm.rb or caller.
-    # @param [Hash, nil] metadata Optional metadata (emitted as langsmith.metadata.*) from llm.rb or caller.
+    # @param [Hash, nil] metadata Optional metadata from llm.rb or caller.
     # @return [void]
     def on_request_finish(operation:, res:, model: nil, span: nil, outputs: nil, metadata: nil)
       raise NotImplementedError, "#{self.class} does not implement '#{__method__}'"
@@ -110,8 +109,7 @@ module LLM
     # @param [Hash] attributes
     #  OpenTelemetry attributes to set on the root span.
     # @param [Hash, nil] metadata
-    #  Optional. Trace-level metadata merged into the trace (e.g. langsmith.metadata.*).
-    #  Only used by tracers that support it (e.g. {LLM::Tracer::Langsmith}).
+    #  Optional. Trace-level metadata merged into the trace by tracers that support it.
     # @return [self]
     def start_trace(trace_group_id: nil, name: "llm", attributes: {}, metadata: nil)
       self
@@ -150,11 +148,10 @@ module LLM
     ##
     # Merges extra attributes for the current trace/span. Used by applications
     # (e.g. chatbot) to add metadata, span inputs, or span outputs to the next
-    # span or to the trace. No-op by default; {LLM::Tracer::Langsmith} merges
-    # into fiber-local storage and emits them as langsmith/GenAI attributes.
+    # span or to the trace. No-op by default.
     #
     # @param [Hash, nil] metadata
-    #  Key-value pairs merged into trace/span metadata (e.g. langsmith.metadata.*).
+    #  Key-value pairs merged into trace/span metadata.
     # @param [Hash, nil] inputs
     #  Key-value pairs set on the next span at start (e.g. gen_ai.input.messages).
     #  Consumed when the span is created.
@@ -169,9 +166,9 @@ module LLM
     ##
     # Optional: set a proc to supply metadata when the next chat span finishes.
     # The proc is called with the response (res) and should return a Hash of
-    # metadata (e.g. { intent: "...", confidence: 1.0 }) to merge onto the span
-    # as langsmith.metadata.*. Cleared after use. Used by apps to attach
-    # routing/intent that is only known after the response.
+    # metadata (e.g. { intent: "...", confidence: 1.0 }) to merge onto the span.
+    # Cleared after use. Used by apps to attach routing/intent that is only
+    # known after the response.
     #
     # @param [Proc, nil] proc (res) -> Hash or nil
     # @return [self]
@@ -183,18 +180,9 @@ module LLM
     FINISH_METADATA_PROC_KEY = :"llm.tracer.finish_metadata_proc"
 
     ##
-    # Returns the current extra bag (metadata, inputs, outputs) for the current
-    # thread/trace. Used by subclasses; default returns empty hashes.
-    #
-    # @return [Hash] { metadata: {}, inputs: {}, outputs: {} }
-    def current_extra
-      {}
-    end
-
-    ##
     # Returns and clears extra inputs for the next span. Called by the telemetry
-    # tracer when starting a span. Subclasses (e.g. Langsmith) override to
-    # return fiber-local inputs; default returns {}.
+    # tracer when starting a span. Subclasses can override to return stored
+    # inputs; default returns {}.
     #
     # @return [Hash] Attribute key => value to set on the span at start
     def consume_extra_inputs

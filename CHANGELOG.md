@@ -64,6 +64,17 @@ major release: `v12.0.0`.
 * **Sequel: yield `LLM::Agent` to `plugin(:agent)`** <br>
   Ditto as above but for Sequel.
 
+* **Remove the langsmith tracer**
+  This code was contributed by a third party but contains
+  many anti-patterns that are against llm.rb conventions
+  and best practices. It was merged without oversight or
+  review, and basically against the ethos of open source.
+
+  I also don't have a langsmith account to maintain the
+  code. The alternative is the `LLM::Tracer::Telemetry` class
+  that was originally written by me, and serves as a
+  general-purpose OTP tracer.
+
 ### Add
 
 * **xAI: add `LLM::XAI::Images#edit`** <br>
