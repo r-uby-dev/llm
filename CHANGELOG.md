@@ -1,8 +1,24 @@
-# Changelog
+<p align="center">
+  <a href="https://r.uby.dev">
+    <img
+      src="https://github.com/r-uby-dev/llm.rb/raw/main/rubydev.svg"
+      width="400"
+      height="200"
+      border="0"
+      alt="a r.uby.dev project"
+     >
+  </a>
+</p>
 
-## Unreleased
+> Changelog <br>
+> a [r.uby.dev](https://r.uby.dev) project
 
-Changes since `v11.3.1`
+## What's next
+
+These changes have not yet been released. <br>
+They cover changes made since the last public
+release `v11.3.1` and will be part of the next
+major release: `v12.0.0`.
 
 ### Breaking
 
