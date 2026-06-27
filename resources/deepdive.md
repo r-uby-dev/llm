@@ -42,6 +42,9 @@ didn't make it into the homepage documentation.
 - [Tracer](#tracer)
   - [Provider-wide tracer](#provider-wide-tracer)
   - [Agent-local tracer](#agent-local-tracer)
+- [Images](#images)
+  - [Generation](#generation)
+  - [Edits](#edits)
 
 ## MCP
 
@@ -471,6 +474,62 @@ agent = LLM::Agent.new(llm, tracer: LLM::Tracer::Logger.new(llm, io: $stdout))
 # Writes to deepseek-agent.log
 llm = LLM.deepseek(key: ENV["KEY"])
 agent = LLM::Agent.new(llm, tracer: LLM::Tracer::Logger.new(llm, path: "deepseek-agent.log"))
+```
+
+[Back to top](#table-of-contents)
+
+## Images
+
+The OpenAI, Google, and xAI providers have builtin
+image generation and editing capabilities. Google,
+though, only supports image generation and not edits.
+
+#### Generation
+
+The [`LLM::Provider#images`](https://r.uby.dev/api-docs/llm.rb/LLM/Provider.html#images-instance_method)
+method returns an Image
+object that a subset of providers implement. At the
+moment Google, xAI, and OpenAI have image generation
+capabilities.
+
+```ruby
+require "llm"
+
+##
+# Store dogrocket.png
+llm = LLM.openai(key: ENV["KEY"])
+res = llm.images.create(prompt: "a dog on a rocket to the moon")
+IO.copy_stream res.images[0], "dogrocket.png"
+```
+
+The API is the same across providers. <br>
+For example &ndash; xAI:
+
+```ruby
+require "llm"
+
+##
+# Store dogrocket.png
+# Same API as OpenAI
+llm = LLM.xai(key: ENV["KEY"])
+res = llm.images.create(prompt: "a dog on a rocket to the moon")
+IO.copy_stream res.images[0], "dogrocket.png"
+```
+
+#### Edits
+
+OpenAI and xAI have the same interface for image edits. <br>
+Google does not have edit image support. <br>
+
+```ruby
+require "llm"
+
+##
+# Edit self.jpg and add a mustache
+# Save to mustache.png
+llm = LLM.openai(key: ENV["KEY"])
+res = llm.images.edit(prompt: "add a mustache", image: "self.jpg")
+IO.copy_stream res.images[0], "mustache.png"
 ```
 
 [Back to top](#table-of-contents)
