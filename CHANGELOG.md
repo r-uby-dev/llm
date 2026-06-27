@@ -102,6 +102,12 @@ major release: `v12.0.0`.
   This change fixes that by supporting both image, document,
   and other media types that OpenAI may support.
 
+* **Add `LLM::Response#id` across all providers**
+  This method was previously implemented via `method_missing`,
+  and the field name could change depending on the provider.
+  The new method is a catch-all that provides a single method
+  that works across all providers.
+
 ### Fix
 
 * **Fix Google `temperature` parameter fall-through** <br>

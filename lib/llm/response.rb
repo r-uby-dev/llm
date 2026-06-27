@@ -57,6 +57,16 @@ module LLM
     end
 
     ##
+    # Returns the provider response id when present.
+    # @return [String, nil]
+    def id
+      return nil unless LLM::Object === body
+      body.id          ||
+      body.responseId  || body.response_id ||
+      body.requestId   || body.request_id
+    end
+
+    ##
     # Returns true if the response is from the Files API
     # @return [Boolean]
     def file?
