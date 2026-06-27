@@ -14,10 +14,14 @@
 
 ## Welcome
 
-Welcome to the llm.rb deepdive. This document is a continuation of
-the [homepage documentation](https://r.uby.dev/llm). It assumes you
-are familiar with the basics already, and focuses on features that
-didn't make it into the homepage documentation.
+Welcome to the llm.rb deepdive. You are reading this document
+in the markdown format. An optimized version exists
+at [https://r.uby.dev/llm/deepdive](https://r.uby.dev/llm/deepdive)
+and it is both easier to read and navigate.
+
+This document is a continuation of the [homepage documentation](https://r.uby.dev/llm).
+It assumes you are familiar with the basics already, and focuses on
+features that didn't make it into the homepage documentation.
 
 ## Table of contents
 
