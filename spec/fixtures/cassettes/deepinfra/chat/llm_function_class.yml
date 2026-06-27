@@ -1,0 +1,99 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.deepinfra.com/v1/openai/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
+        a bot that can run UNIX commands"}]},{"role":"user","content":[{"type":"text","text":"What
+        is the date?"}]}],"model":"zai-org/GLM-5.2","tools":[{"type":"function","name":"system","function":{"name":"system","description":"Runs
+        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}]}'
+    headers:
+      User-Agent:
+      - llm.rb v12.0.0.beta.1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sat, 27 Jun 2026 18:16:48 GMT
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '648'
+      Connection:
+      - keep-alive
+      Server:
+      - uvicorn
+      X-Robots-Tag:
+      - noindex
+      X-Request-Id:
+      - RngLtPGSsnR2MNUWiKgQAjkG
+    body:
+      encoding: UTF-8
+      string: '{"service_tier":"default","id":"chatcmpl-RngLtPGSsnR2MNUWiKgQAjkG","object":"chat.completion","created":1782584208,"model":"zai-org/GLM-5.2","choices":[{"index":0,"message":{"role":"assistant","content":"","reasoning_content":"The
+        user wants to know the current date.","name":null,"tool_calls":[{"id":"call_c229","type":"function","function":{"name":"system","arguments":"{\"command\":
+        \"date\"}"}}]},"finish_reason":"tool_calls","logprobs":null}],"usage":{"prompt_tokens":166,"total_tokens":186,"completion_tokens":20,"estimated_cost":0.000119139999488,"prompt_tokens_details":{"cached_tokens":128,"cache_write_tokens":null},"reasoning_tokens":0}}'
+  recorded_at: Sat, 27 Jun 2026 18:16:36 GMT
+- request:
+    method: post
+    uri: https://api.deepinfra.com/v1/openai/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
+        a bot that can run UNIX commands"}]},{"role":"user","content":[{"type":"text","text":"What
+        is the date?"}]},{"role":"assistant","content":null,"tool_calls":[{"id":"call_c229","type":"function","function":{"name":"system","arguments":"{\"command\":
+        \"date\"}"}}]},{"role":"tool","tool_call_id":"call_c229","content":"{\"cancelled\":true,\"reason\":\"function
+        call cancelled\"}"},{"role":"tool","tool_call_id":"call_c229","content":"{\"success\":\"2025-08-24\"}"}],"model":"zai-org/GLM-5.2","tools":[{"type":"function","name":"system","function":{"name":"system","description":"Runs
+        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}]}'
+    headers:
+      User-Agent:
+      - llm.rb v12.0.0.beta.1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sat, 27 Jun 2026 18:16:50 GMT
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '582'
+      Connection:
+      - keep-alive
+      Server:
+      - uvicorn
+      X-Robots-Tag:
+      - noindex
+      X-Request-Id:
+      - RvTuEo9sObNbdm6jvJUlh2xl
+    body:
+      encoding: UTF-8
+      string: '{"service_tier":"default","id":"chatcmpl-RvTuEo9sObNbdm6jvJUlh2xl","object":"chat.completion","created":1782584210,"model":"zai-org/GLM-5.2","choices":[{"index":0,"message":{"role":"assistant","content":"The
+        current date is **Sunday, August 24, 2025**.","reasoning_content":"The date
+        command returned the date.","name":null,"tool_calls":[]},"finish_reason":"stop","logprobs":null}],"usage":{"prompt_tokens":204,"total_tokens":229,"completion_tokens":25,"estimated_cost":0.000120959999232,"prompt_tokens_details":{"cached_tokens":192,"cache_write_tokens":null},"reasoning_tokens":0}}'
+  recorded_at: Sat, 27 Jun 2026 18:16:39 GMT
+recorded_with: VCR 6.4.0

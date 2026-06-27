@@ -1,0 +1,59 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.deepinfra.com/v1/openai/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"Keep
+        your answers short and concise, and provide three answers to the three questionsThere
+        should be one answer per lineAn answer should be a number, for example: 5Nothing
+        else"}]},{"role":"user","content":[{"type":"text","text":"What is 3+2 ?"}]},{"role":"user","content":[{"type":"text","text":"What
+        is 5+5 ?"}]},{"role":"user","content":[{"type":"text","text":"What is 5+7
+        ?"}]}],"model":"zai-org/GLM-5.2"}'
+    headers:
+      User-Agent:
+      - llm.rb v12.0.0.beta.1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sat, 27 Jun 2026 18:14:29 GMT
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '1212'
+      Connection:
+      - keep-alive
+      Server:
+      - uvicorn
+      X-Robots-Tag:
+      - noindex
+      X-Request-Id:
+      - RbEcw07IXmAFWd3kBK7uCbKv
+    body:
+      encoding: UTF-8
+      string: '{"service_tier":"default","id":"chatcmpl-RbEcw07IXmAFWd3kBK7uCbKv","object":"chat.completion","created":1782584069,"model":"zai-org/GLM-5.2","choices":[{"index":0,"message":{"role":"assistant","content":"5\n10\n12","reasoning_content":"1.  **Analyze
+        the Request:**\n    *   Constraint 1: Keep answers short and concise.\n    *   Constraint
+        2: Provide exactly three answers to the three questions.\n    *   Constraint
+        3: One answer per line.\n    *   Constraint 4: An answer should be a number
+        (e.g., 5).\n    *   Constraint 5: Nothing else (no extra text, no explanations).\n    *   Question
+        1: What is 3+2 ?\n    *   Question 2: What is 5+5 ?\n    *   Question 3: What
+        is 5+7 ?\n\n2.  **Calculate the Answers:**\n    *   3 + 2 = 5\n    *   5 +
+        5 = 10\n    *   5 + 7 = 12\n\n3.  **Format the Output:**\n    *   Line 1:
+        5\n    *   Line 2: 10\n    *   Line 3: 12\n    *   *Check constraints:* Numbers
+        only, one per line, nothing else.\n\n4.  **Final Output Generation:**\n5\n10\n12","name":null,"tool_calls":[]},"finish_reason":"stop","logprobs":null}],"usage":{"prompt_tokens":70,"total_tokens":322,"completion_tokens":252,"estimated_cost":0.0008224999999999999,"prompt_tokens_details":null,"reasoning_tokens":0}}'
+  recorded_at: Sat, 27 Jun 2026 18:14:18 GMT
+recorded_with: VCR 6.4.0

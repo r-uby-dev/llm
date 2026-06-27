@@ -1,0 +1,181 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.deepinfra.com/v1/openai/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
+        a bot that can run UNIX system commands"}]},{"role":"user","content":[{"type":"text","text":"Hey,
+        run the ''date'' command"}]}],"model":"zai-org/GLM-5.2","tools":[{"type":"function","name":"system","function":{"name":"system","description":"Runs
+        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}],"stream":true,"stream_options":{"include_usage":true}}'
+    headers:
+      User-Agent:
+      - llm.rb v12.0.0.beta.1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sat, 27 Jun 2026 18:16:41 GMT
+      Content-Type:
+      - text/event-stream; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      Server:
+      - uvicorn
+      Cache-Control:
+      - no-store
+      X-Robots-Tag:
+      - noindex
+      X-Request-Id:
+      - Rsrq5jsoIVf2DhOL9o9D9imj
+    body:
+      encoding: UTF-8
+      string: |+
+        data: {"service_tier": null, "id": "chatcmpl-Rsrq5jsoIVf2DhOL9o9D9imj", "object": "chat.completion.chunk", "created": 1782584201, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-Rsrq5jsoIVf2DhOL9o9D9imj", "object": "chat.completion.chunk", "created": 1782584201, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": "The", "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-Rsrq5jsoIVf2DhOL9o9D9imj", "object": "chat.completion.chunk", "created": 1782584201, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": " user wants", "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-Rsrq5jsoIVf2DhOL9o9D9imj", "object": "chat.completion.chunk", "created": 1782584201, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": " me to run the", "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-Rsrq5jsoIVf2DhOL9o9D9imj", "object": "chat.completion.chunk", "created": 1782584201, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": " 'date' command", "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-Rsrq5jsoIVf2DhOL9o9D9imj", "object": "chat.completion.chunk", "created": 1782584201, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": ".", "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-Rsrq5jsoIVf2DhOL9o9D9imj", "object": "chat.completion.chunk", "created": 1782584201, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": null, "tool_calls": [{"index": 0, "id": "call_d14d", "function": {"arguments": "{\"command\": \"date\"}", "name": "system"}, "type": "function"}]}, "logprobs": null, "finish_reason": null}], "usage": {"prompt_tokens": 170, "total_tokens": 193, "completion_tokens": 23, "estimated_cost": null, "prompt_tokens_details": null, "reasoning_tokens": 0}}
+
+        data: {"service_tier": null, "id": "chatcmpl-Rsrq5jsoIVf2DhOL9o9D9imj", "object": "chat.completion.chunk", "created": 1782584201, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": "tool_calls"}], "usage": {"prompt_tokens": 170, "total_tokens": 193, "completion_tokens": 23, "estimated_cost": null, "prompt_tokens_details": null, "reasoning_tokens": 0}}
+
+        data: {"service_tier": "default", "id": "chatcmpl-Rsrq5jsoIVf2DhOL9o9D9imj", "object": "chat.completion.chunk", "created": 1782584201, "model": "zai-org/GLM-5.2", "choices": [], "usage": {"prompt_tokens": 170, "total_tokens": 193, "completion_tokens": 23, "estimated_cost": 0.000131939999488, "prompt_tokens_details": {"cached_tokens": 128, "cache_write_tokens": null}, "reasoning_tokens": 0}}
+
+        data: [DONE]
+
+  recorded_at: Sat, 27 Jun 2026 18:16:31 GMT
+- request:
+    method: post
+    uri: https://api.deepinfra.com/v1/openai/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
+        a bot that can run UNIX system commands"}]},{"role":"user","content":[{"type":"text","text":"Hey,
+        run the ''date'' command"}]},{"role":"assistant","content":null,"tool_calls":[{"index":0,"id":"call_d14d","function":{"arguments":"{\"command\":
+        \"date\"}","name":"system"},"type":"function"}]},{"role":"tool","tool_call_id":"call_d14d","content":"{\"success\":true}"}],"model":"zai-org/GLM-5.2","tools":[{"type":"function","name":"system","function":{"name":"system","description":"Runs
+        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}],"stream":true,"stream_options":{"include_usage":true}}'
+    headers:
+      User-Agent:
+      - llm.rb v12.0.0.beta.1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sat, 27 Jun 2026 18:16:43 GMT
+      Content-Type:
+      - text/event-stream; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      Server:
+      - uvicorn
+      Cache-Control:
+      - no-store
+      X-Robots-Tag:
+      - noindex
+      X-Request-Id:
+      - RvrWj1ogpdVG0lFSL0LfHCTK
+    body:
+      encoding: UTF-8
+      string: |+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": "The", "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": " command ran", "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": " successfully but", "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": " no", "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": " output was captured", "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": ". Let", "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": " me present", "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": " the result to", "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": "the user.", "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "The `", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "date` command ran", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": " successfully! However", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": ", it appears", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": " the output wasn", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "'t captured in the", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": " result", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": ". You", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": " can run it", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": " directly", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": " in your terminal", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": " to see the current", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": " system", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": " date and time.", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": " Let me know if", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": " you'd", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": " like to run any", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": " other commands", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
+
+        data: {"service_tier": null, "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "!", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": "stop"}], "usage": {"prompt_tokens": 190, "total_tokens": 262, "completion_tokens": 72, "estimated_cost": null, "prompt_tokens_details": null, "reasoning_tokens": 0}}
+
+        data: {"service_tier": "default", "id": "chatcmpl-RvrWj1ogpdVG0lFSL0LfHCTK", "object": "chat.completion.chunk", "created": 1782584203, "model": "zai-org/GLM-5.2", "choices": [], "usage": {"prompt_tokens": 190, "total_tokens": 262, "completion_tokens": 72, "estimated_cost": 0.000297939999488, "prompt_tokens_details": {"cached_tokens": 128, "cache_write_tokens": null}, "reasoning_tokens": 0}}
+
+        data: [DONE]
+
+  recorded_at: Sat, 27 Jun 2026 18:16:33 GMT
+recorded_with: VCR 6.4.0
+...

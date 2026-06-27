@@ -1,0 +1,106 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.deepinfra.com/v1/openai/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
+        a bot that can run UNIX commands"}]},{"role":"user","content":[{"type":"text","text":"Can
+        you run the date command ? Can you run the pwd command ? Can you run the whoami
+        command ?"}]}],"model":"zai-org/GLM-5.2","tools":[{"type":"function","name":"system","function":{"name":"system","description":"Run
+        a shell command","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}]}'
+    headers:
+      User-Agent:
+      - llm.rb v12.0.0.beta.1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sat, 27 Jun 2026 18:16:52 GMT
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '948'
+      Connection:
+      - keep-alive
+      Server:
+      - uvicorn
+      X-Robots-Tag:
+      - noindex
+      X-Request-Id:
+      - RlikTT49g0brCeGq4OI3Xjqe
+    body:
+      encoding: UTF-8
+      string: '{"service_tier":"default","id":"chatcmpl-RlikTT49g0brCeGq4OI3Xjqe","object":"chat.completion","created":1782584212,"model":"zai-org/GLM-5.2","choices":[{"index":0,"message":{"role":"assistant","content":"Sure!
+        Let me run all three commands for you at once.","reasoning_content":"The user
+        wants me to run three commands: date, pwd, and whoami. These are all independent
+        commands, so I can run them all at once.","name":null,"tool_calls":[{"id":"call_5fa7","type":"function","function":{"name":"system","arguments":"{\"command\":
+        \"date\"}"}},{"id":"call_1fe6","type":"function","function":{"name":"system","arguments":"{\"command\":
+        \"pwd\"}"}},{"id":"call_fb7d","type":"function","function":{"name":"system","arguments":"{\"command\":
+        \"whoami\"}"}}]},"finish_reason":"tool_calls","logprobs":null}],"usage":{"prompt_tokens":184,"total_tokens":259,"completion_tokens":75,"estimated_cost":0.0003998,"prompt_tokens_details":null,"reasoning_tokens":0}}'
+  recorded_at: Sat, 27 Jun 2026 18:16:40 GMT
+- request:
+    method: post
+    uri: https://api.deepinfra.com/v1/openai/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
+        a bot that can run UNIX commands"}]},{"role":"user","content":[{"type":"text","text":"Can
+        you run the date command ? Can you run the pwd command ? Can you run the whoami
+        command ?"}]},{"role":"assistant","content":null,"tool_calls":[{"id":"call_5fa7","type":"function","function":{"name":"system","arguments":"{\"command\":
+        \"date\"}"}},{"id":"call_1fe6","type":"function","function":{"name":"system","arguments":"{\"command\":
+        \"pwd\"}"}},{"id":"call_fb7d","type":"function","function":{"name":"system","arguments":"{\"command\":
+        \"whoami\"}"}}]},{"role":"tool","tool_call_id":"call_5fa7","content":"{\"stderr\":\"\",\"stdout\":\"Sat
+        Jun 27 18:16:41 UTC 2026\\n\"}"},{"role":"tool","tool_call_id":"call_1fe6","content":"{\"stderr\":\"\",\"stdout\":\"/home/robert/projects/llm.rb/\\n\"}"},{"role":"tool","tool_call_id":"call_fb7d","content":"{\"stderr\":\"\",\"stdout\":\"robert\\n\"}"}],"model":"zai-org/GLM-5.2","tools":[{"type":"function","name":"system","function":{"name":"system","description":"Run
+        a shell command","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}]}'
+    headers:
+      User-Agent:
+      - llm.rb v12.0.0.beta.1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sat, 27 Jun 2026 18:16:54 GMT
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '898'
+      Connection:
+      - keep-alive
+      Server:
+      - uvicorn
+      X-Robots-Tag:
+      - noindex
+      X-Request-Id:
+      - RgO8SBKE8LpWydFbJGDeFm62
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        eyJzZXJ2aWNlX3RpZXIiOiJkZWZhdWx0IiwiaWQiOiJjaGF0Y21wbC1SZ084U0JLRThMcFd5ZEZiSkdEZUZtNjIiLCJvYmplY3QiOiJjaGF0LmNvbXBsZXRpb24iLCJjcmVhdGVkIjoxNzgyNTg0MjE0LCJtb2RlbCI6InphaS1vcmcvR0xNLTUuMiIsImNob2ljZXMiOlt7ImluZGV4IjowLCJtZXNzYWdlIjp7InJvbGUiOiJhc3Npc3RhbnQiLCJjb250ZW50IjoiU3VyZSEgSSByYW4gYWxsIHRocmVlIGNvbW1hbmRzIHNpbXVsdGFuZW91c2x5LiBIZXJlIGFyZSB0aGUgcmVzdWx0czpcblxuMS4gKipgZGF0ZWAqKiDigJMgQ3VycmVudCBkYXRlIGFuZCB0aW1lOiBgU2F0IEp1biAyNyAxODoxNjo0MSBVVEMgMjAyNmBcbjIuICoqYHB3ZGAqKiDigJMgQ3VycmVudCB3b3JraW5nIGRpcmVjdG9yeTogYC9ob21lL3JvYmVydC9wcm9qZWN0cy9sbG0ucmIvYFxuMy4gKipgd2hvYW1pYCoqIOKAkyBDdXJyZW50IGxvZ2dlZC1pbiB1c2VyOiBgcm9iZXJ0YFxuXG5JcyB0aGVyZSBhbnl0aGluZyBlbHNlIHlvdSdkIGxpa2UgbWUgdG8gcnVuPyIsInJlYXNvbmluZ19jb250ZW50IjoiQWxsIHRocmVlIGNvbW1hbmRzIHJhbiBzdWNjZXNzZnVsbHkuIExldCBtZSBwcmVzZW50IHRoZSByZXN1bHRzIHRvIHRoZSB1c2VyLiIsIm5hbWUiOm51bGwsInRvb2xfY2FsbHMiOltdfSwiZmluaXNoX3JlYXNvbiI6InN0b3AiLCJsb2dwcm9icyI6bnVsbH1dLCJ1c2FnZSI6eyJwcm9tcHRfdG9rZW5zIjoyNjksInRvdGFsX3Rva2VucyI6MzgyLCJjb21wbGV0aW9uX3Rva2VucyI6MTEzLCJlc3RpbWF0ZWRfY29zdCI6MC4wMDA0OTU5ODk5OTk0ODgsInByb21wdF90b2tlbnNfZGV0YWlscyI6eyJjYWNoZWRfdG9rZW5zIjoxMjgsImNhY2hlX3dyaXRlX3Rva2VucyI6bnVsbH0sInJlYXNvbmluZ190b2tlbnMiOjB9fQ==
+  recorded_at: Sat, 27 Jun 2026 18:16:43 GMT
+recorded_with: VCR 6.4.0

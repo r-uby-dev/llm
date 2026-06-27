@@ -1,0 +1,50 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.deepinfra.com/v1/openai/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"Return
+        probability 1 for true and 0 for false. Does the earth orbit the sun?"}]}],"model":"zai-org/GLM-5.2","response_format":{"type":"json_schema","json_schema":{"name":"JSONSchema","schema":{"type":"object","properties":{"probability":{"description":"The
+        answer''s probability","type":"integer"}},"required":["probability"]}}}}'
+    headers:
+      User-Agent:
+      - llm.rb v12.0.0.beta.1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sat, 27 Jun 2026 18:16:57 GMT
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '646'
+      Connection:
+      - keep-alive
+      Server:
+      - uvicorn
+      X-Robots-Tag:
+      - noindex
+      X-Request-Id:
+      - Riqp0QI9s0PM7AMKKcJKplmD
+    body:
+      encoding: UTF-8
+      string: '{"service_tier":"default","id":"chatcmpl-Riqp0QI9s0PM7AMKKcJKplmD","object":"chat.completion","created":1782584217,"model":"zai-org/GLM-5.2","choices":[{"index":0,"message":{"role":"assistant","content":"{
+        \"probability\": 1 }","reasoning_content":"This is a factual question asking
+        for a probability of 1 (true) or 0 (false).\nQuestion: Does the earth orbit
+        the sun?\nFact: The Earth orbits the Sun.\nResponse: 1.","name":null,"tool_calls":[]},"finish_reason":"stop","logprobs":null}],"usage":{"prompt_tokens":31,"total_tokens":83,"completion_tokens":52,"estimated_cost":0.00018544999999999998,"prompt_tokens_details":null,"reasoning_tokens":0}}'
+  recorded_at: Sat, 27 Jun 2026 18:16:45 GMT
+recorded_with: VCR 6.4.0

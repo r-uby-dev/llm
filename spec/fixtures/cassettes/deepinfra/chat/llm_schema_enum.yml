@@ -1,0 +1,56 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.deepinfra.com/v1/openai/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"Your
+        favorite fruit is pineapple"}]},{"role":"user","content":[{"type":"text","text":"What
+        fruit is your favorite?"}]}],"model":"zai-org/GLM-5.2","response_format":{"type":"json_schema","json_schema":{"name":"JSONSchema","schema":{"type":"object","properties":{"fruit":{"description":"The
+        favorite fruit","enum":["apple","pineapple","orange"],"type":"string"}},"required":["fruit"]}}}}'
+    headers:
+      User-Agent:
+      - llm.rb v12.0.0.beta.1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sat, 27 Jun 2026 18:16:59 GMT
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '1071'
+      Connection:
+      - keep-alive
+      Server:
+      - uvicorn
+      X-Robots-Tag:
+      - noindex
+      X-Request-Id:
+      - RtR3vlq4B0YjPKQdmKT63STc
+    body:
+      encoding: UTF-8
+      string: '{"service_tier":"default","id":"chatcmpl-RtR3vlq4B0YjPKQdmKT63STc","object":"chat.completion","created":1782584219,"model":"zai-org/GLM-5.2","choices":[{"index":0,"message":{"role":"assistant","content":"{  \n  \"fruit\":
+        \"pineapple\"  \n}","reasoning_content":"1.  **Analyze the Input:**\n    *   Premise
+        given: \"Your favorite fruit is pineapple\" (System/User constraint).\n    *   Question
+        asked: \"What fruit is your favorite?\"\n\n2.  **Determine the appropriate
+        response:**\n    *   The user explicitly states my favorite fruit is pineapple.\n    *   I
+        must answer the question based on this provided premise.\n    *   Response
+        should clearly state that pineapple is my favorite fruit.\n\n3.  **Draft the
+        response:**\n    *   \"My favorite fruit is pineapple.\"\n    *   Keep it
+        simple, direct, and compliant with the constraint.","name":null,"tool_calls":[]},"finish_reason":"stop","logprobs":null}],"usage":{"prompt_tokens":24,"total_tokens":166,"completion_tokens":142,"estimated_cost":0.00044879999999999996,"prompt_tokens_details":null,"reasoning_tokens":0}}'
+  recorded_at: Sat, 27 Jun 2026 18:16:48 GMT
+recorded_with: VCR 6.4.0

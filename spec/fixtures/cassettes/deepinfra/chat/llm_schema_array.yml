@@ -1,0 +1,54 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.deepinfra.com/v1/openai/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"Return
+        the numbers 10 and 12"}]},{"role":"user","content":[{"type":"text","text":"Keep
+        them in the same order"}]}],"model":"zai-org/GLM-5.2","response_format":{"type":"json_schema","json_schema":{"name":"JSONSchema","schema":{"type":"object","properties":{"answers":{"description":"The
+        answer to two questions","type":"array","items":{"type":"integer"}}},"required":["answers"]}}}}'
+    headers:
+      User-Agent:
+      - llm.rb v12.0.0.beta.1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sat, 27 Jun 2026 18:17:06 GMT
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '877'
+      Connection:
+      - keep-alive
+      Server:
+      - uvicorn
+      X-Robots-Tag:
+      - noindex
+      X-Request-Id:
+      - R0UQBYvsqh30GhuQKRmjkS8B
+    body:
+      encoding: UTF-8
+      string: '{"service_tier":"default","id":"chatcmpl-R0UQBYvsqh30GhuQKRmjkS8B","object":"chat.completion","created":1782584226,"model":"zai-org/GLM-5.2","choices":[{"index":0,"message":{"role":"assistant","content":"{
+        \"answers\": [10, 12] }","reasoning_content":"1.  **Analyze the Request:**
+        The user wants the numbers 10 and 12 returned in the same order.\n2.  **Identify
+        the Numbers:** 10, 12.\n3.  **Identify the Order:** 10 first, then 12.\n4.  **Format
+        the Output:** The output should simply be the numbers in that order. \"10,
+        12\" or \"10 and 12\" or just \"10 12\". The prompt says \"Return the numbers
+        10 and 12\".\n5.  **Draft Response:** 10, 12","name":null,"tool_calls":[]},"finish_reason":"stop","logprobs":null}],"usage":{"prompt_tokens":27,"total_tokens":162,"completion_tokens":135,"estimated_cost":0.0004306499999999999,"prompt_tokens_details":null,"reasoning_tokens":0}}'
+  recorded_at: Sat, 27 Jun 2026 18:16:54 GMT
+recorded_with: VCR 6.4.0
