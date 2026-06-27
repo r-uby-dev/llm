@@ -89,6 +89,11 @@ major release: `v12.0.0`.
   in the sense that it is called after the properties of
   a schema have been defined.
 
+* **OpenAI: add local file support to the Responses API** <br>
+  Our responses API implementation lacked local file support. <br>
+  This change fixes that by supporting both image, document,
+  and other media types that OpenAI may support.
+
 ### Fix
 
 * **Fix Google `temperature` parameter fall-through** <br>
