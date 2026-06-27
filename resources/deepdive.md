@@ -404,7 +404,9 @@ require "pp"
 class Estimation < LLM::Schema
   property :age, Integer, "The estimated age of the person"
   property :confidence, Number, "Your confidence in the estimate"
-  property :comments, String, "Any additional comments or context"
+  property :applicable, Boolean, "True when the photo contains a person"
+  property :comments, String, "Any additional comments or input"
+  required %i[age confidence applicable comments]
 end
 
 llm = LLM.openai(key: ENV["KEY"])
@@ -414,7 +416,17 @@ res = agent.ask "Given this photo, provide an age estimate", with: "photo.jpg"
 ##
 # Coerces the model's response from a JSON string
 # to an instance of LLM::Object.
-pp res.content!
+estimate = res.content!
+
+##
+# Let's print the estimate
+if estimate.applicable
+  print "The person is approx ", estimage.age, " years old", "\n"
+  print "I have a confidence rating of ", estimate.confidence.to_s, "\n"
+else
+  print "This photo is not applicable:", "\n"
+  print estimate.comments
+end
 ```
 
 [Back to top](#table-of-contents)
