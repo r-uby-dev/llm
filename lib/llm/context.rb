@@ -202,7 +202,7 @@ module LLM
       role = params[:role] || @llm.user_role
       role = @llm.tool_role if params[:role].nil? && [*prompt].grep(LLM::Function::Return).any?
       @messages.concat LLM::Prompt === prompt ? prompt.to_a : [LLM::Message.new(role, prompt)]
-      @messages.concat [res.choices[-1]]
+      @messages.concat [res.choices[-1]].compact
       res
     end
 

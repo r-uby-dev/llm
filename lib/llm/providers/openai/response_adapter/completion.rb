@@ -5,7 +5,7 @@ module LLM::OpenAI::ResponseAdapter
     ##
     # (see LLM::Contract::Completion#messages)
     def messages
-      body.choices.map.with_index do |choice, index|
+      [*body.choices].map.with_index do |choice, index|
         message = choice.message
         extra = {
           index:, response: self,
