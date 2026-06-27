@@ -25,6 +25,15 @@ RSpec.describe "LLM::OpenAI::ResponseAdapter::Completion" do
     end
   end
 
+  context "when choices are missing" do
+    let(:usage) { nil }
+    let(:body) { LLM::Object.from(usage:, model: "test-model") }
+
+    it "returns no messages" do
+      expect(completion.messages).to eq([])
+    end
+  end
+
   context "when usage is provided" do
     let(:usage) do
       LLM::Object.from(
