@@ -81,3 +81,5 @@ Style/RescueModifier:
   Enabled: false
 Style/TrailingCommaInHashLiteral:
   Enabled: false
+Layout/MultilineOperationIndentation:
+  Enabled: false
