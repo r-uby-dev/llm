@@ -66,26 +66,25 @@ class LLM::OpenAI
     end
 
     def merge_delta!(target_message, delta)
-      if delta.length == 1
-        merge_single_delta!(target_message, delta)
-      elsif content = delta["content"]
+      if delta.key?("content") and (content = delta["content"])
         if target_content = target_message["content"]
           target_content << content
         else
           target_message["content"] = content
         end
         emit_content(content)
-      elsif reasoning = delta["reasoning_content"]
+      end
+      if delta.key?("reasoning_content") and (reasoning = delta["reasoning_content"])
         if target_reasoning = target_message["reasoning_content"]
           target_reasoning << reasoning
         else
           target_message["reasoning_content"] = reasoning
         end
         emit_reasoning_content(reasoning)
-      elsif tool_calls = delta["tool_calls"]
+      end
+      if delta.key?("tool_calls") and (tool_calls = delta["tool_calls"])
         merge_tools!(target_message, tool_calls)
       end
-      return if delta.length <= 1
       delta.each do |key, value|
         next if value.nil? || key == "content" || key == "reasoning_content" || key == "tool_calls"
         target_message[key] = value

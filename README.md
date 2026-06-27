@@ -23,7 +23,7 @@ that are opt-in.
 ## Features
 
 The runtime supports OpenAI, OpenAI-compatible endpoints, Anthropic, Google
-Gemini, DeepSeek, xAI, Z.ai, AWS Bedrock, Ollama, and llama.cpp.
+Gemini, DeepSeek, DeepInfra, xAI, Z.ai, AWS Bedrock, Ollama, and llama.cpp.
 It has first-class support for streaming, tool calls,  MCP
 and A2A, embeddings, vector stores and the RAG pattern.
 

@@ -2700,10 +2700,10 @@
         "output": 64000
       },
       "cost": {
-        "input": 1,
-        "output": 5,
-        "cache_read": 0.1,
-        "cache_write": 1.25
+        "input": 1.1,
+        "output": 5.5,
+        "cache_read": 0.11,
+        "cache_write": 1.375
       }
     },
     "openai.gpt-oss-20b-1:0": {
@@ -3406,10 +3406,10 @@
         "output": 64000
       },
       "cost": {
-        "input": 5,
-        "output": 25,
-        "cache_read": 0.5,
-        "cache_write": 6.25
+        "input": 5.5,
+        "output": 27.5,
+        "cache_read": 0.55,
+        "cache_write": 6.875
       }
     },
     "global.anthropic.claude-opus-4-6-v1": {

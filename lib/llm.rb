@@ -155,6 +155,14 @@ module LLM
   end
 
   ##
+  # @param key (see LLM::Provider#initialize)
+  # @return (see LLM::DeepInfra#initialize)
+  def deepinfra(**)
+    lock(:require) { require_relative "llm/providers/deepinfra" unless defined?(LLM::DeepInfra) }
+    LLM::DeepInfra.new(**)
+  end
+
+  ##
   # @param (see LLM::Bedrock#initialize)
   # @return (see LLM::Bedrock#initialize)
   def bedrock(**)

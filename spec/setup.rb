@@ -29,6 +29,7 @@ VCR.configure do |config|
   config.filter_sensitive_data("TOKEN") { ENV["GOOGLE_SECRET"] }
   config.filter_sensitive_data("TOKEN") { ENV["OPENAI_SECRET"] }
   config.filter_sensitive_data("TOKEN") { ENV["DEEPSEEK_SECRET"] }
+  config.filter_sensitive_data("TOKEN") { ENV["DEEPINFRA_SECRET"] }
   config.filter_sensitive_data("TOKEN") { ENV["XAI_SECRET"] }
   config.filter_sensitive_data("TOKEN") { ENV["ZAI_SECRET"] }
   config.filter_sensitive_data("TOKEN") { ENV["AWS_ACCESS_KEY_ID"] }

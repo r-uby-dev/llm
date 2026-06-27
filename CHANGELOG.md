@@ -77,6 +77,14 @@ major release: `v12.0.0`.
 
 ### Add
 
+* **Add a new provider: LLM::DeepInfra** <br>
+  [DeepInfra](https://deepinfra.com) provide OpenAI-compatible
+  endpoints for a large catalog of hosted open-source and
+  open-weight models.
+
+  Capabilities like tool calling, structured outputs, and
+  reasoning can depend on the model.
+
 * **xAI: add `LLM::XAI::Images#edit`** <br>
   With this change it is possible to both generate images
   from a prompt, and edit an existing image with a prompt.
