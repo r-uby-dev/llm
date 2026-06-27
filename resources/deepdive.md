@@ -23,6 +23,7 @@ didn't make it into the homepage documentation.
 
 - [Agents](#agents)
   - [As a subclass](#as-a-subclass)
+  - [As an object](#as-an-object)
 - [MCP](#mcp)
   - [stdio](#stdio)
   - [http](#http)
@@ -106,6 +107,24 @@ end
 llm   = LLM.deepseek(key: ENV["KEY"])
 agent = Agent.new(llm).tap(&:research!)
 agent.talk "How did the research go?"
+```
+
+#### As an object
+
+The more direct, and sometimes more convienent approach, is to
+create an instance of
+[`LLM::Agent`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html)
+directly. The same attributes can be provided as the
+second argument given to
+[`LLM::Agent.new`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html),
+and the same lazy evaluation rules apply. This approach can be
+great for prototyping quickly, and you can always turn to a
+subclass later if that makes more sense.
+
+```ruby
+llm = LLM.deepseek(key: ENV["KEY"])
+agent = LLM::Agent.new(llm, stream: $stdout)
+agent.talk "Hello, fellow agent"
 ```
 
 [Back to top](#table-of-contents)
