@@ -1,6 +1,18 @@
 # frozen_string_literal: true
 
 class LLM::DeepInfra
+  ##
+  # The {LLM::DeepInfra::Images LLM::DeepInfra::Images} class provides an
+  # interface for [DeepInfra's images API](https://docs.deepinfra.com/apis/image-generation).
+  # DeepInfra returns base64-encoded image data.
+  #
+  # @example
+  #   #!/usr/bin/env ruby
+  #   require "llm"
+  #
+  #   llm = LLM.deepinfra(key: ENV["KEY"])
+  #   res = llm.images.create prompt: "A dog on a rocket to the moon"
+  #   IO.copy_stream res.images[0], "rocket.png"
   class Images
     ##
     # @param [LLM::Provider] provider
