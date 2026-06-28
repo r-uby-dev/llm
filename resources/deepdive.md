@@ -653,6 +653,52 @@ end
 
 [Back to top](#table-of-contents)
 
+## Cancellation
+
+#### Cancel a request
+
+A common scenario when communicating with a model is to
+want to cancel the request mid-stream. This could be done
+for a number of different reasons, most often because the
+user made a mistake, or the model is making a mistake and
+the user wants to cancel the action.
+
+The runtime has built-in support for cancellation. So for
+example it is possible to cancel a request on the main
+thread from a secondary thread. A number of things happen
+when a request is cancelled. First the request is cancelled
+at the transport level, and each transport handles it a little
+differently. The net effect in every case is that the connection
+is closed.
+
+The runtime then notifies the rest of the system. so for example,
+if a tool was running, it will receive the `on_interrupt` / `on_cancel`
+callback that lets the tool do any necessary cleanup, or execute its own
+cancellation plan. Tools that were pending (not yet run but requetsed to
+run) are cancelled through
+[`LLM::Function#cancel`](https://r.uby.dev/api-docs/llm.rb/LLM/Function.html#cancel-instance_method).
+
+```ruby
+require "llm"
+
+llm = LLM.deepseek(key: ENV["DEEPSEEK_SECRET"])
+agent = LLM::Agent.new(llm)
+queue = Queue.new
+
+Thread.new do
+  queue.push(nil)
+  sleep(2)
+  agent.cancel!
+end
+
+begin
+  queue.pop
+  agent.talk "write me a very long poem", stream: $stdout
+rescue LLM::Interrupt
+  puts "request cancelled!"
+end
+```
+
 ## Tracer
 
 The runtime can be observed by subclasses of
