@@ -49,6 +49,8 @@ features that didn't make it into the homepage documentation.
   - [Sequel](#sequel)
 - [Schema](#schema)
   - [Estimation](#estimation)
+- [Cancellation](#cancellation)
+  - [Cancel a request](#cancel-a-request)
 - [Tracer](#tracer)
   - [Provider-wide tracer](#provider-wide-tracer)
   - [Agent-local tracer](#agent-local-tracer)
@@ -698,6 +700,8 @@ rescue LLM::Interrupt
   puts "request cancelled!"
 end
 ```
+
+[Back to top](#table-of-contents)
 
 ## Tracer
 
