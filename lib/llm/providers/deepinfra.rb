@@ -19,6 +19,7 @@ module LLM
   class DeepInfra < OpenAI
     HOST = "api.deepinfra.com"
     BASE_PATH = "/v1/openai"
+    require_relative "deepinfra/images"
 
     ##
     # @param key (see LLM::Provider#initialize)
@@ -39,9 +40,9 @@ module LLM
     ##
     # Provides an interface to DeepInfra's OpenAI-compatible image API.
     # @see https://deepinfra.com/models/text-to-image DeepInfra image models
-    # @return [LLM::OpenAI::Images]
+    # @return [LLM::DeepInfra::Images]
     def images
-      super
+      LLM::DeepInfra::Images.new(self)
     end
 
     ##

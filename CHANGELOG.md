@@ -85,6 +85,12 @@ major release: `v12.0.0`.
   Capabilities like tool calling, structured outputs, and
   reasoning can depend on the model.
 
+* **Add new image provider: LLM::DeepInfra::Images** <br>
+  [DeepInfra](https://deepinfra.com) provide access to
+  diverse set of text-to-image models. Learn more about the
+  available models on their [text-to-image models](https://deepinfra.com/models/text-to-image)
+  page.
+
 * **xAI: add `LLM::XAI::Images#edit`** <br>
   With this change it is possible to both generate images
   from a prompt, and edit an existing image with a prompt.
