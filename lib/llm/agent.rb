@@ -58,6 +58,11 @@ module LLM
     private_constant :CASE_PATTERN
 
     ##
+    # @api private
+    File = ::File
+    private_constant :File
+
+    ##
     # Returns a provider
     # @return [LLM::Provider]
     attr_reader :llm
@@ -338,7 +343,7 @@ module LLM
         end
       end
       @ctx = LLM::Context.new(llm, {guard: true}.merge(params))
-      @path ? @ctx.restore(path:) : nil
+      @path and File.readable?(@path) ? @ctx.restore(path:) : nil
     end
 
     ##
