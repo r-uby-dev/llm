@@ -54,6 +54,13 @@
   `max_bytes` with a `truncated` flag. The truncation marker is kept out of
   the returned lines, so the model does not mistake it for a real file line.
 
+* **tools: write-file appends a trailing newline by default** <br>
+  `LLM::Tool::WriteFile` now ensures written content ends with a newline,
+  adding one when the content does not already end with `\n`. It previously
+  wrote the content exactly as given. A new `newline:` parameter (default
+  `true`) controls this, so `newline: false` writes the content exactly as
+  given.
+
 * **tools: fix `edit-file` treating `before` as a regex** <br>
   `LLM::Tool::EditFile` now escapes the `before` snippet with
   `Regexp.escape`, so regex metacharacters are matched literally, and
