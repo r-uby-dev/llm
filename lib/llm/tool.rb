@@ -197,9 +197,18 @@ class LLM::Tool
   # bytes a tool returns to the model. By itself it sets a maximum
   # advisory limit: it does not enforce the limit directly.
   #
-  # Tools can read this value and use it to implement truncation
-  # with {LLM::Tool::Utils#truncate} and
-  # {LLM::Tool::Utils#truncate!}.
+  # While `max_bytes` is advisory, the built-in llm.rb tools do use
+  # it, along with {LLM::Tool::Utils#truncate} and
+  # {LLM::Tool::Utils#truncate!}. It provides a framework for
+  # implementing truncation in your own tools, and can be configured
+  # via `LLM::Tool.max_bytes(X)`.
+  #
+  # How it is applied may depend on the tool. The built-in shell
+  # tools truncate both `stdout` and `stderr` at `max_bytes`, so a
+  # call can produce up to twice the `max_bytes` output. Tools that
+  # return content strings and other field values that could be
+  # large can be truncated either by `LLM::Tool.max_bytes` or on a
+  # case-by-case basis with `truncate!(var, max_bytes: X)`.
   # @param [Integer, nil] bytes
   # @return [Integer]
   def self.max_bytes(bytes = UNDEFINED)
