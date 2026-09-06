@@ -26,6 +26,13 @@ RSpec.describe LLM::Tool::WriteFile do
       end
     end
 
+    context "when newline is disabled" do
+      it "writes the content without forcing a newline" do
+        tool.call(path:, content: "no-newline", newline: false)
+        expect(File.read(path)).to eq("no-newline")
+      end
+    end
+
     context "when writing" do
       it "returns ok" do
         expect(tool.call(path:, content: "hello")).to eq(ok: true)
