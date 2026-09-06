@@ -166,6 +166,12 @@
   valid UTF-8, replacing invalid sequences with the replacement character,
   so dumping works on `json ~> 3.0`.
 
+* **fork: require xchan.rb `~> 0.23`** <br>
+  The `:fork` concurrency strategy now requires the `xchan.rb` gem at
+  `~> 0.23` instead of `~> 0.22`, following the deadlock fix, so it loads
+  against the socket-based channel that keeps the writer and reader from
+  getting stuck.
+
 ## v15.1.0
 
 Changes since `v15.0.3`.
