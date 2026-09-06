@@ -17,6 +17,7 @@ class LLM::Tool
     # @param [String] content
     # @return [Hash]
     def call(path:, content:)
+      content = content.end_with?("\n") ? content : "#{content}\n"
       File.open(path, "w") { _1.write(content) }
       {ok: true}
     end
