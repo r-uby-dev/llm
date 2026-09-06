@@ -32,6 +32,16 @@
 
 ### Console
 
+* **console: rename the repl as the console** <br>
+  The repl is renamed to
+  [`LLM::Console`](https://r.uby.dev/api-docs/llm.rb/LLM/Console.html),
+  which better reflects what it does. The old names remain as aliases for
+  backwards compatibility: `LLM::Repl`, `LLM::Agent#repl`, and the ORM
+  wrappers' `#repl`, so `agent.console` is preferred but `agent.repl`
+  continues to work. The constant and file move from `llm/repl` to
+  `llm/console`, and `LLM::Console::Command` (with its `LLM::Command`
+  shorthand) replaces `LLM::Repl::Command`.
+
 * **console: raise `LLM::Interrupt` on the agent's thread** <br>
   Pressing Esc to cancel now also raises `LLM::Interrupt` on the agent's
   thread. `LLM::Agent#cancel!` alone can be a no-op at some stages of the
@@ -102,6 +112,14 @@
   how `LLM::Agent` resolves its attributes. This lets a default track a
   value that can change between boot and runtime, such as
   `LLM::Tool.max_bytes`.
+
+* **tools: rename `LLM::Tool::Git`'s `action` parameter to `subcommand`** <br>
+  `LLM::Tool::Git` now takes `subcommand:` in its `call` method instead of
+  `action:`. The tool description, parameter schema, and comments all use
+  the `git subcommand` term, so the model receives language that matches
+  how git itself is documented. A new `LLM::Tool::Git.subcommands` class
+  method returns the list of supported subcommands (`log`, `diff`,
+  `commit`, `checkout`, `branch`, and `show`).
 
 * **tools: rename `LLM::Tool::Shell` to `LLM::Tool::Exec`** <br>
   The shell tool is renamed to

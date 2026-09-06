@@ -10,7 +10,7 @@
   </a>
 </p>
 
-> A [r.uby.dev](https://r.uby.dev/llm) project.
+> [r.uby.dev](https://r.uby.dev/llm) project.
 
 Welcome to the canonical llm.rb repository.
 
