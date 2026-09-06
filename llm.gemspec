@@ -62,7 +62,7 @@ DESCRIPTION
   spec.add_development_dependency "activerecord", "~> 8.0"
   spec.add_development_dependency "sequel", "~> 5.0"
   spec.add_development_dependency "sqlite3", "~> 2.0"
-  spec.add_development_dependency "xchan.rb", "~> 0.22"
+  spec.add_development_dependency "xchan.rb", "~> 0.23"
   spec.add_development_dependency "pg", "~> 1.5"
   spec.add_development_dependency "irb", "~> 1.18"
   spec.add_development_dependency "curb", "~> 1.3"

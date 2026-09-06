@@ -273,7 +273,7 @@ class LLM::Function
     when :fiber
       Fiber::Task.new(self, options)
     when :fork
-      LLM.require "xchan", "~> 0.22" unless defined?(::Chan::UNIXSocket)
+      LLM.require "xchan", "~> 0.23" unless defined?(::Chan::UNIXSocket)
       Fork::Task.new(self, options.merge(tracer: @tracer))
     when :ractor
       raise LLM::RactorError, "Ractor concurrency only supports class-based tools" unless Class === @runner
