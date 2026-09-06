@@ -128,7 +128,7 @@ module LLM
     # Set or get an agent's name
     # @note
     #  This method serves as a self-documenting string
-    #  and it is used by {LLM::Repl LLM::Repl}. It is
+    #  and it is used by {LLM::Console LLM::Console}. It is
     #  optional but recommended.
     # @param [String] name
     #  The agent name
@@ -661,14 +661,16 @@ module LLM
     end
 
     ##
-    # Start a minimalist repl that can interact
+    # Start an agent console that can interact
     # with the agent and its current state. This
-    # method requires the 'curses' gem to be installed
-    # and available to require.
+    # method requires the following gems to be
+    # installed and available to require:
+    # 'unicode-display_width', 'kramdown', 'curses',
+    # 'test-cmd.rb', and 'xchan.rb'.
     #
     # @note
     #  By default this method disables the tracer for
-    #  the duration of the repl session, and restores
+    #  the duration of the console session, and restores
     #  it afterwards.
     # @param [String] name
     #  The agent's name.
@@ -677,14 +679,14 @@ module LLM
     #  The path to a file where runtime state is read
     #  from, and written to
     # @param [Array<LLM::Tool>] tools
-    #  Extra tools to attach for the repl session
+    #  Extra tools to attach for the console session
     # @param [Array<String>] skills
-    #  Extra skills to attach for the repl session
+    #  Extra skills to attach for the console session
     # @param [Boolean] tracer
     #  When true, the tracer is kept alive during the
-    #  repl session. Default is false.
+    #  console session. Default is false.
     # @return [void]
-    def repl(name: self.name, path: nil, tools: [], skills: [], tracer: false, trace: nil)
+    def console(name: self.name, path: nil, tools: [], skills: [], tracer: false, trace: nil)
       if trace != nil
         warn "llm.rb: trace option is deprecated, use tracer instead"
         tracer = trace
@@ -693,13 +695,14 @@ module LLM
         previous    = self.tracer
         self.tracer = nil
       end
-      require_relative "repl" unless defined?(::LLM::Repl)
-      LLM::Repl.new(agent: self, name:, path:, tools:, skills:).start
+      require_relative "console" unless defined?(::LLM::Console)
+      LLM::Console.new(agent: self, name:, path:, tools:, skills:).start
     ensure
       if !tracer
         self.tracer = previous
       end
     end
+    alias_method :repl, :console
 
     ##
     # @see LLM::Context#params

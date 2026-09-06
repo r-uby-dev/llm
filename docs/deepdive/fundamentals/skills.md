@@ -52,13 +52,13 @@ cross-contamination.
 
 #### Notes
 
-Skills can also be attached to the REPL session without modifying
+Skills can also be attached to the console session without modifying
 the agent:
 
 ```ruby
 llm = LLM.deepseek(key: ENV["KEY"])
 agent = LLM::Agent.new(llm)
-agent.repl(skills: [__dir__])
+agent.console(skills: [__dir__])
 ```
 
 ### Frontmatter

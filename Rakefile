@@ -79,23 +79,25 @@ namespace :'models.dev' do
   end
 end
 
-desc "start a repl"
-task :repl, [:model] do |_, args|
+desc "start a console"
+task :console, [:model] do |_, args|
   require "llm"
   require "llm/tools"
   model = args[:model] || "deepseek-v4-flash"
   llm = LLM.deepseek(key: ENV["DEEPSEEK_SECRET"])
   agent = LLM::Agent.new(llm, name: "dev", path: "contexts/dev.json", concurrency: :thread, model:)
-  agent.repl(tools: LLM::Tool.subclasses)
+  agent.console(tools: LLM::Tool.subclasses)
 end
+task :repl => :console
 
 namespace :agents do
   desc "a documentation engineer"
   namespace :scribe do
-    desc "Run REPL"
-    task :repl do
-      sh "agents/scribe/agent.rb repl"
+    desc "Run console"
+    task :console do
+      sh "agents/scribe/agent.rb console"
     end
+    task :repl => :console
 
     desc "fix yardoc warnings"
     task :yardoc do
@@ -125,10 +127,11 @@ namespace :agents do
 
   desc "a release engineer"
   namespace :rel do
-    desc "Run REPL"
-    task :repl do
-      sh "agents/rel/agent.rb repl"
+    desc "Run console"
+    task :console do
+      sh "agents/rel/agent.rb console"
     end
+    task :repl => :console
 
     desc "Prepare a release"
     task :release, [:version] do |_t, args|
@@ -138,10 +141,11 @@ namespace :agents do
 
   desc "an mruby-llm backport engineer"
   namespace :mruby do
-    desc "Run REPL"
-    task :repl do
-      sh "agents/mruby/agent.rb repl"
+    desc "Run console"
+    task :console do
+      sh "agents/mruby/agent.rb console"
     end
+    task :repl => :console
 
     desc "perform backport research"
     task :research do

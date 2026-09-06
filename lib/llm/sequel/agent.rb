@@ -75,11 +75,12 @@ module LLM::Sequel
       #  This method does not persist to the database,
       #  but it can inspect and alter runtime state in
       #  a way that is temporary.
-      # @param (see LLM::Agent#repl)
-      # @return (see LLM::Agent#repl)
-      def repl(**params)
-        ctx.repl(**params)
+      # @param (see LLM::Agent#console)
+      # @return (see LLM::Agent#console)
+      def console(**params)
+        ctx.console(**params)
       end
+      alias_method :repl, :console
 
       private
 

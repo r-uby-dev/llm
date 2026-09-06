@@ -79,12 +79,12 @@ def loaderror(ex)
   warn ""
   warn_title "Missing dependency: #{gem}"
   warn ""
-  warn "     The repl needs this gem, but it's not installed."
+  warn "     The console needs this gem, but it's not installed."
   warn ""
   wrapped "Fix:  gem install #{gem}", "     "
   wrapped "Or:   bundle add #{gem}", "     "
   warn ""
-  warn "     Tip:  If you don't need the repl, you can use the"
+  warn "     Tip:  If you don't need the console, you can use the"
   wrapped "library directly with:  require \"llm\"", "           "
   warn ""
   warn "  ───────────────────────────────────────────────────────"
@@ -125,7 +125,7 @@ def main(argv)
   # Make sure the dependencies are satisified first
   begin
     require "llm/tools"
-    require "llm/repl"
+    require "llm/console"
   rescue LLM::LoadError => ex
     loaderror(ex)
     exit 1
@@ -257,7 +257,7 @@ def main(argv)
     concurrency ||= :sequential
     path  = temp ? nil : data[Dir.getwd]
     agent = LLM::Agent.new(llm, model:, path:, concurrency:, tools: LLM::Tool.subclasses)
-    agent.repl
+    agent.console
   rescue Interrupt
     warn "llm.rb: Bye!"
   rescue => ex

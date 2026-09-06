@@ -97,7 +97,7 @@ Format as a markdown link with backtick code text:
 
 ```
 [`LLM::Agent`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html)
-[`LLM::Agent#repl`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#repl-instance_method)
+[`LLM::Agent#console`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#console-instance_method)
 [`LLM::Agent.name`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#name-class_method)
 [`LLM::Context`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html)
 [`LLM::Tool`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool.html)

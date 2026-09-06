@@ -52,5 +52,9 @@ RSpec.describe LLM::Tool::Git do
       tool.call(subcommand: "status", timeout: 10)
       expect(shell).to have_received(:call).with(name: "git", arguments: ["status"], timeout: 10)
     end
+
+    it "raises when subcommand is missing" do
+      expect { tool.call }.to raise_error(ArgumentError, /missing keyword/)
+    end
   end
 end

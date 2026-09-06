@@ -30,16 +30,16 @@
 * **cli: add a `-v` switch** <br>
   `bin/llm.rb` gains a `-v` switch that prints the version (`llm.rb v#{LLM::VERSION}`) and exits.
 
-### Repl
+### Console
 
-* **repl: raise `LLM::Interrupt` on the agent's thread** <br>
+* **console: raise `LLM::Interrupt` on the agent's thread** <br>
   Pressing Esc to cancel now also raises `LLM::Interrupt` on the agent's
   thread. `LLM::Agent#cancel!` alone can be a no-op at some stages of the
-  request lifecycle, so the REPL backs it up by interrupting the thread
+  request lifecycle, so the console backs it up by interrupting the thread
   that runs the agent.
 
-* **repl: alias `/compact` as `/keep`** <br>
-  The REPL now accepts `/keep` as an alias of `/compact`, so `/keep 20%`
+* **console: alias `/compact` as `/keep`** <br>
+  The console now accepts `/keep` as an alias of `/compact`, so `/keep 20%`
   keeps 20% of the context window. Closes
   [issue #161](https://github.com/r-uby-dev/llm.rb/issues/161).
 
@@ -131,7 +131,7 @@
   Requests that raise `Net::WriteTimeout` are now retried alongside the
   other timed-out and rate-limited requests, up to the `retry_budget`,
   matching how `Net::OpenTimeout` and `Net::ReadTimeout` are handled. The
-  REPL status bar also reports a write timeout as `Timed out`.
+  console status bar also reports a write timeout as `Timed out`.
 
 * **alibaba: default to a retry budget of 8** <br>
   An agent that runs on the Alibaba provider now defaults to a retry
@@ -156,7 +156,7 @@ This release adds the OpenRouter provider, splits provider timeouts
 into `connect_timeout` and `read_timeout`, retries timed-out requests,
 and renames `on_rate_limit` to `on_retry`. Skills now gain a
 frontmatter `model:` parameter and inherit the parent agent's model,
-while the CLI gains `-m` and `-x` switches, and the REPL shows retry
+while the CLI gains `-m` and `-x` switches, and the console shows retry
 progress and measures text by display width.
 
 ### Provider
@@ -265,21 +265,21 @@ progress and measures text by display width.
   up to three stack lines from the backtrace, so the failure is easier to
   locate and report than a bare diagnostic.
 
-### Repl
+### Console
 
-* **repl: show retry progress in the status bar** <br>
-  When a request is rate limited or times out, the curses-based REPL status
+* **console: show retry progress in the status bar** <br>
+  When a request is rate limited or times out, the curses-based console status
   bar shows a retry indicator with the error and the remaining attempts, for
   example `🔁 Rate limited • attempt 2 of 5`.
 
-* **repl: measure text width with `unicode-display_width`** <br>
-  The curses-based REPL now counts and slices text by display column width
+* **console: measure text width with `unicode-display_width`** <br>
+  The curses-based console now counts and slices text by display column width
   instead of character count, so wrapping, table columns, and clipping stay
   aligned for wide characters such as emoji. It requires the optional
   `unicode-display_width` gem.
 
-* **repl: treat `LLM::InsufficientQuotaError` as a rate limit in the status bar** <br>
-  The curses-based REPL status bar now shows `Rate limited` when a request
+* **console: treat `LLM::InsufficientQuotaError` as a rate limit in the status bar** <br>
+  The curses-based console status bar now shows `Rate limited` when a request
   raises
   [`LLM::InsufficientQuotaError`](https://r.uby.dev/api-docs/llm.rb/LLM/InsufficientQuotaError.html),
   matching how ordinary `LLM::RateLimitError`s are shown, instead of falling

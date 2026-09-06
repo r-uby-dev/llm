@@ -248,11 +248,11 @@ end
 <summary>Console (<code>binding.irb</code> for agents)</summary>
 <br>
 
-The [LLM::Agent#repl](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#repl-instance_method)
-method drops you into a highly capable read-eval-print loop (REPL)
+The [LLM::Agent#console](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#console-instance_method)
+method drops you into a highly capable interactive console
 that is built on top of curses. It can help you debug agents,
 test your tools, connect to MCP servers, and even A2A agents.
-The REPL stands out because it connects to the surrounding
+The console stands out because it connects to the surrounding
 runtime and it can be extended by your code. Think of it as
 `binding.irb` but for agents.
 
@@ -260,12 +260,12 @@ runtime and it can be extended by your code. Think of it as
 
 [Watch in high quality on asciinema](https://asciinema.org/a/OsS8wwaasKasoDDz)
 
-![llm.rb REPL demo](demo.gif)
+![llm.rb console demo](demo.gif)
 
 
 ##### Installation
 
-The REPL is distributed with llm.rb so you don't have to install
+The console is distributed with llm.rb so you don't have to install
 a separate gem but it requires a number of optional dependencies
 to be installed separately. The following gems provide the full
 experience:
@@ -274,8 +274,8 @@ experience:
 
 ##### Persistence
 
-The `path:` option can be set on an agent for automatic persistence
-across REPL sessions. The `tools:` option attaches extra tools
+the `path:` option can be set on an agent for automatic persistence
+across console sessions. The `tools:` option attaches extra tools
 for the duration of the session. Recall previous turns with Ctrl+P and
 Ctrl+N.
 
@@ -285,13 +285,13 @@ require "llm/tools"
 
 llm = LLM.deepseek(key: ENV["KEY"])
 agent = LLM::Agent.new(llm, name: "my-agent", path: "agent.json")
-agent.repl(tools: LLM::Tool.subclasses)
+agent.console(tools: LLM::Tool.subclasses)
 ```
 
 ##### CLI
 
 The `llm.rb` executable is available on your PATH after installation.
-It starts a REPL session from any directory.The CLI auto-detects your
+It starts a console session from any directory. The CLI auto-detects your
 provider from standard environment variables (`DEEPSEEK_API_KEY`,
 `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, etc.). Persistent sessions are
 stored under `~/.llm.rb/` and restored automatically on your next visit.
@@ -421,8 +421,8 @@ agent = Raven.find(agent.id).tap(&:research_codebase)
 ##
 # Start an agent console.
 # Query agent's state, debug, etc.
-# The REPL does not persist back to the database.
-agent.repl
+# The console does not persist back to the database.
+agent.console
 ```
 </details>
 
@@ -978,7 +978,7 @@ than three years and over that time multiple other
 contributors have contributed to llm.rb as well. New
 contributors are always welcome.
 
-I use the repl that is distributed with llm.rb to build
+I use the console that is distributed with llm.rb to build
 llm.rb itself so there is a healthy feedback loop and
 llm.rb has also been battle tested in production
 environments.

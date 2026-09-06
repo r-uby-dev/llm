@@ -52,13 +52,13 @@ end
 def main(argv)
   llm   = LLM.alibaba
   agent = Agent.new(llm)
-  if argv[0] == "repl"
-    agent.repl
+  if argv[0] == "console"
+    agent.console
   elsif agent.respond_to?(argv[0])
     agent.method(argv[0]).call(*argv[1..])
-    agent.repl
+    agent.console
   else
-    warn "agent: expected audit, improvements, review, or repl but got #{argv[0]}"
+    warn "agent: expected audit, improvements, review, or console but got #{argv[0]}"
     exit 1
   end
 end

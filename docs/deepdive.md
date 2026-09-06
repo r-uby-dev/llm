@@ -69,7 +69,7 @@ is the best place to start if you are new to llm.rb.
 - [Concurrency](deepdive/features/concurrency.md)
 - [Embeddings](deepdive/features/embeddings.md)
 - [Database](deepdive/features/database.md)
-- [REPL](deepdive/features/repl.md)
+- [Console](deepdive/features/repl.md)
 
 ## Advanced
 

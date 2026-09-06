@@ -113,11 +113,11 @@ Each skill writes to `research/scribe/`. The regressions skill writes to
 ### Persistence pattern
 
 - Promote `LLM::Agent.new(llm, path: "session.json")` over
-  `agent.repl(path: "session.json")`. Setting `path:` on the
-  agent carries over to all calls (including REPL sessions),
-  so conversations started before the REPL begins are also
+  `agent.console(path: "session.json")`. Setting `path:` on the
+  agent carries over to all calls (including console sessions),
+  so conversations started before the console begins are also
   persisted. The agent auto-saves after every `talk` or `ask`
-  turn, making the REPL's own `path:` parameter redundant.
+  turn, making the console's own `path:` parameter redundant.
 
 ### Notes sections
 

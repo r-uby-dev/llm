@@ -28,13 +28,13 @@ def main(argv)
   llm   = LLM.alibaba
   agent = Agent.new(llm)
   case argv[0]
-  when "repl"
-    agent.repl
+  when "console"
+    agent.console
   when "release"
     agent.release(version: ARGV[1])
-    agent.repl
+    agent.console
   else
-    warn "agent: expected release, repl but got #{argv[0]}"
+    warn "agent: expected release, console but got #{argv[0]}"
     exit 1
   end
 end

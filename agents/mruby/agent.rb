@@ -29,11 +29,11 @@ def main(argv)
   case command
   when "research", "code"
     agent.method(command).call
-    agent.repl
-  when "repl"
-    agent.repl
+    agent.console
+  when "console"
+    agent.console
   else
-    warn "agent: expected research, code or repl but got #{argv[0]}"
+    warn "agent: expected research, code or console but got #{argv[0]}"
     exit 1
   end
 end
