@@ -193,8 +193,13 @@ class LLM::Tool
   end
 
   ##
-  # Returns (or sets) the default maximum number of
-  # bytes a tool returns to the model.
+  # Returns (or sets) an advisory default for the maximum number of
+  # bytes a tool returns to the model. By itself it sets a maximum
+  # advisory limit: it does not enforce the limit directly.
+  #
+  # Tools can read this value and use it to implement truncation
+  # with {LLM::Tool::Utils#truncate} and
+  # {LLM::Tool::Utils#truncate!}.
   # @param [Integer, nil] bytes
   # @return [Integer]
   def self.max_bytes(bytes = UNDEFINED)
