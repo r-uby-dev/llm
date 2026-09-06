@@ -15,6 +15,51 @@
 
 ## What's next
 
+### Breaking
+
+#### Migration
+
+| Old | New |
+|-----|-----|
+| `LLM::Tool::Shell`, tool name `"shell"` | `LLM::Tool::Exec`, tool name `"exec"` |
+| `require "llm/tools/shell"` | `require "llm/tools/exec"` |
+| `LLM::Repl`, `LLM::Agent#repl` | `LLM::Console`, `LLM::Agent#console` |
+| `require "llm/repl"` | `require "llm/console"` |
+| `Git#call(action: "log")` | `Git#call(subcommand: "log")` |
+| `ReadFile#call` returns `{ok:, content:}` | returns `{ok:, lines:, truncated:}` |
+
+* **tools: rename `shell` to `exec`** <br>
+  The command tool is renamed to
+  [`LLM::Tool::Exec`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Exec.html),
+  which better reflects that it spawns a command without a shell. The tool
+  name and description change from `shell` ("run a shell command") to
+  `exec` ("run a command without a shell"). The old `require
+  "llm/tools/shell"` path no longer exists; use `require
+  "llm/tools/exec"` instead.
+
+* **tools: rename `repl` as `console`** <br>
+  The interactive loop is renamed to
+  [`LLM::Console`](https://r.uby.dev/api-docs/llm.rb/LLM/Console.html),
+  which better reflects what it does. `agent.console` is the primary
+  entry point, and the require path moves from `llm/repl` to
+  `llm/console`. Backwards-compatible aliases remain: `LLM::Repl`,
+  `LLM::Agent#repl`, the ORM wrappers' `#repl`, and `LLM::Command =`
+  `LLM::Console::Command`.
+
+* **tools: rename `LLM::Tool::Git`'s `action` parameter to `subcommand`** <br>
+  `LLM::Tool::Git#call` now takes `subcommand:` instead of `action:`.
+  The tool description, parameter schema, and comments all use the
+  `git subcommand` term, matching how git itself is documented. A new
+  `LLM::Tool::Git.subcommands` class method returns the supported
+  subcommands (`log`, `diff`, `commit`, `checkout`, `branch`, `show`).
+
+* **tools: read-file returns structured lines** <br>
+  `LLM::Tool::ReadFile#call` now returns its content as structured
+  `{lineno:, content:}` lines under a `lines:` key instead of a single
+  `content:` string, and adds a `truncated:` flag. A reversed range
+  (`start: 20, stop: 2`) is swapped to read lines 2 through 20. Callers
+  that read the raw `content:` string must switch to the `lines:` array.
+
 ### Core
 
 * **message: add `LLM::Message#created_at`** <br>
@@ -32,16 +77,6 @@
 
 ### Console
 
-* **console: rename the repl as the console** <br>
-  The repl is renamed to
-  [`LLM::Console`](https://r.uby.dev/api-docs/llm.rb/LLM/Console.html),
-  which better reflects what it does. The old names remain as aliases for
-  backwards compatibility: `LLM::Repl`, `LLM::Agent#repl`, and the ORM
-  wrappers' `#repl`, so `agent.console` is preferred but `agent.repl`
-  continues to work. The constant and file move from `llm/repl` to
-  `llm/console`, and `LLM::Console::Command` (with its `LLM::Command`
-  shorthand) replaces `LLM::Repl::Command`.
-
 * **console: raise `LLM::Interrupt` on the agent's thread** <br>
   Pressing Esc to cancel now also raises `LLM::Interrupt` on the agent's
   thread. `LLM::Agent#cancel!` alone can be a no-op at some stages of the
@@ -54,15 +89,6 @@
   [issue #161](https://github.com/r-uby-dev/llm.rb/issues/161).
 
 ### Tools
-
-* **tools: read-file returns structured lines** <br>
-  `LLM::Tool::ReadFile` now returns its content as structured
-  `{lineno:, content:}` lines instead of a single string, so the model can
-  reference line numbers when requesting a narrower range. A reversed
-  range (`start: 20, stop: 2`) is swapped to read lines 2 through 20
-  instead of returning empty content, and the output is capped at
-  `max_bytes` with a `truncated` flag. The truncation marker is kept out of
-  the returned lines, so the model does not mistake it for a real file line.
 
 * **tools: write-file appends a trailing newline by default** <br>
   `LLM::Tool::WriteFile` now ensures written content ends with a newline,
@@ -112,23 +138,6 @@
   how `LLM::Agent` resolves its attributes. This lets a default track a
   value that can change between boot and runtime, such as
   `LLM::Tool.max_bytes`.
-
-* **tools: rename `LLM::Tool::Git`'s `action` parameter to `subcommand`** <br>
-  `LLM::Tool::Git` now takes `subcommand:` in its `call` method instead of
-  `action:`. The tool description, parameter schema, and comments all use
-  the `git subcommand` term, so the model receives language that matches
-  how git itself is documented. A new `LLM::Tool::Git.subcommands` class
-  method returns the list of supported subcommands (`log`, `diff`,
-  `commit`, `checkout`, `branch`, and `show`).
-
-* **tools: rename `LLM::Tool::Shell` to `LLM::Tool::Exec`** <br>
-  The shell tool is renamed to
-  [`LLM::Tool::Exec`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Exec.html),
-  which better reflects that it spawns a command without a shell. The tool
-  name and description change from `shell` ("run a shell command") to
-  `exec` ("run a command without a shell"). The old `require
-  "llm/tools/shell"` path no longer exists; use `require
-  "llm/tools/exec"` instead.
 
 * **tools: require `test-cmd.rb` `~> 2.5`** <br>
   The `Git`, `Mkdir`, `Rg`, `Ruby`, and `Exec` tools now require the
