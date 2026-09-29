@@ -35,6 +35,10 @@ module LLM::Function::Async
     # because neither is reachable from anywhere else: `#interrupt!` runs
     # on the caller's thread, and `Async::Task.current` is the task of the
     # *current* fiber.
+    #
+    # A cancel can arrive before this block has run. The tool is not
+    # started then, and the caller has already been told, so the block
+    # answers instead of running anything.
     # @return [nil]
     def spawn
       return if @guarded
@@ -43,6 +47,7 @@ module LLM::Function::Async
       @reactor.submit do
         @task = Async::Task.current
         @scheduler = Fiber.scheduler
+        raise LLM::Interrupt if @cancelled
         @queue << function.call
       rescue LLM::Interrupt => e
         @queue << e
@@ -58,22 +63,28 @@ module LLM::Function::Async
     end
 
     ##
-    # Tells the tool, and unblocks the caller.
+    # Tells the tool, and lets it answer.
     #
-    # The two are separate because they are separate things. The raise is
-    # the tool's: it handles the interrupt, or it lets it raise. The
-    # sentinel is the caller's, which must not wait for a task that may
-    # never have started.
+    # A running tool is the one the interrupt belongs to: it handles it, or
+    # it lets it raise, and either way the block above is what the caller
+    # hears from - its value, or the exception it forwards. The sentinel is
+    # only for the one case that has no tool to answer: a cancel that
+    # arrived before the task started, where there is nothing to raise on
+    # and the caller must not wait for a block that will not run.
     #
-    # `LLM::Interrupt` is a `StandardError`, so the task's own handler
-    # fails the task with it and `wait` raises it - which is the second
-    # branch of the fiber's body, not the `Exception` branch that stops
-    # the reactor as a critical failure.
+    # The fiber is checked before it is raised on because a finished task
+    # has none - `Async::Task#finish!` clears it - and the scheduler does
+    # not accept nil. A task that has already returned is a no-op, which is
+    # what `LLM::Function::Return#interrupt!` says one is.
     # @return [nil]
     def interrupt!
       @alive = false
-      @scheduler.fiber_interrupt(@task.fiber, LLM::Interrupt.new) if @task
-      @queue << LLM::Interrupt.new
+      @cancelled = true
+      if @task&.fiber&.alive?
+        @scheduler.fiber_interrupt(@task.fiber, LLM::Interrupt.new)
+      elsif @task.nil?
+        @queue << LLM::Interrupt.new
+      end
       ##
       # A reactor with nothing to do is a thread parked on an inbox for the
       # life of the process, so the cancel stops it too - which is what a
