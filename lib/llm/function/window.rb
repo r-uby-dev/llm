@@ -1,0 +1,69 @@
+# frozen_string_literal: true
+
+class LLM::Function
+  ##
+  # The stretch of a call that an interrupt belongs to.
+  #
+  # A raise cannot be aimed at a region of code, only permitted for one -
+  # it lands wherever the thread it targets happens to be. This is what
+  # permits it: an interrupt that arrives while the tool is running is
+  # raised on the tool at once, and one that arrives before the tool runs
+  # is held until it does, where the tool's own `rescue` can have it.
+  #
+  # Held rather than answered, because arriving early is not the same as
+  # being declined: the tool has not had its chance yet. And afterwards
+  # there is nothing to interrupt - a cancel that arrives once the work is
+  # finished is a no-op, which is what
+  # {LLM::Function::Return#interrupt!} already says one is.
+  class Window
+    ##
+    # @return [LLM::Function::Window]
+    def initialize
+      @mutex = Mutex.new
+      @opened = ConditionVariable.new
+      @state = :idle
+    end
+
+    ##
+    # Called from the thread that raises - the watcher - and not from the
+    # tool's.
+    #
+    # It waits while the window has not opened, and returns without
+    # raising once it has closed. In between, the raise it issues lands on
+    # the tool.
+    # @return [void]
+    def interrupt!
+      @mutex.synchronize do
+        @opened.wait(@mutex) while @state == :idle
+        return unless @state == :running
+      end
+      ::Thread.main.raise(LLM::Interrupt)
+    end
+
+    ##
+    # Called from the tool's thread, immediately before the call.
+    #
+    # It does not wait for the watcher: it broadcasts and returns, so the
+    # thread that is about to call the tool stays ahead of the thread that
+    # is about to interrupt it. By the time the watcher is scheduled, the
+    # tool is running.
+    # @return [void]
+    def running!
+      @mutex.synchronize do
+        @state = :running
+        @opened.broadcast
+      end
+    end
+
+    ##
+    # Called from the tool's thread, once it has returned. Wakes anyone
+    # holding an interrupt, who then finds there is nothing to interrupt.
+    # @return [void]
+    def finished!
+      @mutex.synchronize do
+        @state = :finished
+        @opened.broadcast
+      end
+    end
+  end
+end

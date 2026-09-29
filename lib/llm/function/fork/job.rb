@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "../window"
+
 class LLM::Function
   ##
   # The {LLM::Function::Fork::Job} class represents a single fork-backed
@@ -22,8 +24,19 @@ class LLM::Function
     # @return [void]
     def call
       runner = @function.runner
+      ##
+      # Before the watcher exists, because an interrupt can arrive first:
+      # it is a datagram and it waits in the channel until the watcher
+      # reads it.
+      @window = LLM::Function::Window.new
       controller = setup(runner)
-      @ch.result.write([:result, call!(runner)])
+      ##
+      # And everything the call needs is prepared outside the window, so
+      # the distance from `running!` to the tool's first instruction is
+      # the method dispatch and nothing else.
+      kwargs = arguments_for(@function)
+      @window.running!
+      @ch.result.write([:result, call!(runner, kwargs)])
     rescue LLM::Interrupt
       @ch.result.write([:interrupt])
     rescue => ex
@@ -35,13 +48,12 @@ class LLM::Function
 
     private
 
-    def call!(runner)
-      kwargs = if Hash === @function.arguments
-        @function.arguments.transform_keys(&:to_sym)
-      else
-        @function.arguments
-      end
+    def call!(runner, kwargs)
       {id: @function.id, name: @function.name, value: runner.call(**kwargs)}
+    end
+
+    def arguments_for(function)
+      Hash === function.arguments ? function.arguments.transform_keys(&:to_sym) : function.arguments
     end
 
     def error(ex)
@@ -58,7 +70,10 @@ class LLM::Function
         ready << true
         kind = @ch.control.recv
         next unless kind == :interrupt
-        ::Thread.main.raise(LLM::Interrupt)
+        ##
+        # The window decides whether this is the tool's to handle, or
+        # whether the tool has already been and gone.
+        @window.interrupt!
       rescue IOError, ArgumentError
       end
       ready.pop
