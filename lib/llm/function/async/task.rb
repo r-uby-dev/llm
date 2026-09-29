@@ -30,12 +30,19 @@ module LLM::Function::Async
     ##
     # Submit the function call to the reactor. The result is
     # pushed to a queue that {#wait} consumes.
+    #
+    # The task names itself and its scheduler from inside the reactor,
+    # because neither is reachable from anywhere else: `#interrupt!` runs
+    # on the caller's thread, and `Async::Task.current` is the task of the
+    # *current* fiber.
     # @return [nil]
     def spawn
       return if @guarded
       @queue = Queue.new
       @alive = true
       @reactor.submit do
+        @task = Async::Task.current
+        @scheduler = Fiber.scheduler
         @queue << function.call
       rescue LLM::Interrupt => e
         @queue << e
@@ -51,14 +58,28 @@ module LLM::Function::Async
     end
 
     ##
-    # Push an interrupt sentinel to the result queue. The reactor
-    # thread continues running but the result is discarded.
+    # Tells the tool, and unblocks the caller.
+    #
+    # The two are separate because they are separate things. The raise is
+    # the tool's: it handles the interrupt, or it lets it raise. The
+    # sentinel is the caller's, which must not wait for a task that may
+    # never have started.
+    #
+    # `LLM::Interrupt` is a `StandardError`, so the task's own handler
+    # fails the task with it and `wait` raises it - which is the second
+    # branch of the fiber's body, not the `Exception` branch that stops
+    # the reactor as a critical failure.
     # @return [nil]
     def interrupt!
-      if @queue
-        @alive = false
-        @queue << LLM::Interrupt.new
-      end
+      @alive = false
+      @scheduler.fiber_interrupt(@task.fiber, LLM::Interrupt.new) if @task
+      @queue << LLM::Interrupt.new
+      ##
+      # A reactor with nothing to do is a thread parked on an inbox for the
+      # life of the process, so the cancel stops it too - which is what a
+      # group's `wait` already does, and what a task waited on outside one
+      # otherwise never gets.
+      @reactor&.stop
       nil
     end
     alias_method :cancel!, :interrupt!

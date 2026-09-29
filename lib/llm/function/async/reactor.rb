@@ -25,8 +25,16 @@ module LLM::Function::Async
 
     ##
     # Stop the reactor and wait for the thread to finish.
+    #
+    # Called from a cancel as well as from a group's `ensure`, so it has
+    # to survive being called twice: a second `:stop` is a message the loop
+    # has already gone, and a join on a finished thread returns at once.
+    #
+    # It does not join its own thread. A tool that cancels the task it is
+    # running in would otherwise wait for itself.
     # @return [nil]
     def stop
+      return nil if @thread == ::Thread.current
       @inbox << :stop
       @thread.join(5)
       @thread.kill if @thread.alive?
