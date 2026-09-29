@@ -128,16 +128,12 @@ RSpec.describe LLM::Function::Async::Task do
   describe "a cancel that arrives before the tool starts" do
     it "is answered rather than run" do
       ##
-      # The reactor thread is stopped first, so the block cannot run before
-      # the cancel - an order rather than a hope that the caller's next few
-      # instructions win a race with the reactor thread. It is resumed
-      # after, and the block then answers without starting a tool.
-      reactor.thread.stop
+      # The cancel precedes `spawn`, so it provably precedes the block:
+      # there is no queue to push to yet, `@cancelled` is set, and the block
+      # raises before it reaches a tool when the reactor dispatches it. No
+      # thread needs stopping to make the order - it is the order.
       task = task_for(counting_tool)
-      task.spawn
-
       task.interrupt!
-      reactor.thread.run
 
       expect { within { task.wait } }.to raise_error(LLM::Interrupt)
       expect(started).to be_empty
