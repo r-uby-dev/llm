@@ -10,70 +10,91 @@ require "setup"
 # raised, before the tool runs it is held, and once the tool has returned
 # it is not raised at all.
 #
-# The raise is asynchronous and lands on `Thread.main` - which is this
-# example's own thread - so each example waits at a blocking call and
-# rescues around it. Waiting is the point: a raise arrives at a check
-# point, and a sleeping thread is at one.
+# **The window names the thread it raises on, and every example here names
+# one of its own.** A thread stands in for the tool, builds the window
+# (because the window has to name it and it does not exist until the block
+# is running), and is joined at the end for the value it returned. Nothing
+# waits on a clock, and no example arranges for a raise to land on the
+# thread RSpec is running on.
 #
-# The interrupt is delivered from a thread of its own, because a held
-# interrupt blocks the thread that delivers it. That is what holding
-# means.
+# **The held case is checked by an order rather than by a return value.**
+# `:interrupted` comes back whether the window held the interrupt until the
+# tool ran or answered it the moment it arrived - the difference is whether
+# the tool got to open the window first, and only a log says which.
+#
+# `gate` is how an example says "now": the tool blocks on it, so the window
+# is open for as long as the example wants and closes when the example says
+# so. Where an example does not push it a second time, the thread is left
+# blocked at a check point, which is where an arriving raise lands.
 RSpec.describe LLM::Function::Window do
-  subject(:window) { described_class.new }
-
-  def interrupt(window)
-    Thread.new { window.interrupt! }
-  end
-
   describe "an interrupt while the tool is running" do
-    it "raises on the thread that owns the window" do
-      window.running!
-      raised = begin
-        interrupt(window)
-        sleep 0.1
-        false
+    it "raises on the thread the tool is running on" do
+      handover, gate = Queue.new, Queue.new
+      thread = Thread.new do
+        window = described_class.new(thread: Thread.current)
+        window.running!
+        ##
+        # Handed over after `running!`, so an example that pops it knows
+        # the window is open rather than waiting to find out.
+        handover << window
+        gate.pop
+        :returned
       rescue LLM::Interrupt
-        true
+        :interrupted
       end
-      expect(raised).to be(true)
+
+      handover.pop.interrupt!
+      expect(thread.value).to eq(:interrupted)
     end
   end
 
   describe "an interrupt before the tool runs" do
-    it "is held rather than answered" do
-      thread = interrupt(window)
-      sleep 0.05
-      expect(thread).to be_alive
-    ensure
-      thread&.kill
-    end
-
-    it "is raised on the tool once it runs" do
-      raised = begin
-        interrupt(window)
-        sleep 0.05
+    it "is held until the tool opens the window" do
+      log, handover, gate = Queue.new, Queue.new, Queue.new
+      thread = Thread.new do
+        window = described_class.new(thread: Thread.current)
+        handover << window
+        gate.pop
         window.running!
-        sleep 0.1
-        false
+        log << :opened
+        gate.pop
+        :returned
       rescue LLM::Interrupt
-        true
+        log << :interrupted
+        :interrupted
       end
-      expect(raised).to be(true)
+
+      window = handover.pop
+      ##
+      # Delivered while the window is idle, so it waits rather than
+      # raising - and it cannot return before the tool opens the window,
+      # whatever order the two threads reach their next instruction in.
+      interrupter = Thread.new { window.interrupt! }
+      gate << true
+      expect(log.pop).to eq(:opened)
+      expect(log.pop).to eq(:interrupted)
+      expect(thread.value).to eq(:interrupted)
+      interrupter.join
     end
   end
 
   describe "an interrupt after the tool has returned" do
     it "is not raised" do
-      window.running!
-      window.finished!
-      raised = begin
-        interrupt(window)
-        sleep 0.1
-        false
+      handover, gate = Queue.new, Queue.new
+      thread = Thread.new do
+        window = described_class.new(thread: Thread.current)
+        window.running!
+        window.finished!
+        handover << window
+        gate.pop
+        :returned
       rescue LLM::Interrupt
-        true
+        :interrupted
       end
-      expect(raised).to be(false)
+
+      handover.pop.interrupt!
+      gate << true
+      expect(thread.value).to eq(:returned)
     end
   end
 end
