@@ -11,6 +11,10 @@ require "timeout"
 # example knows the cancel landed on a running tool rather than racing its
 # start, and says when it has finished, so an example knows the interrupt
 # ended it rather than leaving it to run on.
+#
+# Every wait has a deadline. A cancel that silently fails to deliver would
+# otherwise be a cell that hangs rather than a failure that names itself,
+# and this repository has already spent cells on hangs.
 RSpec.describe LLM::Function::Async::Task do
   let(:started) { Queue.new }
   let(:finished) { Queue.new }
@@ -37,15 +41,21 @@ RSpec.describe LLM::Function::Async::Task do
 
   ##
   # And one that handles the interrupt rather than letting it raise.
+  #
+  # It yields twice: once before the interrupt can arrive, and again after
+  # it has been told, before it returns. The second yield is the point - a
+  # tool that answers slowly is the one a teardown can take away from, and
+  # the answer has to be pushed before that can happen.
   def rescuing_tool
     started = self.started
     Class.new(LLM::Tool) do
       name "rescuing"
       define_method(:call) do
         started << :in_call
-        sleep 10
+        sleep 0.05
         {"ok" => true}
       rescue LLM::Interrupt
+        sleep 0.05
         {"ok" => true, "interrupted" => true}
       end
     end
@@ -61,6 +71,10 @@ RSpec.describe LLM::Function::Async::Task do
 
   def settle(queue, timeout = 5)
     Timeout.timeout(timeout) { queue.pop }
+  end
+
+  def within(timeout = 5, &block)
+    Timeout.timeout(timeout, &block)
   end
 
   describe "a tool that lets the interrupt raise" do
@@ -81,7 +95,7 @@ RSpec.describe LLM::Function::Async::Task do
 
       task.interrupt!
 
-      expect { task.wait }.to raise_error(LLM::Interrupt)
+      expect { within { task.wait } }.to raise_error(LLM::Interrupt)
     end
 
     it "stops the reactor it ran on" do
@@ -90,7 +104,7 @@ RSpec.describe LLM::Function::Async::Task do
       settle(started)
 
       task.interrupt!
-      expect { task.wait }.to raise_error(LLM::Interrupt)
+      expect { within { task.wait } }.to raise_error(LLM::Interrupt)
 
       expect(reactor.thread).not_to be_alive
     end
@@ -104,7 +118,24 @@ RSpec.describe LLM::Function::Async::Task do
 
       task.interrupt!
 
-      expect(task.wait.to_h[:value]).to eq("ok" => true, "interrupted" => true)
+      expect(within { task.wait }.to_h[:value]).to eq("ok" => true, "interrupted" => true)
+    end
+  end
+
+  describe "a cancel that arrives before the tool starts" do
+    it "is answered rather than run" do
+      task = task_for(counting_tool)
+      task.spawn
+
+      task.interrupt!
+
+      expect { within { task.wait } }.to raise_error(LLM::Interrupt)
+      expect(started).to be_empty
+    end
+
+    it "is a no-op for a task that never spawned" do
+      task = task_for(counting_tool)
+      expect { task.interrupt! }.not_to raise_error
     end
   end
 end
