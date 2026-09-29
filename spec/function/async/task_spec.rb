@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "setup"
+require "timeout"
 
 ##
 # What a cancel does to a running `:async` tool.
