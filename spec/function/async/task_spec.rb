@@ -6,11 +6,14 @@ require "timeout"
 ##
 # What a cancel does to a running `:async` tool.
 #
-# The task is told, and the reactor is stopped with it. Neither example
-# waits on a clock to find out: the tool says when it has started, so an
-# example knows the cancel landed on a running tool rather than racing its
-# start, and says when it has finished, so an example knows the interrupt
-# ended it rather than leaving it to run on.
+# The task is told, and the reactor is stopped by whoever waits - which is
+# the only point at which it is known to be idle, and the point a group
+# already stopped it from.
+#
+# Neither example waits on a clock to find out what happened: the tool says
+# when it has started, so an example knows the cancel landed on a running
+# tool rather than racing its start, and says when it has finished, so an
+# example knows the interrupt ended it rather than leaving it to run on.
 #
 # Every wait has a deadline. A cancel that silently fails to deliver would
 # otherwise be a cell that hangs rather than a failure that names itself,
@@ -124,10 +127,17 @@ RSpec.describe LLM::Function::Async::Task do
 
   describe "a cancel that arrives before the tool starts" do
     it "is answered rather than run" do
+      ##
+      # The reactor thread is stopped first, so the block cannot run before
+      # the cancel - an order rather than a hope that the caller's next few
+      # instructions win a race with the reactor thread. It is resumed
+      # after, and the block then answers without starting a tool.
+      reactor.thread.stop
       task = task_for(counting_tool)
       task.spawn
 
       task.interrupt!
+      reactor.thread.run
 
       expect { within { task.wait } }.to raise_error(LLM::Interrupt)
       expect(started).to be_empty

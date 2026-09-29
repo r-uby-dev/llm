@@ -109,16 +109,22 @@ module LLM::Function::Async
     # cost is paid: `interrupt!` is a message and a return like every other
     # strategy's, and a tool that will not stop meets the join and the kill
     # here rather than in the caller's cancel.
+    #
+    # The guarded path returns before any of that, so a task whose guard
+    # blocked it does not stop a reactor it never used - which matters in a
+    # group, where the reactor is not its own.
     # @return [LLM::Function::Return]
     def wait
       return @guarded if @guarded
-      spawn unless @queue
-      result = @queue.pop
-      @alive = false
-      raise result if LLM::Interrupt === result
-      result
-    ensure
-      @reactor&.stop
+      begin
+        spawn unless @queue
+        result = @queue.pop
+        @alive = false
+        raise result if LLM::Interrupt === result
+        result
+      ensure
+        @reactor&.stop
+      end
     end
     alias_method :value, :wait
 
