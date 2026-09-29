@@ -34,12 +34,22 @@ class LLM::Function
       # the method dispatch and nothing else.
       kwargs = arguments_for(@function)
       @window.running!
-      @ch.result.write([:result, call!(runner, kwargs)])
+      result = call!(runner, kwargs)
+      ##
+      # The window closes the moment the tool has returned and before the
+      # result is written, so an interrupt that arrives once the work is
+      # done is a no-op rather than a reason to throw the result away.
+      @window.finished!
+      @ch.result.write([:result, result])
     rescue LLM::Interrupt
       @ch.result.write([:interrupt])
     rescue => ex
       @ch.result.write([:result, error(ex)])
     ensure
+      ##
+      # For the paths above that did not reach the line, and nil-safe for
+      # a raise before the window existed.
+      @window&.finished!
       controller&.kill
       [@ch.control, @ch.result].each { _1.close unless _1.closed? }
     end

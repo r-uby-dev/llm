@@ -17,10 +17,16 @@ class LLM::Function
   # {LLM::Function::Return#interrupt!} already says one is.
   class Window
     ##
+    # @param [Thread] thread
+    #  The thread the interrupt is raised on, which is the one running the
+    #  tool. An argument rather than `::Thread.main` so that a strategy
+    #  whose tool runs elsewhere, and a spec, can say which thread they
+    #  mean.
     # @return [LLM::Function::Window]
-    def initialize
+    def initialize(thread: ::Thread.main)
+      @thread = thread
       @mutex = Mutex.new
-      @opened = ConditionVariable.new
+      @changed = ConditionVariable.new
       @state = :idle
     end
 
@@ -34,35 +40,37 @@ class LLM::Function
     # @return [void]
     def interrupt!
       @mutex.synchronize do
-        @opened.wait(@mutex) while @state == :idle
+        @changed.wait(@mutex) while @state == :idle
         return unless @state == :running
       end
-      ::Thread.main.raise(LLM::Interrupt)
+      @thread.raise(LLM::Interrupt)
     end
 
     ##
     # Called from the tool's thread, immediately before the call.
     #
-    # It does not wait for the watcher: it broadcasts and returns, so the
-    # thread that is about to call the tool stays ahead of the thread that
-    # is about to interrupt it. By the time the watcher is scheduled, the
-    # tool is running.
+    # It does not wait for the watcher: it changes the state and returns,
+    # so the thread that is about to call the tool stays ahead of the
+    # thread that is about to interrupt it. By the time the watcher is
+    # scheduled, the tool is running.
     # @return [void]
     def running!
       @mutex.synchronize do
         @state = :running
-        @opened.broadcast
+        @changed.broadcast
       end
     end
 
     ##
-    # Called from the tool's thread, once it has returned. Wakes anyone
-    # holding an interrupt, who then finds there is nothing to interrupt.
+    # Called from the tool's thread, once it has returned - in the happy
+    # path before the result is written, and in `ensure` for every other.
+    # Wakes anyone holding an interrupt, who then finds there is nothing
+    # to interrupt.
     # @return [void]
     def finished!
       @mutex.synchronize do
         @state = :finished
-        @opened.broadcast
+        @changed.broadcast
       end
     end
   end
