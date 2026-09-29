@@ -176,7 +176,7 @@ class LLM::Function
 
   ##
   # Set (or get) the function name
-  # @param [String] name
+  # @param [String] name The function name
   # @return [void]
   def name(name = nil)
     if name
