@@ -32,6 +32,10 @@ RSpec.describe "the tracer's interrupt hook" do
         nil
       end
 
+      def on_tool_finish(result:, span:)
+        nil
+      end
+
       def on_interrupt(scope:, span: nil, request_id: nil)
         @calls << [:interrupt, scope]
         nil
