@@ -12,9 +12,9 @@ require "setup"
 #
 # Both paths are here because they are two different exceptions. A
 # Net::HTTP request fails when its socket is closed from another thread,
-# so it is the transport's own error that arrives. Curb raises
-# `LLM::Interrupt` from the chunk it is reading, and never reaches that
-# rescue at all.
+# so the transport's own error is what arrives and the flag is what says
+# why. Curb raises `LLM::Interrupt` from the chunk it is reading, and
+# never reaches that rescue at all.
 RSpec.describe "an interrupted request" do
   let(:provider) { LLM.openai(key: "test") }
   let(:tracer) { recorder.new(provider) }
@@ -44,11 +44,14 @@ RSpec.describe "an interrupted request" do
     end
   end
 
+  let(:interrupted) { true }
+  let(:interrupt_errors) { [] }
+  let(:failure) { LLM::Interrupt.new("request interrupted") }
   let(:transport) do
     double("transport",
       request_owner: :owner,
       interrupt_errors: interrupt_errors,
-      interrupted?: true)
+      interrupted?: interrupted)
   end
 
   let(:start_id) { tracer.calls.find { _1.first == :start }&.at(1) }
@@ -75,12 +78,22 @@ RSpec.describe "an interrupted request" do
       nil
     end
 
+    it "raises an interrupt to the caller" do
+      expect { request }.to raise_error(LLM::Interrupt)
+    end
+
     it "reports the interrupt to the tracer" do
       expect(errors.size).to eq(1)
     end
 
-    it "hands the tracer the interrupt the caller is given" do
-      expect(reported).to be_a(LLM::Interrupt)
+    it "reports the exception the caller is given" do
+      raised = nil
+      begin
+        request
+      rescue LLM::Interrupt => ex
+        raised = ex
+      end
+      expect(reported).to be(raised)
     end
 
     it "names the request that ended" do
@@ -93,9 +106,6 @@ RSpec.describe "an interrupted request" do
   end
 
   describe "when the transport raises the interrupt itself" do
-    let(:interrupt_errors) { [] }
-    let(:failure) { LLM::Interrupt.new("request interrupted") }
-
     before do
       request
     rescue LLM::Interrupt
@@ -109,14 +119,18 @@ RSpec.describe "an interrupted request" do
     it "hands the tracer the interrupt the transport raised" do
       expect(reported).to be(failure)
     end
+
+    it "names the request that ended" do
+      expect(errors.last.at(1)).to eq(start_id)
+    end
   end
 
   describe "when the transport fails for another reason" do
+    let(:interrupted) { false }
     let(:interrupt_errors) { [IOError] }
     let(:failure) { IOError.new("closed stream") }
 
     before do
-      transport.singleton_class.__send__(:define_method, :interrupted?) { false }
       request
     rescue IOError
       nil
