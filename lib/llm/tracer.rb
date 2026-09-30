@@ -195,6 +195,30 @@ module LLM
     end
 
     ##
+    # Called when a request or a tool is interrupted.
+    #
+    # An interrupt is not a failure, so this is not {#on_request_error} or
+    # {#on_tool_error} under another name: it is the third ending either
+    # scope can have, and it is called before {LLM::Interrupt} reaches the
+    # caller, so a tracer that has to record what happened to a turn does it
+    # while the work is still the work in flight.
+    #
+    # The default does nothing, which is the difference from the rest of the
+    # lifecycle. Every other hook raises, because a tracer that means to draw
+    # a request has to answer for it - but an interrupt is delivered to
+    # whatever tracer happens to be bound, and a hook that raised here would
+    # replace the interrupt every caller is written against.
+    # @param [Symbol] scope
+    #  :request for a request, :tool for a tool
+    # @param [Object, nil] span
+    #  The span that {#on_request_start} or {#on_tool_start} returned
+    # @param [String, nil] request_id
+    #  The id, as passed to {#on_request_start}, when the scope is a request
+    # @return [void]
+    def on_interrupt(scope:, span:, request_id: nil)
+    end
+
+    ##
     # Opens a trace group so subsequent LLM spans share the same OpenTelemetry
     # trace_id (and appear as one trace in backends like Langfuse).
     # When +trace_group_id+ is a string, it is used to derive the trace_id.
