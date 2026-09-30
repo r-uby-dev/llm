@@ -38,9 +38,22 @@ class LLM::Transport
       res = transport.request(request, owner:, stream:, &b)
       res = LLM::Transport::Response.from(res)
       [handle_response(res, tracer, span, request_id), span, tracer, request_id]
-    rescue *transport.interrupt_errors
-      raise LLM::Interrupt, "request interrupted" if transport.interrupted?(owner)
+    rescue LLM::Interrupt => ex
+      ##
+      # A transport that raises the interrupt itself - curb
+      # raises from the chunk it is reading - reaches here,
+      # and the span closes before the caller sees it.
+      tracer.on_request_error(ex:, span:, request_id:)
       raise
+    rescue *transport.interrupt_errors => ex
+      ##
+      # A Net::HTTP request is interrupted by closing its
+      # socket from another thread, so it fails here instead.
+      # Either way the caller is given an interrupt, and the
+      # tracer is told which request it ended.
+      ex = LLM::Interrupt.new("request interrupted") if transport.interrupted?(owner)
+      tracer.on_request_error(ex:, span:, request_id:)
+      raise(ex)
     end
 
     ##
