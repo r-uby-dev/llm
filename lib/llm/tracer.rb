@@ -203,6 +203,11 @@ module LLM
     # caller, so a tracer that has to record what happened to a turn does it
     # while the work is still the work in flight.
     #
+    # A request is announced once, by the transport. A tool is announced
+    # once for the phase rather than once per tool: a cancel reaches every
+    # tool that is running and the caller hears one exception, so there is
+    # no one tool the announcement belongs to.
+    #
     # The default does nothing, which is the difference from the rest of the
     # lifecycle. Every other hook raises, because a tracer that means to draw
     # a request has to answer for it - but an interrupt is delivered to
@@ -211,11 +216,13 @@ module LLM
     # @param [Symbol] scope
     #  :request for a request, :tool for a tool
     # @param [Object, nil] span
-    #  The span that {#on_request_start} or {#on_tool_start} returned
+    #  The span that {#on_request_start} returned. A tool pass has none:
+    #  a tool's span belongs to the call, and the announcement is not one
+    #  tool's to make.
     # @param [String, nil] request_id
     #  The id, as passed to {#on_request_start}, when the scope is a request
     # @return [void]
-    def on_interrupt(scope:, span:, request_id: nil)
+    def on_interrupt(scope:, span: nil, request_id: nil)
     end
 
     ##

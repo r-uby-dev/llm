@@ -232,7 +232,8 @@ module LLM
     # Ask a question and return the content string directly.
     # Accepts `with:` for file attachments and a block for streaming.
     # This interface is compatible with RubyLLM's `ask` method.
-    # @param [String] prompt
+    #
+    # @param prompt [String]
     # @param [Hash] options
     # @option options [String, Array<String>, nil] :with
     #  File path(s) to attach
@@ -343,6 +344,14 @@ module LLM
         @queue = stream.queue
         @queue.wait
       end
+    rescue LLM::Interrupt
+      ##
+      # Once, not once per tool. A cancel reaches every tool that is
+      # running, and the caller hears one exception, so the phase is
+      # announced here - the frame every strategy's interrupt unwinds
+      # through - and before the caller is given it.
+      tracer.on_interrupt(scope: :tool)
+      raise
     ensure
       @queue = nil
       @stream = nil
