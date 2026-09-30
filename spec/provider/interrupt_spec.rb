@@ -3,25 +3,25 @@
 require "setup"
 
 ##
-# A request that ends without answering closes its span.
+# A request that ends without answering closes its span, if it failed.
 #
 # The tracer is told when a request starts, and a request that failed was
 # the one way out that told it nothing - so a tracer that draws what it is
 # told drew a request that never ended, which reads the same as a process
 # that died.
 #
-# An interrupt is the exception, and deliberately so: it is not a failure,
-# and the tracer's own interrupt hook is what will close the span. Until
-# that hook exists an interrupted request leaves its span open, and the
-# examples below say so - so the change that lands the hook fails here
-# first, rather than being a silence nobody notices.
+# An interrupt is not a failure and is not reported as one. It is the
+# tracer's own interrupt hook that will close that span, so until the hook
+# exists an interrupted request leaves its span open - and the examples
+# below say so, so the change that lands the hook fails here first rather
+# than arriving as a silence.
 #
-# Four ways out, and three of them are here. A transport that failed
-# because it was interrupted, a transport that raised the interrupt itself
-# (curb raises from the chunk it is reading, so it never reaches the
-# rescue for the transport's own error classes), a transport that failed
-# for another reason, and a failure that is not one of those classes at
-# all.
+# The transport's own error classes are the third case, and they are where
+# a Net::HTTP interrupt is turned into the exception the caller gets: the
+# socket is closed from another thread and the read fails as one of them.
+# That clause reports nothing, because nothing it sees is known to be a
+# failure - so one of those classes that is not an interrupt is raised and
+# left unreported, which is pinned below rather than left to be discovered.
 RSpec.describe "a request that ends without answering" do
   let(:provider) { LLM.openai(key: "test") }
   let(:tracer) { recorder.new(provider) }
@@ -115,7 +115,7 @@ RSpec.describe "a request that ends without answering" do
     end
   end
 
-  describe "when the transport fails for another reason" do
+  describe "when the transport's own error is not an interrupt" do
     let(:interrupted) { false }
     let(:interrupt_errors) { [IOError] }
     let(:failure) { IOError.new("closed stream") }
@@ -126,20 +126,12 @@ RSpec.describe "a request that ends without answering" do
       nil
     end
 
-    it "reports the failure to the tracer" do
-      expect(reported).to be(failure)
-    end
-
-    it "names the request that ended" do
-      expect(errors.last.at(1)).to eq(start_id)
-    end
-
-    it "reports an ending instead of a finish" do
-      expect(endings).to eq([:start, :error])
-    end
-
     it "raises what the transport raised" do
       expect { request }.to raise_error(IOError)
+    end
+
+    it "does not report it" do
+      expect(errors).to be_empty
     end
   end
 
@@ -156,6 +148,14 @@ RSpec.describe "a request that ends without answering" do
 
     it "reports the failure to the tracer" do
       expect(reported).to be(failure)
+    end
+
+    it "names the request that ended" do
+      expect(errors.last.at(1)).to eq(start_id)
+    end
+
+    it "reports an ending instead of a finish" do
+      expect(endings).to eq([:start, :error])
     end
 
     it "raises what the transport raised" do
