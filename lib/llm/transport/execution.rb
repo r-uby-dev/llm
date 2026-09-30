@@ -40,9 +40,14 @@ class LLM::Transport
       [handle_response(res, tracer, span, request_id), span, tracer, request_id]
     rescue LLM::Interrupt
       ##
+      # Curb raises this itself, from the chunk it is reading,
+      # which is the curb shape rather than something raised
+      # ordinarily: the other transports fail, and reach the
+      # rescue below.
+      #
       # An interrupt is not a failure, so it is not reported as
-      # one: the tracer has a hook of its own for it, and it is
-      # called before the caller is given the exception.
+      # one - `on_interrupt` is the hook for it - and it is called
+      # before the caller is given the exception.
       tracer.on_interrupt(scope: :request, span:, request_id:)
       raise
     rescue *transport.interrupt_errors => ex
