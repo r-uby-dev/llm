@@ -12,16 +12,15 @@ require "setup"
 #
 # An interrupt is not a failure and is not reported as one. It is the
 # tracer's own interrupt hook that will close that span, so until the hook
-# exists an interrupted request leaves its span open - and the examples
-# below say so, so the change that lands the hook fails here first rather
-# than arriving as a silence.
+# exists an interrupted request leaves its span open - and the examples say
+# so, so the change that lands the hook fails here first rather than
+# arriving as a silence.
 #
-# The transport's own error classes are the third case, and they are where
-# a Net::HTTP interrupt is turned into the exception the caller gets: the
+# A transport's own error classes are the middle case, and they are where a
+# Net::HTTP interrupt is turned into the exception the caller gets: the
 # socket is closed from another thread and the read fails as one of them.
-# That clause reports nothing, because nothing it sees is known to be a
-# failure - so one of those classes that is not an interrupt is raised and
-# left unreported, which is pinned below rather than left to be discovered.
+# The owner's flag is what separates the two, so a failure of one of those
+# classes that is not an interrupt is reported like any other failure.
 RSpec.describe "a request that ends without answering" do
   let(:provider) { LLM.openai(key: "test") }
   let(:tracer) { recorder.new(provider) }
@@ -126,12 +125,16 @@ RSpec.describe "a request that ends without answering" do
       nil
     end
 
-    it "raises what the transport raised" do
-      expect { request }.to raise_error(IOError)
+    it "reports the failure to the tracer" do
+      expect(reported).to be(failure)
     end
 
-    it "does not report it" do
-      expect(errors).to be_empty
+    it "names the request that ended" do
+      expect(errors.last.at(1)).to eq(start_id)
+    end
+
+    it "raises what the transport raised" do
+      expect { request }.to raise_error(IOError)
     end
   end
 
@@ -148,10 +151,6 @@ RSpec.describe "a request that ends without answering" do
 
     it "reports the failure to the tracer" do
       expect(reported).to be(failure)
-    end
-
-    it "names the request that ended" do
-      expect(errors.last.at(1)).to eq(start_id)
     end
 
     it "reports an ending instead of a finish" do

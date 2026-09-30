@@ -44,15 +44,18 @@ class LLM::Transport
       # one: the tracer's own interrupt hook is what closes the
       # span, so until that hook exists it stays open.
       raise
-    rescue *transport.interrupt_errors
+    rescue *transport.interrupt_errors => ex
       ##
       # Where a Net::HTTP interrupt becomes the exception the
       # caller gets: the socket is closed from another thread
-      # and the read fails as one of these classes. Nothing is
-      # reported here, and the re-raise is what keeps a failure
-      # of one of these classes from being swallowed.
-      raise LLM::Interrupt, "request interrupted" if transport.interrupted?(owner)
-      raise
+      # and the read fails as one of these classes. The owner
+      # is what tells the two apart.
+      if transport.interrupted?(owner)
+        raise LLM::Interrupt, "request interrupted"
+      else
+        tracer.on_request_error(ex:, span:, request_id:)
+        raise
+      end
     rescue => ex
       ##
       # Everything else ends the request, so the tracer is told:
