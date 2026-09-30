@@ -3,19 +3,26 @@
 require "setup"
 
 ##
-# A request that is interrupted still closes its span.
+# A request that ends without answering closes its span.
 #
-# The tracer is told when a request starts, and an interrupt used to be
-# the one way out of a request that told it nothing - so a tracer that
-# draws what it is told drew a request that never ended, which reads the
-# same as a process that died.
+# The tracer is told when a request starts, and a request that failed was
+# the one way out that told it nothing - so a tracer that draws what it is
+# told drew a request that never ended, which reads the same as a process
+# that died.
 #
-# Both paths are here because they are two different exceptions. A
-# Net::HTTP request fails when its socket is closed from another thread,
-# so the transport's own error is what arrives and the flag is what says
-# why. Curb raises `LLM::Interrupt` from the chunk it is reading, and
-# never reaches that rescue at all.
-RSpec.describe "an interrupted request" do
+# An interrupt is the exception, and deliberately so: it is not a failure,
+# and the tracer's own interrupt hook is what will close the span. Until
+# that hook exists an interrupted request leaves its span open, and the
+# examples below say so - so the change that lands the hook fails here
+# first, rather than being a silence nobody notices.
+#
+# Four ways out, and three of them are here. A transport that failed
+# because it was interrupted, a transport that raised the interrupt itself
+# (curb raises from the chunk it is reading, so it never reaches the
+# rescue for the transport's own error classes), a transport that failed
+# for another reason, and a failure that is not one of those classes at
+# all.
+RSpec.describe "a request that ends without answering" do
   let(:provider) { LLM.openai(key: "test") }
   let(:tracer) { recorder.new(provider) }
   let(:recorder) do
@@ -57,6 +64,7 @@ RSpec.describe "an interrupted request" do
   let(:start_id) { tracer.calls.find { _1.first == :start }&.at(1) }
   let(:errors) { tracer.calls.select { _1.first == :error } }
   let(:reported) { errors.last&.at(2) }
+  let(:endings) { tracer.calls.map(&:first) }
   let(:request) do
     provider.complete([LLM::Message.new("user", "hi")], {model: "gpt-5.4"})
   end
@@ -82,26 +90,12 @@ RSpec.describe "an interrupted request" do
       expect { request }.to raise_error(LLM::Interrupt)
     end
 
-    it "reports the interrupt to the tracer" do
-      expect(errors.size).to eq(1)
+    it "does not report the interrupt as a request error" do
+      expect(errors).to be_empty
     end
 
-    it "reports the exception the caller is given" do
-      raised = nil
-      begin
-        request
-      rescue LLM::Interrupt => ex
-        raised = ex
-      end
-      expect(reported).to be(raised)
-    end
-
-    it "names the request that ended" do
-      expect(errors.last.at(1)).to eq(start_id)
-    end
-
-    it "reports an ending instead of a finish" do
-      expect(tracer.calls.map(&:first)).to eq([:start, :error])
+    it "leaves the span for the interrupt hook to close" do
+      expect(endings).to eq([:start])
     end
   end
 
@@ -112,16 +106,12 @@ RSpec.describe "an interrupted request" do
       nil
     end
 
-    it "reports the interrupt to the tracer" do
-      expect(errors.size).to eq(1)
+    it "does not report the interrupt as a request error" do
+      expect(errors).to be_empty
     end
 
-    it "hands the tracer the interrupt the transport raised" do
-      expect(reported).to be(failure)
-    end
-
-    it "names the request that ended" do
-      expect(errors.last.at(1)).to eq(start_id)
+    it "leaves the span for the interrupt hook to close" do
+      expect(endings).to eq([:start])
     end
   end
 
@@ -140,8 +130,36 @@ RSpec.describe "an interrupted request" do
       expect(reported).to be(failure)
     end
 
+    it "names the request that ended" do
+      expect(errors.last.at(1)).to eq(start_id)
+    end
+
+    it "reports an ending instead of a finish" do
+      expect(endings).to eq([:start, :error])
+    end
+
     it "raises what the transport raised" do
       expect { request }.to raise_error(IOError)
+    end
+  end
+
+  describe "when the failure is not one of the transport's own" do
+    let(:interrupted) { false }
+    let(:interrupt_errors) { [IOError] }
+    let(:failure) { Errno::ECONNREFUSED.new }
+
+    before do
+      request
+    rescue SystemCallError
+      nil
+    end
+
+    it "reports the failure to the tracer" do
+      expect(reported).to be(failure)
+    end
+
+    it "raises what the transport raised" do
+      expect { request }.to raise_error(Errno::ECONNREFUSED)
     end
   end
 end
