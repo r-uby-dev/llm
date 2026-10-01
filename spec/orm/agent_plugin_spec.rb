@@ -17,7 +17,7 @@ RSpec.describe "plugin :agent" do
 
   let(:agent) do
     Class.new(model) do
-      plugin :agent do |agent|
+      plugin(:agent, tracer: -> { LLM::Tracer.logger(llm, io: StringIO.new) }) do |agent|
         agent.description :described_by_the_model
         agent.model "gpt-5.4-mini"
         agent.instructions "You are concise."
@@ -33,10 +33,6 @@ RSpec.describe "plugin :agent" do
 
       def set_context
         {mode: :responses, store: false}
-      end
-
-      def set_tracer
-        LLM::Tracer.logger(llm, io: StringIO.new)
       end
 
       def described_by_the_model
@@ -94,14 +90,12 @@ RSpec.describe "plugin :agent" do
     end
   end
 
-  include_examples "a persisted agent record"
-
-  context "with a live OpenAI completion",
-          vcr: {cassette_name: "openai/chat/completion_contract"} do
+  context "when the tracer is declared in the block" do
     let(:agent) do
       Class.new(model) do
         plugin :agent do |agent|
-          agent.model "gpt-4.1"
+          agent.model "gpt-5.4-mini"
+          agent.tracer -> { LLM::Tracer.logger(llm, io: StringIO.new) }
         end
 
         private
@@ -109,9 +103,28 @@ RSpec.describe "plugin :agent" do
         def set_provider
           LLM.openai(key: "secret")
         end
+      end
+    end
 
-        def set_tracer
-          LLM::Tracer.logger(llm, io: StringIO.new)
+    it "resolves the tracer from the block" do
+      expect(record.send(:ctx).tracer).to be_a(LLM::Tracer::Logger)
+    end
+  end
+
+  include_examples "a persisted agent record"
+
+  context "with a live OpenAI completion",
+          vcr: {cassette_name: "openai/chat/completion_contract"} do
+    let(:agent) do
+      Class.new(model) do
+        plugin(:agent, tracer: -> { LLM::Tracer.logger(llm, io: StringIO.new) }) do |agent|
+          agent.model "gpt-4.1"
+        end
+
+        private
+
+        def set_provider
+          LLM.openai(key: "secret")
         end
       end
     end
