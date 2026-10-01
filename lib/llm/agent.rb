@@ -966,7 +966,7 @@ module LLM
       # is running under, and this names it - recorded here rather than in
       # `Context#talk`, because a turn is a loop and not a request.
       #
-      # The schedler is part of it, and read here rather than by the
+      # The scheduler is part of it, and read here rather than by the
       # caller: a cancel runs on the canceller's thread, which is not the
       # thread a scheduler was installed on. The fiber strategy names it
       # for the same reason. The tracer is part of it too, because the
