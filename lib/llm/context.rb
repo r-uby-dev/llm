@@ -85,28 +85,6 @@ module LLM
     attr_reader :id
 
     ##
-    # The thread a turn is running on, or nil.
-    #
-    # Set by whoever runs the loop - {LLM::Agent#run_loop} - and cleared
-    # when the turn is over, so a cancel that finds nothing else to do
-    # has somewhere to be delivered. See {#interrupt!} for when that is
-    # and why a cancel from another thread goes through the thread rather
-    # than through the fiber below.
-    # @api private
-    # @return [Thread, nil]
-    attr_accessor :turn_thread
-
-    ##
-    # The fiber (or async task) a turn is running on, or nil.
-    #
-    # It is the same object {LLM::Provider#request_owner} answers with,
-    # and it is what a cancel from the turn's own thread raises into -
-    # where the thread itself would be the canceller.
-    # @api private
-    # @return [Object, nil]
-    attr_accessor :turn_owner
-
-    ##
     # @param [LLM::Provider] llm
     #  A provider
     # @param [Hash] params
@@ -616,9 +594,10 @@ module LLM
     # tool, hands returns back to the model, or builds the next request -
     # and there the turn is only reachable where it is running.
     #
-    # `LLM::Agent#run_loop` records that while the turn lasts, and this
-    # raises `LLM::Interrupt` into it. Which half of it receives the raise
-    # is decided by who is cancelling:
+    # {LLM::Agent#run_loop} records that while the turn lasts, in the
+    # context's own `@thread` and `@fiber`, and this raises
+    # `LLM::Interrupt` into it. Which half of it receives the raise is
+    # decided by who is cancelling:
     #
     #   another thread  the thread, because a fiber belongs to the thread
     #                   that made it and cannot be entered from another
@@ -630,8 +609,12 @@ module LLM
     #                   raise in the canceller that asked for it.
     #
     # A fiber scheduler is the case the second rule is for: a turn under
-    # Falcon or Async runs on a fiber of the reactor's thread, and a
-    # cancel that arrives on that thread is another fiber asking.
+    # Falcon or Async runs on a fiber of the reactor's thread, and a cancel
+    # that arrives on that thread is another fiber asking. Such a fiber is
+    # asked for through the scheduler, the way
+    # {LLM::Function::Fiber::Task#interrupt!} asks, because a direct raise
+    # into a scheduled fiber does not transfer: it suspends the thread that
+    # raises, and that thread is the canceller's.
     #
     # Nothing is raised when the frame is this thread and there is no
     # fiber to raise into, and nothing is raised when the turn ended
@@ -640,10 +623,15 @@ module LLM
     # @api private
     # @return [void]
     def interrupt_frame!
-      thread = @turn_thread or return
-      owner = @turn_owner
+      thread = @thread || return
+      fiber = @fiber
       if thread.equal?(Thread.current)
-        owner.raise(LLM::Interrupt, "turn interrupted") if owner.respond_to?(:raise)
+        scheduler = @scheduler
+        if fiber && scheduler.respond_to?(:fiber_interrupt)
+          scheduler.fiber_interrupt(fiber, LLM::Interrupt.new("turn interrupted"))
+        elsif fiber.respond_to?(:raise)
+          fiber.raise(LLM::Interrupt, "turn interrupted")
+        end
       else
         thread.raise(LLM::Interrupt, "turn interrupted")
       end
