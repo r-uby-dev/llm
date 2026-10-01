@@ -32,21 +32,21 @@ module LLM::Function::Fiber
         raise ArgumentError, "Fiber concurrency requires Fiber.scheduler"
       else
         ##
-        # The body records its own ending, because the fiber is not always
-        # askable afterwards.
+        # The body hands its ending back through a queue, the way
+        # `LLM::Function::Async::Task` does, rather than through the fiber.
         #
-        # `Fiber.schedule` does not promise to return the fiber: under
-        # `Async` it is nil for a block that has already ended, and a block
-        # that raises on its first instruction - a held cancel - is exactly
-        # that. So the fiber names itself, and `@fiber` is the scheduler's
-        # return when there is one and that name when there is not.
+        # **A fiber is not askable.** `Fiber.schedule` under `Async` returns
+        # `Async::Scheduler#fiber`'s value, which is a plain fiber, and a
+        # plain fiber has no `#value`; a fiber that has ended cannot be
+        # resumed for one either. The result, and the exception a body ended
+        # with, are therefore pushed where they can be taken from.
         #
-        # The result and the failure are recorded here as well, because a
-        # fiber that has ended cannot be asked for either: `Fiber#value` is
-        # not a method, and a value read off a dead body is a `FiberError`.
-        # `#wait` reads what this block wrote, and only falls back to
-        # `@fiber` while the call is still in flight - which is the one case
-        # where there is something to wait on.
+        # The fiber also names itself, because the scheduler's return is not
+        # promised: under `Async` it is nil for a block that has already
+        # ended, and a block that raises on its first instruction - a held
+        # cancel - is exactly that. `@fiber` is the return when there is one,
+        # and that name when there is not.
+        @queue = Queue.new
         inner = nil
         fiber = Fiber.schedule do
           inner = Fiber.current
@@ -66,9 +66,9 @@ module LLM::Function::Fiber
               @delivered = true
               raise LLM::Interrupt
             end
-            @result = function.call
+            @queue << function.call
           rescue => ex
-            @failure = ex
+            @queue << ex
             raise
           ensure
             ##
@@ -103,12 +103,20 @@ module LLM::Function::Fiber
     alias_method :cancel!, :interrupt!
 
     ##
+    # Wait for the body to hand its result back.
+    #
+    # Anything that is an exception is raised rather than returned, which is
+    # what `Thread#value` does for the other in-process strategy. An
+    # interrupt is the usual one: a held cancel arrives here as the exception
+    # the block ended with, and so does one raised at a call that was already
+    # running.
     # @return [LLM::Function::Return]
     def wait
       return @guarded if @guarded
       spawn unless @fiber
-      raise @failure if @failure
-      @result ||= @fiber.value
+      result = @queue.pop
+      raise result if Exception === result
+      result
     end
     alias_method :value, :wait
 
