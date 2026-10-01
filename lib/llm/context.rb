@@ -367,14 +367,16 @@ module LLM
     # under it. A tool is a task, and every task that is running is
     # raised into. Between the two there is nothing: the loop is between
     # two requests, or waiting out a retry, or building the next one -
-    # and until {LLM::Agent#run_loop} named the caller it is running
+    # and until {LLM::Agent#run_loop} recorded the caller it is running
     # under, an interrupt there was a cancel that did nothing at all.
     #
     # The caller is the last resort rather than the first, because the two
     # precise interrupts are what close a socket and stop a tool, and
     # because they are what a tracer hears about. What is left over is a
     # turn that is running and has nothing to point at, and that is what
-    # a raise into the caller ends.
+    # the caller is asked to end: it answers `interrupt!`, and which of the
+    # thread, the fiber and the scheduler it holds receives the raise is
+    # its own business. See {LLM::Agent::Caller}.
     # @return [nil]
     def interrupt!
       llm.interrupt!(@owner)
@@ -382,7 +384,7 @@ module LLM
       pending_functions.each(&:interrupt!)
       @queue = nil
       @owner = nil
-      interrupt_frame!
+      @caller&.interrupt!
       nil
     end
     alias_method :cancel!, :interrupt!
@@ -583,66 +585,6 @@ module LLM
     end
 
     private
-
-    ##
-    # Ends a turn that has nothing more precise to interrupt.
-    #
-    # A request in flight is closed at the socket and a tool that is
-    # running is raised into, and both are bound to a phase: the loop is
-    # only interruptible where one of them exists. Between two requests
-    # it is neither - which is where a turn waits out a retry, confirms a
-    # tool, hands returns back to the model, or builds the next request -
-    # and there the turn is only reachable where it is running.
-    #
-    # {LLM::Agent#run_loop} names that, while the turn lasts, in the
-    # context's own `@caller`: a thread, a fiber and the scheduler the
-    # fiber belongs to. This raises `LLM::Interrupt` into it, and which
-    # part of it receives the raise is decided by who is cancelling:
-    #
-    #   another thread  the thread, because a fiber belongs to the thread
-    #                   that made it and cannot be entered from another
-    #                   one. The raise lands in whichever fiber that
-    #                   thread is running, which is the turn's, because
-    #                   the turn is what it is doing.
-    #
-    #   the same thread the fiber, because raising on the thread would
-    #                   raise in the canceller that asked for it.
-    #
-    # A fiber scheduler is the case the second rule is for: a turn under
-    # Falcon or Async runs on a fiber of the reactor's thread, and a cancel
-    # that arrives on that thread is another fiber asking. Such a fiber is
-    # asked for through the scheduler, the way
-    # {LLM::Function::Fiber::Task#interrupt!} asks, because a direct raise
-    # into a scheduled fiber does not transfer: it suspends the thread that
-    # raises, and that thread is the canceller's.
-    #
-    # Nothing is raised when the caller is this thread and there is no
-    # fiber to raise into, and nothing is raised when the turn ended
-    # between the read and the raise - that race is the ordinary one, and
-    # a cancel that arrives after a turn is not a failure.
-    # @api private
-    # @return [void]
-    def interrupt_frame!
-      ##
-      # Read once, because the turn can end between one read and the next -
-      # and a half-read caller is a nil where a fiber was expected rather
-      # than the no-op that an ended turn is.
-      frame = @caller || return
-      thread = frame.thread
-      fiber = frame.fiber
-      if thread.equal?(Thread.current)
-        scheduler = frame.scheduler
-        if fiber && scheduler.respond_to?(:fiber_interrupt)
-          scheduler.fiber_interrupt(fiber, LLM::Interrupt.new("turn interrupted"))
-        elsif fiber.respond_to?(:raise)
-          fiber.raise(LLM::Interrupt, "turn interrupted")
-        end
-      else
-        thread.raise(LLM::Interrupt, "turn interrupted")
-      end
-    rescue ThreadError, FiberError
-      nil
-    end
 
     ##
     # Returns the bound stream queue, if available.
