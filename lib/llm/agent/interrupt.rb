@@ -43,7 +43,7 @@ class LLM::Agent
     # behind it - a turn an application ran in a fiber of its own - is raised
     # into directly, which is what such a fiber is for.
     #
-    # The tracer is told `scope: :turn`, before the raise, the way
+    # The tracer is told `scope: :agent`, before the raise, the way
     # {LLM::Context#wait} tells it `scope: :tool` before the caller is given
     # that interrupt. A tracer that has to account for every interrupt a turn
     # receives needs this one too, and the alternative - announcing it from
@@ -58,16 +58,16 @@ class LLM::Agent
     def interrupt!
       if thread.equal?(Thread.current)
         if fiber
-          tracer&.on_interrupt(scope: :turn)
+          tracer&.on_interrupt(scope: :agent)
           if scheduler
-            scheduler.fiber_interrupt(fiber, LLM::Interrupt.new("turn interrupted"))
+            scheduler.fiber_interrupt(fiber, LLM::Interrupt.new("agent interrupted"))
           else
-            fiber.raise(LLM::Interrupt, "turn interrupted")
+            fiber.raise(LLM::Interrupt, "agent interrupted")
           end
         end
       else
-        tracer&.on_interrupt(scope: :turn)
-        thread.raise(LLM::Interrupt, "turn interrupted")
+        tracer&.on_interrupt(scope: :agent)
+        thread.raise(LLM::Interrupt, "agent interrupted")
       end
       nil
     rescue ThreadError, FiberError
