@@ -19,6 +19,11 @@ require "timeout"
 # timeout could not: where it stopped, and whether the child it was waiting on
 # is still there.
 #
+# **The order below is the failing run's order.** The first wait is one
+# example, the second waits are the next two, and everything else this file
+# asks for runs after them, so what this file reproduces is what failed rather
+# than a re-arrangement of it.
+#
 # The strategy needs xchan.rb, which is not a dependency of this gem, and the
 # examples skip where it is not installed.
 RSpec.describe LLM::Function::Fork::Task do
@@ -95,10 +100,23 @@ RSpec.describe LLM::Function::Fork::Task do
       )
     end
 
+    describe "a second wait" do
+      let(:first) { within(task: task) { task.wait } }
+
+      before { first }
+
+      it "is answered from the result the first one took" do
+        expect(within(task: task) { task.wait }).to equal(first)
+      end
+
+      it "is answered with what the first one had" do
+        expect(within(task: task) { task.wait }.to_h).to eq(first.to_h)
+      end
+    end
+
     ##
-    # The same question with no hook and no `let` between it and the example
-    # above: two calls, each waited on once, in one example. If position in
-    # the run decides, this is where it shows.
+    # The same question the group above asks, with no hook and no `let`
+    # between the two waits: two calls, each waited on once, in one example.
     it "answers two calls in one example" do
       first = task_for(quick_tool, "call_1")
       second = task_for(quick_tool, "call_2")
@@ -120,20 +138,6 @@ RSpec.describe LLM::Function::Fork::Task do
       )
       group.spawn
       expect(within(task: group) { group.wait.map(&:id) }).to eq(%w[call_1 call_2])
-    end
-
-    describe "a second wait" do
-      let(:first) { within(task: task) { task.wait } }
-
-      before { first }
-
-      it "is answered from the result the first one took" do
-        expect(within(task: task) { task.wait }).to equal(first)
-      end
-
-      it "is answered with what the first one had" do
-        expect(within(task: task) { task.wait }.to_h).to eq(first.to_h)
-      end
     end
   end
 
