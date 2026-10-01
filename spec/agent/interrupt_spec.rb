@@ -12,10 +12,10 @@ require "timeout"
 # phase, so between them a cancel reached nothing at all: the loop is
 # between two requests, or waiting out a retry, or building the next one.
 #
-# `LLM::Agent#run_loop` records the thread, the fiber and the scheduler the
-# turn is running under, in the context's own ivars, for as long as the turn
-# lasts - and an interrupt that has nothing more precise to do is raised
-# into that frame.
+# `LLM::Agent#run_loop` names the caller the turn is running under - the
+# thread, the fiber and the scheduler the fiber belongs to - in the context's
+# own `@caller`, for as long as the turn lasts. An interrupt that has nothing
+# more precise to do is raised into it.
 #
 # Every wait here has a deadline. A hook that never fires is a failure the
 # suite can report rather than a suite that stops where the hook was
@@ -126,6 +126,7 @@ RSpec.describe "a turn interrupted between its requests" do
   # examples are about the loop rather than about which API it drove.
   let(:agent) { LLM::Agent.new(provider, model: "gpt-5.4", mode: :completions) }
   let(:ctx) { agent.instance_variable_get(:@ctx) }
+  let(:caller) { ctx.instance_variable_get(:@caller) }
 
   before do
     ##
@@ -165,7 +166,7 @@ RSpec.describe "a turn interrupted between its requests" do
 
   ##
   # The turn, on a thread of its own, which is what a cancel has to reach:
-  # the frame is a thread that is not the one asking for the interrupt.
+  # the caller is a thread that is not the one asking for the interrupt.
   def run_turn
     agent.talk("hi")
     nil
@@ -184,13 +185,14 @@ RSpec.describe "a turn interrupted between its requests" do
     end
 
     ##
-    # The frame is what a cancel is delivered to, and it is the thread the
-    # turn is on - not the thread that started it, and not the fiber the
+    # The caller is what a cancel is delivered to, and its thread is the one
+    # the turn is on - not the thread that started it, and not the fiber the
     # request was made on, which has no request left to close.
-    it "records the frame the turn is running in" do
+    it "names the caller the turn is running under" do
       turn
       expect(settle(arrived)).to eq(:finish)
-      expect(ctx.instance_variable_get(:@thread)).to be(turn)
+      expect(caller.thread).to be(turn)
+      expect(caller.fiber).to be_a(Fiber)
       gate << :go
       expect(within { turn.value }).to be_nil
     end
@@ -214,16 +216,14 @@ RSpec.describe "a turn interrupted between its requests" do
     end
 
     ##
-    # The frame is taken back rather than left behind, and that is not a
+    # The caller is taken back rather than left behind, and that is not a
     # formality: a worker's thread is reused for the turn after this one.
-    it "leaves no frame behind once the turn is over" do
+    it "leaves no caller behind once the turn is over" do
       turn
       settle(arrived)
       agent.interrupt!
       within { turn.value }
-      expect(ctx.instance_variable_defined?(:@thread)).to be(false)
-      expect(ctx.instance_variable_defined?(:@fiber)).to be(false)
-      expect(ctx.instance_variable_defined?(:@scheduler)).to be(false)
+      expect(ctx.instance_variable_defined?(:@caller)).to be(false)
     end
   end
 
@@ -271,6 +271,14 @@ RSpec.describe "a turn interrupted between its requests" do
   # it has to go through the fiber the turn is running on, or the
   # interrupt would land in whoever asked for it.
   describe "when the cancel comes from the turn's own thread" do
+    def caller_for(fiber, scheduler: nil)
+      LLM::Object.from(
+        thread: Thread.current,
+        fiber:,
+        scheduler:
+      )
+    end
+
     it "raises into the fiber rather than into the canceller" do
       context = LLM::Context.new(provider)
       ended = nil
@@ -280,8 +288,7 @@ RSpec.describe "a turn interrupted between its requests" do
         ended = ex
       end
       fiber.resume
-      context.instance_variable_set(:@thread, Thread.current)
-      context.instance_variable_set(:@fiber, fiber)
+      context.instance_variable_set(:@caller, caller_for(fiber))
       context.interrupt!
       expect(ended).to be_a(LLM::Interrupt)
     end
@@ -296,9 +303,7 @@ RSpec.describe "a turn interrupted between its requests" do
       fiber = Fiber.new { Fiber.yield }
       fiber.resume
       scheduler = double("scheduler", fiber_interrupt: nil)
-      context.instance_variable_set(:@thread, Thread.current)
-      context.instance_variable_set(:@fiber, fiber)
-      context.instance_variable_set(:@scheduler, scheduler)
+      context.instance_variable_set(:@caller, caller_for(fiber, scheduler:))
       context.interrupt!
       expect(scheduler).to have_received(:fiber_interrupt)
         .with(fiber, kind_of(LLM::Interrupt))
@@ -306,11 +311,11 @@ RSpec.describe "a turn interrupted between its requests" do
   end
 
   ##
-  # And the turn that never recorded a frame - a raw context, which has
-  # no loop of its own - keeps the behaviour it had: a cancel with
-  # nothing to interrupt is a cancel that does nothing, rather than one
-  # raised into the caller.
-  describe "when no frame was recorded" do
+  # And the turn that never named a caller - a raw context, which has no
+  # loop of its own - keeps the behaviour it had: a cancel with nothing to
+  # interrupt is a cancel that does nothing, rather than one raised into
+  # the caller.
+  describe "when no caller was recorded" do
     it "does not raise into the canceller" do
       expect { LLM::Context.new(provider).interrupt! }.not_to raise_error
     end
