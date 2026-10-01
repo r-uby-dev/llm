@@ -969,9 +969,10 @@ module LLM
       # thread a scheduler was installed on. The fiber strategy names it
       # for the same reason.
       #
-      # Taken back below, and that is not a formality: a worker's thread
-      # is reused for the turn after this one, and a cancel that arrived
-      # late would otherwise land in whatever that thread is doing.
+      # Set to nil below once the turn is over, and that is not a
+      # formality: a worker's thread is reused for the turn after this
+      # one, and a cancel that arrived late would otherwise land in
+      # whatever that thread is doing.
       @ctx.instance_variable_set(
         :@caller,
         LLM::Object.from(
@@ -982,11 +983,7 @@ module LLM
       )
       @llm.with_tracer(tracer, &run)
     ensure
-      ##
-      # `remove_instance_variable` raises when there is nothing to remove,
-      # and a turn can fail above the caller being recorded - `start_trace`
-      # is one line of it - so the name is asked for first.
-      @ctx.remove_instance_variable(:@caller) if @ctx.instance_variable_defined?(:@caller)
+      @ctx.instance_variable_set(:@caller, nil)
       tracer&.stop_trace
     end
 
