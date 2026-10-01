@@ -223,7 +223,7 @@ RSpec.describe "a turn interrupted between its requests" do
       turn
       expect(settle(arrived)).to eq(:finish)
       agent.interrupt!
-      expect(settle(arrived)).to eq([:interrupt, :turn])
+      expect(settle(arrived)).to eq([:interrupt, :agent])
       expect(within { turn.value }).to be_a(LLM::Interrupt)
     end
 
