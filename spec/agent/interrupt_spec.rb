@@ -19,29 +19,46 @@ require "timeout"
 # Every wait here has a deadline. A hook that never fires is a failure the
 # suite can report rather than a suite that stops where the hook was
 # expected - which is the convention the task specs set for cancels, and it
-# is what caught this file's first draft: an example waited forever for a
-# hook the turn never reached because it failed earlier, in a thread of its
-# own where the failure is a line on stderr rather than an example.
-class BlockingStep < LLM::Stream
-  def initialize(arrived:, gate:)
+# is what caught this file's first draft twice: once for a hook the turn
+# never reached because it drove the wrong API, and once for a hook it never
+# reached because a stream took the response down a path a stubbed transport
+# does not feed.
+class BlockingTracer < LLM::Tracer
+  def initialize(llm, arrived:, gate:)
+    super(llm)
     @arrived, @gate = arrived, gate
   end
 
+  def on_request_start(operation:, model: nil, inputs: nil, request_id: nil)
+    nil
+  end
+
   ##
-  # The boundary between one request and the next, which is the window
-  # itself: the response is in the conversation, the transport has taken
-  # the request out of its map, and no tool is running. The example is
-  # told the loop is there, and the loop waits to be cancelled.
-  def on_step(_ctx, _res)
-    @arrived << :step
+  # The end of a request, which is the window itself: the provider has
+  # answered, the transport has taken the request out of its map, no tool
+  # is running, and the loop has not asked for the next one yet. The example
+  # is told the loop is there, and the loop waits to be cancelled.
+  #
+  # A tracer rather than a stream, because the stream would put the response
+  # through the streaming path - the provider builds it from chunks the
+  # stub does not produce - and this example is about the turn between two
+  # requests, not about how a response arrives.
+  def on_request_finish(operation:, res:, model: nil, span: nil, outputs: nil, metadata: nil, request_id: nil)
+    @arrived << :finish
     @gate.pop
+    nil
+  end
+
+  def on_request_error(ex:, span: nil, request_id: nil)
+    nil
   end
 end
 
 ##
 # The same window, on the path a retry opens: the request that was made
 # failed and the next one has not been, so there is nothing in flight and
-# nothing running.
+# nothing running. A retry is announced before the backoff, so a stream is
+# the interface for it and no response is parsed to reach it.
 class BlockingRetry < LLM::Stream
   def initialize(arrived:, gate:)
     @arrived, @gate = arrived, gate
@@ -96,6 +113,7 @@ RSpec.describe "a turn interrupted between its requests" do
   ##
   # The chat completions API, because the body the transport answers with
   # is a chat completion. OpenAI defaults to the responses API, and these
+  ##
   # examples are about the loop rather than about which API it drove.
   let(:agent) { LLM::Agent.new(provider, model: "gpt-5.4", mode: :completions) }
   let(:ctx) { agent.instance_variable_get(:@ctx) }
@@ -103,7 +121,7 @@ RSpec.describe "a turn interrupted between its requests" do
   before do
     ##
     # Built on this thread rather than on a turn's, so the example and its
-    # turn share one agent, one stream, and one pair of queues.
+    # turn share one agent, one observer, and one pair of queues.
     agent
     arrived
     gate
@@ -153,7 +171,7 @@ RSpec.describe "a turn interrupted between its requests" do
   describe "when the cancel arrives between two requests" do
     let(:agent) do
       LLM::Agent.new(provider, model: "gpt-5.4", mode: :completions,
-                     stream: BlockingStep.new(arrived:, gate:))
+                     tracer: BlockingTracer.new(provider, arrived:, gate:))
     end
 
     ##
@@ -162,7 +180,7 @@ RSpec.describe "a turn interrupted between its requests" do
     # request was made on, which has no request left to close.
     it "records the frame the turn is running in" do
       turn
-      expect(settle(arrived)).to eq(:step)
+      expect(settle(arrived)).to eq(:finish)
       expect(ctx.turn_thread).to be(turn)
       gate << :go
       expect(within { turn.value }).to be_nil
@@ -170,7 +188,7 @@ RSpec.describe "a turn interrupted between its requests" do
 
     it "ends the turn, though nothing is in flight" do
       turn
-      expect(settle(arrived)).to eq(:step)
+      expect(settle(arrived)).to eq(:finish)
       agent.interrupt!
       expect(within { turn.value }).to be_a(LLM::Interrupt)
     end
