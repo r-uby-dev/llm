@@ -216,14 +216,15 @@ RSpec.describe "a turn interrupted between its requests" do
     end
 
     ##
-    # The caller is taken back rather than left behind, and that is not a
-    # formality: a worker's thread is reused for the turn after this one.
+    # The caller is set back to nil rather than left where it was, and that
+    # is not a formality: a worker's thread is reused for the turn after
+    # this one.
     it "leaves no caller behind once the turn is over" do
       turn
       settle(arrived)
       agent.interrupt!
       within { turn.value }
-      expect(ctx.instance_variable_defined?(:@caller)).to be(false)
+      expect(ctx.instance_variable_get(:@caller)).to be_nil
     end
   end
 
