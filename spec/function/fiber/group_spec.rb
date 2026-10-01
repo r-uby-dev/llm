@@ -109,13 +109,22 @@ RSpec.describe LLM::Function::Fiber::Group do
 
   ##
   # The returned call is first, because the cancel is what used to stop at
-  # it: the tasks after it are the ones a group's map has to keep reaching.
+  # it: the calls after it are the ones a group's map has to keep reaching.
+  #
+  # What is asserted is the hook, not a return: the parked call is still
+  # parked when the example reads, and asking it to finish would be asking the
+  # reactor to run something the example is holding.
   describe "a cancel for a group with a returned call in it" do
     it "reaches the calls after the one that has returned" do
-      group = described_class.new([task_for(quick, "call_1"), task_for(holding, "call_2")])
+      finished = task_for(quick, "call_1")
+      parked = task_for(holding, "call_2")
+      group = described_class.new([finished, parked])
       error = react do
         group.spawn
-        group.value.tap { nil }
+        ##
+        # Answered from the queue the block filled, so this is a read rather
+        # than a wait - which is what makes room for the interrupt below.
+        finished.wait
         group.interrupt!
         ##
         # The reactor's turn: the scheduler is asked to raise on the parked
