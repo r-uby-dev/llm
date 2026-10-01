@@ -356,8 +356,8 @@ module LLM
 
     ##
     # Interrupt a turn: the request in flight, the tools that are
-    # running, and - when it is neither of those - the frame the turn is
-    # running in.
+    # running, and - when it is neither of those - the caller the turn is
+    # running under.
     #
     # This is inspired by Go's context cancellation model, and the three
     # are the whole of what a turn is doing. A request is closed at the
@@ -367,14 +367,14 @@ module LLM
     # under it. A tool is a task, and every task that is running is
     # raised into. Between the two there is nothing: the loop is between
     # two requests, or waiting out a retry, or building the next one -
-    # and until {LLM::Agent#run_loop} recorded the frame it is running
-    # in, an interrupt there was a cancel that did nothing at all.
+    # and until {LLM::Agent#run_loop} named the caller it is running
+    # under, an interrupt there was a cancel that did nothing at all.
     #
-    # The frame is the last resort rather than the first, because the two
+    # The caller is the last resort rather than the first, because the two
     # precise interrupts are what close a socket and stop a tool, and
     # because they are what a tracer hears about. What is left over is a
     # turn that is running and has nothing to point at, and that is what
-    # a raise into the frame ends.
+    # a raise into the caller ends.
     # @return [nil]
     def interrupt!
       llm.interrupt!(@owner)
@@ -594,10 +594,10 @@ module LLM
     # tool, hands returns back to the model, or builds the next request -
     # and there the turn is only reachable where it is running.
     #
-    # {LLM::Agent#run_loop} records that while the turn lasts, in the
-    # context's own `@thread` and `@fiber`, and this raises
-    # `LLM::Interrupt` into it. Which half of it receives the raise is
-    # decided by who is cancelling:
+    # {LLM::Agent#run_loop} names that, while the turn lasts, in the
+    # context's own `@caller`: a thread, a fiber and the scheduler the
+    # fiber belongs to. This raises `LLM::Interrupt` into it, and which
+    # part of it receives the raise is decided by who is cancelling:
     #
     #   another thread  the thread, because a fiber belongs to the thread
     #                   that made it and cannot be entered from another
@@ -616,17 +616,22 @@ module LLM
     # into a scheduled fiber does not transfer: it suspends the thread that
     # raises, and that thread is the canceller's.
     #
-    # Nothing is raised when the frame is this thread and there is no
+    # Nothing is raised when the caller is this thread and there is no
     # fiber to raise into, and nothing is raised when the turn ended
     # between the read and the raise - that race is the ordinary one, and
     # a cancel that arrives after a turn is not a failure.
     # @api private
     # @return [void]
     def interrupt_frame!
-      thread = @thread || return
-      fiber = @fiber
+      ##
+      # Read once, because the turn can end between one read and the next -
+      # and a half-read caller is a nil where a fiber was expected rather
+      # than the no-op that an ended turn is.
+      frame = @caller || return
+      thread = frame.thread
+      fiber = frame.fiber
       if thread.equal?(Thread.current)
-        scheduler = @scheduler
+        scheduler = frame.scheduler
         if fiber && scheduler.respond_to?(:fiber_interrupt)
           scheduler.fiber_interrupt(fiber, LLM::Interrupt.new("turn interrupted"))
         elsif fiber.respond_to?(:raise)
@@ -681,7 +686,7 @@ module LLM
     #
     # The sleep is interruptible, which is the reason it needs nothing
     # else: a cancel that arrives here has no request in flight to close
-    # and no tool to raise into, so it is the frame that is raised into -
+    # and no tool to raise into, so it is the caller that is raised into -
     # and a thread or fiber that is sleeping receives it the way it would
     # receive it anywhere else. A turn cancelled between two attempts
     # does not make the next one.
