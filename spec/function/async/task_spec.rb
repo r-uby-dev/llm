@@ -144,4 +144,42 @@ RSpec.describe LLM::Function::Async::Task do
       expect { task.interrupt! }.not_to raise_error
     end
   end
+
+  ##
+  # A task that has answered has answered for good, which is what `Thread#value`
+  # does for the other in-process strategy and what the ractor's task is
+  # asserted to do. The queue is popped once and what it held is kept.
+  describe "a task that has been waited on" do
+    it "answers a second wait from the result it has" do
+      task = task_for(rescuing_tool)
+      first = within { task.wait }
+      expect(within { task.wait }).to equal(first)
+    end
+  end
+
+  ##
+  # The exception case is the one that used to block: the first wait raised
+  # and the second waited on a queue that would never fill again.
+  describe "a task whose call was interrupted" do
+    it "raises the same exception on a second wait" do
+      task = task_for(counting_tool)
+      task.spawn
+      settle(started)
+      task.interrupt!
+
+      first = begin
+        within { task.wait }
+        nil
+      rescue LLM::Interrupt => ex
+        ex
+      end
+      second = begin
+        within { task.wait }
+        nil
+      rescue LLM::Interrupt => ex
+        ex
+      end
+      expect([first.class, second.equal?(first)]).to eq([LLM::Interrupt, true])
+    end
+  end
 end

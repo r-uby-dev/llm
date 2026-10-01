@@ -73,17 +73,31 @@ class LLM::Function
     alias_method :cancel!, :interrupt!
 
     ##
+    # Wait for the child to write its result.
+    #
+    # **A second wait is answered from what the first one took.** The
+    # channels are closed below, so there is nothing left to read from on a
+    # second call - and a task that has answered has answered for good, which
+    # is what `Thread#value` does one strategy over and what the ractor's task
+    # is asserted to do. The interrupt is held the same way, as the exception
+    # the first wait raised, so a second wait raises the same one rather than
+    # reading a channel that has gone.
     # @return [LLM::Function::Return]
     def wait
       return @guarded if @guarded
+      raise @result if Exception === @result
+      return @result if @result
       spawn unless @spawned
       kind, data = @ch.result.recv
-      raise LLM::Interrupt if kind == :interrupt
-      raise ArgumentError, "Unknown fork message: #{kind.inspect}" unless kind == :result
-      result = Return.new(data[:id], data[:name], data[:value])
+      @result = case kind
+                when :interrupt then LLM::Interrupt.new
+                when :result then Return.new(data[:id], data[:name], data[:value])
+                else raise ArgumentError, "Unknown fork message: #{kind.inspect}"
+                end
+      raise @result if Exception === @result
       reap
-      @tracer&.on_tool_finish(result:, span: @span)
-      result
+      @tracer&.on_tool_finish(result: @result, span: @span)
+      @result
     ensure
       if @guarded.nil?
         reap

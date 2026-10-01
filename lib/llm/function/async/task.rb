@@ -149,6 +149,13 @@ module LLM::Function::Async
     # strategy's, and a tool that will not stop meets the join and the kill
     # here rather than in the caller's cancel.
     #
+    # **A second wait is answered from what the first one took.** `pop` takes
+    # the item, so holding it is what makes a task answerable more than once -
+    # which is what `Thread#value` does for the other in-process strategy, and
+    # what the ractor's task is asserted to do. The exception case is held the
+    # same way, so a call that was interrupted re-raises on every wait rather
+    # than raising once and then blocking on an empty queue.
+    #
     # Anything that is an exception is raised rather than returned, which is
     # what `Thread#value` and `Fiber#value` do. An interrupt is the usual
     # one, and a hook that raised from the block's `ensure` is the other.
@@ -161,10 +168,10 @@ module LLM::Function::Async
       return @guarded if @guarded
       begin
         spawn unless @queue
-        result = @queue.pop
+        @result ||= @queue.pop
         @alive = false
-        raise result if Exception === result
-        result
+        raise @result if Exception === @result
+        @result
       ensure
         @reactor&.stop
       end
