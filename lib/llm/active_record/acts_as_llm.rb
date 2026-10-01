@@ -19,8 +19,12 @@ module LLM::ActiveRecord
   # default) or as a structured object (`format: :json` / `:jsonb`) for
   # databases such as PostgreSQL that can persist JSON natively.
   # `:json` and `:jsonb` expect a real JSON column type with ActiveRecord
-  # handling JSON typecasting for the model. `provider:`, `context:`, and
-  # `tracer:` can also be configured as symbols that are called on the model.
+  # handling JSON typecasting for the model.
+  #
+  # The model implements `set_provider` (required) and `set_context`
+  # (optional), and the wrapper resolves them by name. A tracer is not one of
+  # those callbacks: give it to `acts_as_llm` as `tracer:` - a tracer, a proc,
+  # or a method name - and only then is it assigned to the provider.
   module ActsAsLLM
     module Hooks
       ##
@@ -43,7 +47,8 @@ module LLM::ActiveRecord
     #   ActiveRecord JSON typecasting enabled.
     # @option options [Proc, Symbol, LLM::Tracer, nil] :tracer
     #   Optional tracer, method name, or proc that resolves to one and is
-    #   assigned through `llm.tracer = ...` on the resolved provider.
+    #   assigned through `llm.tracer = ...` on the resolved provider. There is
+    #   no `set_tracer` callback: a tracer is given here, or not at all.
     # @option options [Proc, Symbol, LLM::Provider] :provider
     #   Must resolve to an `LLM::Provider` instance for the current record.
     # @return [void]
@@ -268,13 +273,6 @@ module LLM::ActiveRecord
       def set_context
         return super if defined?(super)
         EMPTY_HASH.dup
-      end
-
-      ##
-      # @return [LLM::Tracer]
-      def set_tracer
-        return super if defined?(super)
-        nil
       end
 
       ##
