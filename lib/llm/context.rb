@@ -370,13 +370,13 @@ module LLM
     # and until {LLM::Agent#run_loop} recorded the caller it is running
     # under, an interrupt there was a cancel that did nothing at all.
     #
-    # The caller is the last resort rather than the first, because the two
-    # precise interrupts are what close a socket and stop a tool, and
-    # because they are what a tracer hears about. What is left over is a
-    # turn that is running and has nothing to point at, and that is what
-    # the caller is asked to end: it answers `interrupt!`, and which of the
-    # thread, the fiber and the scheduler it holds receives the raise is
-    # its own business. See {LLM::Agent::Caller}.
+    # The caller is the last resort rather than the first: the two precise
+    # interrupts are what close a socket and stop a tool, and what is left
+    # over is a turn that is running with nothing to point at. Ending that
+    # is what the caller is asked to do - it answers `interrupt!`, announces
+    # the phase to the tracer, and which of the thread, the fiber and the
+    # scheduler it holds receives the raise is its own business. See
+    # {LLM::Agent::Interrupt}.
     # @return [nil]
     def interrupt!
       llm.interrupt!(@owner)
