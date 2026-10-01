@@ -14,8 +14,9 @@ require "timeout"
 #
 # `LLM::Agent#run_loop` names the caller the turn is running under - the
 # thread, the fiber and the scheduler the fiber belongs to - in the context's
-# own `@caller`, for as long as the turn lasts. An interrupt that has nothing
-# more precise to do is raised into it.
+# own `@caller`, for as long as the turn lasts, and the caller answers
+# `interrupt!`. An interrupt that has nothing more precise to do is asked of
+# it.
 #
 # Every wait here has a deadline. A hook that never fires is a failure the
 # suite can report rather than a suite that stops where the hook was
@@ -84,7 +85,6 @@ RSpec.describe "a turn interrupted between its requests" do
   let(:provider) { LLM.openai(key: "test") }
   let(:transport) do
     double("transport",
-      request_owner: :owner,
       interrupt_errors: [],
       interrupted?: false,
       interrupt!: nil)
@@ -137,6 +137,10 @@ RSpec.describe "a turn interrupted between its requests" do
     gate
     fails = 0
     allow(provider).to receive(:transport).and_return(transport)
+    ##
+    # Answered where the real transport answers it, so the caller's fiber is
+    # the turn's rather than this example's.
+    allow(transport).to receive(:request_owner) { Fiber.current }
     allow(transport).to receive(:set_body_stream)
     allow(transport).to receive(:request) do |*|
       requests << :request
@@ -266,20 +270,22 @@ RSpec.describe "a turn interrupted between its requests" do
   end
 
   ##
-  # A cancel from the turn's own thread, which is a fiber of a reactor.
-  #
-  # The thread is the canceller here, so the raise cannot go through it -
-  # it has to go through the fiber the turn is running on, or the
-  # interrupt would land in whoever asked for it.
+  # What a caller does with the three names it holds, without a turn: the
+  # record is built here the way `run_loop` builds it, and the context is
+  # asked to cancel.
   describe "when the cancel comes from the turn's own thread" do
     def caller_for(fiber, scheduler: nil)
       LLM::Object.from(
         thread: Thread.current,
         fiber:,
         scheduler:
-      )
+      ).extend(LLM::Agent::Caller)
     end
 
+    ##
+    # The thread is the canceller here, so the raise cannot go through it -
+    # it has to go through the fiber the turn is running on, or the
+    # interrupt would land in whoever asked for it.
     it "raises into the fiber rather than into the canceller" do
       context = LLM::Context.new(provider)
       ended = nil
