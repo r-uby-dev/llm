@@ -43,8 +43,23 @@ class LLM::Function
         $stdin.reopen(File::NULL)
         $stdout.reopen(File::NULL)
         $stderr.reopen(File::NULL)
+        ##
+        # The child's half of the note below this block: it reads control and
+        # writes result, and holds no other end.
+        @ch.control.w.close
+        @ch.result.r.close
         Fork::Job.new(@function, @ch).call
       end
+      ##
+      # Each side keeps the end it uses and closes the one it does not. Both
+      # channels are socketpairs, so an end closed here is still open in the
+      # child, and what the rest of them cost is a read that can never be
+      # woken: a child that dies before it writes leaves this side with an
+      # empty socket and - while this side is holding the write end of that
+      # same pair - no end of file to say so. Closed, that is an `EOFError`,
+      # and {#wait} answers with what the child ended as.
+      @ch.control.r.close
+      @ch.result.w.close
       @spawned = true
       self
     end
@@ -53,8 +68,11 @@ class LLM::Function
     # @return [Boolean]
     def alive?
       return false if @waited || !@pid
-      result = ::Process.waitpid(@pid, ::Process::WNOHANG)
-      @waited = !result.nil?
+      status = ::Process.waitpid(@pid, ::Process::WNOHANG)
+      if status
+        @status = status
+        @waited = true
+      end
       !@waited
     rescue Errno::ECHILD
       @waited = true
@@ -82,6 +100,12 @@ class LLM::Function
     # is asserted to do. The interrupt is held the same way, as the exception
     # the first wait raised, so a second wait raises the same one rather than
     # reading a channel that has gone.
+    #
+    # **A child that ends without writing is named.** The ends are closed
+    # above, so a channel with no writer left is an `EOFError` here rather
+    # than a wait with nothing to wake it, and the child's status - a signal,
+    # or the exit code of a raise it could not report - is what the caller is
+    # given with it.
     # @return [LLM::Function::Return]
     def wait
       return @guarded if @guarded
@@ -98,6 +122,9 @@ class LLM::Function
       reap
       @tracer&.on_tool_finish(result: @result, span: @span)
       @result
+    rescue EOFError
+      reap
+      raise EOFError, "the forked call ended without a result (#{@status})"
     ensure
       if @guarded.nil?
         reap
@@ -114,12 +141,18 @@ class LLM::Function
 
     private
 
+    ##
+    # Waits for the child, once, and keeps what it ended as.
+    # @return [Process::Status, nil]
     def reap
-      return if @waited || @guarded || !@pid
-      ::Process.waitpid(@pid)
+      return @status if @waited
+      return if @guarded || !@pid
+      @status = ::Process.waitpid(@pid)
       @waited = true
+      @status
     rescue Errno::ECHILD
       @waited = true
+      @status
     end
   end
 end
