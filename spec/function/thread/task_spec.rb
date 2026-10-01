@@ -1,45 +1,46 @@
 # frozen_string_literal: true
 
 require "setup"
+require "timeout"
 
 ##
 # The four moments a cancel can arrive in, for a thread.
 #
 # A cancel is held before the call runs, raised while it runs, and a no-op
-# once it has returned. The first of those is the one that was missing:
-# `interrupt!` had nothing to raise on before `spawn`, so a cancel that
-# arrived early was dropped, `@delivered` was never set, the hook never ran,
-# and the tool ran as if nobody had asked it to stop.
+# once it has returned - and the first of those is the one that was missing:
+# `interrupt!` had nothing to raise on before `spawn`, so an early cancel was
+# dropped, `@delivered` was never set, the hook never ran, and the tool ran
+# as if nobody had asked it to stop.
 #
-# **The hook is what says a cancel took effect.** It runs on the thread that
-# ran the call, once the call has ended, and only for a cancel that was
-# raised into a live thread - so it is the difference between a cancel that
-# was received and one that did something.
+# **Every wait has a deadline.** The tool says when the call is live, and
+# every wait for the call is wrapped, so a cancel that silently fails to be
+# delivered is a failure that names itself rather than a cell that hangs.
 #
-# **The thread's own entry is not asserted.** A raise into a thread that has
-# not started is delivered at its first checkpoint, which is at or just
-# inside the call, and which of the two it is depends on the schedule the
-# two threads reach their next instruction in. What the caller can depend on
-# is what these examples assert: the cancel is not dropped, the hook runs,
-# and `#wait` raises.
+# **The hook is counted rather than waited on.** It runs on the thread that
+# ran the call, in that thread's `ensure`, so it has run by the time `#wait`
+# has returned however the call ended - which means a queue can be read for
+# its size instead of popped, and nothing waits for it at all.
 #
-# **Nothing is timed by a clock.** A tool that holds is held by a queue the
-# example fills, so an example says when the call is live rather than waiting
-# to find out, and a cancel that did nothing fails rather than hangs.
+# **Nothing here asserts that the thread was entered.** A raise into a thread
+# that has not started is delivered at its first checkpoint, and whether that
+# is at the call or just inside it depends on the schedule. What a caller can
+# depend on is what these examples assert: the cancel is not dropped, the
+# hook runs, and `#wait` raises. The fiber file can assert more, because
+# `Fiber.schedule` runs its block before it returns.
 RSpec.describe LLM::Function::Thread::Task do
   let(:gate) { Queue.new }
   let(:log) { Queue.new }
   let(:started) { Queue.new }
 
   ##
-  # A tool that says it has started, then holds until the example lets it
-  # go, and records the interrupt it was told about.
+  # A tool that says it has started, then holds until the example lets it go,
+  # and counts the interrupt it was told about.
   let(:holding) do
     started, gate, log = self.started, self.gate, self.log
     Class.new(LLM::Tool) do
       name "holding"
       define_method(:call) do
-        started << true
+        started << :in_call
         gate.pop
         {ok: true}
       end
@@ -49,35 +50,50 @@ RSpec.describe LLM::Function::Thread::Task do
     end
   end
 
-  let(:task) do
+  let(:fn) do
     holding.function.dup.tap do |fn|
       fn.id = "call_1"
       fn.arguments = {}
-    end.task(:thread)
+    end
+  end
+
+  let(:task) { fn.task(:thread) }
+
+  ##
+  # A queue read that cannot wait forever.
+  def settle(queue, timeout = 5)
+    Timeout.timeout(timeout) { queue.pop }
+  end
+
+  ##
+  # And the same for anything else that might not come back.
+  def within(timeout = 5, &block)
+    Timeout.timeout(timeout, &block)
   end
 
   describe "a cancel that arrives before the call runs" do
-    ##
-    # The gate is opened so that a cancel which was dropped shows up as a
-    # return rather than as a wait that never ends.
     before do
       task.interrupt!
+      ##
+      # Opened so that a cancel which was dropped shows up as a return
+      # rather than as a call that never ends.
       gate << true
     end
 
     it "is held rather than dropped" do
-      expect { task.wait }.to raise_error(LLM::Interrupt)
+      expect { within { task.wait } }.to raise_error(LLM::Interrupt)
     end
 
     it "runs the hook once the call has ended" do
-      task.wait
-    rescue LLM::Interrupt
-      nil
-    ensure
-      expect(log.pop).to eq(:interrupted)
+      begin
+        within { task.wait }
+      rescue LLM::Interrupt
+        nil
+      end
+      expect(log.size).to eq(1)
     end
 
-    it "answers alive? with a thread it has not spawned yet" do
+    it "has spawned nothing yet" do
       expect(task.alive?).to be(false)
     end
   end
@@ -85,27 +101,31 @@ RSpec.describe LLM::Function::Thread::Task do
   describe "a cancel that arrives while the call runs" do
     before do
       task.spawn
-      started.pop
+      ##
+      # The tool says when it is live, so the cancel is raised at a call
+      # rather than at its edge.
+      settle(started)
       task.interrupt!
     end
 
     it "raises at the tool" do
-      expect { task.wait }.to raise_error(LLM::Interrupt)
+      expect { within { task.wait } }.to raise_error(LLM::Interrupt)
     end
 
     it "runs the hook once the call has ended" do
-      task.wait
-    rescue LLM::Interrupt
-      nil
-    ensure
-      expect(log.pop).to eq(:interrupted)
+      begin
+        within { task.wait }
+      rescue LLM::Interrupt
+        nil
+      end
+      expect(log.size).to eq(1)
     end
   end
 
   describe "a cancel that arrives after the call has returned" do
     before do
       gate << true
-      task.wait
+      within { task.wait }
     end
 
     it "is a no-op" do
@@ -120,7 +140,7 @@ RSpec.describe LLM::Function::Thread::Task do
 
     it "does not run the hook" do
       task.interrupt!
-      expect(log.pop(true) { :none }).to eq(:none)
+      expect(log).to be_empty
     end
   end
 
@@ -145,14 +165,14 @@ RSpec.describe LLM::Function::Thread::Task do
     end
 
     it "is held rather than dropped" do
-      expect { task.wait }.to raise_error(LLM::Interrupt)
+      expect { within { task.wait } }.to raise_error(LLM::Interrupt)
     end
   end
 
   ##
   # A group cancels its tasks in turn, and a task that has not been spawned
-  # is one of them: the record is what makes that work, and nothing pinned
-  # it.
+  # is one of them: the record is what makes that reach it, and nothing
+  # pinned it.
   describe "a cancel for a group whose tasks have not been spawned" do
     let(:group) { LLM::Function::Thread::Group.new([task]) }
 
@@ -162,7 +182,16 @@ RSpec.describe LLM::Function::Thread::Task do
     end
 
     it "reaches the task" do
-      expect { group.wait }.to raise_error(LLM::Interrupt)
+      expect { within { group.wait } }.to raise_error(LLM::Interrupt)
+    end
+
+    it "runs the task's hook" do
+      begin
+        within { group.wait }
+      rescue LLM::Interrupt
+        nil
+      end
+      expect(log.size).to eq(1)
     end
   end
 end

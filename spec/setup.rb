@@ -5,6 +5,10 @@ require "webmock/rspec"
 require "vcr"
 require "dotenv"
 
+# A run's output is a pipe in CI, and a pipe is block-buffered: an example
+# that hangs leaves a log that says nothing about which one it was.
+STDOUT.sync = true
+
 Dir[File.join(__dir__, "support/**/*.rb")].sort.each { require(_1) }
 Dotenv.load
 

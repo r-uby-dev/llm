@@ -11,6 +11,10 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     name: Linux (Ruby ${{ matrix.ruby-version }})
+    # A suite that stalls should be a red check rather than an afternoon:
+    # this is the only thing that stops a hung example, because a job that
+    # never finishes has no log to read.
+    timeout-minutes: 15
     strategy:
       matrix:
         ruby-version: ['3.4', '4.0']

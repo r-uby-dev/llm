@@ -7,34 +7,41 @@ require "async"
 # The four moments a cancel can arrive in, for a fiber.
 #
 # This is the thread strategy's defect one strategy over: `interrupt!` was
-# guarded by `@fiber&.alive?`, and before `spawn` there is no fiber - so an
+# guarded by `@fiber&.alive?`, and before `spawn` there is no fiber, so an
 # early cancel was dropped, `@delivered` was never set, the hook never ran,
 # and the tool ran as if nothing had happened.
 #
 # **A fiber is entered where a thread may not be.** `Fiber.schedule` runs its
-# block before it returns, so by the time `spawn` can deliver a held cancel
-# the call has started and is suspended inside itself: the raise lands at a
-# yield point inside the tool, and the tool's own rescue and ensure run. A
-# thread has no such guarantee, which is why that file asserts the hook and
-# this one can also assert the call.
+# block before it returns, so by the time `spawn` delivers a held cancel the
+# call has started and is parked at the notification this file never sends -
+# which is why the raise lands in the tool rather than at its edge, and why
+# this file can assert the hook while the thread's file cannot assert the
+# entry.
 #
-# **The scheduler is the reactor's.** `Fiber.schedule` requires a
-# `Fiber.scheduler`, and `Async` installs one for the block it runs, so each
-# example runs its waits inside one. The holding call sleeps, which is what
-# yields to that scheduler.
+# **The reactor is what the strategy needs, and the timeout is what the
+# example needs.** The strategy requires a `Fiber.scheduler`, and `Async`
+# installs one on the thread its block runs on. Every wait for the call is
+# wrapped in `Async::Task#with_timeout`, so a cancel that fails to be
+# delivered is a failure that names itself rather than a cell that hangs.
+#
+# **The hook is counted rather than waited on**: it runs in the fiber's
+# `ensure`, so it has run by the time `#wait` has returned however the call
+# ended.
 RSpec.describe LLM::Function::Fiber::Task do
   let(:log) { Queue.new }
+  let(:notification) { Async::Notification.new }
 
   ##
-  # A tool that holds by sleeping - the one wait a scheduler-backed fiber
-  # can take without blocking the thread the reactor runs on - and records
-  # the interrupt it was told about.
+  # A tool that holds at a notification the example never sends, and counts
+  # the interrupt it was told about. A notification yields to the scheduler,
+  # which is what parks the call inside the reactor rather than blocking the
+  # thread the reactor runs on.
   let(:holding) do
-    log = self.log
+    notification, log = self.notification, self.log
     Class.new(LLM::Tool) do
       name "holding"
       define_method(:call) do
-        sleep 5
+        notification.wait
         {ok: true}
       end
       define_method(:on_interrupt) do
@@ -66,41 +73,38 @@ RSpec.describe LLM::Function::Fiber::Task do
     it "is held rather than dropped" do
       task = task_for(holding)
       task.interrupt!
-      Async do
-        expect { task.wait }.to raise_error(LLM::Interrupt)
+      Async do |root|
+        root.with_timeout(5) do
+          expect { task.wait }.to raise_error(LLM::Interrupt)
+        end
       end
     end
 
     it "runs the hook once the call has ended" do
       task = task_for(holding)
       task.interrupt!
-      Async do
-        task.wait
-      rescue LLM::Interrupt
-        nil
+      Async do |root|
+        root.with_timeout(5) do
+          begin
+            task.wait
+          rescue LLM::Interrupt
+            nil
+          end
+        end
       end
-      expect(log.pop).to eq(:interrupted)
-    end
-
-    ##
-    # A tool that answers at once cannot be interrupted after the fact, and
-    # the cancel that arrives with it is the no-op the contract asks for -
-    # the call has returned, and a return is what the caller is given.
-    it "leaves a call that has already returned alone" do
-      task = task_for(quick)
-      Async do
-        expect(task.wait.to_h).to eq(id: "call_1", name: "quick", value: {ok: true})
-      end
+      expect(log.size).to eq(1)
     end
   end
 
   describe "a cancel that arrives while the call runs" do
     it "raises at the tool" do
       task = task_for(holding)
-      Async do
-        task.spawn
-        task.interrupt!
-        expect { task.wait }.to raise_error(LLM::Interrupt)
+      Async do |root|
+        root.with_timeout(5) do
+          task.spawn
+          task.interrupt!
+          expect { task.wait }.to raise_error(LLM::Interrupt)
+        end
       end
     end
   end
@@ -108,19 +112,32 @@ RSpec.describe LLM::Function::Fiber::Task do
   describe "a cancel that arrives after the call has returned" do
     it "is a no-op" do
       task = task_for(quick)
-      Async do
-        task.wait
-        expect(task.interrupt!).to be_nil
+      Async do |root|
+        root.with_timeout(5) do
+          task.wait
+          expect(task.interrupt!).to be_nil
+        end
       end
     end
 
     it "preserves the result" do
       task = task_for(quick)
-      Async do
-        result = task.wait
-        task.interrupt!
-        expect(task.wait).to equal(result)
+      Async do |root|
+        root.with_timeout(5) do
+          result = task.wait
+          task.interrupt!
+          expect(task.wait).to equal(result)
+        end
       end
+    end
+
+    it "does not run the hook" do
+      task = task_for(quick)
+      Async do |root|
+        root.with_timeout(5) { task.wait }
+      end
+      task.interrupt!
+      expect(log).to be_empty
     end
   end
 
@@ -132,8 +149,10 @@ RSpec.describe LLM::Function::Fiber::Task do
       task = task_for(holding)
       group = LLM::Function::Fiber::Group.new([task])
       group.interrupt!
-      Async do
-        expect { group.wait }.to raise_error(LLM::Interrupt)
+      Async do |root|
+        root.with_timeout(5) do
+          expect { group.wait }.to raise_error(LLM::Interrupt)
+        end
       end
     end
   end
