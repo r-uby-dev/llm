@@ -13,10 +13,10 @@ require "timeout"
 # between two requests, or waiting out a retry, or building the next one.
 #
 # `LLM::Agent#run_loop` names the caller the turn is running under - the
-# thread, the fiber and the scheduler the fiber belongs to - in the context's
-# own `@caller`, for as long as the turn lasts, and the caller answers
-# `interrupt!`. An interrupt that has nothing more precise to do is asked of
-# it.
+# thread, the fiber, the scheduler the fiber belongs to, and the turn's
+# tracer - in the context's own `@caller`, for as long as the turn lasts, and
+# the caller answers `interrupt!`. An interrupt that has nothing more precise
+# to do is asked of it.
 #
 # Every wait here has a deadline. A hook that never fires is a failure the
 # suite can report rather than a suite that stops where the hook was
@@ -48,6 +48,14 @@ class BlockingTracer < LLM::Tracer
   end
 
   def on_request_error(ex:, span: nil, request_id: nil)
+    nil
+  end
+
+  ##
+  # The phase the caller ends, announced by `LLM::Agent::Interrupt` before it
+  # raises - the same hook the tool phase is announced through.
+  def on_interrupt(scope: nil)
+    @arrived << [:interrupt, scope]
     nil
   end
 end
@@ -209,6 +217,17 @@ RSpec.describe "a turn interrupted between its requests" do
     end
 
     ##
+    # The tracer hears about the interrupt the turn was given, and not only
+    # about the one a tool was given.
+    it "tells the tracer the turn was interrupted" do
+      turn
+      expect(settle(arrived)).to eq(:finish)
+      agent.interrupt!
+      expect(settle(arrived)).to eq([:interrupt, :turn])
+      expect(within { turn.value }).to be_a(LLM::Interrupt)
+    end
+
+    ##
     # A raise, and not a second request: the turn ends where it is rather
     # than carrying on to ask the model something nobody is waiting for.
     it "makes no request of its own" do
@@ -270,9 +289,9 @@ RSpec.describe "a turn interrupted between its requests" do
   end
 
   ##
-  # What a caller does with the three names it holds, without a turn: the
-  # record is built here the way `run_loop` builds it, and the context is
-  # asked to cancel.
+  # What a caller does with the names it holds, without a turn: the record is
+  # built here the way `run_loop` builds it, and the context is asked to
+  # cancel.
   describe "when the cancel comes from the turn's own thread" do
     def caller_for(fiber, scheduler: nil)
       LLM::Object.from(
