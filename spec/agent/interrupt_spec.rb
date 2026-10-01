@@ -19,10 +19,7 @@ require "timeout"
 # Every wait here has a deadline. A hook that never fires is a failure the
 # suite can report rather than a suite that stops where the hook was
 # expected - which is the convention the task specs set for cancels, and it
-# is what caught this file's first draft twice: once for a hook the turn
-# never reached because it drove the wrong API, and once for a hook it never
-# reached because a stream took the response down a path a stubbed transport
-# does not feed.
+# is what turned each of this file's three drafts into a named failure.
 class BlockingTracer < LLM::Tracer
   def initialize(llm, arrived:, gate:)
     super(llm)
@@ -35,14 +32,13 @@ class BlockingTracer < LLM::Tracer
 
   ##
   # The end of a request, which is the window itself: the provider has
-  # answered, the transport has taken the request out of its map, no tool
-  # is running, and the loop has not asked for the next one yet. The example
-  # is told the loop is there, and the loop waits to be cancelled.
+  # answered, the transport has taken the request out of its map, and no
+  # tool is running. The example is told the loop is there, and the loop
+  # waits to be cancelled.
   #
-  # A tracer rather than a stream, because the stream would put the response
-  # through the streaming path - the provider builds it from chunks the
-  # stub does not produce - and this example is about the turn between two
-  # requests, not about how a response arrives.
+  # A tracer rather than a stream, because a stream would put the response
+  # through the streaming path and this example is about the turn between
+  # two requests, not about how a response arrives.
   def on_request_finish(operation:, res:, model: nil, span: nil, outputs: nil, metadata: nil, request_id: nil)
     @arrived << :finish
     @gate.pop
@@ -93,10 +89,23 @@ RSpec.describe "a turn interrupted between its requests" do
       interrupt!: nil)
   end
   let(:payload) { {choices: [{message: {role: "assistant", content: "hi"}}]} }
+
+  ##
+  # The response the transport answers with, as a pair rather than a value.
+  #
+  # `handle_response` parses the body and writes the parsed result back
+  # through the same reader, so a stub that always answered the raw string
+  # would hand the adapter a String where it expects a completion - which
+  # is what this file did, and what made the one example that let a turn
+  # finish fail with `undefined method 'choices' for an instance of
+  # String`. The wrapper delegates both to this object, so the pair is what
+  # the parse actually round trips through.
   let(:response) do
     Net::HTTPOK.new("1.1", "200", "OK").tap do |res|
-      allow(res).to receive(:body).and_return(LLM.json.dump(payload))
-      allow(res).to receive(:[]).and_return("application/json")
+      body = LLM.json.dump(payload)
+      allow(res).to receive(:[]) { "application/json" }
+      allow(res).to receive(:body) { body }
+      allow(res).to receive(:body=) { |value| body = value }
     end
   end
 
@@ -113,7 +122,6 @@ RSpec.describe "a turn interrupted between its requests" do
   ##
   # The chat completions API, because the body the transport answers with
   # is a chat completion. OpenAI defaults to the responses API, and these
-  ##
   # examples are about the loop rather than about which API it drove.
   let(:agent) { LLM::Agent.new(provider, model: "gpt-5.4", mode: :completions) }
   let(:ctx) { agent.instance_variable_get(:@ctx) }
