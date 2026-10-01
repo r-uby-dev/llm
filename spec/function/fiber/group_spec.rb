@@ -6,38 +6,18 @@ require "async"
 ##
 # A group of fiber calls, and what a cancel does to one.
 #
-# The group is the other half of the strategy the task's file covers. It
-# spawns its tasks in turn and waits on each of them, so a cancel has to
-# reach a task that has not been spawned, and it has to keep going past one
-# that has already returned - both of which the task's record makes work,
-# and neither of which anything pinned before this file.
-#
-# **The scheduler is `Async`'s, because it has to be somebody's.** Ruby
-# ships no default `Fiber.scheduler`, so a strategy that runs its call with
-# `Fiber.schedule` leans on something the runtime does not provide: a
-# scheduler has to be installed, and the thread it is installed on is the
-# thread whose work is cooperative from then on. `Async` installs one for its
-# block, and that is the one here - not a stand-in for a scheduler Ruby would
-# have given us, but the only kind that exists.
-#
-# **The reactor is a thread, and a wait blocks it.** `Queue#pop` is not the
-# scheduler's, so an example that waits inside the reactor stops the thread
-# the reactor runs on - and the interrupt the scheduler was asked to deliver
-# waits with it. Where an example has a parked call to interrupt, it gives
-# the reactor a turn first and then reads.
-#
-# **Every answer is taken out of the reactor and asserted here.** An
-# exception inside `Async do |root| ... end` never reaches RSpec: the top
-# level `Async` returns the initial task rather than waiting on it, so a raise
-# is logged and the example ends green having measured nothing.
+# The group spawns its tasks in turn and waits on each, so a cancel has to
+# reach a task that has not been spawned and keep walking past one that has
+# already returned. The examples run inside a reactor because Ruby ships no
+# default `Fiber.scheduler`, and `Async` installs the only kind there is.
 RSpec.describe LLM::Function::Fiber::Group do
   let(:log) { Queue.new }
   let(:notification) { Async::Notification.new }
 
   ##
   # A tool that holds at a notification the example never sends, and counts
-  # the interrupt it was told about, so a parked call is something a cancel
-  # can reach and something the example can see it reached.
+  # the interrupt it was told about - so a parked call is something a cancel
+  # can reach, and something the example can see it reached.
   let(:holding) do
     notification, log = self.notification, self.log
     Class.new(LLM::Tool) do
@@ -71,6 +51,10 @@ RSpec.describe LLM::Function::Fiber::Group do
     end.task(:fiber)
   end
 
+  ##
+  # Runs the block inside a reactor and answers with the exception it ended
+  # with. Expectations are made on what this returns rather than inside the
+  # block, because a raise under `Async` is logged and never reaches RSpec.
   def react(timeout = 5, &block)
     error = nil
     Async do |root|
@@ -108,12 +92,9 @@ RSpec.describe LLM::Function::Fiber::Group do
   end
 
   ##
-  # The returned call is first, because the cancel is what used to stop at
-  # it: the calls after it are the ones a group's map has to keep reaching.
-  #
-  # What is asserted is the hook, not a return: the parked call is still
-  # parked when the example reads, and asking it to finish would be asking the
-  # reactor to run something the example is holding.
+  # The returned call is first, because the cancel is what used to stop at it:
+  # the calls after it are the ones the map has to keep reaching. What is
+  # asserted is the hook, not a return - the parked call stays parked here.
   describe "a cancel for a group with a returned call in it" do
     it "reaches the calls after the one that has returned" do
       finished = task_for(quick, "call_1")
@@ -122,13 +103,11 @@ RSpec.describe LLM::Function::Fiber::Group do
       error = react do
         group.spawn
         ##
-        # Answered from the queue the block filled, so this is a read rather
-        # than a wait - which is what makes room for the interrupt below.
+        # A read, not a wait: the block already filled the queue.
         finished.wait
         group.interrupt!
         ##
-        # The reactor's turn: the scheduler is asked to raise on the parked
-        # call, and it delivers when this thread lets it.
+        # The reactor's turn, so the scheduler can deliver the raise.
         sleep 0.1
       end
       expect([error, log.size]).to eq([nil, 1])

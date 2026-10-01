@@ -6,39 +6,11 @@ require "async"
 ##
 # The four moments a cancel can arrive in, for a fiber.
 #
-# This is the thread strategy's defect one strategy over: `interrupt!` was
-# guarded by `@fiber&.alive?`, and before `spawn` there is no fiber, so an
-# early cancel was dropped, `@delivered` was never set, the hook never ran,
-# and the tool ran as if nothing had happened.
-#
-# **The scheduler is `Async`'s, and it has to be somebody's.** Ruby ships no
-# default `Fiber.scheduler`, so a strategy that runs a call with
-# `Fiber.schedule` leans on something the runtime does not provide: a
-# scheduler has to be installed, and the thread it is installed on is the
-# thread whose work is cooperative from then on. `Async` installs one on the
-# thread its block runs on, which is why these examples are written inside a
-# reactor - not to test the reactor, but because a scheduler is the only way
-# this strategy runs at all. There is no library-free version of this file.
-#
-# **The reactor is a thread, and a wait blocks it.** `Queue#pop` is not the
-# scheduler's; a wait inside the reactor stops the thread the reactor runs
-# on, and anything the scheduler was going to deliver - an interrupt, a
-# timer - waits with it. So an example that interrupts a parked call gives
-# the reactor a turn (`sleep`) before it reads the queue, and says why.
-#
-# **Every answer is taken out of the reactor and asserted here.** An
-# exception inside `Async do |root| ... end` never reaches RSpec: the top
-# level `Async` returns the initial task rather than waiting on it, so a
-# raise in the block is logged as "Task may have ended with unhandled
-# exception" and the example ends green having measured nothing. Three of
-# these examples did exactly that before a review said so. The reactor's work
-# is wrapped, the error is carried out in a local, and the expectation is
-# made out here, where it can fail.
-#
-# **A held cancel is spent by the body**, because a raise into a fiber a
-# scheduler owns does not deliver: the first run of this file saw the
-# scheduler's own `Async::TimeoutError` arrive where `LLM::Interrupt` was
-# raised.
+# `interrupt!` was guarded by `@fiber&.alive?`, so a cancel that arrived
+# before `spawn` - when there is no fiber to raise on - was dropped and the
+# tool ran as if nothing had happened. The examples run inside a reactor
+# because Ruby ships no default `Fiber.scheduler`, and `Async` is what
+# installs the only kind there is.
 RSpec.describe LLM::Function::Fiber::Task do
   let(:log) { Queue.new }
   let(:notification) { Async::Notification.new }
@@ -46,8 +18,7 @@ RSpec.describe LLM::Function::Fiber::Task do
   ##
   # A tool that holds at a notification the example never sends, and counts
   # the interrupt it was told about. A notification yields to the scheduler,
-  # which is what parks the call inside the reactor rather than blocking the
-  # thread the reactor runs on.
+  # which is what parks the call rather than blocking the thread.
   let(:holding) do
     notification, log = self.notification, self.log
     Class.new(LLM::Tool) do
@@ -63,8 +34,8 @@ RSpec.describe LLM::Function::Fiber::Task do
   end
 
   ##
-  # A tool that answers at once, so that the call has returned before the
-  # cancel arrives.
+  # A tool that answers at once, so the call has returned before the cancel
+  # arrives.
   let(:quick) do
     Class.new(LLM::Tool) do
       name "quick"
@@ -83,8 +54,9 @@ RSpec.describe LLM::Function::Fiber::Task do
 
   ##
   # Runs the block inside a reactor and answers with the exception it ended
-  # with, if it ended with one. The reactor stops when the block returns, so
-  # nothing is left running behind the example.
+  # with. Expectations are made on what this returns rather than inside the
+  # block, because a raise under `Async` is logged and never reaches RSpec - so
+  # an example that asserts in there can pass having measured nothing.
   def react(timeout = 5, &block)
     error = nil
     Async do |root|
@@ -120,9 +92,9 @@ RSpec.describe LLM::Function::Fiber::Task do
         task.spawn
         task.interrupt!
         ##
-        # The scheduler is asked to raise, and the reactor is what runs it.
-        # A wait here would stop the thread the reactor is on, and the
-        # interrupt it is waiting for would wait with it.
+        # The reactor's turn: the scheduler delivers the raise when this
+        # thread lets it, and a read before that would block the thread the
+        # reactor runs on.
         sleep 0.1
         task.wait
       end
@@ -143,7 +115,7 @@ RSpec.describe LLM::Function::Fiber::Task do
 
     ##
     # The second wait is answered from what the first one took, which is what
-    # `Thread#value` does and what the ractor's task is expected to do.
+    # `Thread#value` does for the other in-process strategy.
     it "preserves the result" do
       task = task_for(quick)
       first = second = nil
@@ -164,8 +136,8 @@ RSpec.describe LLM::Function::Fiber::Task do
   end
 
   ##
-  # A group cancels its tasks in turn, and a task that has not been spawned
-  # is one of them; the group's own file has the rest of that story.
+  # A group cancels its tasks in turn, and a task that has not been spawned is
+  # one of them; the group's file has the rest of that story.
   describe "a cancel for a group whose tasks have not been spawned" do
     it "reaches the task" do
       task = task_for(holding)

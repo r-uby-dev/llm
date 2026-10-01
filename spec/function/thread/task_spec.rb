@@ -7,28 +7,10 @@ require "timeout"
 # The four moments a cancel can arrive in, for a thread.
 #
 # A cancel is held before the call runs, raised while it runs, and a no-op
-# once it has returned - and the first of those is the one that was missing:
-# `interrupt!` had nothing to raise on before `spawn`, so an early cancel was
-# dropped, `@delivered` was never set, the hook never ran, and the tool ran
-# as if nobody had asked it to stop.
-#
-# **Every wait has a deadline.** The tool says when the call is live, and
-# every wait for the call is wrapped, so a cancel that silently fails to be
-# delivered is a failure that names itself rather than a cell that hangs.
-#
-# **The hook is counted rather than waited on.** It runs on the thread that
-# ran the call, in that thread's `ensure`, so it has run by the time `#wait`
-# has returned however the call ended - which means a queue can be read for
-# its size instead of popped, and nothing waits for it at all.
-#
-# **The held cancel is spent by the body, and that is what this pins.** The
-# first attempt at this raised a held cancel in from outside, and the run
-# that followed showed what that costs: the interrupt was delivered, the
-# thread ended with it, the caller was given it - and the hook never ran,
-# because a raise into a thread that has not started can be delivered before
-# the block's `ensure` is active. The call itself is still not entered, and
-# no example asserts it: what a caller can depend on is the cancel taking
-# effect, the hook running, and `#wait` raising.
+# once it has returned; the first of those was dropped, because `interrupt!`
+# had nothing to raise on before `spawn`. The held cancel is spent by the body
+# now, so the hook runs with it, and every wait here has a deadline - a wrong
+# expectation fails rather than hangs.
 RSpec.describe LLM::Function::Thread::Task do
   let(:gate) { Queue.new }
   let(:log) { Queue.new }
@@ -77,8 +59,8 @@ RSpec.describe LLM::Function::Thread::Task do
     before do
       task.interrupt!
       ##
-      # Opened so that a cancel which was dropped shows up as a return
-      # rather than as a call that never ends.
+      # Opened so that a cancel which was dropped shows up as a return rather
+      # than as a call that never ends.
       gate << true
     end
 
@@ -86,6 +68,9 @@ RSpec.describe LLM::Function::Thread::Task do
       expect { within { task.wait } }.to raise_error(LLM::Interrupt)
     end
 
+    ##
+    # The hook is counted rather than waited on: it runs in the thread's
+    # `ensure`, so it has run by the time `#wait` has returned.
     it "runs the hook once the call has ended" do
       begin
         within { task.wait }
@@ -173,8 +158,7 @@ RSpec.describe LLM::Function::Thread::Task do
 
   ##
   # A group cancels its tasks in turn, and a task that has not been spawned
-  # is one of them: the record is what makes that reach it, and nothing
-  # pinned it.
+  # is one of them: the record is what makes that reach it.
   describe "a cancel for a group whose tasks have not been spawned" do
     let(:group) { LLM::Function::Thread::Group.new([task]) }
 
