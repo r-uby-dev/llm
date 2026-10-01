@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "setup"
+require "timeout"
 
 ##
 # The window a turn has nothing in it.
@@ -15,9 +16,12 @@ require "setup"
 # for as long as the turn lasts, and an interrupt that has nothing more
 # precise to do is raised into that frame.
 #
-# Every example here runs the turn on a thread of its own, because that is
-# the shape the window is closed for: a worker runs the turn, a cancel
-# arrives on another thread, and the raise has to land where the turn is.
+# Every wait here has a deadline. A hook that never fires is a failure the
+# suite can report rather than a suite that stops where the hook was
+# expected - which is the convention the task specs set for cancels, and it
+# is what caught this file's first draft: an example waited forever for a
+# hook the turn never reached because it failed earlier, in a thread of its
+# own where the failure is a line on stderr rather than an example.
 class BlockingStep < LLM::Stream
   def initialize(arrived:, gate:)
     @arrived, @gate = arrived, gate
@@ -88,10 +92,21 @@ RSpec.describe "a turn interrupted between its requests" do
   let(:gate) { Queue.new }
   let(:requests) { [] }
   let(:failing) { false }
-  let(:agent) { LLM::Agent.new(provider, model: "gpt-5.4") }
+
+  ##
+  # The chat completions API, because the body the transport answers with
+  # is a chat completion. OpenAI defaults to the responses API, and these
+  # examples are about the loop rather than about which API it drove.
+  let(:agent) { LLM::Agent.new(provider, model: "gpt-5.4", mode: :completions) }
   let(:ctx) { agent.instance_variable_get(:@ctx) }
 
   before do
+    ##
+    # Built on this thread rather than on a turn's, so the example and its
+    # turn share one agent, one stream, and one pair of queues.
+    agent
+    arrived
+    gate
     fails = 0
     allow(provider).to receive(:transport).and_return(transport)
     allow(transport).to receive(:set_body_stream)
@@ -102,10 +117,28 @@ RSpec.describe "a turn interrupted between its requests" do
     end
   end
 
+  after do
+    ##
+    # A turn that is still waiting would outlive the stubs this example
+    # installed, and its next call would be a real one.
+    @turn&.kill
+  end
+
   ##
-  # The turn, on a thread of its own. What a cancel has to reach is a
-  # frame, so the example needs one that is not its own - and the thread
-  # answers with the exception it ended on, or nil when the turn worked.
+  # A queue read that cannot wait forever.
+  def settle(queue, timeout = 5)
+    Timeout.timeout(timeout) { queue.pop }
+  end
+
+  ##
+  # And the same for anything else that might not come back.
+  def within(timeout = 5, &block)
+    Timeout.timeout(timeout, &block)
+  end
+
+  ##
+  # The turn, on a thread of its own, which is what a cancel has to reach:
+  # the frame is a thread that is not the one asking for the interrupt.
   def run_turn
     agent.talk("hi")
     nil
@@ -119,27 +152,27 @@ RSpec.describe "a turn interrupted between its requests" do
 
   describe "when the cancel arrives between two requests" do
     let(:agent) do
-      LLM::Agent.new(provider, model: "gpt-5.4", stream: BlockingStep.new(arrived:, gate:))
+      LLM::Agent.new(provider, model: "gpt-5.4", mode: :completions,
+                     stream: BlockingStep.new(arrived:, gate:))
     end
 
     ##
     # The frame is what a cancel is delivered to, and it is the thread the
     # turn is on - not the thread that started it, and not the fiber the
-    # request was made on, which no longer has a request to close.
+    # request was made on, which has no request left to close.
     it "records the frame the turn is running in" do
       turn
-      expect(arrived.pop).to eq(:step)
+      expect(settle(arrived)).to eq(:step)
       expect(ctx.turn_thread).to be(turn)
       gate << :go
-      expect(turn.join(5)).to be(turn)
+      expect(within { turn.value }).to be_nil
     end
 
     it "ends the turn, though nothing is in flight" do
       turn
-      expect(arrived.pop).to eq(:step)
+      expect(settle(arrived)).to eq(:step)
       agent.interrupt!
-      expect(turn.join(5)).to be(turn)
-      expect(turn.value).to be_a(LLM::Interrupt)
+      expect(within { turn.value }).to be_a(LLM::Interrupt)
     end
 
     ##
@@ -147,17 +180,17 @@ RSpec.describe "a turn interrupted between its requests" do
     # than carrying on to ask the model something nobody is waiting for.
     it "makes no request of its own" do
       turn
-      arrived.pop
+      settle(arrived)
       agent.interrupt!
-      turn.join(5)
+      within { turn.value }
       expect(requests.size).to eq(1)
     end
 
     it "leaves no frame behind once the turn is over" do
       turn
-      arrived.pop
+      settle(arrived)
       agent.interrupt!
-      turn.join(5)
+      within { turn.value }
       expect(ctx.turn_thread).to be_nil
       expect(ctx.turn_owner).to be_nil
     end
@@ -165,17 +198,16 @@ RSpec.describe "a turn interrupted between its requests" do
 
   describe "when the cancel arrives before the first request" do
     let(:agent) do
-      LLM::Agent.new(provider, model: "gpt-5.4",
+      LLM::Agent.new(provider, model: "gpt-5.4", mode: :completions,
                      compactor: BlockingCompactor,
                      compactor_options: {arrived:, gate:})
     end
 
     it "ends the turn without making a request" do
       turn
-      expect(arrived.pop).to eq(:compaction)
+      expect(settle(arrived)).to eq(:compaction)
       agent.interrupt!
-      expect(turn.join(5)).to be(turn)
-      expect(turn.value).to be_a(LLM::Interrupt)
+      expect(within { turn.value }).to be_a(LLM::Interrupt)
       expect(requests).to be_empty
     end
   end
@@ -183,7 +215,7 @@ RSpec.describe "a turn interrupted between its requests" do
   describe "when the cancel arrives while a retry is being waited out" do
     let(:failing) { true }
     let(:agent) do
-      LLM::Agent.new(provider, model: "gpt-5.4",
+      LLM::Agent.new(provider, model: "gpt-5.4", mode: :completions,
                      stream: BlockingRetry.new(arrived:, gate:),
                      retry_budget: 1)
     end
@@ -194,10 +226,9 @@ RSpec.describe "a turn interrupted between its requests" do
     # made, and the backoff sleeps in between.
     it "ends the turn without making the next attempt" do
       turn
-      expect(arrived.pop).to eq(:retry)
+      expect(settle(arrived)).to eq(:retry)
       agent.interrupt!
-      expect(turn.join(5)).to be(turn)
-      expect(turn.value).to be_a(LLM::Interrupt)
+      expect(within { turn.value }).to be_a(LLM::Interrupt)
       expect(requests.size).to eq(1)
     end
   end
