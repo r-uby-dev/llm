@@ -38,7 +38,9 @@ class LLM::Agent
     # asked for through the scheduler, the way
     # {LLM::Function::Fiber::Task#interrupt!} asks, because a direct raise
     # into a scheduled fiber does not transfer: it suspends the thread that
-    # raises, and that thread is the canceller's.
+    # raises, and that thread is the canceller's. A fiber with no scheduler
+    # behind it - a turn an application ran in a fiber of its own - is raised
+    # into directly, which is what such a fiber is for.
     #
     # Nothing is raised when there is no fiber to raise into, and nothing
     # is raised when the turn ended between the read and the raise - that
@@ -47,9 +49,9 @@ class LLM::Agent
     # @return [nil]
     def interrupt!
       if thread.equal?(Thread.current)
-        if fiber && scheduler.respond_to?(:fiber_interrupt)
+        if fiber && scheduler
           scheduler.fiber_interrupt(fiber, LLM::Interrupt.new("turn interrupted"))
-        elsif fiber.respond_to?(:raise)
+        elsif fiber
           fiber.raise(LLM::Interrupt, "turn interrupted")
         end
       else
