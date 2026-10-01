@@ -6,8 +6,7 @@ module LLM::ActiveRecord
     data_column: :data,
     format: :string,
     provider: :set_provider,
-    context: :set_context,
-    tracer: :set_tracer
+    context: :set_context
   }.freeze
 
   ##
