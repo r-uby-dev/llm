@@ -11,16 +11,10 @@ class Agent < LLM::Agent
       :skills       => %w[release.md].map { File.join(__dir__, _1) },
       :tools        => [LLM::Tool::Git, LLM::Tool::ReadFile, LLM::Tool::Rg, LLM::Tool::EditFile],
       :path         => File.join(__dir__, "..", "..", "contexts", "dexter.json"),
-      :tracer       => :set_tracer
+      :tracer       => -> { LLM::Tracer.pretty_logger(llm, io: $stderr) }
 
   def release(version:)
     talk("Let's release version #{version}!")
-  end
-
-  private
-
-  def set_tracer
-    LLM::Tracer.pretty_logger(llm, io: $stderr)
   end
 end
 
