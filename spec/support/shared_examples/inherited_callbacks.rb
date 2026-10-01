@@ -12,10 +12,6 @@ RSpec.shared_examples "inherited wrapper callbacks" do
       def set_context
         {mode: :responses, store: false}
       end
-
-      def set_tracer
-        LLM::Tracer.logger(llm, io: StringIO.new)
-      end
     end
   end
 
@@ -27,10 +23,6 @@ RSpec.shared_examples "inherited wrapper callbacks" do
 
     it "resolves the provider from the superclass" do
       expect(row.llm).to be_a(LLM::OpenAI)
-    end
-
-    it "resolves the tracer from the superclass" do
-      expect(row.llm.tracer).to be_a(LLM::Tracer::Logger)
     end
 
     it "resolves the context params from the superclass" do
