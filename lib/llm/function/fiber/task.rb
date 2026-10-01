@@ -32,43 +32,54 @@ module LLM::Function::Fiber
         raise ArgumentError, "Fiber concurrency requires Fiber.scheduler"
       else
         ##
-        # The fiber names itself rather than being read off the return of
-        # `Fiber.schedule`, which does not promise to be the fiber: under
+        # The body records its own ending, because the fiber is not always
+        # askable afterwards.
+        #
+        # `Fiber.schedule` does not promise to return the fiber: under
         # `Async` it is nil for a block that has already ended, and a block
         # that raises on its first instruction - a held cancel - is exactly
-        # that. A `||=` therefore, because the assignment from inside the
-        # block is the one that survives when this one has nothing to say.
+        # that. So the fiber names itself, and `@fiber` is the scheduler's
+        # return when there is one and that name when there is not.
         #
-        # `@fiber` has to be set either way, or `#wait` reaches
-        # `@fiber.value` with nothing to ask - which is what the suite saw
-        # before this line was written.
+        # The result and the failure are recorded here as well, because a
+        # fiber that has ended cannot be asked for either: `Fiber#value` is
+        # not a method, and a value read off a dead body is a `FiberError`.
+        # `#wait` reads what this block wrote, and only falls back to
+        # `@fiber` while the call is still in flight - which is the one case
+        # where there is something to wait on.
+        inner = nil
         fiber = Fiber.schedule do
-          @fiber = Fiber.current
-          ##
-          # A held cancel is spent here, at the block's first instruction,
-          # rather than raised in from the outside.
-          #
-          # **A raise into a fiber a scheduler owns does not deliver.** It
-          # is not a resume: the scheduler is the one that transfers, and
-          # what comes back through a foreign raise is the scheduler's own
-          # pending exception - which a run of this repository's specs saw
-          # as `Async::TimeoutError` arriving where `LLM::Interrupt` was
-          # raised. The block is where a raise belongs, and the hook below
-          # follows it the same way it follows a call.
-          if @cancelled
-            @delivered = true
-            raise LLM::Interrupt
+          inner = Fiber.current
+          begin
+            ##
+            # A held cancel is spent here, at the block's first instruction,
+            # rather than raised in from the outside.
+            #
+            # **A raise into a fiber a scheduler owns does not deliver.** It
+            # is not a resume: the scheduler is the one that transfers, and
+            # what comes back through a foreign raise is the scheduler's own
+            # pending exception - which a run of this repository's specs saw
+            # as `Async::TimeoutError` arriving where `LLM::Interrupt` was
+            # raised. The block is where a raise belongs, and the hook below
+            # follows it the same way it follows a call.
+            if @cancelled
+              @delivered = true
+              raise LLM::Interrupt
+            end
+            @result = function.call
+          rescue => ex
+            @failure = ex
+            raise
+          ensure
+            ##
+            # The hook runs on the fiber the call runs on, once the call has
+            # ended, rather than on the thread that cancelled. See the note on
+            # `LLM::Function::Thread::Task#spawn` for why it cannot run before
+            # the call's frame has ended, and what `@delivered` means.
+            function.interrupt! if @delivered
           end
-          function.call
-        ensure
-          ##
-          # The hook runs on the fiber the call runs on, once the call has
-          # ended, rather than on the thread that cancelled. See the note on
-          # `LLM::Function::Thread::Task#spawn` for why it cannot run before
-          # the call's frame has ended, and what `@delivered` means.
-          function.interrupt! if @delivered
         end
-        @fiber ||= fiber
+        @fiber = fiber || inner
         nil
       end
     end
@@ -96,6 +107,7 @@ module LLM::Function::Fiber
     def wait
       return @guarded if @guarded
       spawn unless @fiber
+      raise @failure if @failure
       @result ||= @fiber.value
     end
     alias_method :value, :wait
