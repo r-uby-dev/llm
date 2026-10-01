@@ -166,6 +166,7 @@ module LLM
     ##
     # Returns whether the context has been compacted and no later model
     # response has cleared that state.
+    # @return [Boolean]
     # @api private
     attr_accessor :compacted
     alias_method :compacted?, :compacted
@@ -205,7 +206,7 @@ module LLM
     # @param params The params, including optional :role (defaults to :user), :stream, :tools, :schema etc.
     # @return [LLM::Response] Returns the LLM's response for this turn.
     # @example
-    #   llm = LLM.deepseek(key: ENV["KEY"])
+    #   llm = LLM.openai(key: ENV["KEY"])
     #   ctx = LLM::Context.new(llm)
     #   res = ctx.talk("Hello, what is your name?")
     #   puts res.messages[0].content
@@ -232,7 +233,7 @@ module LLM
     # Accepts `with:` for file attachments and a block for streaming.
     # This interface is compatible with RubyLLM's `ask` method.
     #
-    # @param prompt The prompt
+    # @param [String] prompt
     # @param [Hash] options
     # @option options [String, Array<String>, nil] :with
     #  File path(s) to attach
@@ -257,7 +258,9 @@ module LLM
     ##
     # @return [String]
     def inspect
-      "#<#{LLM::Utils.object_id(self)} @llm=#{@llm.class}, @mode=#{@mode.inspect}, @params=#{@params.inspect}, @messages=#{@messages.inspect}>"
+      "#<#{LLM::Utils.object_id(self)} " \
+      "@llm=#{@llm.class}, @mode=#{@mode.inspect}, @params=#{@params.inspect}, " \
+      "@messages=#{@messages.inspect}>"
     end
 
     ##
@@ -501,6 +504,7 @@ module LLM
 
     ##
     # @param [LLM::Tracer, nil] other
+    #  A tracer, or nil.
     # @return [void]
     def tracer=(other)
       @llm.tracer = other || LLM::Tracer::Null.new(@llm)
@@ -616,7 +620,7 @@ module LLM
     end
 
     ##
-    ##
+    #
     # Runs a network call, retrying it when the request is rate limited
     # ({LLM::RateLimitError}) or times out (`Timeout::Error`, which covers
     # `Net::OpenTimeout` and `Net::ReadTimeout`), up to the retry budget.
