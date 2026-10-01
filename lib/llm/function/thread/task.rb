@@ -9,8 +9,10 @@ module LLM::Function::Thread
   # a task, pass it around, and decide when to run it.
   #
   # Interrupting a running task raises {LLM::Interrupt} inside
-  # the thread, which stops the tool call mid-flight. The thread
-  # is created with `report_on_exception` disabled so unhandled
+  # the thread, which stops the tool call mid-flight. A cancel
+  # that arrives before the thread exists is held rather than
+  # dropped, and delivered when the thread does. The thread is
+  # created with `report_on_exception` disabled so unhandled
   # exceptions propagate through {#wait} instead of to stderr.
   #
   # A tool that implements `on_interrupt` is told on that thread, once
@@ -39,9 +41,12 @@ module LLM::Function::Thread
         # frame has ended - you cannot run code on a thread blocked inside
         # a method it owns except by raising into it - and `@delivered` is
         # written before the raise and read after it, so the flag says what
-        # it means. It is set only where the raise was issued into a live
-        # thread: a cancel that arrives before the call starts, or after it
-        # has finished, interrupted nothing and tells nobody.
+        # it means. It is set wherever a raise was issued into a live
+        # thread, which includes the cancel that arrived before this thread
+        # existed: that one is held, and {#deliver!} raises it. A cancel
+        # that arrives once the call has finished interrupted nothing, and
+        # tells nobody - which is the no-op that
+        # {LLM::Function::Return#interrupt!} already is.
         #
         # The hook runs before this thread ends, so it has run before
         # `#wait` can return - which is the other half of telling the tool
@@ -51,6 +56,7 @@ module LLM::Function::Thread
         function.interrupt! if @delivered
       end
       @thread.report_on_exception = false
+      deliver!
       nil
     end
 
@@ -63,6 +69,7 @@ module LLM::Function::Thread
     ##
     # @return [nil]
     def interrupt!
+      @cancelled = true
       if @thread&.alive?
         @delivered = true
         @thread.raise(LLM::Interrupt)
@@ -84,6 +91,26 @@ module LLM::Function::Thread
     # @return [Class]
     def group_class
       LLM::Function::Thread::Group
+    end
+
+    private
+
+    ##
+    # Spends a cancel that was held rather than dropped.
+    #
+    # A cancel that arrives before the thread exists has nothing to be
+    # raised on, so it is recorded, and this is where it is delivered: the
+    # thread is live by the time this runs, and a raise into a thread that
+    # has not started is delivered at its first instruction, which is the
+    # call. A thread that has already finished is left alone, which is the
+    # cancel that arrives too late to be anything but a no-op.
+    # @return [nil]
+    def deliver!
+      if @cancelled && @thread&.alive?
+        @delivered = true
+        @thread.raise(LLM::Interrupt)
+      end
+      nil
     end
   end
 end

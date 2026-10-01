@@ -10,7 +10,8 @@ module LLM::Function::Fiber
   # Requires `Fiber.scheduler` — without one, raise early in
   # {#wait}. Interrupting a running task raises
   # {LLM::Interrupt} on the fiber, which stops it at the next
-  # yield point.
+  # yield point. A cancel that arrives before the fiber exists
+  # is held rather than dropped, and delivered when it does.
   #
   # A tool that implements `on_interrupt` is told on that fiber, once the
   # call has ended, rather than on the thread that cancelled it.
@@ -39,6 +40,7 @@ module LLM::Function::Fiber
           # the call's frame has ended, and what `@delivered` means.
           function.interrupt! if @delivered
         end
+        deliver!
         nil
       end
     end
@@ -52,6 +54,7 @@ module LLM::Function::Fiber
     ##
     # @return [nil]
     def interrupt!
+      @cancelled = true
       if @fiber&.alive?
         @delivered = true
         @fiber.raise(LLM::Interrupt)
@@ -73,6 +76,28 @@ module LLM::Function::Fiber
     # @return [Class]
     def group_class
       LLM::Function::Fiber::Group
+    end
+
+    private
+
+    ##
+    # Spends a cancel that was held rather than dropped.
+    #
+    # A cancel that arrives before the fiber exists has nothing to be
+    # raised on, so it is recorded, and this is where it is delivered.
+    # `Fiber.schedule` runs the block before it returns, so the call is
+    # live by the time this runs - it has started, and is suspended
+    # somewhere inside itself - and the raise lands inside the call rather
+    # than at its edge. A fiber whose call has already returned is left
+    # alone, which is the cancel that arrives too late to be anything but a
+    # no-op.
+    # @return [nil]
+    def deliver!
+      if @cancelled && @fiber&.alive?
+        @delivered = true
+        @fiber.raise(LLM::Interrupt)
+      end
+      nil
     end
   end
 end
