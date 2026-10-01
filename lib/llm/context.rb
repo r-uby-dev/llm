@@ -85,6 +85,28 @@ module LLM
     attr_reader :id
 
     ##
+    # The thread a turn is running on, or nil.
+    #
+    # Set by whoever runs the loop - {LLM::Agent#run_loop} - and cleared
+    # when the turn is over, so a cancel that finds nothing else to do
+    # has somewhere to be delivered. See {#interrupt!} for when that is
+    # and why a cancel from another thread goes through the thread rather
+    # than through the fiber below.
+    # @api private
+    # @return [Thread, nil]
+    attr_accessor :turn_thread
+
+    ##
+    # The fiber (or async task) a turn is running on, or nil.
+    #
+    # It is the same object {LLM::Provider#request_owner} answers with,
+    # and it is what a cancel from the turn's own thread raises into -
+    # where the thread itself would be the canceller.
+    # @api private
+    # @return [Object, nil]
+    attr_accessor :turn_owner
+
+    ##
     # @param [LLM::Provider] llm
     #  A provider
     # @param [Hash] params
@@ -166,7 +188,6 @@ module LLM
     ##
     # Returns whether the context has been compacted and no later model
     # response has cleared that state.
-    # @return [Boolean]
     # @api private
     attr_accessor :compacted
     alias_method :compacted?, :compacted
@@ -206,7 +227,7 @@ module LLM
     # @param params The params, including optional :role (defaults to :user), :stream, :tools, :schema etc.
     # @return [LLM::Response] Returns the LLM's response for this turn.
     # @example
-    #   llm = LLM.openai(key: ENV["KEY"])
+    #   llm = LLM.deepseek(key: ENV["KEY"])
     #   ctx = LLM::Context.new(llm)
     #   res = ctx.talk("Hello, what is your name?")
     #   puts res.messages[0].content
@@ -232,7 +253,8 @@ module LLM
     # Ask a question and return the content string directly.
     # Accepts `with:` for file attachments and a block for streaming.
     # This interface is compatible with RubyLLM's `ask` method.
-    # @param [String] prompt
+    #
+    # @param prompt The prompt
     # @param [Hash] options
     # @option options [String, Array<String>, nil] :with
     #  File path(s) to attach
@@ -257,9 +279,7 @@ module LLM
     ##
     # @return [String]
     def inspect
-      "#<#{LLM::Utils.object_id(self)} " \
-      "@llm=#{@llm.class}, @mode=#{@mode.inspect}, @params=#{@params.inspect}, " \
-      "@messages=#{@messages.inspect}>"
+      "#<#{LLM::Utils.object_id(self)} @llm=#{@llm.class}, @mode=#{@mode.inspect}, @params=#{@params.inspect}, @messages=#{@messages.inspect}>"
     end
 
     ##
@@ -357,8 +377,26 @@ module LLM
     end
 
     ##
-    # Interrupt the active request, if any.
-    # This is inspired by Go's context cancellation model.
+    # Interrupt a turn: the request in flight, the tools that are
+    # running, and - when it is neither of those - the frame the turn is
+    # running in.
+    #
+    # This is inspired by Go's context cancellation model, and the three
+    # are the whole of what a turn is doing. A request is closed at the
+    # socket, which is `llm.interrupt!(owner)`: the transport keys its
+    # live requests by the owner the request was made on, and answers
+    # that it has nothing to close when there is no request registered
+    # under it. A tool is a task, and every task that is running is
+    # raised into. Between the two there is nothing: the loop is between
+    # two requests, or waiting out a retry, or building the next one -
+    # and until {LLM::Agent#run_loop} recorded the frame it is running
+    # in, an interrupt there was a cancel that did nothing at all.
+    #
+    # The frame is the last resort rather than the first, because the two
+    # precise interrupts are what close a socket and stop a tool, and
+    # because they are what a tracer hears about. What is left over is a
+    # turn that is running and has nothing to point at, and that is what
+    # a raise into the frame ends.
     # @return [nil]
     def interrupt!
       llm.interrupt!(@owner)
@@ -366,6 +404,7 @@ module LLM
       pending_functions.each(&:interrupt!)
       @queue = nil
       @owner = nil
+      interrupt_frame!
       nil
     end
     alias_method :cancel!, :interrupt!
@@ -482,7 +521,6 @@ module LLM
 
     ##
     # @param [LLM::Tracer, nil] other
-    #  A tracer, or nil.
     # @return [void]
     def tracer=(other)
       @llm.tracer = other || LLM::Tracer::Null.new(@llm)
@@ -569,6 +607,51 @@ module LLM
     private
 
     ##
+    # Ends a turn that has nothing more precise to interrupt.
+    #
+    # A request in flight is closed at the socket and a tool that is
+    # running is raised into, and both are bound to a phase: the loop is
+    # only interruptible where one of them exists. Between two requests
+    # it is neither - which is where a turn waits out a retry, confirms a
+    # tool, hands returns back to the model, or builds the next request -
+    # and there the turn is only reachable where it is running.
+    #
+    # `LLM::Agent#run_loop` records that while the turn lasts, and this
+    # raises `LLM::Interrupt` into it. Which half of it receives the raise
+    # is decided by who is cancelling:
+    #
+    #   another thread  the thread, because a fiber belongs to the thread
+    #                   that made it and cannot be entered from another
+    #                   one. The raise lands in whichever fiber that
+    #                   thread is running, which is the turn's, because
+    #                   the turn is what it is doing.
+    #
+    #   the same thread the fiber, because raising on the thread would
+    #                   raise in the canceller that asked for it.
+    #
+    # A fiber scheduler is the case the second rule is for: a turn under
+    # Falcon or Async runs on a fiber of the reactor's thread, and a
+    # cancel that arrives on that thread is another fiber asking.
+    #
+    # Nothing is raised when the frame is this thread and there is no
+    # fiber to raise into, and nothing is raised when the turn ended
+    # between the read and the raise - that race is the ordinary one, and
+    # a cancel that arrives after a turn is not a failure.
+    # @api private
+    # @return [void]
+    def interrupt_frame!
+      thread = @turn_thread or return
+      owner = @turn_owner
+      if thread.equal?(Thread.current)
+        owner.raise(LLM::Interrupt, "turn interrupted") if owner.respond_to?(:raise)
+      else
+        thread.raise(LLM::Interrupt, "turn interrupted")
+      end
+    rescue ThreadError, FiberError
+      nil
+    end
+
+    ##
     # Returns the bound stream queue, if available.
     # @api private
     def queue
@@ -607,6 +690,13 @@ module LLM
     # refused before any content streams, so retrying the same request
     # loses nothing. The bare `retry` below re-runs the method body while
     # `attempts ||= 0` keeps the count across attempts.
+    #
+    # The sleep is interruptible, which is the reason it needs nothing
+    # else: a cancel that arrives here has no request in flight to close
+    # and no tool to raise into, so it is the frame that is raised into -
+    # and a thread or fiber that is sleeping receives it the way it would
+    # receive it anywhere else. A turn cancelled between two attempts
+    # does not make the next one.
     # @api private
     # @return [Object]
     def try
