@@ -965,15 +965,26 @@ module LLM
       # than in `Context#talk`, because a turn is a loop and not a
       # request.
       #
-      # Cleared below, and that is not a formality: a worker's thread is
-      # reused for the turn after this one, and a cancel that arrived
+      # The scheduler is recorded with it, and read here rather than in
+      # the interrupt: that runs on the canceller's thread, which is not
+      # the thread a scheduler was installed on. The fiber strategy names
+      # it for the same reason.
+      #
+      # Taken back below, and that is not a formality: a worker's thread
+      # is reused for the turn after this one, and a cancel that arrived
       # late would otherwise land in whatever that thread is doing.
-      @ctx.turn_thread = Thread.current
-      @ctx.turn_owner = @llm.request_owner
+      @ctx.instance_variable_set(:@thread, Thread.current)
+      @ctx.instance_variable_set(:@fiber, @llm.request_owner)
+      @ctx.instance_variable_set(:@scheduler, Fiber.scheduler)
       @llm.with_tracer(tracer, &run)
     ensure
-      @ctx.turn_thread = nil
-      @ctx.turn_owner = nil
+      ##
+      # `remove_instance_variable` raises when there is nothing to remove,
+      # and a turn can fail above the frame being recorded - `start_trace`
+      # is one line of it - so each name is asked for first.
+      @ctx.remove_instance_variable(:@thread) if @ctx.instance_variable_defined?(:@thread)
+      @ctx.remove_instance_variable(:@fiber) if @ctx.instance_variable_defined?(:@fiber)
+      @ctx.remove_instance_variable(:@scheduler) if @ctx.instance_variable_defined?(:@scheduler)
       tracer&.stop_trace
     end
 
