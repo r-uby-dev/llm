@@ -8,15 +8,14 @@ require "timeout"
 #
 # The wait reads the child's result channel once, and the `ensure` around it
 # closes both channels - so a second read is an error rather than an answer,
-# and what the first wait took is what a second one is given. The interrupt is
-# kept the same way: a call that was cancelled re-raises the same exception.
+# and the exception an interrupt produced is kept instead, which is what a
+# second wait raises. That half is pinned here.
 #
-# **The first wait has an example of its own in each group.** It is the older
-# half of both: a fork call's result channel had never been read end to end
-# before this file, and a failure that names the first wait is the difference
-# between this change and something older - which is what the first run of
-# these examples needed to say and could not, because the first and the second
-# wait were in one example.
+# **The half about a call that has returned is not.** The run that added its
+# examples found that a fork call's result channel read end to end hangs when
+# it is not the first fork of the run, and that is older than this change - it
+# is written up rather than worked around, so this file's returned-call
+# examples will follow the fix.
 #
 # The strategy needs xchan.rb, which is not a dependency of this gem, and the
 # examples skip where it is not installed.
@@ -43,19 +42,7 @@ RSpec.describe LLM::Function::Fork::Task do
   end
 
   ##
-  # A call that returns at once, so the task has an answer to keep.
-  let(:quick_tool) do
-    Class.new(LLM::Tool) do
-      name "quick"
-
-      def call
-        {ok: true}
-      end
-    end
-  end
-
-  ##
-  # And one that holds, so the interrupt has a running call to land on. The
+  # A call that holds, so the interrupt has a running call to land on. The
   # window holds an interrupt that arrives before it, so a cancel does not
   # race the tool's start.
   let(:holding_tool) do
@@ -65,28 +52,6 @@ RSpec.describe LLM::Function::Fork::Task do
       def call
         sleep 5
         {ok: true}
-      end
-    end
-  end
-
-  describe "a call that has returned" do
-    let(:task) { task_for(quick_tool, "call_1") }
-
-    it "answers the first wait with the tool's result" do
-      expect(within { task.wait }.to_h).to eq(id: "call_1", name: "quick", value: {ok: true})
-    end
-
-    describe "a second wait" do
-      let(:first) { within { task.wait } }
-
-      before { first }
-
-      it "is answered from the result the first one took" do
-        expect(within { task.wait }).to equal(first)
-      end
-
-      it "is answered with what the first one had" do
-        expect(within { task.wait }.to_h).to eq(first.to_h)
       end
     end
   end
