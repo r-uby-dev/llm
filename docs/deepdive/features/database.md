@@ -275,8 +275,8 @@ tracer, stream, and confirm:
 The model implements two callbacks and the wrapper resolves them by
 name: `set_provider`, which is required, and `set_context`, which is
 optional. A tracer is not one of them - there is no `set_tracer` - so
-give it to `acts_as_agent` as `tracer:`, or set it on the agent in the
-block as the example below does.
+set it on the agent in the block, as the example below does, or give it
+to `acts_as_agent` as `tracer:`.
 
 ##### Migration with TEXT column
 
@@ -315,10 +315,10 @@ require "llm/active_record"
 
 class Agent < ApplicationRecord
   acts_as_agent(format: :jsonb) do |agent|
-    agent.model "deepseek-v4-pro"
-    agent.instructions "solve the user's query"
-    agent.tools [Research, FinalizeResearch, ActOnResearch]
-    agent.tracer -> { LLM::Tracer.logger(llm, io: $stdout) }
+    agent.set model: "deepseek-v4-pro",
+              instructions: "solve the user's query",
+              tools: [Research, FinalizeResearch, ActOnResearch],
+              tracer: proc { LLM::Tracer.logger(llm, io: $stdout) }
   end
 
   private
@@ -352,9 +352,9 @@ The model requires a `set_provider` private method that returns an
 [`LLM::Provider`](https://r.uby.dev/api-docs/llm.rb/LLM/Provider.html)
 instance, and may implement `set_context` to seed the context with
 parameters. Those two are the only callbacks `acts_as_llm` and
-`acts_as_agent` resolve. A tracer is passed to the wrapper as
-`tracer:`, or set on the agent in the block
-(`agent.tracer ...`, `agent.stream ...`).
+`acts_as_agent` resolve. A tracer is set on the agent in the block -
+`agent.set tracer: proc { ... }` - or passed to the wrapper as
+`tracer:`.
 
 An agent built by `acts_as_agent` is bound to the record it was
 loaded from, and
@@ -468,8 +468,8 @@ instance. Configure agent defaults in the block -- model, tools,
 instructions, tracer, stream, and confirm all go here:
 
 As with ActiveRecord, the model implements `set_provider` and
-`set_context`, the plugin takes a tracer as `tracer:`, and a tracer
-can be set on the agent in the block.
+`set_context`, and a tracer is set on the agent in the block with
+`agent.set tracer:`, or passed to the plugin as `tracer:`.
 
 ##### Migration with TEXT column
 
@@ -504,10 +504,10 @@ require "llm/sequel/plugin"
 
 class Agent < Sequel::Model
   plugin(:agent, format: :jsonb) do |agent|
-    agent.model "deepseek-v4-pro"
-    agent.instructions "solve the user's query"
-    agent.tools [Research, FinalizeResearch, ActOnResearch]
-    agent.tracer -> { LLM::Tracer.logger(llm, io: $stdout) }
+    agent.set model: "deepseek-v4-pro",
+              instructions: "solve the user's query",
+              tools: [Research, FinalizeResearch, ActOnResearch],
+              tracer: proc { LLM::Tracer.logger(llm, io: $stdout) }
   end
 
   private
@@ -539,8 +539,9 @@ The model requires a `set_provider` private method that returns an
 [`LLM::Provider`](https://r.uby.dev/api-docs/llm.rb/LLM/Provider.html)
 instance, and may implement `set_context` to seed the context with
 parameters. Those two are the only callbacks `plugin :llm` and
-`plugin :agent` resolve. A tracer is passed to the plugin as
-`tracer:`, or set on the agent in the block.
+`plugin :agent` resolve. A tracer is set on the agent in the block -
+`agent.set tracer: proc { ... }` - or passed to the plugin as
+`tracer:`.
 
 To persist a context instead of an agent, use `plugin :llm`. The
 model gains `#llm` (the provider) and `#ctx` (the context), and
