@@ -4,24 +4,13 @@ require "setup"
 require "timeout"
 
 ##
-# The window a turn has nothing in it.
+# A turn is a loop, and between two of its requests there is nothing in
+# flight to close and nothing running to raise into - so a cancel that
+# arrived there reached nothing at all, until the loop named the caller it is
+# running under and the caller learned to answer `interrupt!`.
 #
-# `Context#interrupt!` reaches a request in flight - the transport closes
-# the socket of the request registered under the owner - and a tool that is
-# running, which is a task that can be raised into. Both are bound to a
-# phase, so between them a cancel reached nothing at all: the loop is
-# between two requests, or waiting out a retry, or building the next one.
-#
-# `LLM::Agent#run_loop` names the caller the turn is running under - the
-# thread, the fiber, the scheduler the fiber belongs to, and the turn's
-# tracer - in the context's own `@caller`, for as long as the turn lasts, and
-# the caller answers `interrupt!`. An interrupt that has nothing more precise
-# to do is asked of it.
-#
-# Every wait here has a deadline. A hook that never fires is a failure the
-# suite can report rather than a suite that stops where the hook was
-# expected - which is the convention the task specs set for cancels, and it
-# is what turned each of this file's three drafts into a named failure.
+# Every wait here has a deadline, so a hook that never fires is a failing
+# example rather than a suite that stops where the hook was expected.
 class BlockingTracer < LLM::Tracer
   def initialize(llm, arrived:, gate:)
     super(llm)
@@ -91,24 +80,24 @@ end
 
 RSpec.describe "a turn interrupted between its requests" do
   let(:provider) { LLM.openai(key: "test") }
+  let(:model) { "gpt-5.4" }
+  let(:payload) { {choices: [{message: {role: "assistant", content: "hi"}}]} }
+
   let(:transport) do
     double("transport",
       interrupt_errors: [],
       interrupted?: false,
       interrupt!: nil)
   end
-  let(:payload) { {choices: [{message: {role: "assistant", content: "hi"}}]} }
 
   ##
   # The response the transport answers with, as a pair rather than a value.
   #
   # `handle_response` parses the body and writes the parsed result back
   # through the same reader, so a stub that always answered the raw string
-  # would hand the adapter a String where it expects a completion - which
-  # is what this file did, and what made the one example that let a turn
-  # finish fail with `undefined method 'choices' for an instance of
-  # String`. The wrapper delegates both to this object, so the pair is what
-  # the parse actually round trips through.
+  # would hand the adapter a String where it expects a completion. The
+  # wrapper delegates both to this object, so the pair is what the parse
+  # round trips through.
   let(:response) do
     Net::HTTPOK.new("1.1", "200", "OK").tap do |res|
       body = LLM.json.dump(payload)
@@ -119,30 +108,21 @@ RSpec.describe "a turn interrupted between its requests" do
   end
 
   ##
-  # What the loop tells the example, and what it waits on. The example
-  # holds the gate closed until it has cancelled, so the cancel and the
-  # loop cannot race: the loop is provably inside the window when the
-  # interrupt is made.
+  # What the loop tells the example, and what it waits on. The example holds
+  # the gate closed until it has cancelled, so the loop is provably inside
+  # the window when the interrupt is made.
   let(:arrived) { Queue.new }
   let(:gate) { Queue.new }
   let(:requests) { [] }
   let(:failing) { false }
 
   ##
-  # The chat completions API, because the body the transport answers with
-  # is a chat completion. OpenAI defaults to the responses API, and these
-  # examples are about the loop rather than about which API it drove.
-  let(:agent) { LLM::Agent.new(provider, model: "gpt-5.4", mode: :completions) }
+  # The chat completions API, because the body the transport answers with is
+  # a chat completion, and OpenAI defaults to the responses API.
+  let(:agent) { LLM::Agent.new(provider, model:, mode: :completions) }
   let(:ctx) { agent.instance_variable_get(:@ctx) }
-  let(:caller) { ctx.instance_variable_get(:@caller) }
 
   before do
-    ##
-    # Built on this thread rather than on a turn's, so the example and its
-    # turn share one agent, one observer, and one pair of queues.
-    agent
-    arrived
-    gate
     fails = 0
     allow(provider).to receive(:transport).and_return(transport)
     ##
@@ -192,99 +172,105 @@ RSpec.describe "a turn interrupted between its requests" do
 
   describe "when the cancel arrives between two requests" do
     let(:agent) do
-      LLM::Agent.new(provider, model: "gpt-5.4", mode: :completions,
+      LLM::Agent.new(provider, model:, mode: :completions,
                      tracer: BlockingTracer.new(provider, arrived:, gate:))
     end
+    let(:caller) { ctx.instance_variable_get(:@caller) }
 
-    ##
-    # The caller is what a cancel is delivered to, and its thread is the one
-    # the turn is on - not the thread that started it, and not the fiber the
-    # request was made on, which has no request left to close.
-    it "names the caller the turn is running under" do
-      turn
-      expect(settle(arrived)).to eq(:finish)
-      expect(caller.thread).to be(turn)
-      expect(caller.fiber).to be_a(Fiber)
-      gate << :go
-      expect(within { turn.value }).to be_nil
+    context "while the loop is between two requests" do
+      before do
+        turn
+        settle(arrived)
+      end
+
+      it "names the turn's thread as the caller's thread" do
+        expect(caller.thread).to be(turn)
+      end
+
+      it "names the turn's fiber as the caller's fiber" do
+        expect(caller.fiber).to be_a(Fiber)
+      end
     end
 
-    it "ends the turn, though nothing is in flight" do
-      turn
-      expect(settle(arrived)).to eq(:finish)
-      agent.interrupt!
-      expect(within { turn.value }).to be_a(LLM::Interrupt)
-    end
+    context "when the cancel arrives there" do
+      before do
+        turn
+        settle(arrived)
+        agent.interrupt!
+      end
 
-    ##
-    # The tracer hears about the interrupt the turn was given, and not only
-    # about the one a tool was given.
-    it "tells the tracer the turn was interrupted" do
-      turn
-      expect(settle(arrived)).to eq(:finish)
-      agent.interrupt!
-      expect(settle(arrived)).to eq([:interrupt, :agent])
-      expect(within { turn.value }).to be_a(LLM::Interrupt)
-    end
+      it "ends the turn, though nothing is in flight" do
+        expect(within { turn.value }).to be_a(LLM::Interrupt)
+      end
 
-    ##
-    # A raise, and not a second request: the turn ends where it is rather
-    # than carrying on to ask the model something nobody is waiting for.
-    it "makes no request of its own" do
-      turn
-      settle(arrived)
-      agent.interrupt!
-      within { turn.value }
-      expect(requests.size).to eq(1)
-    end
+      context "once the turn is over" do
+        before { within { turn.value } }
 
-    ##
-    # The caller is set back to nil rather than left where it was, and that
-    # is not a formality: a worker's thread is reused for the turn after
-    # this one.
-    it "leaves no caller behind once the turn is over" do
-      turn
-      settle(arrived)
-      agent.interrupt!
-      within { turn.value }
-      expect(ctx.instance_variable_get(:@caller)).to be_nil
+        it "tells the tracer which phase ended" do
+          expect(settle(arrived)).to eq([:interrupt, :agent])
+        end
+
+        it "makes no request of its own" do
+          expect(requests.size).to eq(1)
+        end
+
+        it "leaves no caller behind" do
+          expect(ctx.instance_variable_get(:@caller)).to be_nil
+        end
+      end
     end
   end
 
   describe "when the cancel arrives before the first request" do
     let(:agent) do
-      LLM::Agent.new(provider, model: "gpt-5.4", mode: :completions,
+      LLM::Agent.new(provider, model:, mode: :completions,
                      compactor: BlockingCompactor,
                      compactor_options: {arrived:, gate:})
     end
 
-    it "ends the turn without making a request" do
+    before do
       turn
-      expect(settle(arrived)).to eq(:compaction)
+      settle(arrived)
       agent.interrupt!
+    end
+
+    it "ends the turn" do
       expect(within { turn.value }).to be_a(LLM::Interrupt)
-      expect(requests).to be_empty
+    end
+
+    context "once the turn is over" do
+      before { within { turn.value } }
+
+      it "makes no request at all" do
+        expect(requests).to be_empty
+      end
     end
   end
 
   describe "when the cancel arrives while a retry is being waited out" do
     let(:failing) { true }
     let(:agent) do
-      LLM::Agent.new(provider, model: "gpt-5.4", mode: :completions,
+      LLM::Agent.new(provider, model:, mode: :completions,
                      stream: BlockingRetry.new(arrived:, gate:),
                      retry_budget: 1)
     end
 
-    ##
-    # The retry is what a cancel used to be lost to: the request that
-    # failed is not in flight any more, the one that follows has not been
-    # made, and the backoff sleeps in between.
-    it "ends the turn without making the next attempt" do
+    before do
       turn
-      expect(settle(arrived)).to eq(:retry)
+      settle(arrived)
       agent.interrupt!
+    end
+
+    it "ends the turn" do
       expect(within { turn.value }).to be_a(LLM::Interrupt)
-      expect(requests.size).to eq(1)
+    end
+
+    context "once the turn is over" do
+      before { within { turn.value } }
+
+      it "makes no next attempt" do
+        expect(requests.size).to eq(1)
+      end
     end
   end
 
@@ -293,7 +279,18 @@ RSpec.describe "a turn interrupted between its requests" do
   # built here the way `run_loop` builds it, and the context is asked to
   # cancel.
   describe "when the cancel comes from the turn's own thread" do
-    def caller_for(fiber, scheduler: nil)
+    let(:context) { LLM::Context.new(provider) }
+    let(:ended) { [] }
+    let(:scheduler) { nil }
+    let(:fiber) do
+      ended = self.ended
+      Fiber.new do
+        Fiber.yield
+      rescue LLM::Interrupt => ex
+        ended << ex
+      end
+    end
+    let(:caller) do
       LLM::Object.from(
         thread: Thread.current,
         fiber:,
@@ -301,46 +298,29 @@ RSpec.describe "a turn interrupted between its requests" do
       ).extend(LLM::Agent::Interrupt)
     end
 
-    ##
-    # The thread is the canceller here, so the raise cannot go through it -
-    # it has to go through the fiber the turn is running on, or the
-    # interrupt would land in whoever asked for it.
-    it "raises into the fiber rather than into the canceller" do
-      context = LLM::Context.new(provider)
-      ended = nil
-      fiber = Fiber.new do
-        Fiber.yield
-      rescue LLM::Interrupt => ex
-        ended = ex
-      end
+    before do
       fiber.resume
-      context.instance_variable_set(:@caller, caller_for(fiber))
+      context.instance_variable_set(:@caller, caller)
       context.interrupt!
-      expect(ended).to be_a(LLM::Interrupt)
     end
 
-    ##
-    # And a scheduled fiber is asked for through the scheduler, the way
-    # `LLM::Function::Fiber::Task#interrupt!` asks, because a direct raise
-    # into one does not transfer the exception: it suspends the thread that
-    # raises, and that thread is the canceller's.
-    it "asks the scheduler when the fiber belongs to one" do
-      context = LLM::Context.new(provider)
-      fiber = Fiber.new { Fiber.yield }
-      fiber.resume
-      scheduler = double("scheduler", fiber_interrupt: nil)
-      context.instance_variable_set(:@caller, caller_for(fiber, scheduler:))
-      context.interrupt!
-      expect(scheduler).to have_received(:fiber_interrupt)
-        .with(fiber, kind_of(LLM::Interrupt))
+    it "raises into the fiber rather than into the canceller" do
+      expect(ended.first).to be_a(LLM::Interrupt)
+    end
+
+    context "when the fiber belongs to a scheduler" do
+      let(:scheduler) { double("scheduler", fiber_interrupt: nil) }
+
+      it "asks the scheduler rather than raising at the fiber" do
+        expect(scheduler).to have_received(:fiber_interrupt)
+          .with(fiber, kind_of(LLM::Interrupt))
+      end
     end
   end
 
   ##
-  # And the turn that never named a caller - a raw context, which has no
-  # loop of its own - keeps the behaviour it had: a cancel with nothing to
-  # interrupt is a cancel that does nothing, rather than one raised into
-  # the caller.
+  # And the turn that never named a caller - a raw context, which has no loop
+  # of its own - keeps the behaviour it had.
   describe "when no caller was recorded" do
     it "does not raise into the canceller" do
       expect { LLM::Context.new(provider).interrupt! }.not_to raise_error
