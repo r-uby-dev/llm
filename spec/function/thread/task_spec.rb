@@ -21,12 +21,14 @@ require "timeout"
 # has returned however the call ended - which means a queue can be read for
 # its size instead of popped, and nothing waits for it at all.
 #
-# **Nothing here asserts that the thread was entered.** A raise into a thread
-# that has not started is delivered at its first checkpoint, and whether that
-# is at the call or just inside it depends on the schedule. What a caller can
-# depend on is what these examples assert: the cancel is not dropped, the
-# hook runs, and `#wait` raises. The fiber file can assert more, because
-# `Fiber.schedule` runs its block before it returns.
+# **The held cancel is spent by the body, and that is what this pins.** The
+# first attempt at this raised a held cancel in from outside, and the run
+# that followed showed what that costs: the interrupt was delivered, the
+# thread ended with it, the caller was given it - and the hook never ran,
+# because a raise into a thread that has not started can be delivered before
+# the block's `ensure` is active. The call itself is still not entered, and
+# no example asserts it: what a caller can depend on is the cancel taking
+# effect, the hook running, and `#wait` raising.
 RSpec.describe LLM::Function::Thread::Task do
   let(:gate) { Queue.new }
   let(:log) { Queue.new }

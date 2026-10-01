@@ -11,12 +11,12 @@ require "async"
 # early cancel was dropped, `@delivered` was never set, the hook never ran,
 # and the tool ran as if nothing had happened.
 #
-# **A fiber is entered where a thread may not be.** `Fiber.schedule` runs its
-# block before it returns, so by the time `spawn` delivers a held cancel the
-# call has started and is parked at the notification this file never sends -
-# which is why the raise lands in the tool rather than at its edge, and why
-# this file can assert the hook while the thread's file cannot assert the
-# entry.
+# **A raise into a fiber a scheduler owns does not deliver**, and the first
+# run of these examples is what said so: `@fiber.raise(LLM::Interrupt)` from
+# `spawn` came back as `Async::TimeoutError` - the scheduler's own pending
+# exception, arriving where the interrupt was raised, five seconds later. A
+# fiber a scheduler runs is not resumed by us, so the held cancel is spent by
+# the block itself, at its first instruction, exactly as the thread's is.
 #
 # **The reactor is what the strategy needs, and the timeout is what the
 # example needs.** The strategy requires a `Fiber.scheduler`, and `Async`
@@ -24,9 +24,14 @@ require "async"
 # wrapped in `Async::Task#with_timeout`, so a cancel that fails to be
 # delivered is a failure that names itself rather than a cell that hangs.
 #
-# **The hook is counted rather than waited on**: it runs in the fiber's
+# **The hook is counted rather than waited on**: it runs in the block's
 # `ensure`, so it has run by the time `#wait` has returned however the call
 # ended.
+#
+# **The running cancel is still a foreign raise**, and this file is the only
+# place it is exercised: `interrupt!` raises on a parked fiber, from inside
+# the reactor. It is the one path a scheduler can still swallow, and the
+# example says so by existing rather than by passing forever.
 RSpec.describe LLM::Function::Fiber::Task do
   let(:log) { Queue.new }
   let(:notification) { Async::Notification.new }
