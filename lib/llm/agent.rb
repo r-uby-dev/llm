@@ -954,8 +954,26 @@ module LLM
       # identifies the turn.
       tracer = @tracer || @llm.tracer
       tracer.start_trace(name: "llm.turn", trace_group_id: SecureRandom.uuid_v7)
+      ##
+      # Where the turn is running, for as long as it runs.
+      #
+      # A cancel reaches a request in flight and the tools that are
+      # running, and between those it reached nothing: the loop is
+      # between two requests, or waiting out a retry, or building the
+      # next one. What is left over is a raise into the frame the turn
+      # is running in, and this is that frame - recorded here rather
+      # than in `Context#talk`, because a turn is a loop and not a
+      # request.
+      #
+      # Cleared below, and that is not a formality: a worker's thread is
+      # reused for the turn after this one, and a cancel that arrived
+      # late would otherwise land in whatever that thread is doing.
+      @ctx.turn_thread = Thread.current
+      @ctx.turn_owner = @llm.request_owner
       @llm.with_tracer(tracer, &run)
     ensure
+      @ctx.turn_thread = nil
+      @ctx.turn_owner = nil
       tracer&.stop_trace
     end
 
