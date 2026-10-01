@@ -92,9 +92,9 @@ Attributes passed to
 [`LLM::Agent.set`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#set-class_method)
 can be plain values, blocks, or
 Symbols. A Symbol is evaluated as an instance method on the
-subclass, so `tracer: :set_tracer` calls `set_tracer` on the
-instance. A block like `stream: -> { $stdout }` is evaluated
-when the attribute is first accessed.
+subclass, so `tools: :tools` calls `tools` on the instance. A
+block like `stream: -> { $stdout }` is evaluated when the attribute
+is first accessed.
 
 Set `path:` on a subclass or instance for automatic filesystem
 persistence; the agent restores conversation history from the
