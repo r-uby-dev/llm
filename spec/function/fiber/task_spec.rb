@@ -11,27 +11,26 @@ require "async"
 # early cancel was dropped, `@delivered` was never set, the hook never ran,
 # and the tool ran as if nothing had happened.
 #
-# **A raise into a fiber a scheduler owns does not deliver**, and the first
-# run of these examples is what said so: `@fiber.raise(LLM::Interrupt)` from
-# `spawn` came back as `Async::TimeoutError` - the scheduler's own pending
-# exception, arriving where the interrupt was raised, five seconds later. A
-# fiber a scheduler runs is not resumed by us, so the held cancel is spent by
-# the block itself, at its first instruction, exactly as the thread's is.
+# **Every example takes its answer out of the reactor and asserts it here.**
+# An exception inside `Async do |root| ... end` does not reach RSpec: the top
+# level `Async` runs `Async::Reactor#run`, which returns the initial task
+# rather than waiting on it, so a raise inside the block is logged as "Task
+# may have ended with unhandled exception" and the example ends green having
+# evaluated no assertion at all. That is a trap, and three of these examples
+# fell into it before a review said so: the reactor's work is wrapped, the
+# error is carried out in a local, and the expectation is made out here,
+# where it can fail.
 #
-# **The reactor is what the strategy needs, and the timeout is what the
-# example needs.** The strategy requires a `Fiber.scheduler`, and `Async`
-# installs one on the thread its block runs on. Every wait for the call is
-# wrapped in `Async::Task#with_timeout`, so a cancel that fails to be
-# delivered is a failure that names itself rather than a cell that hangs.
+# **A held cancel is spent by the body.** A raise into a fiber a scheduler
+# owns does not deliver - the first run of this file saw the scheduler's own
+# `Async::TimeoutError` arrive where `LLM::Interrupt` was raised - so the
+# block raises at its first instruction, where the scheduler is not in the
+# way and the hook below it is active.
 #
-# **The hook is counted rather than waited on**: it runs in the block's
-# `ensure`, so it has run by the time `#wait` has returned however the call
-# ended.
-#
-# **The running cancel is still a foreign raise**, and this file is the only
-# place it is exercised: `interrupt!` raises on a parked fiber, from inside
-# the reactor. It is the one path a scheduler can still swallow, and the
-# example says so by existing rather than by passing forever.
+# **The running cancel is the scheduler's raise.** `interrupt!` asks the
+# scheduler to interrupt the fiber, because raising directly suspends the
+# thread it is called on - which is the caller's thread, so the interrupt
+# reaches the tool and the canceller never comes back.
 RSpec.describe LLM::Function::Fiber::Task do
   let(:log) { Queue.new }
   let(:notification) { Async::Notification.new }
@@ -74,75 +73,80 @@ RSpec.describe LLM::Function::Fiber::Task do
     end.task(:fiber)
   end
 
+  ##
+  # Runs the block inside a reactor and answers with the exception it ended
+  # with, if it ended with one. The reactor stops when the block returns, so
+  # nothing is left running behind the example.
+  def react(timeout = 5, &block)
+    error = nil
+    Async do |root|
+      root.with_timeout(timeout) do
+        block.call
+      rescue => ex
+        error = ex
+      end
+    end
+    error
+  end
+
   describe "a cancel that arrives before the call runs" do
     it "is held rather than dropped" do
       task = task_for(holding)
       task.interrupt!
-      Async do |root|
-        root.with_timeout(5) do
-          expect { task.wait }.to raise_error(LLM::Interrupt)
-        end
-      end
+      error = react { task.wait }
+      expect(error).to be_a(LLM::Interrupt)
     end
 
     it "runs the hook once the call has ended" do
       task = task_for(holding)
       task.interrupt!
-      Async do |root|
-        root.with_timeout(5) do
-          begin
-            task.wait
-          rescue LLM::Interrupt
-            nil
-          end
-        end
-      end
-      expect(log.size).to eq(1)
+      error = react { task.wait }
+      expect([error.class, log.size]).to eq([LLM::Interrupt, 1])
     end
   end
 
   describe "a cancel that arrives while the call runs" do
     it "raises at the tool" do
       task = task_for(holding)
-      Async do |root|
-        root.with_timeout(5) do
-          task.spawn
-          task.interrupt!
-          expect { task.wait }.to raise_error(LLM::Interrupt)
-        end
+      error = react do
+        task.spawn
+        task.interrupt!
+        task.wait
       end
+      expect(error).to be_a(LLM::Interrupt)
     end
   end
 
   describe "a cancel that arrives after the call has returned" do
     it "is a no-op" do
       task = task_for(quick)
-      Async do |root|
-        root.with_timeout(5) do
-          task.wait
-          expect(task.interrupt!).to be_nil
-        end
+      cancelled = :unset
+      error = react do
+        task.wait
+        cancelled = task.interrupt!
       end
+      expect([error, cancelled]).to eq([nil, nil])
     end
 
+    ##
+    # The second wait is answered from what the first one took, which is what
+    # `Thread#value` does and what the ractor's task is expected to do.
     it "preserves the result" do
       task = task_for(quick)
-      Async do |root|
-        root.with_timeout(5) do
-          result = task.wait
-          task.interrupt!
-          expect(task.wait).to equal(result)
-        end
+      first = second = nil
+      error = react do
+        first = task.wait
+        task.interrupt!
+        second = task.wait
       end
+      expect([error, second.equal?(first)]).to eq([nil, true])
     end
 
     it "does not run the hook" do
       task = task_for(quick)
-      Async do |root|
-        root.with_timeout(5) { task.wait }
-      end
+      error = react { task.wait }
       task.interrupt!
-      expect(log).to be_empty
+      expect([error, log.size]).to eq([nil, 0])
     end
   end
 
@@ -154,11 +158,8 @@ RSpec.describe LLM::Function::Fiber::Task do
       task = task_for(holding)
       group = LLM::Function::Fiber::Group.new([task])
       group.interrupt!
-      Async do |root|
-        root.with_timeout(5) do
-          expect { group.wait }.to raise_error(LLM::Interrupt)
-        end
-      end
+      error = react { group.wait }
+      expect(error).to be_a(LLM::Interrupt)
     end
   end
 end
