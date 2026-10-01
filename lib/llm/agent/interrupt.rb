@@ -6,11 +6,12 @@ class LLM::Agent
   #
   # A turn is a loop, and between two of its requests there is nothing in
   # flight to close and nothing running to raise into. {LLM::Agent#run_loop}
-  # records where it is running - the thread, the fiber, and the scheduler
-  # that fiber belongs to - and extends this onto that record, so an
-  # interrupt with nothing more precise to do has somewhere to land:
-  # {LLM::Context#interrupt!} calls `interrupt!` on the caller it holds, and
-  # what the caller does with the three names is its own business.
+  # records where it is running - the thread, the fiber, the scheduler that
+  # fiber belongs to, and the tracer the turn is traced with - and extends
+  # this onto that record, so an interrupt with nothing more precise to do
+  # has somewhere to land: {LLM::Context#interrupt!} calls `interrupt!` on
+  # the caller it holds, and what the caller does with the names is its own
+  # business.
   #
   # It is public rather than private because the runtime is not the only
   # thing that runs a loop: an application with a loop of its own can record
@@ -19,7 +20,7 @@ class LLM::Agent
   # @see LLM::Context#interrupt!
   module Interrupt
     ##
-    # Ends the turn where it is.
+    # Ends the turn where it is, and tells the tracer first.
     #
     # Which name receives the raise is decided by who is cancelling:
     #
@@ -42,19 +43,30 @@ class LLM::Agent
     # behind it - a turn an application ran in a fiber of its own - is raised
     # into directly, which is what such a fiber is for.
     #
-    # Nothing is raised when there is no fiber to raise into, and nothing
-    # is raised when the turn ended between the read and the raise - that
-    # race is the ordinary one, and a cancel that arrives after a turn is
-    # not a failure.
+    # The tracer is told `scope: :turn`, before the raise, the way
+    # {LLM::Context#wait} tells it `scope: :tool` before the caller is given
+    # that interrupt. A tracer that has to account for every interrupt a turn
+    # receives needs this one too, and the alternative - announcing it from
+    # the turn as it unwinds - is not available: between two requests there
+    # is no frame of the turn's own to announce it from.
+    #
+    # Nothing is raised, and nothing is announced, when there is no fiber to
+    # raise into - and nothing is raised when the turn ended between the read
+    # and the raise, which is the ordinary race, because a cancel that
+    # arrives after a turn is not a failure.
     # @return [nil]
     def interrupt!
       if thread.equal?(Thread.current)
-        if fiber && scheduler
-          scheduler.fiber_interrupt(fiber, LLM::Interrupt.new("turn interrupted"))
-        elsif fiber
-          fiber.raise(LLM::Interrupt, "turn interrupted")
+        if fiber
+          tracer&.on_interrupt(scope: :turn)
+          if scheduler
+            scheduler.fiber_interrupt(fiber, LLM::Interrupt.new("turn interrupted"))
+          else
+            fiber.raise(LLM::Interrupt, "turn interrupted")
+          end
         end
       else
+        tracer&.on_interrupt(scope: :turn)
         thread.raise(LLM::Interrupt, "turn interrupted")
       end
       nil
