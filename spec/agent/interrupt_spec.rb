@@ -279,7 +279,7 @@ RSpec.describe "a turn interrupted between its requests" do
         thread: Thread.current,
         fiber:,
         scheduler:
-      ).extend(LLM::Agent::Caller)
+      ).extend(LLM::Agent::Interrupt)
     end
 
     ##
