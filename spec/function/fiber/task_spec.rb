@@ -11,26 +11,34 @@ require "async"
 # early cancel was dropped, `@delivered` was never set, the hook never ran,
 # and the tool ran as if nothing had happened.
 #
-# **Every example takes its answer out of the reactor and asserts it here.**
-# An exception inside `Async do |root| ... end` does not reach RSpec: the top
-# level `Async` runs `Async::Reactor#run`, which returns the initial task
-# rather than waiting on it, so a raise inside the block is logged as "Task
-# may have ended with unhandled exception" and the example ends green having
-# evaluated no assertion at all. That is a trap, and three of these examples
-# fell into it before a review said so: the reactor's work is wrapped, the
-# error is carried out in a local, and the expectation is made out here,
-# where it can fail.
+# **The scheduler is `Async`'s, and it has to be somebody's.** Ruby ships no
+# default `Fiber.scheduler`, so a strategy that runs a call with
+# `Fiber.schedule` leans on something the runtime does not provide: a
+# scheduler has to be installed, and the thread it is installed on is the
+# thread whose work is cooperative from then on. `Async` installs one on the
+# thread its block runs on, which is why these examples are written inside a
+# reactor - not to test the reactor, but because a scheduler is the only way
+# this strategy runs at all. There is no library-free version of this file.
 #
-# **A held cancel is spent by the body.** A raise into a fiber a scheduler
-# owns does not deliver - the first run of this file saw the scheduler's own
-# `Async::TimeoutError` arrive where `LLM::Interrupt` was raised - so the
-# block raises at its first instruction, where the scheduler is not in the
-# way and the hook below it is active.
+# **The reactor is a thread, and a wait blocks it.** `Queue#pop` is not the
+# scheduler's; a wait inside the reactor stops the thread the reactor runs
+# on, and anything the scheduler was going to deliver - an interrupt, a
+# timer - waits with it. So an example that interrupts a parked call gives
+# the reactor a turn (`sleep`) before it reads the queue, and says why.
 #
-# **The running cancel is the scheduler's raise.** `interrupt!` asks the
-# scheduler to interrupt the fiber, because raising directly suspends the
-# thread it is called on - which is the caller's thread, so the interrupt
-# reaches the tool and the canceller never comes back.
+# **Every answer is taken out of the reactor and asserted here.** An
+# exception inside `Async do |root| ... end` never reaches RSpec: the top
+# level `Async` returns the initial task rather than waiting on it, so a
+# raise in the block is logged as "Task may have ended with unhandled
+# exception" and the example ends green having measured nothing. Three of
+# these examples did exactly that before a review said so. The reactor's work
+# is wrapped, the error is carried out in a local, and the expectation is
+# made out here, where it can fail.
+#
+# **A held cancel is spent by the body**, because a raise into a fiber a
+# scheduler owns does not deliver: the first run of this file saw the
+# scheduler's own `Async::TimeoutError` arrive where `LLM::Interrupt` was
+# raised.
 RSpec.describe LLM::Function::Fiber::Task do
   let(:log) { Queue.new }
   let(:notification) { Async::Notification.new }
@@ -111,6 +119,11 @@ RSpec.describe LLM::Function::Fiber::Task do
       error = react do
         task.spawn
         task.interrupt!
+        ##
+        # The scheduler is asked to raise, and the reactor is what runs it.
+        # A wait here would stop the thread the reactor is on, and the
+        # interrupt it is waiting for would wait with it.
+        sleep 0.1
         task.wait
       end
       expect(error).to be_a(LLM::Interrupt)
@@ -152,7 +165,7 @@ RSpec.describe LLM::Function::Fiber::Task do
 
   ##
   # A group cancels its tasks in turn, and a task that has not been spawned
-  # is one of them.
+  # is one of them; the group's own file has the rest of that story.
   describe "a cancel for a group whose tasks have not been spawned" do
     it "reaches the task" do
       task = task_for(holding)
