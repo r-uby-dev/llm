@@ -8,8 +8,8 @@ require "timeout"
 #
 # The wait reads the child's result channel once, and the `ensure` around it
 # closes both channels - so a second read is an error rather than an answer,
-# and what the first wait took is kept instead. The interrupt is kept the same
-# way: a call that was cancelled re-raises the same exception on every wait.
+# and what the first wait took is what a second one is given. The interrupt is
+# kept the same way: a call that was cancelled re-raises the same exception.
 #
 # The strategy needs xchan.rb, which is not a dependency of this gem, and the
 # examples skip where it is not installed.
@@ -28,26 +28,30 @@ RSpec.describe LLM::Function::Fork::Task do
     thread.join(seconds) ? thread.value : raise("timed out after #{seconds} seconds")
   end
 
+  def task_for(tool, id)
+    tool.function.dup.tap do |fn|
+      fn.id = id
+      fn.arguments = {}
+    end.task(:fork)
+  end
+
   ##
-  # A call that returns at once, so that the task has an answer to keep.
-  let(:quick) do
+  # A call that returns at once, so the task has an answer to keep.
+  let(:quick_tool) do
     Class.new(LLM::Tool) do
       name "quick"
 
       def call
         {ok: true}
       end
-    end.function.dup.tap do |fn|
-      fn.id = "call_1"
-      fn.arguments = {}
-    end.task(:fork)
+    end
   end
 
   ##
-  # And one that holds, so that the interrupt has a running call to land on.
-  # The window holds an interrupt that arrives before it, so the cancel does
-  # not race the tool's start.
-  let(:holding) do
+  # And one that holds, so the interrupt has a running call to land on. The
+  # window holds an interrupt that arrives before it, so a cancel does not
+  # race the tool's start.
+  let(:holding_tool) do
     Class.new(LLM::Tool) do
       name "holding"
 
@@ -55,42 +59,55 @@ RSpec.describe LLM::Function::Fork::Task do
         sleep 5
         {ok: true}
       end
-    end.function.dup.tap do |fn|
-      fn.id = "call_2"
-      fn.arguments = {}
-    end.task(:fork)
+    end
   end
 
   describe "a call that has returned" do
+    let(:task) { task_for(quick_tool, "call_1") }
+    let(:first) { within { task.wait } }
+
+    before { first }
+
     it "answers a second wait from the result it has" do
-      first = within { quick.wait }
-      expect(within { quick.wait }).to equal(first)
+      expect(within { task.wait }).to equal(first)
     end
 
     it "answers a second wait with what the first one had" do
-      first = within { quick.wait }
-      expect(within { quick.wait }.to_h).to eq(first.to_h)
+      expect(within { task.wait }.to_h).to eq(first.to_h)
     end
   end
 
   describe "a call that was interrupted" do
-    it "raises the same exception on a second wait" do
-      holding.spawn
-      holding.interrupt!
+    let(:task) { task_for(holding_tool, "call_2") }
 
-      first = begin
-        within { holding.wait }
-        nil
-      rescue LLM::Interrupt => ex
-        ex
-      end
+    ##
+    # The exception the first wait raised, which a second one has to raise
+    # again rather than reading a channel that has gone.
+    let(:first) do
+      within { task.wait }
+      nil
+    rescue LLM::Interrupt => ex
+      ex
+    end
+
+    before do
+      task.spawn
+      task.interrupt!
+      first
+    end
+
+    it "raises LLM::Interrupt on a second wait" do
+      expect { within { task.wait } }.to raise_error(LLM::Interrupt)
+    end
+
+    it "raises the same exception it raised the first time" do
       second = begin
-        within { holding.wait }
+        within { task.wait }
         nil
       rescue LLM::Interrupt => ex
         ex
       end
-      expect([first.class, second.equal?(first)]).to eq([LLM::Interrupt, true])
+      expect(second).to equal(first)
     end
   end
 end
