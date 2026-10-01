@@ -11,7 +11,7 @@ RSpec.describe "acts_as_llm" do
 
   let(:context) do
     Class.new(model) do
-      acts_as_llm
+      acts_as_llm(tracer: -> { LLM::Tracer.logger(llm, io: StringIO.new) })
 
       private
 
@@ -21,10 +21,6 @@ RSpec.describe "acts_as_llm" do
 
       def set_context
         {model: "gpt-5.4-mini", mode: :responses, store: false}
-      end
-
-      def set_tracer
-        LLM::Tracer.logger(llm, io: StringIO.new)
       end
     end
   end
@@ -67,7 +63,7 @@ RSpec.describe "acts_as_llm" do
           vcr: {cassette_name: "openai/chat/completion_contract"} do
     let(:context) do
       Class.new(model) do
-        acts_as_llm
+        acts_as_llm(tracer: -> { LLM::Tracer.logger(llm, io: StringIO.new) })
 
         private
 
@@ -77,10 +73,6 @@ RSpec.describe "acts_as_llm" do
 
         def set_context
           {model: "gpt-4.1"}
-        end
-
-        def set_tracer
-          LLM::Tracer.logger(llm, io: StringIO.new)
         end
       end
     end
