@@ -960,31 +960,33 @@ module LLM
       # A cancel reaches a request in flight and the tools that are
       # running, and between those it reached nothing: the loop is
       # between two requests, or waiting out a retry, or building the
-      # next one. What is left over is a raise into the frame the turn
-      # is running in, and this is that frame - recorded here rather
-      # than in `Context#talk`, because a turn is a loop and not a
-      # request.
+      # next one. What is left over is a raise into the caller the turn
+      # is running under, and this names it - recorded here rather than in
+      # `Context#talk`, because a turn is a loop and not a request.
       #
-      # The scheduler is recorded with it, and read here rather than in
-      # the interrupt: that runs on the canceller's thread, which is not
-      # the thread a scheduler was installed on. The fiber strategy names
-      # it for the same reason.
+      # The scheduler is part of it, and read here rather than by the
+      # interrupt: that runs on the canceller's thread, which is not the
+      # thread a scheduler was installed on. The fiber strategy names it
+      # for the same reason.
       #
       # Taken back below, and that is not a formality: a worker's thread
       # is reused for the turn after this one, and a cancel that arrived
       # late would otherwise land in whatever that thread is doing.
-      @ctx.instance_variable_set(:@thread, Thread.current)
-      @ctx.instance_variable_set(:@fiber, @llm.request_owner)
-      @ctx.instance_variable_set(:@scheduler, Fiber.scheduler)
+      @ctx.instance_variable_set(
+        :@caller,
+        LLM::Object.from(
+          thread: Thread.current,
+          fiber: @llm.request_owner,
+          scheduler: Fiber.scheduler
+        )
+      )
       @llm.with_tracer(tracer, &run)
     ensure
       ##
       # `remove_instance_variable` raises when there is nothing to remove,
-      # and a turn can fail above the frame being recorded - `start_trace`
-      # is one line of it - so each name is asked for first.
-      @ctx.remove_instance_variable(:@thread) if @ctx.instance_variable_defined?(:@thread)
-      @ctx.remove_instance_variable(:@fiber) if @ctx.instance_variable_defined?(:@fiber)
-      @ctx.remove_instance_variable(:@scheduler) if @ctx.instance_variable_defined?(:@scheduler)
+      # and a turn can fail above the caller being recorded - `start_trace`
+      # is one line of it - so the name is asked for first.
+      @ctx.remove_instance_variable(:@caller) if @ctx.instance_variable_defined?(:@caller)
       tracer&.stop_trace
     end
 
