@@ -183,12 +183,12 @@ RSpec.describe "acts_as_agent" do
     end
   end
 
-  context "when the tracer is declared in the block" do
+  context "when the tracer is set in the block" do
     let(:agent) do
       Class.new(model) do
         acts_as_agent do |agent|
-          agent.model "gpt-5.4-mini"
-          agent.tracer -> { LLM::Tracer.logger(llm, io: StringIO.new) }
+          agent.set model: "gpt-5.4-mini",
+                    tracer: proc { LLM::Tracer.logger(llm, io: StringIO.new) }
         end
 
         private
