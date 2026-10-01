@@ -12,9 +12,10 @@ require "timeout"
 # phase, so between them a cancel reached nothing at all: the loop is
 # between two requests, or waiting out a retry, or building the next one.
 #
-# `LLM::Agent#run_loop` records the thread and the fiber it is running on
-# for as long as the turn lasts, and an interrupt that has nothing more
-# precise to do is raised into that frame.
+# `LLM::Agent#run_loop` records the thread, the fiber and the scheduler the
+# turn is running under, in the context's own ivars, for as long as the turn
+# lasts - and an interrupt that has nothing more precise to do is raised
+# into that frame.
 #
 # Every wait here has a deadline. A hook that never fires is a failure the
 # suite can report rather than a suite that stops where the hook was
@@ -189,7 +190,7 @@ RSpec.describe "a turn interrupted between its requests" do
     it "records the frame the turn is running in" do
       turn
       expect(settle(arrived)).to eq(:finish)
-      expect(ctx.turn_thread).to be(turn)
+      expect(ctx.instance_variable_get(:@thread)).to be(turn)
       gate << :go
       expect(within { turn.value }).to be_nil
     end
@@ -212,13 +213,17 @@ RSpec.describe "a turn interrupted between its requests" do
       expect(requests.size).to eq(1)
     end
 
+    ##
+    # The frame is taken back rather than left behind, and that is not a
+    # formality: a worker's thread is reused for the turn after this one.
     it "leaves no frame behind once the turn is over" do
       turn
       settle(arrived)
       agent.interrupt!
       within { turn.value }
-      expect(ctx.turn_thread).to be_nil
-      expect(ctx.turn_owner).to be_nil
+      expect(ctx.instance_variable_defined?(:@thread)).to be(false)
+      expect(ctx.instance_variable_defined?(:@fiber)).to be(false)
+      expect(ctx.instance_variable_defined?(:@scheduler)).to be(false)
     end
   end
 
@@ -275,10 +280,28 @@ RSpec.describe "a turn interrupted between its requests" do
         ended = ex
       end
       fiber.resume
-      context.turn_thread = Thread.current
-      context.turn_owner = fiber
+      context.instance_variable_set(:@thread, Thread.current)
+      context.instance_variable_set(:@fiber, fiber)
       context.interrupt!
       expect(ended).to be_a(LLM::Interrupt)
+    end
+
+    ##
+    # And a scheduled fiber is asked for through the scheduler, the way
+    # `LLM::Function::Fiber::Task#interrupt!` asks, because a direct raise
+    # into one does not transfer the exception: it suspends the thread that
+    # raises, and that thread is the canceller's.
+    it "asks the scheduler when the fiber belongs to one" do
+      context = LLM::Context.new(provider)
+      fiber = Fiber.new { Fiber.yield }
+      fiber.resume
+      scheduler = double("scheduler", fiber_interrupt: nil)
+      context.instance_variable_set(:@thread, Thread.current)
+      context.instance_variable_set(:@fiber, fiber)
+      context.instance_variable_set(:@scheduler, scheduler)
+      context.interrupt!
+      expect(scheduler).to have_received(:fiber_interrupt)
+        .with(fiber, kind_of(LLM::Interrupt))
     end
   end
 
