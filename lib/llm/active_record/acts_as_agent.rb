@@ -15,6 +15,11 @@ module LLM::ActiveRecord
   # instead of an {LLM::Context LLM::Context}. Agent defaults such as model,
   # tools, schema, instructions, and concurrency are configured on the model
   # class and forwarded to an internal agent subclass.
+  #
+  # The model implements `set_provider` (required) and `set_context`
+  # (optional), and the wrapper resolves them by name. A tracer is not one of
+  # those callbacks: give it to `acts_as_agent` as `tracer:`, or set it on the
+  # agent in the block with `agent.tracer`.
   module ActsAsAgent
     module ClassMethods
       ##
@@ -80,7 +85,9 @@ module LLM::ActiveRecord
     #   ActiveRecord JSON typecasting enabled.
     # @option options [Proc, Symbol, LLM::Tracer, nil] :tracer
     #   Optional tracer, method name, or proc that resolves to one and is
-    #   assigned through `llm.tracer = ...` on the resolved provider.
+    #   assigned through `llm.tracer = ...` on the resolved provider. There is
+    #   no `set_tracer` callback: the tracer is given here, or on the agent in
+    #   the block.
     # @option options [Proc, Symbol, LLM::Provider] :provider
     #   Must resolve to an `LLM::Provider` instance for the current record.
     # @yield
