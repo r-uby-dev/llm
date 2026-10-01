@@ -7,17 +7,18 @@ require "async"
 # A group of fiber calls, and what a cancel does to one.
 #
 # The group spawns its tasks in turn and waits on each, so a cancel has to
-# reach a task that has not been spawned and keep walking past one that has
-# already returned. The examples run inside a reactor because Ruby ships no
-# default `Fiber.scheduler`, and `Async` installs the only kind there is.
+# reach a task that has not been spawned, and a wait has to be served for a
+# call that is still parked. The examples run inside a reactor because Ruby
+# ships no default `Fiber.scheduler`, and `Async` installs the only kind there
+# is.
 RSpec.describe LLM::Function::Fiber::Group do
   let(:log) { Queue.new }
   let(:notification) { Async::Notification.new }
 
   ##
-  # A tool that holds at a notification the example never sends, and counts
-  # the interrupt it was told about - so a parked call is something a cancel
-  # can reach, and something the example can see it reached.
+  # A tool that holds at a notification, and counts the interrupt it was told
+  # about - so a parked call is something a cancel can reach, and something
+  # the example can see it reached.
   let(:holding) do
     notification, log = self.notification, self.log
     Class.new(LLM::Tool) do
@@ -76,6 +77,26 @@ RSpec.describe LLM::Function::Fiber::Group do
       returns = nil
       error = react { returns = group.wait }
       expect([error, returns.map(&:id)]).to eq([nil, %w[call_1 call_2]])
+    end
+  end
+
+  ##
+  # A group waits on its tasks in turn, so the first wait is for a call that
+  # has not answered yet. The reactor serves it - the pop parks the fiber, the
+  # parked call runs to its end, and the push wakes the waiter - which is the
+  # case the group's handoff was built for and the one no example reached.
+  describe "a group with a call that is parked" do
+    it "answers with a return for each of them" do
+      parked = task_for(holding, "call_1")
+      answered = task_for(quick, "call_2")
+      returns = nil
+      error = react do
+        group = described_class.new([parked, answered])
+        group.spawn
+        notification.signal
+        returns = group.wait.map(&:id)
+      end
+      expect([error, returns]).to eq([nil, %w[call_1 call_2]])
     end
   end
 

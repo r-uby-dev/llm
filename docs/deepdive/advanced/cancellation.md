@@ -32,10 +32,19 @@ At the same time,
 is raised on every active tool.
 A tool running in a thread gets it on that thread. A tool in a
 fiber gets it on that fiber. A tool in a forked process gets it
-via a message over the control channel. Pending tools (not yet
-started) are cancelled through
-[`LLM::Function#cancel`](https://r.uby.dev/api-docs/llm.rb/LLM/Function.html#cancel)
-without ever being executed.
+via a message over the control channel.
+
+A tool that has not started yet is not forgotten. On `:thread`
+and `:fiber` the cancel is held on the task and spent as the
+tool's body begins, so the tool's
+[`on_interrupt`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool.html#on_interrupt-instance_method)
+hook runs and the caller sees
+[`LLM::Interrupt`](https://r.uby.dev/api-docs/llm.rb/LLM/Interrupt.html)
+rather than a call that ran to completion. The other strategies
+answer it their own way: `:async` raises before the call is
+entered, `:fork` and `:ractor` deliver it as a message, and
+`:sequential` runs no call at all, so the hook is its only
+notification.
 
 The transport layer also cancels the in-flight HTTP request.
 
@@ -71,4 +80,6 @@ tool that enters an infinite loop would run forever without it.
 The `:ractor` strategy delivers the interrupt through ractor
 message passing. The `:fork` strategy delivers it via a message
 over the xchan control channel. All other strategies raise the
-exception directly on the executing thread or fiber.
+exception directly on the executing thread or fiber - except
+`:fiber`, which asks the scheduler to deliver it when the
+scheduler provides the hook for it, as `Async` does.

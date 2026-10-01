@@ -4,7 +4,8 @@ require "setup"
 require "async"
 
 ##
-# The four moments a cancel can arrive in, for a fiber.
+# The moments a cancel can arrive in, for a fiber, and one wait that arrives
+# while the call is still parked.
 #
 # `interrupt!` was guarded by `@fiber&.alive?`, so a cancel that arrived
 # before `spawn` - when there is no fiber to raise on - was dropped and the
@@ -16,9 +17,9 @@ RSpec.describe LLM::Function::Fiber::Task do
   let(:notification) { Async::Notification.new }
 
   ##
-  # A tool that holds at a notification the example never sends, and counts
-  # the interrupt it was told about. A notification yields to the scheduler,
-  # which is what parks the call rather than blocking the thread.
+  # A tool that holds at a notification, and counts the interrupt it was told
+  # about. A notification yields to the scheduler, which is what parks the
+  # call rather than blocking the thread.
   let(:holding) do
     notification, log = self.notification, self.log
     Class.new(LLM::Tool) do
@@ -99,6 +100,31 @@ RSpec.describe LLM::Function::Fiber::Task do
         task.wait
       end
       expect(error).to be_a(LLM::Interrupt)
+    end
+  end
+
+  ##
+  # The case the handoff exists for: a call that parks, and a wait that
+  # arrives before it answers. Nothing is asked of the fiber here - the pop
+  # parks this fiber, the tool runs to its end, and the push wakes the waiter.
+  describe "a wait that arrives while the call is parked" do
+    it "answers with the tool's value" do
+      task = task_for(holding)
+      parked = nil
+      returns = nil
+      error = react do
+        task.spawn
+        ##
+        # `spawn` returns once the body has parked, so the call is inside the
+        # tool when the notification is sent - and the wait below is the one
+        # the queue was added for.
+        parked = task.alive?
+        notification.signal
+        returns = task.wait
+      end
+      expect([error, parked, returns.to_h]).to eq(
+        [nil, true, {id: "call_1", name: "holding", value: {ok: true}}]
+      )
     end
   end
 
