@@ -11,6 +11,13 @@ require "timeout"
 # and what the first wait took is what a second one is given. The interrupt is
 # kept the same way: a call that was cancelled re-raises the same exception.
 #
+# **The first wait has an example of its own in each group.** It is the older
+# half of both: a fork call's result channel had never been read end to end
+# before this file, and a failure that names the first wait is the difference
+# between this change and something older - which is what the first run of
+# these examples needed to say and could not, because the first and the second
+# wait were in one example.
+#
 # The strategy needs xchan.rb, which is not a dependency of this gem, and the
 # examples skip where it is not installed.
 RSpec.describe LLM::Function::Fork::Task do
@@ -64,16 +71,23 @@ RSpec.describe LLM::Function::Fork::Task do
 
   describe "a call that has returned" do
     let(:task) { task_for(quick_tool, "call_1") }
-    let(:first) { within { task.wait } }
 
-    before { first }
-
-    it "answers a second wait from the result it has" do
-      expect(within { task.wait }).to equal(first)
+    it "answers the first wait with the tool's result" do
+      expect(within { task.wait }.to_h).to eq(id: "call_1", name: "quick", value: {ok: true})
     end
 
-    it "answers a second wait with what the first one had" do
-      expect(within { task.wait }.to_h).to eq(first.to_h)
+    describe "a second wait" do
+      let(:first) { within { task.wait } }
+
+      before { first }
+
+      it "is answered from the result the first one took" do
+        expect(within { task.wait }).to equal(first)
+      end
+
+      it "is answered with what the first one had" do
+        expect(within { task.wait }.to_h).to eq(first.to_h)
+      end
     end
   end
 
@@ -84,23 +98,25 @@ RSpec.describe LLM::Function::Fork::Task do
     # The exception the first wait raised, which a second one has to raise
     # again rather than reading a channel that has gone.
     let(:first) do
+      task.spawn
+      task.interrupt!
       within { task.wait }
       nil
     rescue LLM::Interrupt => ex
       ex
     end
 
-    before do
-      task.spawn
-      task.interrupt!
-      first
+    before { first }
+
+    it "raises LLM::Interrupt on the first wait" do
+      expect(first).to be_a(LLM::Interrupt)
     end
 
     it "raises LLM::Interrupt on a second wait" do
       expect { within { task.wait } }.to raise_error(LLM::Interrupt)
     end
 
-    it "raises the same exception it raised the first time" do
+    it "raises the same exception the first one raised" do
       second = begin
         within { task.wait }
         nil
