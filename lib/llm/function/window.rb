@@ -34,7 +34,10 @@ class LLM::Function
     #  A scheduler to ask instead of a thread to raise on - the
     #  `Fiber.scheduler` a tool that runs under one was given. Asking is
     #  not raising: `fiber_interrupt` schedules the raise and returns, so a
-    #  canceller that is the tool's own thread is not left waiting on it.
+    #  canceller that is the tool's own thread is not left waiting on it. A
+    #  scheduler that does not implement it - it is new enough that few do -
+    #  is asked by raising on the fiber directly, which suspends the
+    #  canceller until the scheduler delivers it.
     # @param [Fiber, nil] fiber
     #  The fiber the scheduler is asked to raise on, which is the one
     #  running the tool.
@@ -182,7 +185,11 @@ class LLM::Function
     # @return [Proc]
     def interrupt_for(thread:, scheduler:, fiber:)
       if scheduler and fiber
-        -> { scheduler.fiber_interrupt(fiber, LLM::Interrupt.new) }
+        if scheduler.respond_to?(:fiber_interrupt)
+          -> { scheduler.fiber_interrupt(fiber, LLM::Interrupt.new) }
+        else
+          -> { fiber.raise(LLM::Interrupt) }
+        end
       elsif scheduler or fiber
         raise ArgumentError, "a scheduler and a fiber are given together"
       else
