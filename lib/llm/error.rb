@@ -82,6 +82,16 @@ module LLM
   RactorError = Class.new(Error)
 
   ##
+  # When a fiber tool's scheduler cannot hold a cancel until the tool starts.
+  #
+  # A cancel that arrives before a call opens is issued at the call's first
+  # instruction, and only a scheduler that implements `fiber_interrupt` can
+  # be asked for a raise from there - it schedules the raise rather than
+  # issuing it. A scheduler that cannot is told so, rather than delivering
+  # the cancel before the call and never running the tool.
+  FiberError = Class.new(Error)
+
+  ##
   # When a tool call cannot be mapped to a local tool
   NoSuchToolError = Class.new(Error)
 
