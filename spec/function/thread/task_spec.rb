@@ -11,6 +11,11 @@ require "timeout"
 # had nothing to raise on before `spawn`. The held cancel is delivered inside
 # the call now, so a tool whose own rescue cleans up is cleaned up - and every
 # wait here has a deadline, a wrong expectation fails rather than hangs.
+#
+# The tools hold at the gate rather than running straight through, which is
+# what makes a held cancel measurable: a tool that finished before the raise
+# landed would be a call with nothing left to interrupt, and the example would
+# be measuring the schedule rather than the delivery.
 RSpec.describe LLM::Function::Thread::Task do
   let(:gate) { Queue.new }
   let(:log) { Queue.new }
@@ -36,8 +41,9 @@ RSpec.describe LLM::Function::Thread::Task do
   end
 
   ##
-  # And one that cleans up in its own rescue rather than in a hook, which is
-  # what a cancel has to reach to be worth holding.
+  # And one that cleans up in its own rescue and raises on, so the caller
+  # still sees the interrupt - which is the whole of what the held cancel has
+  # to reach: the tool's rescue, and the caller's exception.
   let(:rescuing) do
     started, gate, cleaned = self.started, self.gate, self.cleaned
     Class.new(LLM::Tool) do
@@ -48,7 +54,7 @@ RSpec.describe LLM::Function::Thread::Task do
         {ok: true}
       rescue LLM::Interrupt
         cleaned << :cleaned_up
-        {ok: false, interrupted: true}
+        raise
       end
     end
   end
@@ -94,13 +100,7 @@ RSpec.describe LLM::Function::Thread::Task do
   end
 
   describe "a cancel that arrives before the call runs" do
-    before do
-      task.interrupt!
-      ##
-      # Opened so that a cancel which was dropped shows up as a return rather
-      # than as a call that never ends.
-      gate << true
-    end
+    before { task.interrupt! }
 
     it "is held rather than dropped" do
       expect { within { task.wait } }.to raise_error(LLM::Interrupt)
@@ -186,12 +186,6 @@ RSpec.describe LLM::Function::Thread::Task do
     context "when the tool cleans up in its own rescue" do
       let(:fn) { fn_for(rescuing) }
 
-      before do
-        task.spawn
-        settle(started)
-        task.interrupt!
-      end
-
       it "is cleaned up" do
         begin
           within { task.wait }
@@ -240,10 +234,7 @@ RSpec.describe LLM::Function::Thread::Task do
       end.task(:thread)
     end
 
-    before do
-      task.interrupt!
-      gate << true
-    end
+    before { task.interrupt! }
 
     it "is held rather than dropped" do
       expect { within { task.wait } }.to raise_error(LLM::Interrupt)
@@ -256,10 +247,7 @@ RSpec.describe LLM::Function::Thread::Task do
   describe "a cancel for a group whose tasks have not been spawned" do
     let(:group) { LLM::Function::Thread::Group.new([task]) }
 
-    before do
-      group.interrupt!
-      gate << true
-    end
+    before { group.interrupt! }
 
     it "reaches the task" do
       expect { within { group.wait } }.to raise_error(LLM::Interrupt)
