@@ -72,7 +72,7 @@ class LLM::Function
     # @return [Boolean]
     def alive?
       return false if @waited || !@pid
-      result = ::Process.waitpid(@pid, ::Process::WNOCHILD)
+      result = ::Process.waitpid(@pid, ::Process::WNOHANG)
       @waited = !result.nil?
       !@waited
     rescue Errno::ECHILD
