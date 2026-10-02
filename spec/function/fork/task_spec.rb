@@ -11,6 +11,13 @@ require "timeout"
 # and a call that was cancelled re-raises the same exception. A child that
 # ended without writing is answered in band, the way a tool that raised is.
 #
+# **A cancel that arrives before the child has the call running is held, not
+# dropped**: the control message is a datagram, so it waits in the channel
+# until the child's watcher reads it, and the watcher waits on the window the
+# child opens immediately before the call. The record of what happened is
+# written on the result channel, because a fork's copy of a tool is not the
+# object the parent holds.
+#
 # The half about a call that returned is issue #203, and the order below is the
 # failing run's order: the first wait is one example, the second waits are the
 # next two, and everything else this file asks for runs after them.
@@ -83,6 +90,30 @@ RSpec.describe LLM::Function::Fork::Task do
       def call
         sleep 5
         {ok: true}
+      end
+    end
+  end
+
+  ##
+  # A call that records what reached it. The hook writes a flag and the rescue
+  # reads it back, so the record says both that the rescue ran and that the
+  # hook was written first - which is the order the job's watcher promises, and
+  # the reason a tool that releases a resource has released it by the time the
+  # raise lands.
+  let(:recording_tool) do
+    Class.new(LLM::Tool) do
+      name "recording"
+
+      def call
+        @entered = true
+        sleep 5
+        {ok: true}
+      rescue LLM::Interrupt
+        {entered: @entered, told: @told, rescued: true}
+      end
+
+      def on_interrupt
+        @told = true
       end
     end
   end
@@ -182,6 +213,53 @@ RSpec.describe LLM::Function::Fork::Task do
 
     it "raises the same exception the first one raised" do
       expect(second).to equal(first)
+    end
+  end
+
+  ##
+  # The cancel is made before the task is spawned, so it provably precedes the
+  # call: the child reads it before it has the call running, and the watcher
+  # waits on a window that is still idle. What the tool recorded comes back on
+  # the result channel, which is what a rescue that answers rather than raises
+  # is for here.
+  describe "a call that was cancelled before it was entered" do
+    let(:task) { task_for(recording_tool, "call_4") }
+    let(:returned) { within(task:) { task.wait } }
+
+    before do
+      task.interrupt!
+      task.spawn
+      returned
+    end
+
+    it "enters the tool" do
+      expect(returned.value[:entered]).to be(true)
+    end
+
+    it "runs the tool's own rescue" do
+      expect(returned.value[:rescued]).to be(true)
+    end
+
+    it "tells the tool before the raise lands" do
+      expect(returned.value[:told]).to be(true)
+    end
+  end
+
+  ##
+  # And the same cancel on a call that does not rescue: the interrupt escapes
+  # the tool, the child writes that on the result channel, and the caller is
+  # given it.
+  describe "a call cancelled before it was entered that does not rescue" do
+    let(:task) { task_for(holding_tool, "call_5") }
+    let(:error) { raised { within(task:) { task.wait } } }
+
+    before do
+      task.interrupt!
+      task.spawn
+    end
+
+    it "gives the caller LLM::Interrupt" do
+      expect(error).to be_a(LLM::Interrupt)
     end
   end
 
