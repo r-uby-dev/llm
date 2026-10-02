@@ -49,18 +49,16 @@ module LLM::Function::Async
     # hook that runs after the queue was pushed is a hook the caller can
     # race past.
     #
-    # **An interrupt is answered, not raised on.** It is pushed to the queue
-    # and the task ends having answered, because a task that ends with one
-    # is not contained here the way a `StandardError` is: it ends the
-    # reactor's thread, and the interrupt is then raised again in whoever
-    # stops the reactor - which is `#wait`'s own `ensure`, and so the
-    # caller's thread rather than a task's. The caller is given the
-    # interrupt either way; this is the difference between a cancel and a
-    # cancel that takes a thread down with it.
+    # An interrupt is answered, not raised on. `LLM::Interrupt` is a subclass
+    # of `Exception`, and one that is left to raise kills the reactor's
+    # thread and takes every other task on that reactor with it. So the task
+    # rescues it, stores it on its own queue, and exits silently - and the
+    # caller reads the queue and raises the interrupt on its own thread or
+    # fiber, which is where it was asked for.
     #
-    # Both rescues name the interrupt rather than leaving it to a bare
+    # The rescue below names the interrupt rather than leaving it to a bare
     # rescue, because a bare rescue - and `rescue => e` - reaches only
-    # `StandardError`, and an interrupt sits outside it.
+    # `StandardError`.
     # @return [nil]
     def spawn
       return if @guarded
