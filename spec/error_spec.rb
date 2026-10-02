@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "setup"
+require "setup"
 
 ##
 # An interrupt is a request to stop rather than a failure to handle, so it
