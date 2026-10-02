@@ -328,7 +328,7 @@ end
 
 llm = LLM.deepseek(key: ENV["KEY"])
 agent = LLM::Agent.new(llm, tools: [Search])
-Thread.new { sleep(1); agent.cancel! }
+Thread.new { sleep(1); agent.interrupt! }
 
 begin
   agent.talk "find every TODO in the repository", stream: $stdout
