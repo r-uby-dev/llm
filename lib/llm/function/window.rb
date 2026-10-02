@@ -15,16 +15,37 @@ class LLM::Function
   # there is nothing to interrupt - a cancel that arrives once the work is
   # finished is a no-op, which is what
   # {LLM::Function::Return#interrupt!} already says one is.
+  #
+  # **What differs between the strategies is the asker, not the edges.**
+  # A tool that runs on a thread is interrupted by raising on that thread;
+  # one that runs under a scheduler is interrupted by asking the scheduler,
+  # which schedules the raise and returns. Both are one call here, and
+  # everything else - the three states, and what "this call was
+  # interrupted" means - is this object's, so the strategies agree about
+  # where a call begins and ends.
   class Window
     ##
-    # @param [Thread] thread
+    # @param [Thread, nil] thread
     #  The thread the interrupt is raised on, which is the one running the
     #  tool. An argument rather than `::Thread.main` so that a strategy
     #  whose tool runs elsewhere, and a spec, can say which thread they
     #  mean.
+    # @param [Object, nil] scheduler
+    #  A scheduler to ask instead of a thread to raise on - the
+    #  `Fiber.scheduler` a tool that runs under one was given. Asking is
+    #  not raising: `fiber_interrupt` schedules the raise and returns, so a
+    #  canceller that is the tool's own thread is not left waiting on it.
+    # @param [Fiber, nil] fiber
+    #  The fiber the scheduler is asked to raise on, which is the one
+    #  running the tool.
     # @return [LLM::Function::Window]
-    def initialize(thread: ::Thread.main)
-      @thread = thread
+    def initialize(thread: nil, scheduler: nil, fiber: nil)
+      @ask = if scheduler && fiber
+        -> { scheduler.fiber_interrupt(fiber, LLM::Interrupt.new) }
+      else
+        thread ||= ::Thread.main
+        -> { thread.raise(LLM::Interrupt) }
+      end
       @mutex = Mutex.new
       @changed = ConditionVariable.new
       @state = :idle
@@ -39,6 +60,12 @@ class LLM::Function
     # raising once it has closed. In between, the raise it issues lands on
     # the tool.
     #
+    # **It waits, and that is why a scheduler strategy does not use it.**
+    # The wait is a mutex and a condition variable, which is right here
+    # because the caller is never the tool's thread. Where it can be - a
+    # reactor, where a cancel can arrive on the thread the tool runs on -
+    # {#ask!} is the one to call instead.
+    #
     # What it guarantees is that the raise is not issued before the call.
     # The call's own dispatch is code, and a raise can land in that - the
     # same gap `Fork::Job` has between `running!` and `runner.call`. What
@@ -51,7 +78,40 @@ class LLM::Function
         return unless @state == :running
         @interrupted = true
       end
-      @thread.raise(LLM::Interrupt)
+      @ask.call
+    end
+
+    ##
+    # Ask, if there is a call to ask about.
+    #
+    # **It does not wait**, which is what a strategy that runs under a
+    # scheduler needs: the canceller there can be the tool's own thread,
+    # and a canceller that waited for the call to start would be waiting on
+    # the fiber it means to interrupt. A call that is running is asked
+    # about at once; one that has already finished is a no-op; and one that
+    # has not opened yet is not asked about at all - the caller reads
+    # {#idle?}, waits its own way, and asks again when the call has opened.
+    # @return [void]
+    def ask!
+      @mutex.synchronize do
+        return unless @state == :running
+        @interrupted = true
+      end
+      @ask.call
+    end
+
+    ##
+    # Whether the call has not opened yet.
+    # @return [Boolean]
+    def idle?
+      @mutex.synchronize { @state == :idle }
+    end
+
+    ##
+    # Whether the call is running.
+    # @return [Boolean]
+    def running?
+      @mutex.synchronize { @state == :running }
     end
 
     ##
