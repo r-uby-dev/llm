@@ -49,9 +49,18 @@ module LLM::Function::Async
     # hook that runs after the queue was pushed is a hook the caller can
     # race past.
     #
-    # The rescue below is the other half of that promise, and it is written
-    # to catch everything rather than an interrupt. A hook that raises from
-    # the block's `ensure` unwinds past the push, so the queue would be left
+    # **An interrupt is answered, not raised on.** It is pushed to the queue
+    # and the task ends having answered, because a task that ends with one
+    # is not contained here the way a `StandardError` is: it ends the
+    # reactor's thread, and the interrupt is then raised again in whoever
+    # stops the reactor - which is `#wait`'s own `ensure`, and so the
+    # caller's thread rather than a task's. The caller is given the
+    # interrupt either way; this is the difference between a cancel and a
+    # cancel that takes a thread down with it.
+    #
+    # The rescue below is for everything else, and it is written to catch
+    # everything rather than an interrupt. A hook that raises from the
+    # block's `ensure` unwinds past the push, so the queue would be left
     # empty and `#wait` would wait on it forever - the outcome this comment
     # already names. Whatever comes out of the block is pushed, and `#wait`
     # hands anything that is an exception to the caller the way `Thread#value`
@@ -65,10 +74,22 @@ module LLM::Function::Async
         task = Async::Task.current
         @task = task
         @scheduler = Fiber.scheduler
-        raise LLM::Interrupt if @cancelled
+        ##
+        # A cancel that arrived before this ran. There is no tool to tell,
+        # so the caller is given it and the task ends - for the same reason
+        # the block below answers rather than raises.
+        if @cancelled
+          @queue << LLM::Interrupt.new
+          next
+        end
         task.defer_cancel do
           result = begin
             function.call
+          rescue LLM::Interrupt => ex
+            ##
+            # The interrupt is the block's result, and the queue carries it
+            # to the caller.
+            ex
           ensure
             ##
             # The hook runs on the reactor's thread rather than on the one
@@ -83,12 +104,12 @@ module LLM::Function::Async
       rescue => e
         ##
         # This runs after the `defer_cancel` block's `ensure`, so the tool is
-        # told first and the caller second. It answers an interrupt, a
-        # cancel that arrived before `spawn` - the block raises before it
-        # reaches a tool, and there is no result to push - and a hook whose
-        # own error unwound past the push.
+        # told first and the caller second. It answers a hook whose own
+        # error unwound past the push, and it is the backstop for an
+        # interrupt that arrived from somewhere other than the call above -
+        # which is why the interrupt is pushed and not raised on.
         @queue << e
-        raise
+        raise unless LLM::Interrupt === e
       end
       nil
     end
