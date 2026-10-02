@@ -28,6 +28,7 @@ class LLM::Function
       @arguments = options.fetch(:arguments)
       @model = options.fetch(:model, nil)
       @tracer = options.fetch(:tracer, nil)
+      @cancelled = false
     end
 
     ##
@@ -46,6 +47,13 @@ class LLM::Function
       # receives the result once and holds it until it is asked.
       result = ::Ractor.new { ::Ractor.receive }
       @mailbox = Ractor::Mailbox.new(build_task(result), result)
+      ##
+      # **A cancel that arrived before there was a mailbox is delivered now.**
+      # The watcher reads the message after it starts, and it waits on the
+      # window the job opens immediately before the call, so a message that
+      # arrives with the mailbox is held the same way one that arrives a
+      # moment later is.
+      @mailbox.interrupt! if @cancelled
       self
     end
 
@@ -60,9 +68,21 @@ class LLM::Function
     end
 
     ##
+    # Tells the tool to stop.
+    #
+    # **A cancel that arrives before `spawn` is remembered, not lost.** The
+    # mailbox is built in `spawn`, and there is no safe navigation to a
+    # message that has not been sent: a cancel that answered `nil` here was a
+    # cancel that said nothing, and the call ran as if nobody had asked it to
+    # stop. It is delivered by `spawn` instead, which is the first moment
+    # there is anything to deliver it to.
     # @return [nil]
     def interrupt!
-      mailbox&.interrupt!
+      if @mailbox
+        @mailbox.interrupt!
+      else
+        @cancelled = true
+      end
       nil
     end
     alias_method :cancel!, :interrupt!
