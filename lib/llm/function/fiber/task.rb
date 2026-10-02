@@ -74,13 +74,7 @@ module LLM::Function::Fiber
             @queue << function.call
           rescue => ex
             @queue << ex
-            ##
-            # An interrupt stays in the queue, where `#wait` hands it to the
-            # caller. It is raised on only if it is not one, for the reason
-            # `LLM::Function::Async::Task#spawn` gives: a signal left to
-            # escape a task is read by the runtime as the scheduler's own
-            # condition rather than as a task that failed.
-            raise unless LLM::Interrupt === ex
+            raise
           ensure
             ##
             # The hook runs on the fiber the call runs on, once the call has
