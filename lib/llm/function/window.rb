@@ -24,14 +24,21 @@ class LLM::Function
   # "this call was interrupted" means - is this object's, so the strategies
   # agree about where a call begins and ends.
   #
-  # **A raise a call cannot take is not delivered after it.** The scheduler
-  # places a scheduled raise, and a tool that never suspends gives it no
-  # suspension inside the call to be placed at - so one is left over. What
-  # the specs pin is the half that matters to anything outside the call:
-  # the frame the task ends in and a sibling task on the same reactor are
-  # both asserted to be untouched, so a raise left over is the scheduler's
-  # to discard and not something a caller, or whatever runs beside it, has
-  # to survive.
+  # **A raise a call cannot take is not delivered outside the call.** The
+  # scheduler places a scheduled raise, and a tool that never suspends
+  # gives it no suspension inside the call to be placed at - so one is left
+  # over. What is asserted is the half anything outside the call could
+  # notice, and it is the caller's frame rather than the tool's: the frame
+  # that waits on the task ends cleanly, and a sibling task on the same
+  # reactor runs.
+  #
+  # **Where the leftover goes is reasoned, not observed.** The raise is
+  # aimed at the fibre the tool runs in, and the frame those examples watch
+  # is a different fibre - a raise in one is not the other's exception, so
+  # they cannot see it either way. That it is discarded rather than
+  # delivered follows from what the scheduler can place: a raise scheduled
+  # for a fibre is placed when that fibre resumes, and a fibre whose tool
+  # never suspends does not resume before it ends.
   class Window
     ##
     # @param [Thread, nil] thread
