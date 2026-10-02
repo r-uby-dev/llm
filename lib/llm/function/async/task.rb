@@ -56,6 +56,14 @@ module LLM::Function::Async
     # already names. Whatever comes out of the block is pushed, and `#wait`
     # hands anything that is an exception to the caller the way `Thread#value`
     # and `Fiber#value` do for the other in-process strategies.
+    #
+    # An interrupt is the one thing that is pushed and not raised on. The
+    # caller is given it through the queue, and the async runtime does not
+    # read a signal as a task that failed - it reads it as the reactor's own
+    # condition and ends the reactor's thread, so one cancelled tool would
+    # take every sibling on that reactor with it. Every other error is raised
+    # on, because a task that could not answer is one the reactor's thread
+    # has to hear about.
     # @return [nil]
     def spawn
       return if @guarded
@@ -88,7 +96,7 @@ module LLM::Function::Async
         # reaches a tool, and there is no result to push - and a hook whose
         # own error unwound past the push.
         @queue << e
-        raise
+        raise unless LLM::Interrupt === e
       end
       nil
     end
