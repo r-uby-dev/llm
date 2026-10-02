@@ -23,8 +23,7 @@ require "setup"
 # **And a cancel made before `spawn` is held too.** The mailbox is built in
 # `spawn`, so there was nothing to send a cancel to and the task answered `nil`
 # for one that had not run yet - a cancel that said nothing. It is remembered
-# and delivered by `spawn`, and `:fork`'s task takes one the same way, having
-# built its channels by whoever got there first.
+# and delivered by `spawn`, which is where `:fork`'s task takes one too.
 #
 # **What the caller is given is this strategy's own answer**: a cancel that
 # escapes the tool is a return with `cancelled: true`, not a raise out of
