@@ -103,11 +103,14 @@ RSpec.describe LLM::Function::Window do
   # only an asker that schedules its raise can do. The fallback for a
   # scheduler without `fiber_interrupt` raises on the fiber that asks - so it
   # would deliver before the call and skip the tool, and the window refuses
-  # rather than quietly doing the thing the hold exists to prevent.
+  # rather than quietly doing the thing the hold exists to prevent. The
+  # message names the method that is missing, since that is what a caller
+  # has to do something about.
   describe "a deferred ask when the asker cannot hold one" do
     it "is refused" do
       window = described_class.new(scheduler: Object.new, fiber: Fiber.current)
-      expect { window.interrupt!(wait: false) }.to raise_error(ArgumentError)
+      expect { window.interrupt!(wait: false) }
+        .to raise_error(LLM::FiberError, /fiber_interrupt/)
     end
   end
 end
