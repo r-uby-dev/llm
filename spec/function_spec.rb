@@ -401,10 +401,19 @@ RSpec.describe LLM::Function do
         task.spawn
         Timeout.timeout(2) { sleep 0.05 until function.runner.ran }
         task.interrupt!
+        ##
+        # The interrupt is the caller's to catch, and a modifier rescue -
+        # `task.wait rescue LLM::Interrupt` - is not a rescue at all: it
+        # catches a `StandardError` and answers with the constant. An
+        # interrupt is outside `StandardError`, so it is named here.
+        begin
+          task.wait
+        rescue LLM::Interrupt
+          nil
+        end
       end
 
       it "tells the tool on the thread that runs the call" do
-        task.wait rescue LLM::Interrupt
         expect(function.runner.told).to eq(function.runner.ran)
       end
     end
@@ -422,12 +431,16 @@ RSpec.describe LLM::Function do
         task.spawn
         Timeout.timeout(2) { sleep 0.05 until function.runner.ran }
         task.interrupt!
+        begin
+          task.wait
+        rescue LLM::Interrupt
+          nil
+        end
       end
 
       after { reactor&.stop }
 
       it "tells the tool on the thread that runs the call" do
-        task.wait rescue LLM::Interrupt
         expect(function.runner.told).to eq(function.runner.ran)
       end
 
@@ -593,7 +606,16 @@ RSpec.describe LLM::Function do
 
       context "when wait runs on another thread" do
         let(:thread) do
-          Thread.new { group.wait rescue LLM::Interrupt; :interrupted }.tap do |t|
+          ##
+          # The interrupt is caught by name rather than by a modifier
+          # rescue, which reaches only `StandardError`.
+          Thread.new do
+            begin
+              group.wait
+            rescue LLM::Interrupt
+              :interrupted
+            end
+          end.tap do |t|
             t.report_on_exception = false
           end
         end
@@ -721,7 +743,7 @@ RSpec.describe LLM::Function do
       let(:spawned_thread_task) { LLM::Function::Thread::Task.new(fn).tap(&:spawn) }
 
       it "returns nil" do
-        expect(spawned_thread_task.interrupt!).to be_nil
+        expect(spawned_thread_task.interrupt!.nil?).to be(true)
       end
     end
   end
