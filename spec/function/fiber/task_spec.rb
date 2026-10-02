@@ -57,12 +57,17 @@ RSpec.describe LLM::Function::Fiber::Task do
   # with. Expectations are made on what this returns rather than inside the
   # block, because a raise under `Async` is logged and never reaches RSpec - so
   # an example that asserts in there can pass having measured nothing.
+  #
+  # The interrupt is named rather than left to `rescue => ex`, which reaches
+  # only `StandardError` - and an interrupt sits outside it, so a bare rescue
+  # here would let the very exception the examples are about walk out of the
+  # reactor and fail the example from the outside.
   def react(timeout = 5, &block)
     error = nil
     Async do |root|
       root.with_timeout(timeout) do
         block.call
-      rescue => ex
+      rescue LLM::Interrupt, StandardError => ex
         error = ex
       end
     end
