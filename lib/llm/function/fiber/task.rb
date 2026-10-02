@@ -11,8 +11,10 @@ module LLM::Function::Fiber
   # {#wait}. Interrupting a running task raises
   # {LLM::Interrupt} on the fiber, which stops it at the next
   # yield point. A cancel that arrives before the fiber exists
-  # is held rather than dropped, and spent by the fiber itself
-  # when it starts.
+  # is held rather than dropped, and spent inside the call: the
+  # tool is entered, so a tool whose own `rescue` cleans up is
+  # cleaned up by a cancel that arrived before it started, the
+  # way it is on `:thread`, `:fork` and `:ractor`.
   #
   # A tool that implements `on_interrupt` is told on that fiber, once the
   # call has ended, rather than on the thread that cancelled it.
@@ -55,22 +57,27 @@ module LLM::Function::Fiber
         fiber = Fiber.schedule do
           inner = Fiber.current
           @scheduler = Fiber.scheduler
+          @window = LLM::Function::Window.new(scheduler: @scheduler, fiber: inner)
+          ##
+          # **A cancel that arrived before this fiber ran is held by the
+          # window.** There is nothing to ask for yet, so the ask is
+          # recorded and issued when the call opens - which is the
+          # transition the window alerts, and the only place that can, since
+          # this fiber is the one that will be running the tool.
+          #
+          # A canceller cannot wait for that here, which is the difference
+          # from `:thread`: it may be the fiber running the tool, so a
+          # canceller that waited would be waiting on the fiber it means to
+          # interrupt. `wait: false` is the only shape this strategy can
+          # take, and the deferred ask is what makes it work.
+          @window.interrupt!(wait: false) if @cancelled
           begin
             ##
-            # A held cancel is spent here, at the block's first instruction,
-            # rather than raised in from the outside.
-            #
-            # **A raise into a fiber a scheduler owns does not deliver.** It
-            # is not a resume: the scheduler is the one that transfers, and
-            # what comes back through a foreign raise is the scheduler's own
-            # pending exception - which a run of this repository's specs saw
-            # as `Async::TimeoutError` arriving where `LLM::Interrupt` was
-            # raised. The block is where a raise belongs, and the hook below
-            # follows it the same way it follows a call.
-            if @cancelled
-              @delivered = true
-              raise LLM::Interrupt
-            end
+            # The call opens here, and it is what a deferred ask is issued
+            # against. The tool is entered, which is what a held cancel used
+            # to prevent - this fiber raised before the call was reached, so
+            # the tool's own `rescue` never saw the interrupt.
+            @window.running!
             @queue << function.call
           rescue LLM::Interrupt, StandardError => ex
             ##
@@ -88,11 +95,17 @@ module LLM::Function::Fiber
             raise unless LLM::Interrupt === ex
           ensure
             ##
+            # The tool has answered, so a cancel that arrives from here on
+            # asks nothing - which is the no-op a cancel that arrives once
+            # the call has returned is.
+            @window.finished!
+            ##
             # The hook runs on the fiber the call runs on, once the call has
             # ended, rather than on the thread that cancelled. See the note on
             # `LLM::Function::Thread::Task#spawn` for why it cannot run before
-            # the call's frame has ended, and what `@delivered` means.
-            function.interrupt! if @delivered
+            # the call's frame has ended, and what the window's
+            # `interrupted?` means.
+            function.interrupt! if @window.interrupted?
           end
         end
         @fiber = fiber || inner
@@ -107,28 +120,23 @@ module LLM::Function::Fiber
     end
 
     ##
+    # Tells the tool, and lets it answer.
+    #
+    # **The ask is the window's, and it does not wait.** This runs on the
+    # canceller's thread, which can be the thread the scheduler runs on, so
+    # a canceller that waited for the call to start would block the fiber it
+    # means to interrupt. A call that is running is asked about at once, one
+    # that has finished asks nothing, and one that has not opened holds the
+    # ask until it does.
+    #
+    # Whether waiting would have been affordable is the window's to say, not
+    # this task's: `fiber_interrupt` schedules the raise and returns, where
+    # a direct raise on a fiber a scheduler owns suspends the caller until
+    # the scheduler delivers it.
     # @return [nil]
     def interrupt!
       @cancelled = true
-      if @fiber&.alive?
-        @delivered = true
-        ##
-        # The scheduler is asked to raise when it knows how, and that is the
-        # difference between a cancel and a cancel that never returns.
-        #
-        # `fiber_interrupt` schedules the raise and returns, which is what
-        # `:async` uses for the same reason. A direct `Fiber#raise` on a
-        # fiber the scheduler owns does not transfer the exception - it
-        # suspends this thread, and this thread is the caller's, so the
-        # interrupt reaches the tool and the canceller is left waiting
-        # forever. The direct raise stays for a scheduler that has no such
-        # hook.
-        if @scheduler&.respond_to?(:fiber_interrupt)
-          @scheduler.fiber_interrupt(@fiber, LLM::Interrupt.new)
-        else
-          @fiber.raise(LLM::Interrupt)
-        end
-      end
+      @window&.interrupt!(wait: false)
       nil
     end
     alias_method :cancel!, :interrupt!
