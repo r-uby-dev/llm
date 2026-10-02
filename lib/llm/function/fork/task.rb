@@ -25,10 +25,13 @@ class LLM::Function
         id: @function.id, name: @function.name,
         arguments: @function.arguments, model: @function.model
       )
-      @ch = LLM::Object.from(
-        control: xchan(:marshal),
-        result: xchan(:marshal, sock: Socket::SOCK_STREAM)
-      )
+      ##
+      # **The channels may already exist**, because a cancel can arrive before
+      # this does: `interrupt!` builds them when it has nowhere else to write,
+      # and a socketpair does not need a child to exist. They are built once,
+      # by whoever gets there first, so the message a cancel wrote is in the
+      # channel the child is about to read.
+      @ch ||= channels
       @pid = Kernel.fork do
         ##
         # The child inherits the parent's terminal. When
@@ -69,7 +72,7 @@ class LLM::Function
     # @return [Boolean]
     def alive?
       return false if @waited || !@pid
-      result = ::Process.waitpid(@pid, ::Process::WNOHANG)
+      result = ::Process.waitpid(@pid, ::Process::WNOCHILD)
       @waited = !result.nil?
       !@waited
     rescue Errno::ECHILD
@@ -78,9 +81,22 @@ class LLM::Function
     end
 
     ##
+    # Tells the child to stop, and is a no-op once it has answered.
+    #
+    # **A cancel that arrives before `spawn` is not lost.** The controls
+    # channel is a datagram, so a message written into it waits until the
+    # child's watcher reads it - and the child's watcher waits on the window
+    # the job opens immediately before the call. So the channels are built
+    # here when the fork has not happened yet, rather than raising on a
+    # channel that did not exist.
+    #
+    # A task the guard blocked never forks, and one that has answered has
+    # nothing left to tell: both are a no-op, the way
+    # {LLM::Function::Return#interrupt!} says one is.
     # @return [nil]
     def interrupt!
-      return nil if @waited
+      return nil if @waited || @guarded
+      @ch ||= channels
       @ch.control.write(:interrupt)
       nil
     rescue Errno::ESRCH, IOError
@@ -149,6 +165,21 @@ class LLM::Function
     end
 
     private
+
+    ##
+    # The controls and results channels, built once.
+    #
+    # They are built by `spawn` for an ordinary call - after the guard has had
+    # its say, so a task that never forks never opens a socketpair - and by
+    # {#interrupt!} when a cancel arrives first. Whoever builds them, the other
+    # finds them.
+    # @return [LLM::Object]
+    def channels
+      LLM::Object.from(
+        control: xchan(:marshal),
+        result: xchan(:marshal, sock: Socket::SOCK_STREAM)
+      )
+    end
 
     ##
     # Waits for the child, once.
