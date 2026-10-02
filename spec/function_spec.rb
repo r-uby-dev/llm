@@ -404,11 +404,12 @@ RSpec.describe LLM::Function do
         ##
         # The interrupt is the caller's to catch, and a modifier rescue -
         # `task.wait rescue LLM::Interrupt` - is not a rescue at all: it
-        # catches a `StandardError` and answers with the constant. An
-        # interrupt is outside `StandardError`, so it is named here.
+        # catches a `StandardError` and answers with the constant. Both are
+        # named here, so that the wait in setup cannot fail an example that
+        # is about the hook rather than about the ending.
         begin
           task.wait
-        rescue LLM::Interrupt
+        rescue LLM::Interrupt, StandardError
           nil
         end
       end
@@ -433,7 +434,7 @@ RSpec.describe LLM::Function do
         task.interrupt!
         begin
           task.wait
-        rescue LLM::Interrupt
+        rescue LLM::Interrupt, StandardError
           nil
         end
       end
