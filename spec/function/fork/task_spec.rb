@@ -32,7 +32,7 @@ require "timeout"
 # `interrupt!` raises. The in-process strategies hold one that early; this one
 # does not, and the group that cancels its tasks in turn reaches tasks that
 # have not been spawned, so the difference is more than theoretical - it is
-# issue #222.
+# issue #224.
 #
 # The half about a call that returned is issue #203, and the order below is the
 # failing run's order: the first wait is one example, the second waits are the
