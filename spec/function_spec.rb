@@ -743,7 +743,7 @@ RSpec.describe LLM::Function do
       let(:spawned_thread_task) { LLM::Function::Thread::Task.new(fn).tap(&:spawn) }
 
       it "returns nil" do
-        expect(spawned_thread_task.interrupt!.nil?).to be(true)
+        expect(spawned_thread_task.interrupt!).to be_nil
       end
     end
   end
