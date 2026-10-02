@@ -178,10 +178,12 @@ RSpec.describe LLM::Function::Async::Task do
     end
 
     ##
-    # The third state, and the semantic this change introduces: a cancel
-    # before `spawn` is no longer a promise that the call never runs. A tool
-    # that never suspends is never reached by the raise, so the caller is
-    # given its result and the tool is not told - nothing interrupted it.
+    # A tool that never suspends is one the raise cannot land inside, so the
+    # caller is given the result the tool returned. The ask is still an ask
+    # - the window issues a deferred one when the call opens - so the tool
+    # is told, and it is asked about rather than interrupted. It is also the
+    # semantic this change introduces: a cancel before `spawn` is no longer
+    # a promise that the call never runs.
     context "when the tool answers before anything can reach it" do
       let(:tool) { quick }
 
@@ -189,16 +191,8 @@ RSpec.describe LLM::Function::Async::Task do
         expect(within { task.wait }.to_h[:value]).to eq("ok" => true)
       end
 
-      context "once the caller has waited" do
-        before do
-          within { task.wait }
-        rescue LLM::Interrupt
-          nil
-        end
-
-        it "does not tell the tool" do
-          expect(told).to be_empty
-        end
+      it "tells the tool" do
+        expect(settle(told)).to eq(:interrupted)
       end
     end
   end
