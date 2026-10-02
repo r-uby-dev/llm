@@ -24,30 +24,6 @@ module LLM
   end
 
   ##
-  # When a request is interrupted.
-  #
-  # This is a signal rather than an error, so that a bare `rescue` cannot
-  # swallow it: an interrupt is a request to stop, and a turn whose cancel
-  # was eaten looks like a turn that ignored one. The signal it names is
-  # `INT`, which is what an interrupt is, and the message it carries is the
-  # one it was raised with rather than a signal name.
-  class Interrupt < SignalException
-    ##
-    # @param [String, nil] message
-    def initialize(message = nil)
-      super("INT")
-      @message = message
-    end
-
-    ##
-    # @return [String]
-    def message
-      @message || super
-    end
-    alias_method :to_s, :message
-  end
-
-  ##
   # HTTPUnauthorized
   UnauthorizedError = Class.new(Error)
 
@@ -85,6 +61,21 @@ module LLM
   ##
   # When the context window is exceeded
   ContextWindowError = Class.new(InvalidRequestError)
+
+  ##
+  # When a request is interrupted.
+  #
+  # It sits outside `StandardError`, so that neither a bare `rescue` nor a
+  # `rescue => e` can swallow it by mistake: an interrupt is a request to
+  # stop, and a turn whose cancel was eaten looks like a turn that ignored
+  # one.
+  #
+  # It is not a `SignalException` either. A signal is a framework's own
+  # condition rather than a task's - RSpec re-raises one that escapes an
+  # example, and an async reactor ends its own thread rather than failing
+  # the task that raised it - and an interrupt has to be something a caller
+  # can catch.
+  Interrupt = Class.new(Exception)
 
   ##
   # When a concurrency strategy cannot execute a given tool
