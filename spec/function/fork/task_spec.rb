@@ -8,30 +8,12 @@ require "timeout"
 #
 # A wait reads the child's result channel once, and the `ensure` around it
 # closes both channels - so a second read is an error rather than an answer,
-# and what the first wait took is what a second one is given. The interrupt is
-# kept the same way: a call that was cancelled re-raises the same exception.
+# and a call that was cancelled re-raises the same exception. A child that
+# ended without writing is answered in band, the way a tool that raised is.
 #
-# **A child that ended without writing is answered in band.** The ends are
-# closed, so a read with no writer left is an `EOFError` rather than a wait
-# nothing can wake - and it comes back as an error return the model is told
-# about, the way a tool that raised does, rather than as a raise that would end
-# the turn.
-#
-# **The half about a call that returned is issue #203.** #202 wrote these
-# examples and took them out again: the first wait passes on its own, and the
-# same wait hangs once a fork call has been waited on before it in the same
-# process - and the run's output could not say which of the two waits it was.
-# They are here again, and the wait that runs them says the two things the
-# timeout could not: where it stopped, and whether the child it was waiting on
-# is still there.
-#
-# **The order below is the failing run's order.** The first wait is one
-# example, the second waits are the next two, and everything else this file
-# asks for runs after them, so what this file reproduces is what failed rather
-# than a re-arrangement of it.
-#
-# The strategy needs xchan.rb, which is not a dependency of this gem, and the
-# examples skip where it is not installed.
+# The half about a call that returned is issue #203, and the order below is the
+# failing run's order: the first wait is one example, the second waits are the
+# next two, and everything else this file asks for runs after them.
 RSpec.describe LLM::Function::Fork::Task do
   before do
     LLM.require "xchan", "~> 0.24" unless defined?(::Chan::UNIXSocket)
@@ -41,12 +23,8 @@ RSpec.describe LLM::Function::Fork::Task do
 
   ##
   # Runs the block on a thread of its own and joins it, so a wait that never
-  # comes back is a failure that names the wait rather than a hang.
-  #
-  # A failure says the two things a timeout cannot: whether the child is still
-  # running - one that is running has not answered yet, and one that has ended
-  # never will - and where the waiter stopped, which separates a read with
-  # nothing to read from a lock with no owner.
+  # comes back is a failure that names the wait rather than a hang. It says
+  # whether the child is still running, and where the waiter stopped.
   def within(seconds = 5, task: nil, &block)
     thread = Thread.new(&block)
     return thread.value if thread.join(seconds)
@@ -54,6 +32,16 @@ RSpec.describe LLM::Function::Fork::Task do
           "  the waiter was in:\n    #{thread.backtrace&.first(8)&.join("\n    ")}"
   ensure
     thread&.kill if thread&.alive?
+  end
+
+  ##
+  # The exception a block raised, or nil, so an example asserts on an ending
+  # rather than performing one.
+  def raised
+    yield
+    nil
+  rescue LLM::Interrupt => ex
+    ex
   end
 
   ##
@@ -83,9 +71,7 @@ RSpec.describe LLM::Function::Fork::Task do
   end
 
   ##
-  # And one that holds, so the interrupt has a running call to land on. The
-  # window holds an interrupt that arrives before it, so a cancel does not
-  # race the tool's start.
+  # A call that holds, so an interrupt has a running call to land on.
   let(:holding_tool) do
     Class.new(LLM::Tool) do
       name "holding"
@@ -98,10 +84,8 @@ RSpec.describe LLM::Function::Fork::Task do
   end
 
   ##
-  # And one that ends the process it runs in before it writes anything, which
-  # is the ending a result channel cannot report: `exit!` runs no `ensure`, so
-  # the child is gone with nothing written and the parent's read is the end of
-  # the channel.
+  # A call that ends the process it runs in before it writes anything: `exit!`
+  # runs no `ensure`, so the child is gone with nothing written.
   let(:dying_tool) do
     Class.new(LLM::Tool) do
       name "dying"
@@ -114,117 +98,114 @@ RSpec.describe LLM::Function::Fork::Task do
 
   describe "a call that has returned" do
     let(:task) { task_for(quick_tool, "call_1") }
+    let(:first) { within(task: task) { task.wait } }
+    let(:second) { within(task: task) { task.wait } }
+
+    before { first }
 
     it "answers the first wait with the tool's result" do
-      expect(within(task: task) { task.wait }.to_h).to eq(
-        id: "call_1", name: "quick", value: {ok: true}
-      )
+      expect(first.to_h).to eq(id: "call_1", name: "quick", value: {ok: true})
     end
 
-    describe "a second wait" do
-      let(:first) { within(task: task) { task.wait } }
-
-      before { first }
-
-      it "is answered from the result the first one took" do
-        expect(within(task: task) { task.wait }).to equal(first)
-      end
-
-      it "is answered with what the first one had" do
-        expect(within(task: task) { task.wait }.to_h).to eq(first.to_h)
-      end
+    it "answers a second wait from the result the first one took" do
+      expect(second).to equal(first)
     end
 
-    ##
-    # The same question the group above asks, with no hook and no `let`
-    # between the two waits: two calls, each waited on once, in one example.
-    it "answers two calls in one example" do
-      first = task_for(quick_tool, "call_1")
-      second = task_for(quick_tool, "call_2")
-      expect([
+    it "answers a second wait with what the first one had" do
+      expect(second.to_h).to eq(first.to_h)
+    end
+  end
+
+  ##
+  # Two calls, each waited on once, in one example - the same question the
+  # group above asks, with no hook between the two waits.
+  describe "two calls waited on in one example" do
+    let(:first) { task_for(quick_tool, "call_1") }
+    let(:second) { task_for(quick_tool, "call_2") }
+    let(:waited) do
+      [
         within(task: first) { first.wait }.to_h,
         within(task: second) { second.wait }.to_h
-      ]).to eq([
+      ]
+    end
+
+    it "answers each call with its own result" do
+      expect(waited).to eq([
         {id: "call_1", name: "quick", value: {ok: true}},
         {id: "call_2", name: "quick", value: {ok: true}}
       ])
     end
+  end
 
-    ##
-    # And the shape the issue names: both spawned before either is waited on,
-    # which is what a group does.
-    it "answers two calls that were spawned before either was waited on" do
-      group = LLM::Function::Fork::Group.new(
+  ##
+  # Both calls spawned before either is waited on, which is what a group does.
+  describe "two calls spawned before either is waited on" do
+    let(:group) do
+      LLM::Function::Fork::Group.new(
         [task_for(quick_tool, "call_1"), task_for(quick_tool, "call_2")]
       )
-      group.spawn
-      expect(within(task: group) { group.wait.map(&:id) }).to eq(%w[call_1 call_2])
+    end
+    let(:ids) { within(task: group) { group.wait.map(&:id) } }
+
+    before { group.spawn }
+
+    it "answers them in the order they were asked for" do
+      expect(ids).to eq(%w[call_1 call_2])
     end
   end
 
+  ##
+  # The interrupt is kept as the exception the first wait raised, and a second
+  # wait re-raises that same one rather than reading a channel that has gone.
   describe "a call that was interrupted" do
     let(:task) { task_for(holding_tool, "call_2") }
+    let(:first) { raised { within(task: task) { task.wait } } }
+    let(:second) { raised { within(task: task) { task.wait } } }
 
-    ##
-    # The exception the first wait raised, which a second one has to raise
-    # again rather than reading a channel that has gone.
-    let(:first) do
+    before do
       task.spawn
       task.interrupt!
-      within(task: task) { task.wait }
-      nil
-    rescue LLM::Interrupt => ex
-      ex
+      first
     end
-
-    before { first }
 
     it "raises LLM::Interrupt on the first wait" do
       expect(first).to be_a(LLM::Interrupt)
     end
 
     it "raises LLM::Interrupt on a second wait" do
-      expect { within(task: task) { task.wait } }.to raise_error(LLM::Interrupt)
+      expect(second).to be_a(LLM::Interrupt)
     end
 
     it "raises the same exception the first one raised" do
-      second = begin
-        within(task: task) { task.wait }
-        nil
-      rescue LLM::Interrupt => ex
-        ex
-      end
       expect(second).to equal(first)
     end
   end
 
   ##
-  # The ending a result channel cannot report, and what the model is told.
-  #
-  # A raise here would end the turn for a call that failed, which is the one
-  # thing the runtime does not do anywhere else: a guard, a constructor and
-  # `#call_function` all answer in band, and a child that died is the same kind
-  # of news.
+  # The ending a result channel cannot report: the read is an `EOFError` rather
+  # than a wait nothing can wake, and it is answered in band rather than raised
+  # into the turn.
   describe "a call whose child ended without a result" do
     let(:task) { task_for(dying_tool, "call_3") }
+    let(:returned) { within(task: task) { task.wait } }
+    let(:second) { within(task: task) { task.wait } }
+
+    before { returned }
 
     it "answers with an error return rather than raising" do
-      expect(within(task: task) { task.wait }.error?).to be(true)
+      expect(returned.error?).to be(true)
     end
 
     it "names the read that ended" do
-      expect(within(task: task) { task.wait }.value[:type]).to eq("EOFError")
+      expect(returned.value[:type]).to eq("EOFError")
     end
 
     it "says the tool exited unexpectedly" do
-      expect(within(task: task) { task.wait }.value[:message]).to eq(
-        "the tool exited unexpectedly"
-      )
+      expect(returned.value[:message]).to eq("the tool exited unexpectedly")
     end
 
     it "answers a second wait with the same return" do
-      first = within(task: task) { task.wait }
-      expect(within(task: task) { task.wait }).to equal(first)
+      expect(second).to equal(returned)
     end
   end
 end
