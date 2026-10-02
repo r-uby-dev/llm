@@ -11,6 +11,12 @@ require "timeout"
 # and what the first wait took is what a second one is given. The interrupt is
 # kept the same way: a call that was cancelled re-raises the same exception.
 #
+# **A child that ended without writing is answered in band.** The ends are
+# closed, so a read with no writer left is an `EOFError` rather than a wait
+# nothing can wake - and it comes back as an error return the model is told
+# about, the way a tool that raised does, rather than as a raise that would end
+# the turn.
+#
 # **The half about a call that returned is issue #203.** #202 wrote these
 # examples and took them out again: the first wait passes on its own, and the
 # same wait hangs once a fork call has been waited on before it in the same
@@ -87,6 +93,21 @@ RSpec.describe LLM::Function::Fork::Task do
       def call
         sleep 5
         {ok: true}
+      end
+    end
+  end
+
+  ##
+  # And one that ends the process it runs in before it writes anything, which
+  # is the ending a result channel cannot report: `exit!` runs no `ensure`, so
+  # the child is gone with nothing written and the parent's read is the end of
+  # the channel.
+  let(:dying_tool) do
+    Class.new(LLM::Tool) do
+      name "dying"
+
+      def call
+        exit!(3)
       end
     end
   end
@@ -174,6 +195,34 @@ RSpec.describe LLM::Function::Fork::Task do
         ex
       end
       expect(second).to equal(first)
+    end
+  end
+
+  ##
+  # The ending a result channel cannot report, and what the model is told.
+  #
+  # A raise here would end the turn for a call that failed, which is the one
+  # thing the runtime does not do anywhere else: a guard, a constructor and
+  # `#call_function` all answer in band, and a child that died is the same kind
+  # of news.
+  describe "a call whose child ended without a result" do
+    let(:task) { task_for(dying_tool, "call_3") }
+
+    it "answers with an error return rather than raising" do
+      expect(within(task: task) { task.wait }.error?).to be(true)
+    end
+
+    it "names the read that ended" do
+      expect(within(task: task) { task.wait }.value[:type]).to eq("EOFError")
+    end
+
+    it "says what the child ended as" do
+      expect(within(task: task) { task.wait }.value[:message]).to include("exited with 3")
+    end
+
+    it "answers a second wait with the same return" do
+      first = within(task: task) { task.wait }
+      expect(within(task: task) { task.wait }).to equal(first)
     end
   end
 end
