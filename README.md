@@ -266,12 +266,15 @@ A cancel is aimed at the tool rather than at whatever happens to be
 running. A call that is running is entered, and
 [`LLM::Interrupt`](https://r.uby.dev/api-docs/llm.rb/LLM/Interrupt.html)
 is raised inside it, so its own `rescue` sees it and it can free
-resources before it dies - on every concurrency strategy alike. A
-call that has not started is not skipped: the cancel is held and
-delivered inside the call once it opens, so a tool that was asked
-about before it began is still the one that cleans up. A call that
-has already answered is a no-op that leaves the result alone, and a
-cancel that arrives between two requests ends the turn where it is.
+resources before it dies - on every concurrency strategy alike. The
+socket a request is waiting on is closed before the raise, so a
+cancelled request stops burning tokens, and the request itself is a
+fiber that is interrupted like any other. A call that has not started
+is not skipped: the cancel is held and delivered inside the call once
+it opens, so a tool that was asked about before it began is still the
+one that cleans up. A call that has already answered is a no-op that
+leaves the result alone, and a cancel that arrives between two
+requests ends the turn where it is.
 
 The raise sits outside `StandardError`, so a bare `rescue`, or a
 `rescue => e`, passes a cancel through instead of swallowing it. A
