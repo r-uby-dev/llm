@@ -16,6 +16,13 @@ module LLM::Function::Fiber
   # cleaned up by a cancel that arrived before it started, the
   # way it is on `:thread`, `:fork` and `:ractor`.
   #
+  # **The scheduler must implement `fiber_interrupt`**, which is how a raise
+  # is asked for from the call's own fiber rather than issued before it.
+  # Without it a cancel that arrived early could only be delivered before the
+  # call, so the strategy refuses at {#spawn} - in the caller's hands, before
+  # a fiber exists - rather than inside one, where the refusal would be an
+  # unhandled exception and a caller waiting on a queue nothing fills.
+  #
   # A tool that implements `on_interrupt` is told on that fiber, once the
   # call has ended, rather than on the thread that cancelled it.
   class Task < LLM::Function::Task
@@ -32,6 +39,15 @@ module LLM::Function::Fiber
       return if @guarded
       if Fiber.scheduler.nil?
         raise ArgumentError, "Fiber concurrency requires Fiber.scheduler"
+      elsif !Fiber.scheduler.respond_to?(:fiber_interrupt)
+        ##
+        # Refused here rather than at the window, which is built inside the
+        # fiber: a raise in there is an exception the fiber ends with, and
+        # the caller waits on a queue that will never fill.
+        raise LLM::FiberError,
+          "this scheduler does not implement fiber_interrupt, so a cancel " \
+          "cannot be held until the tool starts: it would be delivered " \
+          "before the call, and the tool would never run"
       else
         ##
         # The body hands its ending back through a queue, the way
