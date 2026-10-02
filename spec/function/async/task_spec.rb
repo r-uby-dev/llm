@@ -194,6 +194,34 @@ RSpec.describe LLM::Function::Async::Task do
       it "tells the tool" do
         expect(settle(told)).to eq(:interrupted)
       end
+
+      ##
+      # And a probe for what became of the raise a scheduler cannot land
+      # inside a call that never suspends: it is scheduled into the tool's
+      # fiber, whose next suspension is after the block's `ensure` - outside
+      # the `rescue` that wraps the call - and `LLM::Interrupt` is not a
+      # `StandardError`, so one left to raise ends the reactor's thread and
+      # takes the tasks on it with it. A task that starts after this one is
+      # where that would show: the assertion is that it runs at all, which
+      # it cannot on a reactor that is gone.
+      context "when another task is on the same reactor" do
+        let(:sibling) do
+          quick.function.dup.tap do |fn|
+            fn.id = "call_2"
+            fn.arguments = {}
+          end.task(:async).tap { |task| task.reactor = reactor }
+        end
+
+        before do
+          task.spawn
+          sleep 0.05
+          sibling.spawn
+        end
+
+        it "leaves the reactor usable" do
+          expect(within { sibling.wait }.to_h[:value]).to eq("ok" => true)
+        end
+      end
     end
   end
 
