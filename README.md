@@ -280,23 +280,31 @@ The raise sits outside `StandardError`, so a bare `rescue`, or a
 `rescue => e`, passes a cancel through instead of swallowing it. A
 tool that means to handle one names it: `rescue LLM::Interrupt`.
 
-A tool can also implement `#on_interrupt` to be told. The hook runs
-before the raise lands, so a tool that releases a resource has
-released it by the time the interrupt arrives, and it runs on the
-thread or fiber the call runs on.
+A tool can also implement `#on_interrupt` to be told. It runs on the
+thread or fiber the call runs on, and its order against the raise is
+the one thing the strategies do differently. On `:fork` and `:ractor`
+the hook is written before the raise, so a tool that releases a
+resource in the hook has released it by the time the interrupt
+arrives. On `:thread`, `:fiber` and `:async` it runs in the call's
+`ensure`, after the raise has landed and after the tool's own
+`rescue` - so a tool that cleans up in both places cleans up twice,
+rescue first, and one that cleans up in one place should pick the
+hook.
 
-Two of the six strategies have a shape of their own, and both are
-about where a raise can be placed. `:fiber` and `:async` ask the
-fiber scheduler for the raise, so a tool that never suspends is one
-the raise cannot reach - the call completes, the caller is given its
-result, and the tool is told it was asked about. `:sequential` runs
-the tool in the caller's own thread, so the hook is what tells it,
-and nothing is raised into the call.
+Two shapes are about where a raise can be placed. `:fiber` and
+`:async` ask the fiber scheduler for the raise, so a tool that never
+suspends is one the raise cannot reach - the call completes, the
+caller is given its result, and the tool is told it was asked about.
+`:sequential` is the third: it runs the tool in the caller's own
+thread, where nothing is raised into the call at all, so the hook is
+what tells it.
 
 ```ruby
 class Search < LLM::Tool
   name "search"
   description "Search many files"
+  parameter :pattern, String, "The pattern to search for"
+  required %i[pattern]
 
   def call(pattern:)
     search(pattern)
@@ -308,9 +316,10 @@ class Search < LLM::Tool
   end
 
   ##
-  # Told before the raise lands, on the thread or fiber the
-  # call runs on. A tool that only wants the notification
-  # implements this and nothing else.
+  # Told as well, on the thread or fiber the call runs on. A tool
+  # only needs one of these: on :thread, :fiber and :async this
+  # runs after the rescue above, so a tool that cleans up in both
+  # places cleans up twice.
   def on_interrupt
     cleanup
   end
