@@ -40,10 +40,11 @@ class LLM::Function
     #  running the tool.
     # @return [LLM::Function::Window]
     def initialize(thread: nil, scheduler: nil, fiber: nil)
-      @interrupt = define_interrupt!(thread:, scheduler:, fiber:)
+      @raise = interrupt_for(thread:, scheduler:, fiber:)
       @mutex = Mutex.new
       @changed = ConditionVariable.new
       @state = :idle
+      @deferred = false
       @interrupted = false
     end
 
@@ -55,25 +56,38 @@ class LLM::Function
     # taken is the whole of what `wait` is for: the canceller is never the
     # tool's thread on `:thread`, `:fork` and `:ractor`, so it waits, and
     # it can be on a reactor - where a cancel can arrive on the thread the
-    # tool runs on - so there it does not, and the caller waits its own way
-    # and asks again once the call has opened.
+    # tool runs on - so there it does not.
     #
-    # Either way: a call that has not opened is not asked about, one that
-    # is running is asked about at once, and one that has finished asks
-    # nothing. The raise is not issued before the call - the call's own
-    # dispatch is code, and a raise can land in that, the same gap
-    # `Fork::Job` has between `running!` and `runner.call` - and it is not
-    # issued for a call that has already finished.
+    # **A call that has not opened is not asked about, and the ask is not
+    # lost.** With `wait: false` the ask is recorded and issued when the
+    # call opens, which is the transition {#running!} alerts - the only
+    # place that can, since the caller cannot wait and the call has not
+    # begun. Without that record the strategies would disagree: `:thread`
+    # would deliver an ask made in this moment and a scheduled strategy
+    # would drop it.
+    #
+    # A call that is running is asked about at once, and one that has
+    # finished asks nothing. The raise is not issued before the call - the
+    # call's own dispatch is code, and a raise can land in that, the same
+    # gap `Fork::Job` has between `running!` and `runner.call` - and it is
+    # not issued for a call that has already finished.
     # @param [Boolean] wait
     #  Whether to wait for the call to open.
     # @return [void]
     def interrupt!(wait: true)
-      @mutex.synchronize do
+      issue = @mutex.synchronize do
         @changed.wait(@mutex) while wait and @state == :idle
-        return unless @state == :running
-        @interrupted = true
+        if @state == :idle
+          @deferred = true
+          false
+        elsif @state == :running
+          @interrupted = true
+          true
+        else
+          false
+        end
       end
-      @interrupt.call
+      @raise.call if issue
     end
 
     ##
@@ -110,12 +124,23 @@ class LLM::Function
     # so the thread that is about to call the tool stays ahead of the
     # thread that is about to interrupt it. By the time the watcher is
     # scheduled, the tool is running.
+    #
+    # An ask that could not wait is issued here, after the state has been
+    # changed and the lock released - so a caller that cannot wait is
+    # still answered, and answered once.
     # @return [void]
     def running!
-      @mutex.synchronize do
+      issue = @mutex.synchronize do
         @state = :running
         @changed.broadcast
+        if @deferred
+          @deferred = false
+          @interrupted = true
+        else
+          false
+        end
       end
+      @raise.call if issue
     end
 
     ##
@@ -139,14 +164,18 @@ class LLM::Function
     #
     # Either a thread to raise on - the default being `::Thread.main`, so
     # that a strategy whose tool runs elsewhere can name its own - or a
-    # scheduler and the fiber it is asked to raise on.
+    # scheduler and the fiber it is asked to raise on. The two go together:
+    # one without the other would fall back to raising on `::Thread.main`,
+    # which under a reactor is the thread the tool runs on.
     # @param [Thread, nil] thread
     # @param [Object, nil] scheduler
     # @param [Fiber, nil] fiber
     # @return [Proc]
-    def define_interrupt!(thread:, scheduler:, fiber:)
+    def interrupt_for(thread:, scheduler:, fiber:)
       if scheduler and fiber
         -> { scheduler.fiber_interrupt(fiber, LLM::Interrupt.new) }
+      elsif scheduler or fiber
+        raise ArgumentError, "a scheduler and a fiber are given together"
       else
         thread ||= ::Thread.main
         -> { thread.raise(LLM::Interrupt) }
