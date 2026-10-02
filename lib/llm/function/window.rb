@@ -91,7 +91,10 @@ class LLM::Function
         @changed.wait(@mutex) while wait and @state == :idle
         if @state == :idle
           unless @defer
-            raise ArgumentError, "a deferred ask needs an asker that can hold one"
+            raise ArgumentError,
+              "this scheduler does not implement fiber_interrupt, so a cancel " \
+              "cannot be held until the tool starts: it would be delivered " \
+              "before the call, and the tool would never run"
           end
           @deferred = true
           false
