@@ -41,9 +41,9 @@ module LLM::Function::Thread
         # It is what makes a cancel a delivery rather than a race. The
         # window is idle until `running!` below and `#interrupt!` waits on
         # it, so a cancel that arrives before this thread has reached the
-        # call is held, and the raise it issues lands wherever this thread
-        # is - which is the call, because nothing sits between `running!`
-        # and the call but the method dispatch.
+        # call is held rather than dropped - and the raise it issues is not
+        # issued before the call, which is what puts it at the tool in
+        # practice.
         @window = LLM::Function::Window.new(thread: ::Thread.current)
         @ready << @window
         ##
@@ -56,10 +56,7 @@ module LLM::Function::Thread
         # task used to do: the tool was never entered, so a tool whose own
         # rescue cleans up was never cleaned up. The window holds it
         # instead, and opens on the call.
-        if @cancelled
-          @delivered = true
-          ::Thread.new { @window.interrupt! }
-        end
+        ::Thread.new { @window.interrupt! } if @cancelled
         @window.running!
         function.call
       ensure
@@ -73,20 +70,25 @@ module LLM::Function::Thread
         # cancelled, because a tool's state belongs to the thread its call
         # runs on, and the caller's thread is not that thread.
         #
+        # It runs for a call that was interrupted and not for a call that
+        # was asked about: the window is the frame that decides whether a
+        # raise is issued, so it is the frame that knows, and
+        # `Window#interrupted?` is true only where the raise was. A cancel
+        # that arrives while the call is returning, and a held cancel whose
+        # tool finished before the watcher was scheduled, are both cancels
+        # that interrupted nothing - and neither tells the tool.
+        #
         # On the job's own thread the hook can only run after the call's
         # frame has ended - you cannot run code on a thread blocked inside
-        # a method it owns except by raising into it - and `@delivered` is
-        # written before the raise and read after it, so the flag says what
-        # it means. It is set wherever an interrupt is raised into a live
-        # body, which includes the held cancel above. A cancel that arrives
-        # once the call has finished raises nothing, and tells nobody.
+        # a method it owns except by raising into it - so it runs here
+        # rather than before the raise, as `:fork` runs it.
         #
         # The hook runs before this thread ends, so it has run before
         # `#wait` can return - which is the other half of telling the tool
         # before the caller. A hook that raises becomes what this thread
         # returns instead, so the error reaches the caller in place of the
         # call's result.
-        function.interrupt! if @delivered
+        function.interrupt! if @window&.interrupted?
       end
       @thread.report_on_exception = false
       nil
@@ -99,11 +101,23 @@ module LLM::Function::Thread
     end
 
     ##
+    # Asks the tool to stop, and waits for it to be possible.
+    #
+    # **It can wait, and the waits are bounded by the body's next
+    # instruction.** One is for the window itself - the body publishes it on
+    # `@ready` before it opens the call - and one is inside the window,
+    # which holds the raise until the call is running. A task this method
+    # was called on before it had a thread is the exception: the cancel is
+    # recorded and the body delivers it, because there is nothing here to
+    # raise on yet.
+    #
+    # A group and `Context#interrupt!` call this in a loop, which is why the
+    # wait is worth a line: a loop's cost is the longest wait in it, and
+    # every one of those is a dispatch wide.
     # @return [nil]
     def interrupt!
       @cancelled = true
       if @thread&.alive?
-        @delivered = true
         window.interrupt!
       end
       nil
