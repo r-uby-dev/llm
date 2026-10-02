@@ -90,7 +90,8 @@ module LLM::Function::Async
         # The reactor runs this block and the tool in one fiber, on one
         # thread, so a canceller that waited for the tool to start would be
         # waiting on the fiber it means to interrupt. A helper fiber can wait
-        # - cooperatively, so the reactor keeps running - and then ask.
+        # - cooperatively, so the reactor keeps running - and then ask
+        # without waiting, which is what `interrupt!(wait: false)` says.
         #
         # What it waits on is the window's state and not a flag of this
         # task's: the wait is this strategy's, and where the call is is the
@@ -102,7 +103,7 @@ module LLM::Function::Async
           @condition = Async::Condition.new
           task.async do
             @condition.wait while @window.idle?
-            @window.ask!
+            @window.interrupt!(wait: false)
           end
         end
         task.defer_cancel do
@@ -168,10 +169,11 @@ module LLM::Function::Async
     # whose state belongs to the reactor's thread sees that thread.
     #
     # **The ask is the window's, from wherever it is made.** A cancel that
-    # arrives while the call is running is asked for here; a held one is
-    # asked for by the helper, and it waits for the call to open first. In
-    # both cases the window decides: a call that has not opened is asked
-    # about by nobody until it has, and a call that has finished asks
+    # arrives while the call is running is asked for here, without waiting -
+    # this runs on the caller's thread, which can be the reactor's - and a
+    # held one is asked for by the helper, which waits for the call to open
+    # first. In both cases the window decides: a call that has not opened is
+    # asked about by nobody until it has, and a call that has finished asks
     # nothing and tells nobody - which is the no-op
     # `LLM::Function::Return#interrupt!` says one is.
     #
@@ -189,7 +191,7 @@ module LLM::Function::Async
     def interrupt!
       @alive = false
       @cancelled = true
-      @window&.ask!
+      @window&.interrupt!(wait: false)
       nil
     end
     alias_method :cancel!, :interrupt!
