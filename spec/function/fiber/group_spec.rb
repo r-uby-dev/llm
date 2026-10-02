@@ -55,12 +55,17 @@ RSpec.describe LLM::Function::Fiber::Group do
   # Runs the block inside a reactor and answers with the exception it ended
   # with. Expectations are made on what this returns rather than inside the
   # block, because a raise under `Async` is logged and never reaches RSpec.
+  #
+  # The interrupt is named rather than left to `rescue => ex`, which reaches
+  # only `StandardError`: an interrupt is outside it, and one that is not
+  # captured here is not measured by the example but fails it from outside
+  # the reactor.
   def react(timeout = 5, &block)
     error = nil
     Async do |root|
       root.with_timeout(timeout) do
         block.call
-      rescue => ex
+      rescue LLM::Interrupt, StandardError => ex
         error = ex
       end
     end
