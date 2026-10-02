@@ -62,9 +62,9 @@ class LLM::Function
     # lost.** With `wait: false` the ask is recorded and issued when the
     # call opens, which is the transition {#running!} alerts - the only
     # place that can, since the caller cannot wait and the call has not
-    # begun. Without that record the strategies would disagree: `:thread`
-    # would deliver an ask made in this moment and a scheduled strategy
-    # would drop it.
+    # begun. Without that record the strategies disagree: `:thread`
+    # delivers an ask made in this moment, and a scheduled strategy drops
+    # it.
     #
     # A call that is running is asked about at once, and one that has
     # finished asks nothing. The raise is not issued before the call - the
@@ -105,13 +105,22 @@ class LLM::Function
     end
 
     ##
-    # Whether this window has issued an interrupt.
+    # Whether a raise has been issued for this call.
     #
-    # A caller that has to tell *asked* from *delivered* asks this rather
-    # than reading a flag of its own: the window is the frame that decides
-    # whether a raise is the tool's to handle, so it is the frame that
-    # knows. It is true only where the raise was issued, which is never
-    # once the state is `finished`.
+    # A caller that has to decide whether to tell a tool that it was
+    # cancelled asks this rather than reading a flag of its own: the window
+    # is the frame that decides whether a raise is the tool's to handle, so
+    # it is the frame that knows. It is true where a raise was issued, and
+    # false where none was - a call that has finished, and a cancel that
+    # arrived without one.
+    #
+    # **Issued, not delivered, and the two are not the same here.** A
+    # strategy that asks a scheduler gets a raise that is scheduled rather
+    # than one that has landed - and a tool that never suspends is one it
+    # cannot land inside, so that tool is asked about and never reached.
+    # The flag is the notification that an ask was taken up, not a promise
+    # that the tool saw it, and a caller that needs the second has to get
+    # it from the tool.
     # @return [Boolean]
     def interrupted?
       @mutex.synchronize { @interrupted }
