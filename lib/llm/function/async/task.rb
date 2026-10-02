@@ -88,30 +88,34 @@ module LLM::Function::Async
         # `fiber_interrupt`, which schedules the raise and returns rather
         # than issuing it from here.
         #
-        # **A notification is delivered once and not stored**, so the check
-        # and the wait are both here: a helper that is scheduled before the
-        # call opens waits for the signal, and one that is scheduled after it
-        # has nothing to wait for. Whichever happens, `@running` is what says
-        # whether there is a call to interrupt - and it is false once the
-        # tool has answered, which is the cancel that interrupted nothing.
+        # **The state is three-valued, and that is the whole of it.** A
+        # helper scheduled before the call opens waits for the signal; one
+        # scheduled while the call runs asks; and one scheduled after it has
+        # closed asks nothing and returns. A boolean cannot tell the first
+        # from the third - and a helper that waited in the third case would
+        # wait for a signal the `ensure` had already sent and lost, which is
+        # a child task the reactor can never finish.
         if @cancelled
-          @delivered = true
-          @ready = Async::Notification.new
+          @state = :idle
+          @condition = Async::Condition.new
           task.async do
-            @ready.wait unless @running
-            @scheduler.fiber_interrupt(task.fiber, LLM::Interrupt.new) if @running
+            @condition.wait while @state == :idle
+            if @state == :running
+              @interrupted = true
+              @scheduler.fiber_interrupt(task.fiber, LLM::Interrupt.new)
+            end
           end
         end
         task.defer_cancel do
           result = begin
             ##
-            # The window opens on the call's first instruction, and it is
-            # what the helper above waits for. What the hold guarantees is
-            # that the raise is not asked for before the call; the dispatch
-            # itself is code, and a raise can land in it, which is the same
-            # gap `Fork::Job` has between `running!` and `runner.call`.
-            @running = true
-            @ready&.signal
+            # The call opens here, and it is what the helper above waits
+            # for. What the hold guarantees is that the raise is not asked
+            # for before the call; the dispatch itself is code, and a raise
+            # can land in it, which is the same gap `Fork::Job` has between
+            # `running!` and `runner.call`.
+            @state = :running
+            @condition&.signal
             function.call
           rescue LLM::Interrupt => ex
             ##
@@ -120,18 +124,18 @@ module LLM::Function::Async
             ex
           ensure
             ##
-            # The tool has answered. A helper that has not asked yet is
-            # released here and finds nothing to interrupt - which is the
-            # no-op a cancel that arrives once the call has returned is.
-            @running = false
-            @ready&.signal
+            # The tool has answered. A helper that has not asked yet finds
+            # the state closed and asks nothing - which is the no-op a
+            # cancel that arrives once the call has returned is.
+            @state = :finished
+            @condition&.signal
             ##
             # The hook runs on the reactor's thread rather than on the one
             # that cancelled. See the note on
             # `LLM::Function::Thread::Task#spawn` for why it cannot run
-            # before the call's frame has ended, and what `@delivered`
+            # before the call's frame has ended, and what `@interrupted`
             # means.
-            function.interrupt! if @delivered
+            function.interrupt! if @interrupted
           end
           @queue << result
         end
@@ -163,10 +167,12 @@ module LLM::Function::Async
     #
     # The tool is told from inside the reactor, not here, so that a tool
     # whose state belongs to the reactor's thread sees that thread.
-    # `@delivered` is set where a cancel is taken up for delivery: here, for
-    # one that arrived while the call was running, and in the block, for one
-    # that arrived before it. A cancel that arrives once the call has
-    # finished raises nothing, and tells nobody - which is the no-op
+    #
+    # **`@interrupted` is set where the fiber is asked, and nowhere else.**
+    # A cancel that arrives while the call is running is asked for here; a
+    # held one is asked for by the helper, and the helper sets it only when
+    # there was a call to interrupt. A cancel that arrives once the call has
+    # finished asks nothing, and tells nobody - which is the no-op
     # `LLM::Function::Return#interrupt!` says one is.
     #
     # Nothing is done to the reactor here. Where it is stopped is `#wait`'s
@@ -188,7 +194,7 @@ module LLM::Function::Async
       @alive = false
       @cancelled = true
       if @task&.fiber&.alive?
-        @delivered = true
+        @interrupted = true
         @scheduler.fiber_interrupt(@task.fiber, LLM::Interrupt.new)
       end
       nil
