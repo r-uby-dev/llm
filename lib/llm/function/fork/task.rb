@@ -15,6 +15,7 @@ class LLM::Function
       @tracer = options.fetch(:tracer, nil)
       @spawned = false
       @waited = false
+      @cancelled = false
     end
 
     ##
@@ -25,13 +26,18 @@ class LLM::Function
         id: @function.id, name: @function.name,
         arguments: @function.arguments, model: @function.model
       )
+      @ch = channels
       ##
-      # **The channels may already exist**, because a cancel can arrive before
-      # this does: `interrupt!` builds them when it has nowhere else to write,
-      # and a socketpair does not need a child to exist. They are built once,
-      # by whoever gets there first, so the message a cancel wrote is in the
-      # channel the child is about to read.
-      @ch ||= channels
+      # **A cancel that arrived before this is written now, before the fork.**
+      # The child is the reader, and it inherits both ends, so the message is
+      # waiting in the channel by the time its watcher looks - which is the
+      # same way a cancel that arrives a moment later is delivered, and the
+      # same shape `:ractor`'s task answers with. Written earlier, it would
+      # have opened a socketpair for a task that may never fork.
+      if @cancelled
+        @cancelled = false
+        @ch.control.write(:interrupt)
+      end
       @pid = Kernel.fork do
         ##
         # The child inherits the parent's terminal. When
@@ -83,12 +89,11 @@ class LLM::Function
     ##
     # Tells the child to stop, and is a no-op once it has answered.
     #
-    # **A cancel that arrives before `spawn` is not lost.** The controls
-    # channel is a datagram, so a message written into it waits until the
-    # child's watcher reads it - and the child's watcher waits on the window
-    # the job opens immediately before the call. So the channels are built
-    # here when the fork has not happened yet, rather than raising on a
-    # channel that did not exist.
+    # **A cancel that arrives before `spawn` is not lost.** There is no channel
+    # to write to yet, so the cancel is recorded and written by `spawn`, before
+    # the fork - the child is the reader, and the message waits in the channel
+    # until its watcher looks, which is how a cancel that arrives a moment
+    # later is delivered too.
     #
     # A task the guard blocked never forks, and one that has answered has
     # nothing left to tell: both are a no-op, the way
@@ -96,8 +101,11 @@ class LLM::Function
     # @return [nil]
     def interrupt!
       return nil if @waited || @guarded
-      @ch ||= channels
-      @ch.control.write(:interrupt)
+      if @ch
+        @ch.control.write(:interrupt)
+      else
+        @cancelled = true
+      end
       nil
     rescue Errno::ESRCH, IOError
       nil
@@ -167,12 +175,12 @@ class LLM::Function
     private
 
     ##
-    # The controls and results channels, built once.
+    # The controls and results channels.
     #
-    # They are built by `spawn` for an ordinary call - after the guard has had
-    # its say, so a task that never forks never opens a socketpair - and by
-    # {#interrupt!} when a cancel arrives first. Whoever builds them, the other
-    # finds them.
+    # They are built by `spawn` and not by {#interrupt!}, so a task that never
+    # forks never opens a socketpair - a guard blocks many of them, and that is
+    # the common case. A cancel that arrives before `spawn` is recorded instead,
+    # and written by it.
     # @return [LLM::Object]
     def channels
       LLM::Object.from(
