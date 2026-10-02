@@ -198,15 +198,15 @@ RSpec.describe LLM::Function::Thread::Task do
   end
 
   ##
-  # `#interrupt!` waits now - for the body to publish the window, and for the
-  # window to open - and this is the case that says the wait is not felt: a
-  # task that is spawned and live answers the canceller without holding it,
-  # and the wait a canceller does make is a dispatch wide.
-  describe "a cancel for a task that is spawned and live" do
-    before do
-      task.spawn
-      settle(started)
-    end
+  # `#interrupt!` waits now - for the body to publish the window, and inside
+  # the window for the call to open - and this is the case that wait is for.
+  # The task is spawned and interrupted with nothing in between, so the window
+  # is still idle when the canceller arrives: it waits there rather than
+  # returning, and the tool holds at the gate, so the interrupt still lands
+  # inside the call. A group and `Context#interrupt!` meet the same wait in a
+  # loop, which is why the answer matters.
+  describe "a cancel that arrives once the thread has started" do
+    before { task.spawn }
 
     it "does not hold the canceller" do
       expect(within { task.interrupt! }).to be_nil
