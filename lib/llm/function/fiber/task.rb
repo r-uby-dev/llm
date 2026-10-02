@@ -74,7 +74,13 @@ module LLM::Function::Fiber
             @queue << function.call
           rescue => ex
             @queue << ex
-            raise
+            ##
+            # An interrupt stays in the queue: it is the answer the caller
+            # takes, and a fiber that ends with one is not contained by the
+            # scheduler the way a `StandardError` is. See the note on
+            # `LLM::Function::Async::Task#spawn`, which is the same rule for
+            # the same reason.
+            raise unless LLM::Interrupt === ex
           ensure
             ##
             # The hook runs on the fiber the call runs on, once the call has
