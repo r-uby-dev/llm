@@ -71,6 +71,23 @@ RSpec.describe LLM::Function::Fiber::Task do
     end
   end
 
+  ##
+  # And one that answers at once and counts the hook it was told through. A
+  # tool that never suspends is the one an ask cannot reach, so the hook is
+  # what says whether it was told anyway.
+  let(:telling) do
+    log = self.log
+    Class.new(LLM::Tool) do
+      name "telling"
+      def call
+        {ok: true}
+      end
+      define_method(:on_interrupt) do
+        log << :interrupted
+      end
+    end
+  end
+
   def task_for(tool)
     tool.function.dup.tap do |fn|
       fn.id = "call_1"
@@ -185,6 +202,20 @@ RSpec.describe LLM::Function::Fiber::Task do
           sibling.wait
         end
         expect(error).to be_nil
+      end
+
+      ##
+      # And the half that is a decision rather than a fact about a scheduler:
+      # the tool is asked about and never reached, and it is told all the same,
+      # because the window is keyed on whether an ask was taken up for the call
+      # and not on whether the raise landed. `:async` pins the same case.
+      context "when the tool counts the hook it was told through" do
+        let(:tool) { telling }
+
+        it "tells the tool" do
+          error
+          expect(settle(log)).to eq(:interrupted)
+        end
       end
     end
   end
