@@ -13,6 +13,8 @@ require "async"
 # installs the only kind there is.
 RSpec.describe LLM::Function::Fiber::Task do
   let(:log) { Queue.new }
+  let(:started) { Queue.new }
+  let(:cleaned) { Queue.new }
   let(:notification) { Async::Notification.new }
 
   ##
@@ -29,6 +31,25 @@ RSpec.describe LLM::Function::Fiber::Task do
       end
       define_method(:on_interrupt) do
         log << :interrupted
+      end
+    end
+  end
+
+  ##
+  # A tool that says it has started, holds at the notification, and cleans up
+  # in its own rescue before raising on - which is what a held cancel has to
+  # reach: the tool's rescue, and the caller's exception.
+  let(:cleaning) do
+    notification, started, cleaned = self.notification, self.started, self.cleaned
+    Class.new(LLM::Tool) do
+      name "cleaning"
+      define_method(:call) do
+        started << :in_call
+        notification.wait
+        {ok: true}
+      rescue LLM::Interrupt
+        cleaned << :cleaned_up
+        raise
       end
     end
   end
@@ -88,8 +109,38 @@ RSpec.describe LLM::Function::Fiber::Task do
       error = react { task.wait }
       expect([error.class, log.size]).to eq([LLM::Interrupt, 1])
     end
+
+    ##
+    # The tool is entered now, which is the whole of what this strategy was
+    # missing: the fiber raised before the call was reached, so a tool that
+    # cleans up in its own rescue never ran its rescue.
+    context "when the tool cleans up in its own rescue" do
+      let(:tool) { cleaning }
+      let(:task) { task_for(tool) }
+
+      before { task.interrupt! }
+
+      it "enters the tool" do
+        react { task.wait }
+        expect(settle(started)).to eq(:in_call)
+      end
+
+      it "is cleaned up" do
+        react { task.wait }
+        expect(settle(cleaned)).to eq(:cleaned_up)
+      end
+
+      it "still raises to the caller" do
+        expect(react { task.wait }).to be_a(LLM::Interrupt)
+      end
+    end
   end
 
+  ##
+  # A cancel arrives on the thread the scheduler runs on here, so this is also
+  # the example for a canceller that must not block it: the sleep below is
+  # reached only if `interrupt!` returned, and a canceller that waited for
+  # the call to start would never get there.
   describe "a cancel that arrives while the call runs" do
     it "raises at the tool" do
       task = task_for(holding)
