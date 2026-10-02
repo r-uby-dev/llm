@@ -18,11 +18,21 @@ require "timeout"
 # result channel, because a fork's copy of a tool is not the object the parent
 # holds.
 #
+# **Where the raise lands is the tool's shape as well as the window's.** The
+# window promises that a raise is not issued *before* the call; the dispatch is
+# code, and a raise can land in it. What puts it after the tool's first
+# instruction here is that the tool yields - the watcher is woken by
+# `running!`, but it cannot take the GVL until the child's main thread gives it
+# up, which is the `sleep`. A raise that landed in the dispatch would take the
+# job's own `rescue` branch and write `[:interrupt]`, so the first group would
+# fail whole rather than one example.
+#
 # A cancel **before** `spawn` is not this file's to pin: `Fork::Task` builds
 # its channels in `spawn`, so there is nothing to write to until it has run and
 # `interrupt!` raises. The in-process strategies hold one that early; this one
-# does not, and the difference is worth knowing about rather than working
-# around.
+# does not, and the group that cancels its tasks in turn reaches tasks that
+# have not been spawned, so the difference is more than theoretical - it is
+# issue #222.
 #
 # The half about a call that returned is issue #203, and the order below is the
 # failing run's order: the first wait is one example, the second waits are the
