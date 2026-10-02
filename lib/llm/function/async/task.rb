@@ -49,12 +49,11 @@ module LLM::Function::Async
     # hook that runs after the queue was pushed is a hook the caller can
     # race past.
     #
-    # An interrupt is answered, not raised on. `LLM::Interrupt` is a subclass
-    # of `Exception`, and one that is left to raise kills the reactor's
-    # thread and takes every other task on that reactor with it. So the task
-    # rescues it, stores it on its own queue, and exits silently - and the
-    # caller reads the queue and raises the interrupt on its own thread or
-    # fiber, which is where it was asked for.
+    # `LLM::Interrupt` is a subclass of `Exception`, and one that is left to
+    # raise kills the reactor's thread and takes every other task on that
+    # reactor with it. So the task rescues it, stores it on its own queue,
+    # and exits silently - and the caller reads the queue and raises the
+    # interrupt on its own thread or fiber, which is where it was asked for.
     #
     # The rescue below names the interrupt rather than leaving it to a bare
     # rescue, because a bare rescue - and `rescue => e` - reaches only
