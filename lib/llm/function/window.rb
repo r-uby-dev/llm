@@ -40,12 +40,7 @@ class LLM::Function
     #  running the tool.
     # @return [LLM::Function::Window]
     def initialize(thread: nil, scheduler: nil, fiber: nil)
-      @interrupt = if scheduler and fiber
-        -> { scheduler.fiber_interrupt(fiber, LLM::Interrupt.new) }
-      else
-        thread ||= ::Thread.main
-        -> { thread.raise(LLM::Interrupt) }
-      end
+      @interrupt = define_interrupt!(thread:, scheduler:, fiber:)
       @mutex = Mutex.new
       @changed = ConditionVariable.new
       @state = :idle
@@ -133,6 +128,28 @@ class LLM::Function
       @mutex.synchronize do
         @state = :finished
         @changed.broadcast
+      end
+    end
+
+    private
+
+    ##
+    # The callable that issues the raise, built from whichever the strategy
+    # gave.
+    #
+    # Either a thread to raise on - the default being `::Thread.main`, so
+    # that a strategy whose tool runs elsewhere can name its own - or a
+    # scheduler and the fiber it is asked to raise on.
+    # @param [Thread, nil] thread
+    # @param [Object, nil] scheduler
+    # @param [Fiber, nil] fiber
+    # @return [Proc]
+    def define_interrupt!(thread:, scheduler:, fiber:)
+      if scheduler and fiber
+        -> { scheduler.fiber_interrupt(fiber, LLM::Interrupt.new) }
+      else
+        thread ||= ::Thread.main
+        -> { thread.raise(LLM::Interrupt) }
       end
     end
   end
