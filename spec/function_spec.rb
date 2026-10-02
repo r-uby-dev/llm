@@ -401,20 +401,19 @@ RSpec.describe LLM::Function do
         task.spawn
         Timeout.timeout(2) { sleep 0.05 until function.runner.ran }
         task.interrupt!
-        ##
-        # The interrupt is the caller's to catch, and a modifier rescue -
-        # `task.wait rescue LLM::Interrupt` - is not a rescue at all: it
-        # catches a `StandardError` and answers with the constant. Both are
-        # named here, so that the wait in setup cannot fail an example that
-        # is about the hook rather than about the ending.
-        begin
-          task.wait
-        rescue LLM::Interrupt, StandardError
-          nil
-        end
       end
 
       it "tells the tool on the thread that runs the call" do
+        ##
+        # The interrupt is the caller's to catch, and a modifier rescue -
+        # `task.wait rescue LLM::Interrupt` - is not a rescue at all: it
+        # catches a `StandardError` and answers with the constant. It is the
+        # interrupt that is named here, and only that.
+        begin
+          task.wait
+        rescue LLM::Interrupt
+          nil
+        end
         expect(function.runner.told).to eq(function.runner.ran)
       end
     end
@@ -432,16 +431,16 @@ RSpec.describe LLM::Function do
         task.spawn
         Timeout.timeout(2) { sleep 0.05 until function.runner.ran }
         task.interrupt!
-        begin
-          task.wait
-        rescue LLM::Interrupt, StandardError
-          nil
-        end
       end
 
       after { reactor&.stop }
 
       it "tells the tool on the thread that runs the call" do
+        begin
+          task.wait
+        rescue LLM::Interrupt
+          nil
+        end
         expect(function.runner.told).to eq(function.runner.ran)
       end
 
