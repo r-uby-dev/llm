@@ -40,7 +40,7 @@ class LLM::Function
     #  running the tool.
     # @return [LLM::Function::Window]
     def initialize(thread: nil, scheduler: nil, fiber: nil)
-      @ask = if scheduler && fiber
+      @ask = if scheduler and fiber
         -> { scheduler.fiber_interrupt(fiber, LLM::Interrupt.new) }
       else
         thread ||= ::Thread.main
@@ -53,47 +53,28 @@ class LLM::Function
     end
 
     ##
-    # Called from the thread that raises - the watcher - and not from the
-    # tool's.
+    # Asks the call to stop, waiting for it to start if this canceller can
+    # afford to.
     #
-    # It waits while the window has not opened, and returns without
-    # raising once it has closed. In between, the raise it issues lands on
-    # the tool.
+    # The wait is a mutex and a condition variable, and whether it can be
+    # taken is the whole of what `wait` is for: the canceller is never the
+    # tool's thread on `:thread`, `:fork` and `:ractor`, so it waits, and
+    # it can be on a reactor - where a cancel can arrive on the thread the
+    # tool runs on - so there it does not, and the caller waits its own way
+    # and asks again once the call has opened.
     #
-    # **It waits, and that is why a scheduler strategy does not use it.**
-    # The wait is a mutex and a condition variable, which is right here
-    # because the caller is never the tool's thread. Where it can be - a
-    # reactor, where a cancel can arrive on the thread the tool runs on -
-    # {#ask!} is the one to call instead.
-    #
-    # What it guarantees is that the raise is not issued before the call.
-    # The call's own dispatch is code, and a raise can land in that - the
-    # same gap `Fork::Job` has between `running!` and `runner.call`. What
-    # it does not do is issue a raise for a call that has already
-    # finished: the state is read here, and the raise happens after it.
+    # Either way: a call that has not opened is not asked about, one that
+    # is running is asked about at once, and one that has finished asks
+    # nothing. The raise is not issued before the call - the call's own
+    # dispatch is code, and a raise can land in that, the same gap
+    # `Fork::Job` has between `running!` and `runner.call` - and it is not
+    # issued for a call that has already finished.
+    # @param [Boolean] wait
+    #  Whether to wait for the call to open.
     # @return [void]
-    def interrupt!
+    def interrupt!(wait: true)
       @mutex.synchronize do
-        @changed.wait(@mutex) while @state == :idle
-        return unless @state == :running
-        @interrupted = true
-      end
-      @ask.call
-    end
-
-    ##
-    # Ask, if there is a call to ask about.
-    #
-    # **It does not wait**, which is what a strategy that runs under a
-    # scheduler needs: the canceller there can be the tool's own thread,
-    # and a canceller that waited for the call to start would be waiting on
-    # the fiber it means to interrupt. A call that is running is asked
-    # about at once; one that has already finished is a no-op; and one that
-    # has not opened yet is not asked about at all - the caller reads
-    # {#idle?}, waits its own way, and asks again when the call has opened.
-    # @return [void]
-    def ask!
-      @mutex.synchronize do
+        @changed.wait(@mutex) while wait && @state == :idle
         return unless @state == :running
         @interrupted = true
       end
