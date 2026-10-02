@@ -102,8 +102,8 @@ RSpec.describe LLM::Function::Fork::Task do
 
   describe "a call that has returned" do
     let(:task) { task_for(quick_tool, "call_1") }
-    let(:first) { within(task: task) { task.wait } }
-    let(:second) { within(task: task) { task.wait } }
+    let(:first) { within(task:) { task.wait } }
+    let(:second) { within(task:) { task.wait } }
 
     before { first }
 
@@ -163,8 +163,8 @@ RSpec.describe LLM::Function::Fork::Task do
   # wait re-raises that same one rather than reading a channel that has gone.
   describe "a call that was interrupted" do
     let(:task) { task_for(holding_tool, "call_2") }
-    let(:first) { raised { within(task: task) { task.wait } } }
-    let(:second) { raised { within(task: task) { task.wait } } }
+    let(:first) { raised { within(task:) { task.wait } } }
+    let(:second) { raised { within(task:) { task.wait } } }
 
     before do
       task.spawn
@@ -191,8 +191,8 @@ RSpec.describe LLM::Function::Fork::Task do
   # into the turn.
   describe "a call whose child ended without a result" do
     let(:task) { task_for(dying_tool, "call_3") }
-    let(:returned) { within(task: task) { task.wait } }
-    let(:second) { within(task: task) { task.wait } }
+    let(:returned) { within(task:) { task.wait } }
+    let(:second) { within(task:) { task.wait } }
 
     before { returned }
 
