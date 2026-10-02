@@ -73,11 +73,15 @@ module LLM::Function::Thread
         # It runs where an ask was taken up for this call, and not for a
         # cancel the window never asked about: the window is the frame that
         # decides whether a raise is issued, so it is the frame that knows,
-        # and `Window#interrupted?` is true where one was issued. **Issued
-        # is not delivered** - a strategy that asks a scheduler gets a raise
-        # that is placed at the tool's next suspension, so a tool that never
-        # suspends is asked about and never reached, and the hook runs for
-        # it all the same.
+        # and `Window#interrupted?` is true where one was issued.
+        #
+        # **Issued is not delivered, and this strategy is the one where the
+        # two come apart least.** The raise here is a `Thread#raise`, and a
+        # thread can be interrupted where it stands, so a cancel that the
+        # window asks about lands on the call. `:fiber` and `:async` ask a
+        # scheduler instead, which places the raise at the tool's next
+        # suspension - so there a tool that never suspends is asked about
+        # and never reached, and the hook runs for it all the same.
         #
         # That is the side to be on, and a tool whose own rescue answers the
         # interrupt rather than raising is why: it was interrupted, and its
