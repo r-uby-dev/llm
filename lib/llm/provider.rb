@@ -576,7 +576,7 @@ class LLM::Provider
     else
       weakmaps = LLM::Object.from(
         tracer: ObjectSpace::WeakMap.new,
-        header: ObjectSpace::WeakMap.new
+        header: ObjectSpace::WeakKeyMap.new
       )
       thread["llm.#{name}.weakmaps"] = weakmaps
     end

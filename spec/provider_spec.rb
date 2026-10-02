@@ -57,6 +57,42 @@ RSpec.describe LLM::Provider do
       end
     end
 
+    context "when scoped headers encounter garbage collection" do
+      it "retains the header until its scope ends" do
+        provider.with("x-session-id" => "abc") do
+          GC.start
+          expect(provider.send(:headers)).to include("x-session-id" => "abc")
+        end
+        expect(provider.send(:headers)).not_to have_key("x-session-id")
+      end
+
+      it "retains nested headers and restores the outer scope" do
+        provider.with("x-session-id" => "outer", "X-Outer" => "yes") do
+          provider.with("x-session-id" => "inner") do
+            GC.start
+            expect(provider.send(:headers)).to include("x-session-id" => "inner", "X-Outer" => "yes")
+          end
+          GC.start
+          expect(provider.send(:headers)).to include("x-session-id" => "outer", "X-Outer" => "yes")
+        end
+      end
+
+      it "restores a surviving outer scope after an inner scope raises" do
+        provider.with("x-session-id" => "outer") do
+          expect do
+            provider.with("x-session-id" => "inner") do
+              GC.start
+              expect(provider.send(:headers)).to include("x-session-id" => "inner")
+              raise "boom"
+            end
+          end.to raise_error(RuntimeError, "boom")
+          GC.start
+          expect(provider.send(:headers)).to include("x-session-id" => "outer")
+        end
+        expect(provider.send(:headers)).not_to have_key("x-session-id")
+      end
+    end
+
     context "when a scoped header block raises" do
       before do
         provider.with("x-session-id" => "abc") { raise "boom" }
