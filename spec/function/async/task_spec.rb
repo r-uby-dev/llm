@@ -99,6 +99,23 @@ RSpec.describe LLM::Function::Async::Task do
     end
   end
 
+  ##
+  # And one that answers before anything can reach it: no yield, so no point
+  # at which the raise could arrive.
+  let(:quick) do
+    started, told = self.started, self.told
+    Class.new(LLM::Tool) do
+      name "quick"
+      define_method(:call) do
+        started << :in_call
+        {"ok" => true}
+      end
+      define_method(:on_interrupt) do
+        told << :interrupted
+      end
+    end
+  end
+
   let(:tool) { counting }
 
   let(:task) do
@@ -157,6 +174,31 @@ RSpec.describe LLM::Function::Async::Task do
 
       it "is told" do
         expect(settle(told)).to eq(:cancelled)
+      end
+    end
+
+    ##
+    # The third state, and the semantic this change introduces: a cancel
+    # before `spawn` is no longer a promise that the call never runs. A tool
+    # that never suspends is never reached by the raise, so the caller is
+    # given its result and the tool is not told - nothing interrupted it.
+    context "when the tool answers before anything can reach it" do
+      let(:tool) { quick }
+
+      it "answers with the tool's result" do
+        expect(within { task.wait }.to_h[:value]).to eq("ok" => true)
+      end
+
+      context "once the caller has waited" do
+        before do
+          within { task.wait }
+        rescue LLM::Interrupt
+          nil
+        end
+
+        it "does not tell the tool" do
+          expect(told).to be_empty
+        end
       end
     end
   end
