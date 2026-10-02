@@ -30,8 +30,10 @@ RSpec.describe LLM::Interrupt do
 
   describe "a rescue that catches everything" do
     ##
-    # Two shapes, and the interrupt passes both: a bare rescue, and the one
-    # that catches an error so it can carry on.
+    # Two shapes, and an interrupt has to come out of both: a bare rescue,
+    # and the one that catches an error so it can carry on. Each is asked
+    # for an ordinary error first, so that the examples below cannot pass
+    # because the rescue was never a rescue.
     let(:barely) do
       proc do |&block|
         block.call
@@ -52,12 +54,25 @@ RSpec.describe LLM::Interrupt do
       end
     end
 
-    it "is not caught by a bare rescue" do
-      expect(barely.call { raise LLM::Interrupt }).to eq(:passed)
+    it "catches an ordinary error" do
+      expect(barely.call { raise "boom" }).to eq(:caught)
     end
 
-    it "is not caught by a rescue of StandardError" do
-      expect(broadly.call { raise LLM::Interrupt }).to eq(:passed)
+    it "catches an error a rescue of StandardError names" do
+      expect(broadly.call { raise "boom" }).to eq(:caught)
+    end
+
+    ##
+    # The claim itself: the rescue did not catch it, and the caller is
+    # given it - which is the whole of what the class is for.
+    it "does not catch an interrupt" do
+      expect { barely.call { raise LLM::Interrupt } }
+        .to raise_error(described_class)
+    end
+
+    it "does not catch an interrupt when it names StandardError" do
+      expect { broadly.call { raise LLM::Interrupt } }
+        .to raise_error(described_class)
     end
   end
 end
