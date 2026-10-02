@@ -37,13 +37,14 @@ class LLM::Function
     #  canceller that is the tool's own thread is not left waiting on it. A
     #  scheduler that does not implement it - it is new enough that few do -
     #  is asked by raising on the fiber directly, which suspends the
-    #  canceller until the scheduler delivers it.
+    #  canceller until the scheduler delivers it, and which cannot hold a
+    #  deferred ask.
     # @param [Fiber, nil] fiber
     #  The fiber the scheduler is asked to raise on, which is the one
     #  running the tool.
     # @return [LLM::Function::Window]
     def initialize(thread: nil, scheduler: nil, fiber: nil)
-      @raise = interrupt_for(thread:, scheduler:, fiber:)
+      @raise, @defer = interrupt_for(thread:, scheduler:, fiber:)
       @mutex = Mutex.new
       @changed = ConditionVariable.new
       @state = :idle
@@ -69,6 +70,14 @@ class LLM::Function
     # delivers an ask made in this moment, and a scheduled strategy drops
     # it.
     #
+    # **A deferred ask needs an asker that can hold one.** The ask is issued
+    # at {#running!} only by an asker that schedules its raise; the fallback
+    # for a scheduler without `fiber_interrupt` raises on the fiber that
+    # asks, which at `running!` is the tool's own - so it would deliver
+    # before the call and skip the tool, which is the divergence these edges
+    # exist to close. It is refused instead, loudly, rather than quietly
+    # doing the thing this is here to prevent.
+    #
     # A call that is running is asked about at once, and one that has
     # finished asks nothing. The raise is not issued before the call - the
     # call's own dispatch is code, and a raise can land in that, the same
@@ -81,6 +90,9 @@ class LLM::Function
       issue = @mutex.synchronize do
         @changed.wait(@mutex) while wait and @state == :idle
         if @state == :idle
+          unless @defer
+            raise ArgumentError, "a deferred ask needs an asker that can hold one"
+          end
           @deferred = true
           false
         elsif @state == :running
@@ -172,29 +184,36 @@ class LLM::Function
 
     ##
     # The callable that issues the raise, built from whichever the strategy
-    # gave.
+    # gave, and whether it can hold a deferred ask.
     #
     # Either a thread to raise on - the default being `::Thread.main`, so
     # that a strategy whose tool runs elsewhere can name its own - or a
     # scheduler and the fiber it is asked to raise on. The two go together:
     # one without the other would fall back to raising on `::Thread.main`,
     # which under a reactor is the thread the tool runs on.
+    #
+    # **Only a scheduler's raise can be deferred.** `fiber_interrupt`
+    # schedules it and returns, so it can be issued from the call's own
+    # fiber and land inside the call. A raise on a thread or a fiber is
+    # issued where it is asked, and an ask issued at `running!` lands before
+    # the call - so those askers say so, and the window refuses rather than
+    # delivering early.
     # @param [Thread, nil] thread
     # @param [Object, nil] scheduler
     # @param [Fiber, nil] fiber
-    # @return [Proc]
+    # @return [Array(Proc, Boolean)]
     def interrupt_for(thread:, scheduler:, fiber:)
       if scheduler and fiber
         if scheduler.respond_to?(:fiber_interrupt)
-          -> { scheduler.fiber_interrupt(fiber, LLM::Interrupt.new) }
+          [-> { scheduler.fiber_interrupt(fiber, LLM::Interrupt.new) }, true]
         else
-          -> { fiber.raise(LLM::Interrupt) }
+          [-> { fiber.raise(LLM::Interrupt) }, false]
         end
       elsif scheduler or fiber
         raise ArgumentError, "a scheduler and a fiber are given together"
       else
         thread ||= ::Thread.main
-        -> { thread.raise(LLM::Interrupt) }
+        [-> { thread.raise(LLM::Interrupt) }, false]
       end
     end
   end
