@@ -123,7 +123,14 @@ RSpec.describe LLM::Function::Async::Task do
   # strategy was missing - the block used to raise before `defer_cancel`,
   # which is where the tool is called, so the tool was never entered.
   describe "a cancel that arrives before the call runs" do
-    before { task.interrupt! }
+    before do
+      task.interrupt!
+      ##
+      # The spawn is here rather than in an example because it is setup:
+      # the interrupt above is the thing under test, and every example below
+      # states one thing about what became of it.
+      task.spawn
+    end
 
     it "enters the tool" do
       expect(settle(started)).to eq(:in_call)
@@ -131,10 +138,6 @@ RSpec.describe LLM::Function::Async::Task do
 
     it "raises LLM::Interrupt to the caller" do
       expect { within { task.wait } }.to raise_error(LLM::Interrupt)
-    end
-
-    it "is a no-op for a task that never spawned" do
-      expect { task.interrupt! }.not_to raise_error
     end
 
     context "when the tool cleans up in its own rescue" do
@@ -155,6 +158,15 @@ RSpec.describe LLM::Function::Async::Task do
       it "is told" do
         expect(settle(told)).to eq(:cancelled)
       end
+    end
+  end
+
+  ##
+  # There is no block to hold it and nothing to ask for, so the record is
+  # the whole of the answer.
+  describe "a cancel for a task that never spawned" do
+    it "is a no-op" do
+      expect(task.interrupt!).to be_nil
     end
   end
 
