@@ -610,11 +610,9 @@ RSpec.describe LLM::Function do
           # The interrupt is caught by name rather than by a modifier
           # rescue, which reaches only `StandardError`.
           Thread.new do
-            begin
-              group.wait
-            rescue LLM::Interrupt
-              :interrupted
-            end
+            group.wait
+          rescue LLM::Interrupt
+            :interrupted
           end.tap do |t|
             t.report_on_exception = false
           end
