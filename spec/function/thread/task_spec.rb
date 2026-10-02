@@ -8,13 +8,14 @@ require "timeout"
 #
 # A cancel is held before the call runs, raised while it runs, and a no-op
 # once it has returned; the first of those was dropped, because `interrupt!`
-# had nothing to raise on before `spawn`. The held cancel is spent by the body
-# now, so the hook runs with it, and every wait here has a deadline - a wrong
-# expectation fails rather than hangs.
+# had nothing to raise on before `spawn`. The held cancel is delivered inside
+# the call now, so a tool whose own rescue cleans up is cleaned up - and every
+# wait here has a deadline, a wrong expectation fails rather than hangs.
 RSpec.describe LLM::Function::Thread::Task do
   let(:gate) { Queue.new }
   let(:log) { Queue.new }
   let(:started) { Queue.new }
+  let(:cleaned) { Queue.new }
 
   ##
   # A tool that says it has started, then holds until the example lets it go,
@@ -34,12 +35,49 @@ RSpec.describe LLM::Function::Thread::Task do
     end
   end
 
-  let(:fn) do
-    holding.function.dup.tap do |fn|
+  ##
+  # And one that cleans up in its own rescue rather than in a hook, which is
+  # what a cancel has to reach to be worth holding.
+  let(:rescuing) do
+    started, gate, cleaned = self.started, self.gate, self.cleaned
+    Class.new(LLM::Tool) do
+      name "rescuing"
+      define_method(:call) do
+        started << :in_call
+        gate.pop
+        {ok: true}
+      rescue LLM::Interrupt
+        cleaned << :cleaned_up
+        {ok: false, interrupted: true}
+      end
+    end
+  end
+
+  ##
+  # And one whose only notification is the hook under its other name.
+  let(:cancelling) do
+    started, gate, log = self.started, self.gate, self.log
+    Class.new(LLM::Tool) do
+      name "cancelling"
+      define_method(:call) do
+        started << :in_call
+        gate.pop
+        {ok: true}
+      end
+      define_method(:on_cancel) do
+        log << :cancelled
+      end
+    end
+  end
+
+  def fn_for(tool)
+    tool.function.dup.tap do |fn|
       fn.id = "call_1"
       fn.arguments = {}
     end
   end
+
+  let(:fn) { fn_for(holding) }
 
   let(:task) { fn.task(:thread) }
 
@@ -83,6 +121,40 @@ RSpec.describe LLM::Function::Thread::Task do
     it "has spawned nothing yet" do
       expect(task.alive?).to be(false)
     end
+
+    ##
+    # The tool is entered, which is the whole of what this strategy was
+    # missing: the cancel used to be raised before `function.call`, so a tool
+    # that cleans up in its own rescue never ran its rescue.
+    context "when the tool cleans up in its own rescue" do
+      let(:fn) { fn_for(rescuing) }
+
+      it "is entered and cleans up" do
+        begin
+          within { task.wait }
+        rescue LLM::Interrupt
+          nil
+        end
+        expect(cleaned.size).to eq(1)
+      end
+
+      it "still raises to the caller" do
+        expect { within { task.wait } }.to raise_error(LLM::Interrupt)
+      end
+    end
+
+    context "when the tool is told through on_cancel" do
+      let(:fn) { fn_for(cancelling) }
+
+      it "is told" do
+        begin
+          within { task.wait }
+        rescue LLM::Interrupt
+          nil
+        end
+        expect(settle(log)).to eq(:cancelled)
+      end
+    end
   end
 
   describe "a cancel that arrives while the call runs" do
@@ -106,6 +178,28 @@ RSpec.describe LLM::Function::Thread::Task do
         nil
       end
       expect(log.size).to eq(1)
+    end
+
+    ##
+    # And a running cancel reaches the tool's own rescue too, which is what
+    # the held one now does as well.
+    context "when the tool cleans up in its own rescue" do
+      let(:fn) { fn_for(rescuing) }
+
+      before do
+        task.spawn
+        settle(started)
+        task.interrupt!
+      end
+
+      it "is cleaned up" do
+        begin
+          within { task.wait }
+        rescue LLM::Interrupt
+          nil
+        end
+        expect(cleaned.size).to eq(1)
+      end
     end
   end
 
