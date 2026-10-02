@@ -20,6 +20,12 @@ require "setup"
 # value the job sends back, because a ractor's copy of a tool is not the
 # object the caller holds.
 #
+# **And a cancel made before `spawn` is held too.** The mailbox is built in
+# `spawn`, so there was nothing to send a cancel to and the task answered `nil`
+# for one that had not run yet - a cancel that said nothing. It is remembered
+# and delivered by `spawn`, and `:fork`'s task takes one the same way, having
+# built its channels by whoever got there first.
+#
 # **What the caller is given is this strategy's own answer**: a cancel that
 # escapes the tool is a return with `cancelled: true`, not a raise out of
 # `#wait`, which is the difference from `:fork` and is worth pinning beside
@@ -198,6 +204,33 @@ RSpec.describe LLM::Function::Ractor::Task do
     it "answers with a cancelled return rather than raising" do
       expect(returned.to_h).to eq(
         id: "call_3", name: "holding",
+        value: {cancelled: true, reason: "interrupted"}
+      )
+    end
+  end
+
+  ##
+  # The cancel precedes `spawn`, so there is no mailbox to send it to yet: the
+  # task remembers it and delivers it as soon as there is one. The tool holds,
+  # so a cancel that was dropped is a wait with nothing to answer it rather
+  # than a cancel that arrived too late to matter.
+  describe "a call cancelled before it was spawned" do
+    let(:task) do
+      holding_tool.function.dup.tap do |fn|
+        fn.id = "call_4"
+        fn.arguments = {}
+      end.task(:ractor)
+    end
+    let(:returned) { within { task.wait } }
+
+    before do
+      task.interrupt!
+      task.spawn
+    end
+
+    it "answers with a cancelled return rather than raising" do
+      expect(returned.to_h).to eq(
+        id: "call_4", name: "holding",
         value: {cancelled: true, reason: "interrupted"}
       )
     end
