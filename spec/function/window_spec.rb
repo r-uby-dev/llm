@@ -3,7 +3,7 @@
 require "setup"
 
 ##
-# The window's three cases.
+# The window's three cases, and the one ask it refuses.
 #
 # A raise cannot be aimed at a region of code, only permitted for one, so
 # these examples are about when it is permitted: while the tool runs it is
@@ -95,6 +95,19 @@ RSpec.describe LLM::Function::Window do
       handover.pop.interrupt!
       gate << true
       expect(thread.value).to eq(:returned)
+    end
+  end
+
+  ##
+  # A deferred ask is issued from the call's own fiber at `running!`, which
+  # only an asker that schedules its raise can do. The fallback for a
+  # scheduler without `fiber_interrupt` raises on the fiber that asks - so it
+  # would deliver before the call and skip the tool, and the window refuses
+  # rather than quietly doing the thing the hold exists to prevent.
+  describe "a deferred ask when the asker cannot hold one" do
+    it "is refused" do
+      window = described_class.new(scheduler: Object.new, fiber: Fiber.current)
+      expect { window.interrupt!(wait: false) }.to raise_error(ArgumentError)
     end
   end
 end
