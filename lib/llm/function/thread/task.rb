@@ -35,7 +35,8 @@ module LLM::Function::Thread
       @ready = Queue.new
       @thread = ::Thread.new do
         ##
-        # The window opens on this thread, before the call.
+        # The window opens on this thread, before the call, and it is
+        # published on the queue a canceller may already be waiting on.
         #
         # It is what makes a cancel a delivery rather than a race. The
         # window is idle until `running!` below and `#interrupt!` waits on
@@ -44,7 +45,7 @@ module LLM::Function::Thread
         # is - which is the call, because nothing sits between `running!`
         # and the call but the method dispatch.
         @window = LLM::Function::Window.new(thread: ::Thread.current)
-        @ready << true
+        @ready << @window
         ##
         # **A cancel that arrived before this thread existed is delivered
         # by a watcher of its own.**
@@ -129,11 +130,11 @@ module LLM::Function::Thread
     ##
     # The window the body opened, from wherever it is.
     #
-    # It is published on the queue the body fills, so a cancel that arrives
-    # in the gap between the thread starting and the window existing waits
-    # for the body rather than dropping itself. That wait is bounded by the
-    # body's next instruction, and it is the wait the fork child's watcher
-    # already makes.
+    # The body publishes it on a queue before it opens the call, so a
+    # cancel that arrives in the gap between the thread starting and the
+    # window existing waits for the body rather than dropping itself. That
+    # wait is bounded by the body's next instruction, and it is the wait
+    # the fork child's watcher already makes.
     # @return [LLM::Function::Window]
     def window
       @window ||= @ready.pop
