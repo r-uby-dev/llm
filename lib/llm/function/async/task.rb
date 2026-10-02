@@ -58,13 +58,9 @@ module LLM::Function::Async
     # interrupt either way; this is the difference between a cancel and a
     # cancel that takes a thread down with it.
     #
-    # The rescue below is for everything else, and it is written to catch
-    # everything rather than an interrupt. A hook that raises from the
-    # block's `ensure` unwinds past the push, so the queue would be left
-    # empty and `#wait` would wait on it forever - the outcome this comment
-    # already names. Whatever comes out of the block is pushed, and `#wait`
-    # hands anything that is an exception to the caller the way `Thread#value`
-    # and `Fiber#value` do for the other in-process strategies.
+    # Both rescues name the interrupt rather than leaving it to a bare
+    # rescue, because a bare rescue - and `rescue => e` - reaches only
+    # `StandardError`, and an interrupt sits outside it.
     # @return [nil]
     def spawn
       return if @guarded
@@ -101,7 +97,7 @@ module LLM::Function::Async
           end
           @queue << result
         end
-      rescue => e
+      rescue LLM::Interrupt, StandardError => e
         ##
         # This runs after the `defer_cancel` block's `ensure`, so the tool is
         # told first and the caller second. It answers a hook whose own
