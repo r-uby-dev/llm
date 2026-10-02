@@ -197,6 +197,27 @@ RSpec.describe LLM::Function::Thread::Task do
     end
   end
 
+  ##
+  # `#interrupt!` waits now - for the body to publish the window, and for the
+  # window to open - and this is the case that says the wait is not felt: a
+  # task that is spawned and live answers the canceller without holding it,
+  # and the wait a canceller does make is a dispatch wide.
+  describe "a cancel for a task that is spawned and live" do
+    before do
+      task.spawn
+      settle(started)
+    end
+
+    it "does not hold the canceller" do
+      expect(within { task.interrupt! }).to be_nil
+    end
+
+    it "interrupts the call" do
+      task.interrupt!
+      expect { within { task.wait } }.to raise_error(LLM::Interrupt)
+    end
+  end
+
   describe "a cancel that arrives after the call has returned" do
     before do
       gate << true
