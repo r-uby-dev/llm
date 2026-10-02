@@ -312,6 +312,10 @@ class Search < LLM::Tool
   def call(pattern:)
     search(pattern)
   rescue LLM::Interrupt
+    ##
+    # A tool can return a value from here, and the turn carries on with
+    # it, or re-raise and the fiber that made the request is raised
+    # into as well.
     cleanup
     raise
   end
