@@ -87,11 +87,18 @@ module LLM::Function::Async
         # it waits for is the call's first instruction, and the ask is
         # `fiber_interrupt`, which schedules the raise and returns rather
         # than issuing it from here.
+        #
+        # **A notification is delivered once and not stored**, so the check
+        # and the wait are both here: a helper that is scheduled before the
+        # call opens waits for the signal, and one that is scheduled after it
+        # has nothing to wait for. Whichever happens, `@running` is what says
+        # whether there is a call to interrupt - and it is false once the
+        # tool has answered, which is the cancel that interrupted nothing.
         if @cancelled
           @delivered = true
           @ready = Async::Notification.new
           task.async do
-            @ready.wait
+            @ready.wait unless @running
             @scheduler.fiber_interrupt(task.fiber, LLM::Interrupt.new) if @running
           end
         end
