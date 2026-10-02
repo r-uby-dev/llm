@@ -12,6 +12,10 @@ require "timeout"
 # tool ran as if nothing had happened. The examples run inside a reactor
 # because Ruby ships no default `Fiber.scheduler`, and `Async` is what
 # installs the only kind there is.
+#
+# `react` answers with the exception a block ended with rather than raising,
+# and `error` is that answer: the block runs inside the reactor, where a raise
+# is logged and never reaches RSpec.
 RSpec.describe LLM::Function::Fiber::Task do
   let(:log) { Queue.new }
   let(:started) { Queue.new }
@@ -102,43 +106,43 @@ RSpec.describe LLM::Function::Fiber::Task do
     error
   end
 
+  ##
+  # The tool is entered now, which is the whole of what this strategy was
+  # missing: the fiber raised before the call was reached, so a tool that
+  # cleans up in its own rescue never ran its rescue.
   describe "a cancel that arrives before the call runs" do
+    let(:tool) { holding }
+    let(:task) { task_for(tool) }
+    let(:error) { react { task.wait } }
+
+    before { task.interrupt! }
+
     it "is held rather than dropped" do
-      task = task_for(holding)
-      task.interrupt!
-      error = react { task.wait }
       expect(error).to be_a(LLM::Interrupt)
     end
 
+    ##
+    # The hook is counted rather than waited on: it runs in the fiber's
+    # `ensure`, so it has run by the time the wait has answered.
     it "runs the hook once the call has ended" do
-      task = task_for(holding)
-      task.interrupt!
-      error = react { task.wait }
       expect([error.class, log.size]).to eq([LLM::Interrupt, 1])
     end
 
-    ##
-    # The tool is entered now, which is the whole of what this strategy was
-    # missing: the fiber raised before the call was reached, so a tool that
-    # cleans up in its own rescue never ran its rescue.
     context "when the tool cleans up in its own rescue" do
       let(:tool) { cleaning }
-      let(:task) { task_for(tool) }
-
-      before { task.interrupt! }
 
       it "enters the tool" do
-        react { task.wait }
+        error
         expect(settle(started)).to eq(:in_call)
       end
 
       it "is cleaned up" do
-        react { task.wait }
+        error
         expect(settle(cleaned)).to eq(:cleaned_up)
       end
 
       it "still raises to the caller" do
-        expect(react { task.wait }).to be_a(LLM::Interrupt)
+        expect(error).to be_a(LLM::Interrupt)
       end
     end
   end
@@ -149,9 +153,10 @@ RSpec.describe LLM::Function::Fiber::Task do
   # reached only if `interrupt!` returned, and a canceller that waited for
   # the call to start would never get there.
   describe "a cancel that arrives while the call runs" do
+    let(:task) { task_for(holding) }
+
     it "raises at the tool" do
-      task = task_for(holding)
-      error = react do
+      expect(react do
         task.spawn
         task.interrupt!
         ##
@@ -160,16 +165,19 @@ RSpec.describe LLM::Function::Fiber::Task do
         # reactor runs on.
         sleep 0.1
         task.wait
-      end
-      expect(error).to be_a(LLM::Interrupt)
+      end).to be_a(LLM::Interrupt)
     end
   end
 
+  ##
+  # A cancel after the call has returned has nothing to interrupt, and the
+  # fiber a task ran in has gone with it.
   describe "a cancel that arrives after the call has returned" do
+    let(:task) { task_for(quick) }
+
     it "is a no-op" do
-      task = task_for(quick)
-      cancelled = :unset
-      error = react do
+      error = cancelled = nil
+      react do
         task.wait
         cancelled = task.interrupt!
       end
@@ -180,21 +188,19 @@ RSpec.describe LLM::Function::Fiber::Task do
     # The second wait is answered from what the first one took, which is what
     # `Thread#value` does for the other in-process strategy.
     it "preserves the result" do
-      task = task_for(quick)
       first = second = nil
-      error = react do
+      react do
         first = task.wait
         task.interrupt!
         second = task.wait
       end
-      expect([error, second.equal?(first)]).to eq([nil, true])
+      expect(second.equal?(first)).to be(true)
     end
 
     it "does not run the hook" do
-      task = task_for(quick)
-      error = react { task.wait }
+      react { task.wait }
       task.interrupt!
-      expect([error, log.size]).to eq([nil, 0])
+      expect(log).to be_empty
     end
   end
 
@@ -202,12 +208,13 @@ RSpec.describe LLM::Function::Fiber::Task do
   # A group cancels its tasks in turn, and a task that has not been spawned is
   # one of them; the group's file has the rest of that story.
   describe "a cancel for a group whose tasks have not been spawned" do
+    let(:task) { task_for(holding) }
+    let(:group) { LLM::Function::Fiber::Group.new([task]) }
+
+    before { group.interrupt! }
+
     it "reaches the task" do
-      task = task_for(holding)
-      group = LLM::Function::Fiber::Group.new([task])
-      group.interrupt!
-      error = react { group.wait }
-      expect(error).to be_a(LLM::Interrupt)
+      expect(react { group.wait }).to be_a(LLM::Interrupt)
     end
   end
 end
