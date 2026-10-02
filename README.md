@@ -327,7 +327,7 @@ class Search < LLM::Tool
 end
 
 llm = LLM.deepseek(key: ENV["KEY"])
-agent = LLM::Agent.new(llm, tools: [Search])
+agent = LLM::Agent.new(llm, tools: [Search], concurrency: :async)
 Thread.new { sleep(1); agent.interrupt! }
 
 begin
