@@ -48,12 +48,19 @@ class LLM::Function
       result = ::Ractor.new { ::Ractor.receive }
       @mailbox = Ractor::Mailbox.new(build_task(result), result)
       ##
-      # **A cancel that arrived before there was a mailbox is delivered now.**
+      # **A cancel that arrived before there was a mailbox is delivered now**,
+      # and the flag is cleared as it is delivered, so it means what its name
+      # says - a cancel waiting for a mailbox, rather than one that was made at
+      # some point.
+      #
       # The watcher reads the message after it starts, and it waits on the
       # window the job opens immediately before the call, so a message that
-      # arrives with the mailbox is held the same way one that arrives a
-      # moment later is.
-      @mailbox.interrupt! if @cancelled
+      # arrives with the mailbox is held the same way one that arrives a moment
+      # later is.
+      if @cancelled
+        @cancelled = false
+        @mailbox.interrupt!
+      end
       self
     end
 
