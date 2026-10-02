@@ -18,12 +18,6 @@ require "timeout"
 # result channel, because a fork's copy of a tool is not the object the parent
 # holds.
 #
-# **A cancel made even earlier is held too.** The channels are built by
-# whoever gets there first - `spawn`, or {LLM::Function::Fork::Task#interrupt!}
-# when a cancel arrives before it - because a socketpair does not need a child
-# to exist. A group cancels every task it holds, spawned or not, so that order
-# is one the runtime has and not only a spec's.
-#
 # **Where the raise lands is the tool's shape as well as the window's.** The
 # window promises that a raise is not issued *before* the call; the dispatch is
 # code, and a raise can land in it. What puts it after the tool's first
@@ -279,10 +273,10 @@ RSpec.describe LLM::Function::Fork::Task do
   end
 
   ##
-  # The cancel precedes `spawn`, which is now something a task can take: the
-  # channels are built by whoever gets there first, and a socketpair does not
-  # need a child. The message waits in the control channel until the child's
-  # watcher reads it.
+  # The cancel precedes `spawn`, so it is written by `spawn` rather than by the
+  # cancel itself: the channels do not exist yet, and building them here would
+  # open a socketpair for a task that may never fork. The child is the reader,
+  # and the message waits in the channel until its watcher looks.
   describe "a call cancelled before it was spawned" do
     let(:task) { task_for(recording_tool, "call_6") }
     let(:returned) { within(task:) { task.wait } }
