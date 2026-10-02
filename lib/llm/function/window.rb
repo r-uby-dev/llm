@@ -23,6 +23,15 @@ class LLM::Function
   # are one call here, and everything else - the three states, and what
   # "this call was interrupted" means - is this object's, so the strategies
   # agree about where a call begins and ends.
+  #
+  # **A raise a call cannot take is not delivered after it.** The scheduler
+  # places a scheduled raise, and a tool that never suspends gives it no
+  # suspension inside the call to be placed at - so one is left over. What
+  # the specs pin is the half that matters to anything outside the call:
+  # the frame the task ends in and a sibling task on the same reactor are
+  # both asserted to be untouched, so a raise left over is the scheduler's
+  # to discard and not something a caller, or whatever runs beside it, has
+  # to survive.
   class Window
     ##
     # @param [Thread, nil] thread
