@@ -216,8 +216,10 @@ RSpec.describe LLM::Function::Fork::Task do
       expect(within(task: task) { task.wait }.value[:type]).to eq("EOFError")
     end
 
-    it "says what the child ended as" do
-      expect(within(task: task) { task.wait }.value[:message]).to include("exited with 3")
+    it "says the tool exited unexpectedly" do
+      expect(within(task: task) { task.wait }.value[:message]).to eq(
+        "the tool exited unexpectedly"
+      )
     end
 
     it "answers a second wait with the same return" do
