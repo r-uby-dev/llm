@@ -295,7 +295,7 @@ Two shapes are about where a raise can be placed. `:fiber` and
 `:async` ask the fiber scheduler for the raise, so a tool that never
 suspends is one the raise cannot reach - the call completes, the
 caller is given its result, and the tool is told it was asked about.
-`:sequential` is the third: it runs the tool in the caller's own
+`:sequential` is the other: it runs the tool in the caller's own
 thread, where nothing is raised into the call at all, so the hook is
 what tells it.
 
@@ -308,18 +308,13 @@ class Search < LLM::Tool
 
   def call(pattern:)
     search(pattern)
-  rescue LLM::Interrupt
-    ##
-    # The cancel is raised inside the call, so this rescue runs.
-    cleanup
-    raise
   end
 
   ##
-  # Told as well, on the thread or fiber the call runs on. A tool
-  # only needs one of these: on :thread, :fiber and :async this
-  # runs after the rescue above, so a tool that cleans up in both
-  # places cleans up twice.
+  # Told on the thread or fiber the call runs on. This is the one
+  # place to clean up that runs on every strategy - a tool that
+  # also cleans up in a `rescue LLM::Interrupt` cleans up twice on
+  # :thread, :fiber and :async, rescue first.
   def on_interrupt
     cleanup
   end
