@@ -204,6 +204,28 @@ RSpec.describe LLM::Function::Async::Task do
   end
 
   ##
+  # The moment between the block's check and the call: the window exists, the
+  # state is idle, and the task is asked with `wait: false` - which records
+  # the ask and issues it when the call opens. On `:thread` the same moment
+  # waits and delivers, so the two strategies now agree about it, and the
+  # outcome is the same whichever way the interleaving falls, which is what
+  # makes this an example rather than a race.
+  describe "a cancel that arrives after the block has started" do
+    before do
+      task.spawn
+      task.interrupt!
+    end
+
+    it "enters the tool" do
+      expect(settle(started)).to eq(:in_call)
+    end
+
+    it "raises LLM::Interrupt to the caller" do
+      expect { within { task.wait } }.to raise_error(LLM::Interrupt)
+    end
+  end
+
+  ##
   # There is no block to hold it and nothing to ask for, so the record is
   # the whole of the answer.
   describe "a cancel for a task that never spawned" do
