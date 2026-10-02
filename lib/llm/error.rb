@@ -89,6 +89,10 @@ module LLM
   # be asked for a raise from there - it schedules the raise rather than
   # issuing it. A scheduler that cannot is told so, rather than delivering
   # the cancel before the call and never running the tool.
+  #
+  # **Name it in full.** Ruby has a `FiberError` of its own, so a bare
+  # `FiberError` in a rescue written outside this namespace is core's rather
+  # than this one.
   FiberError = Class.new(Error)
 
   ##
