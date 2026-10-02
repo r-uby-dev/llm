@@ -48,12 +48,21 @@ class LLM::Tool
     # Wait for a command to finish, or abort
     # with an error when it exceeds the
     # specified timeout.
+    #
+    # **A command is waited on until its status is decided, not only until it
+    # has stopped running.** `running?` answers whether the process is there,
+    # and `success?` answers `nil` until the command has been reaped - so a
+    # loop that trusts `running?` alone can leave before the status exists, and
+    # the caller reads `ok: nil` beside an output the read had waited for.
+    #
+    # A command that was never found has no status to wait for: there was
+    # nothing to reap, and `not_found?` is the answer the caller wants.
     # @param [Test::Command] command
     # @param [Integer] timeout
     # @return [void]
     def wait(command:, timeout:)
       start = now
-      while command.running?
+      while command.running? || (command.success?.nil? && !command.not_found?)
         if now - start > timeout
           command.kill!
           raise "command timed out after #{timeout}s"
