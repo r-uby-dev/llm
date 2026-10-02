@@ -107,6 +107,22 @@ RSpec.describe LLM::Function::Fiber::Task do
   end
 
   ##
+  # A scheduler that cannot be asked for a raise is refused in `spawn`, in the
+  # caller's hands - not where the window is built, which is inside the fiber,
+  # where the refusal would be an exception the fiber ends with and a caller
+  # waiting on a queue nothing fills. The scheduler is answered for rather
+  # than installed, since the reactor installs its own.
+  describe "a scheduler that cannot hold a cancel" do
+    let(:task) { task_for(holding) }
+
+    before { allow(Fiber).to receive(:scheduler).and_return(Object.new) }
+
+    it "is refused before the fiber is scheduled" do
+      expect { task.wait }.to raise_error(LLM::FiberError)
+    end
+  end
+
+  ##
   # The tool is entered now, which is the whole of what this strategy was
   # missing: the fiber raised before the call was reached, so a tool that
   # cleans up in its own rescue never ran its rescue.
