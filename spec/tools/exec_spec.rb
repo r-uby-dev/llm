@@ -65,6 +65,28 @@ RSpec.describe LLM::Tool::Exec do
       end
     end
 
+    ##
+    # The race a real `echo` lost: `running?` is false before the command has
+    # been reaped, so a wait that trusts it alone leaves, and `ok` is read from
+    # a status that does not exist yet. The double answers nil once, which is
+    # what the second question is for.
+    context "when the command has not been reaped yet" do
+      let(:result) { tool.call(arguments: ["echo", "hi"]) }
+
+      before do
+        allow(command).to receive(:env).and_return(command)
+        allow(command).to receive(:arguments).and_return(command)
+        allow(command).to receive(:spawn).and_return(command)
+        allow(command).to receive(:limit).and_return(command)
+        allow(LLM::Tool::Exec::Command).to receive(:new).and_return(command)
+        allow(command).to receive(:success?).and_return(nil, true)
+      end
+
+      it "waits for a status rather than reading nil" do
+        expect(result).to include(ok: true)
+      end
+    end
+
     context "when constructed with env" do
       before do
         allow(command).to receive(:env).and_return(command)
