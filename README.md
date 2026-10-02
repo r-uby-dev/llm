@@ -306,15 +306,26 @@ class Search < LLM::Tool
   parameter :pattern, String, "The pattern to search for"
   required %i[pattern]
 
+  ##
+  # A raise and a hook are two ways of being told, not two ways of
+  # doing the same thing. `LLM::Interrupt` is raised inside the call,
+  # so a rescue here sees the cancel where it happened, and it is the
+  # only one of the two that can stop the call. `on_interrupt` is
+  # told rather than raised, which is why it runs on `:sequential`
+  # too, where nothing is raised into the call at all. A tool that
+  # cleans up in both places cleans up twice on `:thread`, `:fiber`
+  # and `:async`, rescue first.
   def call(pattern:)
     search(pattern)
+  rescue LLM::Interrupt
+    cleanup
+    raise
   end
 
   ##
-  # Told on the thread or fiber the call runs on. This is the one
-  # place to clean up that runs on every strategy - a tool that
-  # also cleans up in a `rescue LLM::Interrupt` cleans up twice on
-  # :thread, :fiber and :async, rescue first.
+  # Told on the thread or fiber the call runs on - before the raise on
+  # `:fork` and `:ractor`, and after the rescue above on the other
+  # three. This is the one that runs on every strategy.
   def on_interrupt
     cleanup
   end
