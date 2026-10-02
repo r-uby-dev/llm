@@ -161,6 +161,32 @@ RSpec.describe LLM::Function::Fiber::Task do
         expect(error).to be_a(LLM::Interrupt)
       end
     end
+
+    ##
+    # A tool that never suspends is one the raise cannot land inside: the ask
+    # is issued when the call opens, and the scheduler schedules the raise
+    # rather than issuing it - so what is left is a raise with no suspension to
+    # land on inside the call, and the call has answered by the time the fiber
+    # reaches one.
+    #
+    # What becomes of it is what this is for. A sibling task on the same
+    # reactor answers part of that, and the ending answers the rest: a raise
+    # delivered after the call is delivered into this frame, and `react` is
+    # what answers with it - an interrupt here rather than `nil` is the
+    # delivered outcome, and `nil` is the raise being discarded.
+    context "when the tool answers before anything can reach it" do
+      let(:tool) { quick }
+
+      it "leaves the reactor usable" do
+        sibling = task_for(quick)
+        error = react do
+          task.wait
+          sibling.spawn
+          sibling.wait
+        end
+        expect(error).to be_nil
+      end
+    end
   end
 
   ##
