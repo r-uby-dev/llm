@@ -16,13 +16,13 @@ class LLM::Function
   # finished is a no-op, which is what
   # {LLM::Function::Return#interrupt!} already says one is.
   #
-  # **What differs between the strategies is the asker, not the edges.**
-  # A tool that runs on a thread is interrupted by raising on that thread;
-  # one that runs under a scheduler is interrupted by asking the scheduler,
-  # which schedules the raise and returns. Both are one call here, and
-  # everything else - the three states, and what "this call was
-  # interrupted" means - is this object's, so the strategies agree about
-  # where a call begins and ends.
+  # **What differs between the strategies is how the raise is issued, not
+  # where the edges are.** A tool that runs on a thread is interrupted by
+  # raising on that thread; one that runs under a scheduler is interrupted
+  # by asking the scheduler, which schedules the raise and returns. Both
+  # are one call here, and everything else - the three states, and what
+  # "this call was interrupted" means - is this object's, so the strategies
+  # agree about where a call begins and ends.
   class Window
     ##
     # @param [Thread, nil] thread
@@ -40,7 +40,7 @@ class LLM::Function
     #  running the tool.
     # @return [LLM::Function::Window]
     def initialize(thread: nil, scheduler: nil, fiber: nil)
-      @ask = if scheduler and fiber
+      @interrupt = if scheduler and fiber
         -> { scheduler.fiber_interrupt(fiber, LLM::Interrupt.new) }
       else
         thread ||= ::Thread.main
@@ -74,11 +74,11 @@ class LLM::Function
     # @return [void]
     def interrupt!(wait: true)
       @mutex.synchronize do
-        @changed.wait(@mutex) while wait && @state == :idle
+        @changed.wait(@mutex) while wait and @state == :idle
         return unless @state == :running
         @interrupted = true
       end
-      @ask.call
+      @interrupt.call
     end
 
     ##
