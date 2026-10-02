@@ -2,6 +2,7 @@
 
 require "setup"
 require "async"
+require "timeout"
 
 ##
 # The four moments a cancel can arrive in, for a fiber.
@@ -71,6 +72,12 @@ RSpec.describe LLM::Function::Fiber::Task do
       fn.id = "call_1"
       fn.arguments = {}
     end.task(:fiber)
+  end
+
+  ##
+  # A queue read that cannot wait forever, as the other strategies' specs have.
+  def settle(queue, timeout = 5)
+    Timeout.timeout(timeout) { queue.pop }
   end
 
   ##
