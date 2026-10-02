@@ -176,8 +176,8 @@ RSpec.describe LLM::Function::Fiber::Task do
     let(:task) { task_for(quick) }
 
     it "is a no-op" do
-      error = cancelled = nil
-      react do
+      cancelled = nil
+      error = react do
         task.wait
         cancelled = task.interrupt!
       end
