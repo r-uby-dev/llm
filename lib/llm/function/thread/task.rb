@@ -70,13 +70,21 @@ module LLM::Function::Thread
         # cancelled, because a tool's state belongs to the thread its call
         # runs on, and the caller's thread is not that thread.
         #
-        # It runs for a call that was interrupted and not for a call that
-        # was asked about: the window is the frame that decides whether a
-        # raise is issued, so it is the frame that knows, and
-        # `Window#interrupted?` is true only where the raise was. A cancel
-        # that arrives while the call is returning, and a held cancel whose
-        # tool finished before the watcher was scheduled, are both cancels
-        # that interrupted nothing - and neither tells the tool.
+        # It runs where an ask was taken up for this call, and not for a
+        # cancel the window never asked about: the window is the frame that
+        # decides whether a raise is issued, so it is the frame that knows,
+        # and `Window#interrupted?` is true where one was issued. **Issued
+        # is not delivered** - a strategy that asks a scheduler gets a raise
+        # that is placed at the tool's next suspension, so a tool that never
+        # suspends is asked about and never reached, and the hook runs for
+        # it all the same.
+        #
+        # That is the side to be on, and a tool whose own rescue answers the
+        # interrupt rather than raising is why: it was interrupted, and its
+        # hook is the only thing left that can say so on its own thread.
+        # What does not tell the tool is a cancel the window never asked
+        # about - one that arrives once the call has returned - which is the
+        # no-op {LLM::Function::Return#interrupt!} already says one is.
         #
         # On the job's own thread the hook can only run after the call's
         # frame has ended - you cannot run code on a thread blocked inside
