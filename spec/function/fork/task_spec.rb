@@ -18,21 +18,20 @@ require "timeout"
 # result channel, because a fork's copy of a tool is not the object the parent
 # holds.
 #
+# **A cancel made even earlier is held too.** The channels are built by
+# whoever gets there first - `spawn`, or {LLM::Function::Fork::Task#interrupt!}
+# when a cancel arrives before it - because a socketpair does not need a child
+# to exist. A group cancels every task it holds, spawned or not, so that order
+# is one the runtime has and not only a spec's.
+#
 # **Where the raise lands is the tool's shape as well as the window's.** The
 # window promises that a raise is not issued *before* the call; the dispatch is
 # code, and a raise can land in it. What puts it after the tool's first
 # instruction here is that the tool yields - the watcher is woken by
 # `running!`, but it cannot take the GVL until the child's main thread gives it
 # up, which is the `sleep`. A raise that landed in the dispatch would take the
-# job's own `rescue` branch and write `[:interrupt]`, so the first group would
+# job's own `rescue` branch and write `[:interrupt]`, so the group below would
 # fail whole rather than one example.
-#
-# A cancel **before** `spawn` is not this file's to pin: `Fork::Task` builds
-# its channels in `spawn`, so there is nothing to write to until it has run and
-# `interrupt!` raises. The in-process strategies hold one that early; this one
-# does not, and the group that cancels its tasks in turn reaches tasks that
-# have not been spawned, so the difference is more than theoretical - it is
-# issue #224.
 #
 # The half about a call that returned is issue #203, and the order below is the
 # failing run's order: the first wait is one example, the second waits are the
@@ -276,6 +275,54 @@ RSpec.describe LLM::Function::Fork::Task do
 
     it "gives the caller LLM::Interrupt" do
       expect(error).to be_a(LLM::Interrupt)
+    end
+  end
+
+  ##
+  # The cancel precedes `spawn`, which is now something a task can take: the
+  # channels are built by whoever gets there first, and a socketpair does not
+  # need a child. The message waits in the control channel until the child's
+  # watcher reads it.
+  describe "a call cancelled before it was spawned" do
+    let(:task) { task_for(recording_tool, "call_6") }
+    let(:returned) { within(task:) { task.wait } }
+
+    before do
+      task.interrupt!
+      task.spawn
+      returned
+    end
+
+    it "enters the tool" do
+      expect(returned.value[:entered]).to be(true)
+    end
+
+    it "runs the tool's own rescue" do
+      expect(returned.value[:rescued]).to be(true)
+    end
+  end
+
+  ##
+  # And the same cancel on a group before its tasks are spawned, which is the
+  # path the runtime has: a group cancels every task it holds, spawned or not.
+  describe "a group cancelled before its tasks were spawned" do
+    let(:group) do
+      LLM::Function::Fork::Group.new([task_for(recording_tool, "call_7")])
+    end
+    let(:returned) { within(task: group) { group.wait.first } }
+
+    before do
+      group.interrupt!
+      group.spawn
+      returned
+    end
+
+    it "enters the tool" do
+      expect(returned.value[:entered]).to be(true)
+    end
+
+    it "runs the tool's own rescue" do
+      expect(returned.value[:rescued]).to be(true)
     end
   end
 
