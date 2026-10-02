@@ -4,15 +4,23 @@ require_relative "setup"
 
 ##
 # An interrupt is a request to stop rather than a failure to handle, so it
-# is a signal and not an error. The two rescue forms that catch nearly
+# sits outside `StandardError`. The two rescue forms that catch nearly
 # everything must not be able to swallow it: a turn whose cancel was eaten
 # looks like a turn that ignored one.
+#
+# It is deliberately not a signal, either: a signal is a framework's own
+# condition - RSpec re-raises one that escapes an example, and an async
+# reactor ends its thread - and an interrupt has to be catchable.
 RSpec.describe LLM::Interrupt do
   let(:interrupt) { described_class.new("agent interrupted") }
 
   describe "what it is" do
-    it "is a signal" do
-      expect(described_class).to be < SignalException
+    it "is an exception" do
+      expect(described_class).to be < Exception
+    end
+
+    it "is not a signal" do
+      expect(described_class).not_to be < SignalException
     end
 
     it "is not an error a broad rescue catches" do
