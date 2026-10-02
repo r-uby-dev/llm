@@ -169,11 +169,13 @@ RSpec.describe LLM::Function::Fiber::Task do
     # land on inside the call, and the call has answered by the time the fiber
     # reaches one.
     #
-    # What becomes of it is what this is for. A sibling task on the same
-    # reactor answers part of that, and the ending answers the rest: a raise
-    # delivered after the call is delivered into this frame, and `react` is
-    # what answers with it - an interrupt here rather than `nil` is the
-    # delivered outcome, and `nil` is the raise being discarded.
+    # What this asserts is the half anything outside the call could notice: the
+    # frame that waits on the task ends cleanly, and a sibling task on the same
+    # reactor runs. **The raise's own fate is not measured here** - it is aimed
+    # at the fiber the tool runs in, and this frame is a different fiber, so
+    # `nil` is what a delivered raise and a discarded one both look like from
+    # here. The fate is the window's to reason about, and it does, rather than
+    # being claimed by a run that cannot see it.
     context "when the tool answers before anything can reach it" do
       let(:tool) { quick }
 
