@@ -28,6 +28,7 @@ class LLM::Function
       @mutex = Mutex.new
       @changed = ConditionVariable.new
       @state = :idle
+      @interrupted = false
     end
 
     ##
@@ -37,13 +38,33 @@ class LLM::Function
     # It waits while the window has not opened, and returns without
     # raising once it has closed. In between, the raise it issues lands on
     # the tool.
+    #
+    # What it guarantees is that the raise is not issued before the call.
+    # The call's own dispatch is code, and a raise can land in that - the
+    # same gap `Fork::Job` has between `running!` and `runner.call`. What
+    # it does not do is issue a raise for a call that has already
+    # finished: the state is read here, and the raise happens after it.
     # @return [void]
     def interrupt!
       @mutex.synchronize do
         @changed.wait(@mutex) while @state == :idle
         return unless @state == :running
+        @interrupted = true
       end
       @thread.raise(LLM::Interrupt)
+    end
+
+    ##
+    # Whether this window has issued an interrupt.
+    #
+    # A caller that has to tell *asked* from *delivered* asks this rather
+    # than reading a flag of its own: the window is the frame that decides
+    # whether a raise is the tool's to handle, so it is the frame that
+    # knows. It is true only where the raise was issued, which is never
+    # once the state is `finished`.
+    # @return [Boolean]
+    def interrupted?
+      @mutex.synchronize { @interrupted }
     end
 
     ##
