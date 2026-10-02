@@ -54,6 +54,10 @@ class LLM::Tool
     # and `success?` answers `nil` until the command has been reaped - so a
     # loop that trusts `running?` alone can leave before the status exists, and
     # the caller reads `ok: nil` beside an output the read had waited for.
+    #
+    # **`running?` is what decides it.** The command reaps the process as it
+    # answers, so every turn of this loop is what makes a status exist - which
+    # is why the condition is asked again on each turn rather than read once.
     # @param [Test::Command] command
     # @param [Integer] timeout
     # @return [void]
