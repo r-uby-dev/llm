@@ -69,11 +69,8 @@ class LLM::Function
     # @return [Boolean]
     def alive?
       return false if @waited || !@pid
-      _, status = ::Process.wait2(@pid, ::Process::WNOHANG)
-      if status
-        @status = status
-        @waited = true
-      end
+      result = ::Process.waitpid(@pid, ::Process::WNOHANG)
+      @waited = !result.nil?
       !@waited
     rescue Errno::ECHILD
       @waited = true
@@ -126,7 +123,17 @@ class LLM::Function
       @tracer&.on_tool_finish(result: @result, span: @span)
       @result
     rescue EOFError
-      ended_without_a_result
+      ##
+      # Held in `@result` rather than answered once, so a second wait is given
+      # the same return the way it is for every other ending.
+      reap
+      @result = Return.new(@function.id, @function.name, {
+        error: true,
+        type: EOFError.name,
+        message: "the tool exited unexpectedly"
+      })
+      @tracer&.on_tool_finish(result: @result, span: @span)
+      @result
     ensure
       if @guarded.nil?
         reap
@@ -144,58 +151,18 @@ class LLM::Function
     private
 
     ##
-    # What the child ended as, in words a model can read.
+    # Waits for the child, once.
     #
-    # The status is the whole of what this side knows about a child that
-    # wrote nothing: a signal, or the exit code of a raise whose report never
-    # reached the result channel - the child's own stderr is pointed at null,
-    # so it is not said anywhere else.
-    # @return [String]
-    def ended_as
-      return "its status is unknown" unless Process::Status === @status
-      return "killed by signal #{@status.termsig}" if @status.signaled?
-      "exited with #{@status.exitstatus}"
-    end
-
-    ##
-    # The answer for a child that ended without writing one.
-    #
-    # The shape is the runtime's own for a failed call - `{error:, type:,
-    # message:}` - so a model reads it the way it reads a tool that raised,
-    # and the type names the read that ended: a channel with no writer left
-    # raises `EOFError` rather than returning nil.
-    #
-    # It is held in `@result` rather than answered once, so a second wait is
-    # given the same return the way it is for every other ending, and the
-    # tracer is told before the caller, which is the order {#wait} keeps.
-    # @return [LLM::Function::Return]
-    def ended_without_a_result
-      reap
-      @result = Return.new(@function.id, @function.name, {
-        error: true,
-        type: EOFError.name,
-        message: "the forked call ended without a result (#{ended_as})"
-      })
-      @tracer&.on_tool_finish(result: @result, span: @span)
-      @result
-    end
-
-    ##
-    # Waits for the child, once, and keeps what it ended as.
-    #
-    # `wait2` rather than `waitpid`, because a child's ending is read from a
-    # `Process::Status` and `waitpid` answers a pid. The status is why a read
-    # ended, which is what the in-band answer above is written from.
-    # @return [Process::Status, nil]
+    # It is `reap` rather than a bare `waitpid` because the call appears three
+    # times - the answer, the ending above, and the `ensure` - and a child can
+    # only be reaped once.
+    # @return [void]
     def reap
-      return @status if @waited
-      return if @guarded || !@pid
-      _, @status = ::Process.wait2(@pid)
+      return if @waited || @guarded || !@pid
+      ::Process.waitpid(@pid)
       @waited = true
-      @status
     rescue Errno::ECHILD
       @waited = true
-      @status
     end
   end
 end
