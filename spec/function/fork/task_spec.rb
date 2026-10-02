@@ -25,8 +25,12 @@ RSpec.describe LLM::Function::Fork::Task do
   # Runs the block on a thread of its own and joins it, so a wait that never
   # comes back is a failure that names the wait rather than a hang. It says
   # whether the child is still running, and where the waiter stopped.
+  #
+  # The interrupt examples raise inside the thread on purpose, so the thread is
+  # told not to report its own ending - the example is the report.
   def within(seconds = 5, task: nil, &block)
     thread = Thread.new(&block)
+    thread.report_on_exception = false
     return thread.value if thread.join(seconds)
     raise "timed out after #{seconds} seconds (#{child(task)})\n" \
           "  the waiter was in:\n    #{thread.backtrace&.first(8)&.join("\n    ")}"
