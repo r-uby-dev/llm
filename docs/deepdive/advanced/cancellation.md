@@ -81,6 +81,13 @@ a rate-limited turn waiting out its backoff is a turn that has not been
 stopped until the cancel reaches it, and the request it is waiting to
 make is one nobody asked for any more.
 
+It is also worth saying what is unusual about it. The usual shape of a
+cancel is a request that is aborted; this one reaches a tool that is
+running, and a turn that is between two requests. And a cancel does not
+leave a hole: the call it stopped is closed with an in-band return
+before the next request goes out, so the conversation the model sees
+stays valid and the model is told what happened rather than finding one.
+
 #### Notes
 
 How an interrupt reaches a tool depends on the strategy. The
