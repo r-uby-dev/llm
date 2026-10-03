@@ -257,83 +257,29 @@ agent.talk "Run the tools in parallel"
 <summary>Cancellation</summary>
 <br>
 
-It is possible to abort a request mid-stream and interrupt
-running tool calls with
+It is possible to abort a request mid-stream and interrupt running
+tool calls with
 [`LLM::Agent#interrupt!`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#interrupt!)
-(or `cancel!`).
-
-A cancel is aimed at the tool rather than at whatever happens to be
-running. A call that is running is entered, and
+(or `cancel!`). A cancel is aimed at the tool rather than at whatever
+happens to be running: a call that is running is entered, and
 [`LLM::Interrupt`](https://r.uby.dev/api-docs/llm.rb/LLM/Interrupt.html)
-is raised inside it, so its own `rescue` sees it and it can free
-resources before it dies - on every concurrency strategy alike. The
-socket a request is waiting on is closed before the raise, so a
-cancelled request stops burning tokens, and the request itself is a
-fiber that is interrupted like any other. A call that has not started
-is not skipped: the cancel is held and delivered inside the call once
-it opens, so a tool that was asked about before it began is still the
-one that cleans up. A call that has already answered is a no-op that
-leaves the result alone, and a cancel that arrives between two
-requests ends the turn where it is.
+is raised inside it, so its own `rescue` sees it; a call that has not
+started is held and delivered once it opens; and a call that has already
+answered is a no-op. A cancel that arrives between two requests ends the
+turn. The socket a request waits on is closed before the raise, so a
+cancelled request stops burning tokens.
 
-The raise sits outside `StandardError`, so a bare `rescue`, or a
-`rescue => e`, passes a cancel through instead of swallowing it. A
-tool that means to handle one names it: `rescue LLM::Interrupt`.
-
-A tool can also implement `#on_interrupt` to be told. It runs on the
-thread or fiber the call runs on, and its order against the raise is
-the one thing the strategies do differently. On `:fork` and `:ractor`
-the hook is written before the raise, so a tool that releases a
-resource in the hook has released it by the time the interrupt
-arrives. On `:thread`, `:fiber` and `:async` it runs in the call's
-`ensure`, after the raise has landed and after the tool's own
-`rescue` - so a tool that cleans up in both places cleans up twice,
-rescue first, and one that cleans up in one place should pick the
-hook.
-
-Two shapes are about where a raise can be placed. `:fiber` and
-`:async` ask the fiber scheduler for the raise, so a tool that never
-suspends is one the raise cannot reach - the call completes, the
-caller is given its result, and the tool is told it was asked about.
-`:sequential` is the other: it runs the tool in the caller's own
-thread, where nothing is raised into the call at all, so the hook is
-what tells it.
+The raise sits outside `StandardError`, so a bare `rescue` passes a
+cancel through rather than swallowing it - a tool that means to handle
+one names it, or implements `#on_interrupt` to be told. Two strategies
+are worth knowing about: `:fiber` and `:async` ask the fiber scheduler
+for the raise, so a tool that never suspends is one it cannot reach, and
+is told all the same; and `:sequential` runs the tool on the caller's
+own thread, where nothing is raised into the call at all. The
+[cancellation chapter](docs/deepdive/advanced/cancellation.md) covers
+the rest.
 
 ```ruby
-class Search < LLM::Tool
-  name "search"
-  description "Search many files"
-  parameter :pattern, String, "The pattern to search for"
-  required %i[pattern]
-
-  ##
-  # A raise is delivered here; `on_interrupt` is a notification, and it
-  # runs on every strategy - `:sequential` included.
-  def call(pattern:)
-    search(pattern)
-  rescue LLM::Interrupt
-    ##
-    # A tool can return a value from here, and the turn carries on with
-    # it, or re-raise and the fiber that made the request is raised
-    # into as well.
-    cleanup
-    raise
-  end
-
-  ##
-  # Told on the thread or fiber the call runs on: before the raise on
-  # `:fork` and `:ractor`, after the rescue above on the other three.
-  def on_interrupt
-    cleanup
-  end
-
-  private
-
-  def cleanup
-    # Release a file, a socket, or a lock here.
-  end
-end
-
 llm = LLM.deepseek(key: ENV["KEY"])
 agent = LLM::Agent.new(llm, tools: [Search], concurrency: :async)
 Thread.new { sleep(1); agent.interrupt! }
