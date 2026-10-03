@@ -81,6 +81,13 @@ a rate-limited turn waiting out its backoff is a turn that has not been
 stopped until the cancel reaches it, and the request it is waiting to
 make is one nobody asked for any more.
 
+It is also worth saying what is unusual about it. The usual shape of a
+cancel is a request that is aborted; this one reaches a tool that is
+running, and a turn that is between two requests. And a cancel does not
+leave a hole: the call it stopped is closed with an in-band return
+before the next request goes out, so the conversation the model sees
+stays valid and the model is told what happened rather than finding one.
+
 #### Notes
 
 How an interrupt reaches a tool depends on the strategy. The
@@ -94,6 +101,15 @@ which is also why a tool that never yields is one the raise cannot
 reach. The `:sequential` strategy has nothing to raise into: its
 tool runs on the caller's own thread, so a cancel tells the tool
 through its hook alone.
+
+Where the hook runs against the raise is the one thing a tool can
+feel twice. On `:fork` and `:ractor` the hook is written before the
+raise, so a tool that releases a resource in the hook has released it
+by the time the interrupt arrives. On `:thread`, `:fiber` and `:async`
+it runs in the call's `ensure`, after the raise has landed and after
+the tool's own `rescue` - so a tool that cleans up in both places
+cleans up twice, rescue first, and one that cleans up in one place
+should pick the hook.
 
 A cancel is delivered at the point the turn has reached, which can be
 any point of it: inside a stream callback, a compactor, a transformer,
