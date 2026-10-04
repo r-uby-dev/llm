@@ -284,7 +284,6 @@ module LLM
             fn.model  = msg.model
             fn.guard  = guard
           end
-          fns
         end.extend(LLM::Function::Array)
     end
 
