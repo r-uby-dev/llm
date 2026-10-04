@@ -257,24 +257,27 @@ agent.talk "Run the tools in parallel"
 <summary>Cancellation</summary>
 <br>
 
-It is possible to interrupt a running request, a running tool call, or a
-turn that is between two of them, with
+It is possible to interrupt a running agent who
+is between requests or tool calls as long as the
+cancel request is sent from another thread or fiber
+running in the same process as the agent. A cancel
+request can be sent with the
 [`LLM::Agent#interrupt!`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#interrupt!)
-(or `cancel!`). The third one is the shape llm.rb gives cancellation that a
-read of the usual abort would miss: a turn waiting out a retry, handing tool
-returns back to the model, or building its next request is a turn that has
-not stopped until the cancel reaches it - and this one does.
+method.
 
-A tool is interrupted where it stands rather than at its next opportunity to
-notice: its own `rescue` runs, and `#on_interrupt` is called even where a
-raise cannot reach the tool. Nothing is left half-answered either, because a
-cancelled call is closed with an in-band return before the next request goes
-out, so the conversation the model sees stays valid and the model is told
-what happened rather than finding a hole. And a cancel is not an error:
-[`LLM::Interrupt`](https://r.uby.dev/api-docs/llm.rb/LLM/Interrupt.html)
-sits outside `StandardError`, so a bare `rescue` passes one through. The
-[cancellation chapter](docs/deepdive/advanced/cancellation.md) has the
-details, including the strategies whose shape differs.
+An interrupted tool call is made aware of the interrupt
+and it can both rescue `LLM::Interrupt` and/or implement
+the `on_interrupt` callback on the tool class. The option to
+cancel on [r.uby.dev](https://r.ub.dev) is built on top of
+this feature, and it has a single background process
+with 24 threads. Each thread can run an agent request that
+can be interrupted via another thread in the same process.
+
+It is solid and reliable but r.uby.dev had to meet this
+feature halfway, so expect to build your own infrastructure
+around it. See
+[cancellation chapter](docs/deepdive/advanced/cancellation.md)
+to learn more.
 
 ```ruby
 class Search < LLM::Tool
