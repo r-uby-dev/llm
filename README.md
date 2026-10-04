@@ -268,7 +268,7 @@ method.
 An interrupted tool call is made aware of the interrupt
 and it can both rescue `LLM::Interrupt` and/or implement
 the `on_interrupt` callback on the tool class. The option to
-cancel on [r.uby.dev](https://r.ub.dev) is built on top of
+cancel on [r.uby.dev](https://r.uby.dev) is built on top of
 this feature, and it has a single background process
 with 24 threads. Each thread can run an agent request that
 can be interrupted via another thread in the same process.
