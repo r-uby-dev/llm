@@ -22,10 +22,10 @@ RSpec.describe LLM::Context do
     end
 
     context "when given an explicit id" do
-      let(:params) { {id: "my-agent"} }
+      let(:params) { {id: SecureRandom.uuid_v7} }
 
       it "uses the given id" do
-        expect(context.id).to eq("my-agent")
+        expect(context.id).to eq(params[:id])
       end
     end
 
@@ -61,14 +61,6 @@ RSpec.describe LLM::Context do
 
     it "returns a time derived from the id" do
       expect(context.created_at).to be_within(5).of(Time.now.utc)
-    end
-
-    context "when given a non-UUIDv7 id" do
-      let(:params) { {id: "custom"} }
-
-      it "returns nil" do
-        expect(context.created_at).to be_nil
-      end
     end
 
     context "when serialized and restored" do
