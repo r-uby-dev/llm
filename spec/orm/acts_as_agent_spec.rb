@@ -237,11 +237,14 @@ RSpec.describe "acts_as_agent" do
   end
 
   context "when the record's id is not a UUIDv7" do
-    let(:record) { agent.create! }
+    let(:ctx) { record.send(:ctx) }
 
-    it "generates the context id rather than taking the record's" do
-      expect(record.send(:ctx).id).not_to eq(record.id)
-      expect(LLM::Utils.timestamp(record.send(:ctx).id)).not_to be_nil
+    it "does not take the record's id" do
+      expect(ctx.id).not_to eq(record.id)
+    end
+
+    it "generates a UUIDv7" do
+      expect(LLM::Utils.timestamp(ctx.id)).not_to be_nil
     end
   end
 
