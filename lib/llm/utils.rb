@@ -49,15 +49,25 @@ module LLM
     end
 
     ##
+    # Returns true when a value is a UUIDv7 string: 32 hexadecimal
+    # digits, with or without hyphens, whose version nibble is a 7.
+    # @param [Object] id
+    # @return [Boolean]
+    def uuidv7?(id)
+      hex = id.to_s.delete("-")
+      hex.match?(/\A\h{32}\z/) && hex[12] == "7"
+    end
+
+    ##
     # Returns the UTC time encoded in a UUIDv7, or nil when the
     # given value is not a UUIDv7. The first 48 bits of a UUIDv7
     # are a Unix millisecond timestamp.
+    # @see #uuidv7?
     # @param [Object] id
     # @return [Time, nil]
     def timestamp(id)
+      return nil unless uuidv7?(id)
       hex = id.to_s.delete("-")
-      return nil unless hex.match?(/\A\h{32}\z/)
-      return nil unless hex[12] == "7"
       Time.at(hex[0, 12].to_i(16) / 1000.0).utc
     end
 
