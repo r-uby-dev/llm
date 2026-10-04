@@ -34,9 +34,13 @@ RSpec.describe "a context's id" do
     expect(ctx.created_at).to be_nil
   end
 
+  ##
+  # Through JSON, which is what a serialized payload is: `to_h` writes
+  # symbol keys, and what a deserializer reads is a parsed payload, whose
+  # keys are strings like the payload a record's column holds.
   it "survives a save and a restore" do
     ctx = LLM::Context.new(llm, record: LLM::Test::Record.new(uuid))
-    restored = LLM::Context.new(llm).deserialize(data: ctx.to_h)
+    restored = LLM::Context.new(llm).deserialize(string: ctx.to_json)
     expect(restored.id).to eq(uuid)
   end
 end
