@@ -49,14 +49,23 @@ RSpec.describe "a context's id" do
   end
 
   context "when an id is given" do
-    let(:params) { {id: "custom", record:} }
+    let(:given) { SecureRandom.uuid_v7 }
+    let(:params) { {id: given, record:} }
 
     it "is the id it was given, not the record's" do
-      expect(ctx.id).to eq("custom")
+      expect(ctx.id).to eq(given)
     end
 
-    it "has no creation time" do
-      expect(ctx.created_at).to be_nil
+    it "is the given id's creation time" do
+      expect(ctx.created_at).to eq(LLM::Utils.timestamp(given))
+    end
+  end
+
+  context "when the id that is given is not a UUIDv7" do
+    let(:params) { {id: "custom"} }
+
+    it "is refused" do
+      expect { ctx }.to raise_error(LLM::Error, "an id must be a UUIDv7 string")
     end
   end
 

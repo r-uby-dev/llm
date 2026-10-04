@@ -80,9 +80,9 @@ module LLM
 
     ##
     # Returns a stable id for this context. It is generated once
-    # on creation and restored with the runtime state on load - and a
-    # context bound to a record takes the record's id instead, when that
-    # id is a UUIDv7 string.
+    # on creation and restored with the runtime state on load - a
+    # context bound to a record takes the record's id instead, when
+    # that id is a UUIDv7 string - and it is always a UUIDv7 string.
     # @return [String]
     attr_reader :id
 
@@ -98,11 +98,10 @@ module LLM
     #   to `:completions`.
     # @option params [String] :model Defaults to the provider's default model
     # @option params [String] :id
-    #   A stable id for the context. Defaults to the record's id when the
-    #   context is bound to a record whose id is a UUIDv7, and to a
-    #   generated UUIDv7 otherwise. A UUIDv7 is recommended - it is what
-    #   makes `created_at` answerable - but not required: any value is
-    #   stored and restored as given.
+    #   A stable id for the context. It must be a UUIDv7 string, and
+    #   anything else raises {LLM::Error}. Defaults to the record's id
+    #   when the context is bound to a record whose id is a UUIDv7, and
+    #   to a generated UUIDv7 otherwise.
     # @option params [Class<LLM::Compactor>, nil] :compactor
     #   A compactor class to use for context compaction. Defaults to
     #   {LLM::Compactor::Null}.
@@ -125,6 +124,7 @@ module LLM
       @llm = llm
       @record = params.delete(:record)
       @id = params.delete(:id) || makeid
+      raise LLM::Error, "an id must be a UUIDv7 string" unless LLM::Utils.uuidv7?(@id)
       @mode = params.delete(:mode) || (llm.name == :openai ? :responses : :completions)
       tools = [*params.delete(:tools), *load_skills(params.delete(:skills))]
       @params = {model: llm.default_model, schema: nil}.compact.merge!(params)
@@ -612,14 +612,15 @@ module LLM
     # context with no record, every record whose id is an integer or a
     # slug, and every row that is not saved yet.
     #
-    # The check is the same function {#created_at} reads a time out of,
-    # rather than a second opinion about what a UUIDv7 looks like: an id
-    # this accepts is an id `created_at` can answer for.
+    # The check is {LLM::Utils.uuidv7?}, which is what
+    # {LLM::Utils.timestamp} reads a time out of as well - rather than a
+    # second opinion about what a UUIDv7 looks like, an id this accepts
+    # is an id `created_at` can answer for.
     # @api private
     # @return [Object]
     def makeid
       if record
-        LLM::Utils.timestamp(record.id) ? record.id : SecureRandom.uuid_v7
+        LLM::Utils.uuidv7?(record.id) ? record.id : SecureRandom.uuid_v7
       else
         SecureRandom.uuid_v7
       end

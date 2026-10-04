@@ -124,8 +124,8 @@ A context bound to a record takes that record's id when the record's
 id is a UUIDv7 string, and generates one otherwise - so an agent's
 id is the identity its host already has, and a record with an
 integer primary key, or a row that is not saved yet, still gets a
-UUIDv7 of its own. Pass `id:` to name a context yourself: the value
-is used as given, and is not required to be a UUIDv7.
+UUIDv7 of its own. Pass `id:` to name a context yourself; it must be
+a UUIDv7 string, and anything else raises `LLM::Error`.
 
 #### Why would I use it?
 
@@ -139,11 +139,12 @@ creation order and no separate timestamp column is needed.
 The id is generated once and saved with the runtime state, so it
 survives a save and a restore. A payload written before ids existed
 has none, so its object is restored with a fresh id.
-A UUIDv7 is recommended for a record's id, though it is not required:
-it is what lets the same string name a row and the conversation bound
-to it, and what makes `created_at` answerable. An id that is not a
-UUIDv7 is stored and restored as given, and only `created_at` answers
-`nil` for it.
+A UUIDv7 is a constraint rather than a convention: an id that is not
+one is refused with `LLM::Error`, because the id is what carries the
+creation time, and the same string is meant to name a row and the
+conversation bound to it.
+[`LLM::Utils.uuidv7?`](https://r.uby.dev/api-docs/llm.rb/LLM/Utils.html#uuidv7?-instance_method)
+is the check.
 [`LLM::Message#==`](https://r.uby.dev/api-docs/llm.rb/LLM/Message.html#==-instance_method)
 ignores the id, so a difference in creation time alone does not make
 two messages unequal.
