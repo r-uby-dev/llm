@@ -4,6 +4,7 @@ require "setup"
 
 RSpec.describe LLM::Utils do
   let(:uuid) { SecureRandom.uuid_v7 }
+  let(:v4) { "9c7a3d1e-4b2f-4e6a-8c1d-2f5b7a9e3c4d" }
 
   describe ".uuidv7?" do
     let(:value) { uuid }
@@ -22,7 +23,7 @@ RSpec.describe LLM::Utils do
     end
 
     context "for a UUID of another version" do
-      let(:value) { SecureRandom.uuid }
+      let(:value) { v4 }
 
       it "is false" do
         expect(result).to be(false)
@@ -55,7 +56,7 @@ RSpec.describe LLM::Utils do
     end
 
     context "for a UUID of another version" do
-      let(:value) { SecureRandom.uuid }
+      let(:value) { v4 }
 
       it "is nil" do
         expect(result).to be_nil
