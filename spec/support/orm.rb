@@ -30,6 +30,11 @@ module LLM::Test
     end
   end
 
+  ##
+  # A record, as far as a context is concerned: a bound object is asked
+  # for an id, and nothing else about it is a context's business.
+  Record = Struct.new(:id)
+
   module Harness
     module_function
 

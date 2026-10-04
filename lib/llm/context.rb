@@ -80,7 +80,9 @@ module LLM
 
     ##
     # Returns a stable id for this context. It is generated once
-    # on creation and restored with the runtime state on load.
+    # on creation and restored with the runtime state on load - and a
+    # context bound to a record takes the record's id instead, when that
+    # id is a UUIDv7 string.
     # @return [String]
     attr_reader :id
 
@@ -96,7 +98,11 @@ module LLM
     #   to `:completions`.
     # @option params [String] :model Defaults to the provider's default model
     # @option params [String] :id
-    #   A stable id for the context. Defaults to a UUID.
+    #   A stable id for the context. Defaults to the record's id when the
+    #   context is bound to a record whose id is a UUIDv7, and to a
+    #   generated UUIDv7 otherwise. A UUIDv7 is recommended - it is what
+    #   makes `created_at` answerable - but not required: any value is
+    #   stored and restored as given.
     # @option params [Class<LLM::Compactor>, nil] :compactor
     #   A compactor class to use for context compaction. Defaults to
     #   {LLM::Compactor::Null}.
@@ -117,8 +123,8 @@ module LLM
     def initialize(llm, params = {})
       params = {}.merge!(params)
       @llm = llm
-      @id = params.delete(:id) || SecureRandom.uuid_v7
       @record = params.delete(:record)
+      @id = params.delete(:id) || makeid
       @mode = params.delete(:mode) || (llm.name == :openai ? :responses : :completions)
       tools = [*params.delete(:tools), *load_skills(params.delete(:skills))]
       @params = {model: llm.default_model, schema: nil}.compact.merge!(params)
@@ -278,6 +284,7 @@ module LLM
             fn.model  = msg.model
             fn.guard  = guard
           end
+          fns
         end.extend(LLM::Function::Array)
     end
 
@@ -595,6 +602,28 @@ module LLM
     # @api private
     def queue
       [@queue, stream.queue].compact.first
+    end
+
+    ##
+    # The id a context is born with.
+    #
+    # The record's id when the context is bound to a record and that id
+    # is a UUIDv7, so that an agent and the row it came from answer the
+    # same name - and a generated UUIDv7 otherwise, which is every
+    # context with no record, every record whose id is an integer or a
+    # slug, and every row that is not saved yet.
+    #
+    # The check is the same function {#created_at} reads a time out of,
+    # rather than a second opinion about what a UUIDv7 looks like: an id
+    # this accepts is an id `created_at` can answer for.
+    # @api private
+    # @return [Object]
+    def makeid
+      if record
+        LLM::Utils.timestamp(record.id) ? record.id : SecureRandom.uuid_v7
+      else
+        SecureRandom.uuid_v7
+      end
     end
 
     ##
