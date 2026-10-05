@@ -13,8 +13,8 @@ class LLM::Agent
   # button has nothing to reach.
   #
   # So a turn registers itself for as long as it runs, and a canceller names
-  # the identity it already has: the record's id when the agent was built
-  # around one, the agent's own id otherwise.
+  # it by the agent, or by the id it already has: the record's id when the
+  # agent was built around one, the agent's own otherwise.
   #
   # ## What it does not promise
   #
@@ -66,41 +66,40 @@ class LLM::Agent
     ##
     # The agent running a turn under this identity, or nil.
     #
-    # Looked up under the lock and answered outside it, because the
-    # interrupt that follows is not this class's to make: a caller holding
-    # the lock while raising into another thread's turn would be holding it
-    # against that turn's own `exit`.
-    # @param [String, Integer, LLM::Agent, Object] agent
-    #  An id, an agent, or a record
+    # Named by the agent or by the id, and not by both: the two are the same
+    # question asked with different things in hand. An id is compared with
+    # `==`, so a host may pass a string, a number, or whatever it holds that
+    # equals the id a turn registered under.
+    #
+    # Looked up under the lock and answered outside it, because the interrupt
+    # that follows is not this class's to make: a caller holding the lock
+    # while raising into another thread's turn would be holding it against
+    # that turn's own `exit`.
+    # @param [LLM::Agent, nil] agent
+    # @param [String, Integer, nil] id
+    # @raise [ArgumentError]
+    #  When neither is given, or when both are
     # @return [LLM::Agent, nil]
-    def find(agent)
-      @mutex.synchronize { @agents[key(agent)] }
+    def find(agent: nil, id: nil)
+      if (agent.nil? && id.nil?) || (!agent.nil? && !id.nil?)
+        raise ArgumentError, "provide an agent or an id, and not both"
+      end
+      @mutex.synchronize { @agents[agent ? key(agent) : id] }
     end
 
     private
 
     ##
-    # The identity a cancel names.
+    # The identity an agent registers under.
     #
-    # The record's id when the agent was built around one, because that is
-    # what a host already has - a row it can name from a route - and the
-    # agent's own otherwise.
-    #
-    # Asked as a question rather than as a class, and that is the whole of
-    # this method. A host reaches it with whatever it holds: an agent, a
-    # record, or an id. `LLM::Agent === agent` would answer "no" for the
-    # record, whose id is what the caller has and what the turn registered
-    # under - so the record's id is asked about, and a record is a thing
-    # that has an id of its own rather than an agent at all.
-    # @param [String, Integer, LLM::Agent, Object] agent
+    # The record's id when the agent was built around a record, because that
+    # is what a host already has - a row it can name from a route - and the
+    # agent's own otherwise. One value, not two: an agent with a record
+    # answers to the record's id and not also to its own.
+    # @param [LLM::Agent] agent
     # @return [String, Integer]
     def key(agent)
-      case agent
-      when String, Integer then agent
-      else
-        record = agent.record if agent.respond_to?(:record)
-        record&.id || agent.id
-      end
+      agent.record&.id || agent.id
     end
   end
 end

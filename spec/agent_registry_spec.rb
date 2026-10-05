@@ -3,22 +3,16 @@
 require "setup"
 
 ##
-# The registry, and the two things it promises.
+# The registry, and the two ways a turn is named.
 #
-# The identity is what a host already has, and the examples are about the two
-# spellings reaching one entry: a record and the agent built around it are the
-# same turn, and a cancel written against either finds it. The rest are the
-# edges - nothing registered, and a second turn under one identity.
-#
-# An agent's own id is a spelling of its own, but not for an agent that has a
-# record: the key is one value, `record&.id || id`, so an agent with a record
-# answers to the record's id and not to both. That is the whole reason the key
-# is written that way, and it is asserted below.
+# The identity is what a host already has: a record's id when the agent was
+# built around one, the agent's own otherwise. The examples are about those
+# two spellings reaching one entry, about the agent itself being a spelling of
+# its own, and about the edges - nothing registered, and a second turn under
+# one identity.
 RSpec.describe LLM::Agent::Registry do
   subject(:registry) { described_class.new }
 
-  ##
-  # An agent's two identities, and the record it may have been built around.
   let(:row) { double(id: "a-row-id") }
   let(:agent) { double(record: row, id: "an-agent-id") }
 
@@ -26,24 +20,20 @@ RSpec.describe LLM::Agent::Registry do
     before { registry.enter(agent) }
 
     it "is found by the agent" do
-      expect(registry.find(agent)).to equal(agent)
+      expect(registry.find(agent:)).to equal(agent)
     end
 
     ##
     # The spelling a route has: it knows the row, not the object.
     it "is found by its record's id" do
-      expect(registry.find("a-row-id")).to equal(agent)
-    end
-
-    it "is found by the record itself" do
-      expect(registry.find(row)).to equal(agent)
+      expect(registry.find(id: "a-row-id")).to equal(agent)
     end
 
     ##
-    # One key, not two. The agent's own id names it only when there is no
-    # record to name it by, which is what `record&.id || id` decides.
+    # One key, not two. An agent with a record answers to the record's id
+    # and not also to its own - that is what `record&.id || id` decides.
     it "is not also found by its own id" do
-      expect(registry.find("an-agent-id")).to be_nil
+      expect(registry.find(id: "an-agent-id")).to be_nil
     end
   end
 
@@ -53,7 +43,7 @@ RSpec.describe LLM::Agent::Registry do
     before { registry.enter(agent) }
 
     it "is found by its own id" do
-      expect(registry.find("an-agent-id")).to equal(agent)
+      expect(registry.find(id: "an-agent-id")).to equal(agent)
     end
   end
 
@@ -64,13 +54,28 @@ RSpec.describe LLM::Agent::Registry do
     end
 
     it "is not found" do
-      expect(registry.find("a-row-id")).to be_nil
+      expect(registry.find(agent:)).to be_nil
     end
   end
 
   describe "an agent that never registered" do
     it "is not found" do
-      expect(registry.find("a-row-id")).to be_nil
+      expect(registry.find(agent:)).to be_nil
+    end
+  end
+
+  ##
+  # Naming a turn by both, or by neither, is a mistake rather than a
+  # question: there is one answer and two ways to ask for it.
+  describe "naming a turn by nothing" do
+    it "is refused" do
+      expect { registry.find }.to raise_error(ArgumentError)
+    end
+  end
+
+  describe "naming a turn by both" do
+    it "is refused" do
+      expect { registry.find(agent:, id: "a-row-id") }.to raise_error(ArgumentError)
     end
   end
 
@@ -87,7 +92,7 @@ RSpec.describe LLM::Agent::Registry do
     end
 
     it "is left alone by the first one's exit" do
-      expect(registry.find("a-row-id")).to equal(second)
+      expect(registry.find(id: "a-row-id")).to equal(second)
     end
   end
 end
