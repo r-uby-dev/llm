@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "llm"
+require "setup"
 
 ##
 # The registry, and the two things it promises.
