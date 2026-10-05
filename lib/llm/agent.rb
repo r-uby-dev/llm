@@ -52,6 +52,7 @@ module LLM
   # @see LLM::Stream Stream callbacks for model output
   class Agent
     require_relative "agent/interrupt"
+    require_relative "agent/registry"
 
     ##
     # @api private
@@ -95,6 +96,16 @@ module LLM
     private_constant :File
 
     ##
+    # The agents running a turn in this process.
+    #
+    # Reached through `LLM::Agent.registry` rather than through this name,
+    # which is private for the same reason the other constants here are: it
+    # is the class's own, and `run_loop` is the only thing that writes it.
+    # @api private
+    REGISTRY = Registry.new
+    private_constant :REGISTRY
+
+    ##
     # Returns a provider
     # @return [LLM::Provider]
     attr_reader :llm
@@ -136,6 +147,19 @@ module LLM
           raise KeyError, "key not found: #{_1}"
         end
       end
+    end
+
+    ##
+    # The agents running a turn, in this process.
+    #
+    # What a cancel reaches: an identity a host already has - a record's
+    # id, an agent's own id, an agent, or a record - answered with the
+    # agent running under it, or nil. `LLM.interrupt(agent:)` is the call
+    # most hosts want; this is the map underneath it.
+    # @see LLM::Agent::Registry
+    # @return [LLM::Agent::Registry]
+    def self.registry
+      REGISTRY
     end
 
     ##
@@ -985,8 +1009,18 @@ module LLM
           tracer:
         ).extend(Interrupt)
       )
+      ##
+      # And where the turn can be found by whoever does not hold it.
+      #
+      # The caller above is for a cancel that has the agent and needs to
+      # know what to raise into; this is for a cancel that has only an
+      # identity - a route with a row id - and no agent at all. Registered
+      # for as long as the turn runs, and forgotten in the same `ensure`,
+      # which is the whole of its lifetime.
+      REGISTRY.enter(self)
       @llm.with_tracer(tracer, &run)
     ensure
+      REGISTRY.exit(self)
       @ctx.instance_variable_set(:@caller, nil)
       tracer&.stop_trace
     end
