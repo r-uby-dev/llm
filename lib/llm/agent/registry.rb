@@ -81,10 +81,11 @@ class LLM::Agent
     #  When neither is given, or when both are
     # @return [LLM::Agent, nil]
     def find(agent: nil, id: nil)
-      if (agent.nil? && id.nil?) || (!agent.nil? && !id.nil?)
+      if (agent.nil? and id.nil?) or (!agent.nil? and !id.nil?)
         raise ArgumentError, "provide an agent or an id, and not both"
+      else
+        @mutex.synchronize { @agents[agent ? key(agent) : id] }
       end
-      @mutex.synchronize { @agents[agent ? key(agent) : id] }
     end
 
     private
