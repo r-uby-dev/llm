@@ -363,6 +363,29 @@ module LLM
   end
 
   ##
+  # Interrupts the turn running under this identity, in this process.
+  #
+  # The identity is what a host already has: an agent's record id, an
+  # agent's own id, an agent, or a record. `false` means nothing was
+  # registered under it - the ordinary race, a turn that finished first,
+  # and not a failure.
+  #
+  # It reaches the agents *this process* is running. A cancel that lands
+  # in another worker finds nothing here and must not be told otherwise;
+  # an application that needs a guarantee keeps one of its own, and what
+  # this is for is the fast path.
+  # @see LLM::Agent::Registry
+  # @param [String, Integer, LLM::Agent, Object] agent
+  # @return [Boolean]
+  #  Whether anything was reached
+  def interrupt(agent:)
+    found = LLM::Agent.registry.find(agent)
+    return false unless found
+    found.interrupt!
+    true
+  end
+
+  ##
   # Provides a thread-safe lock
   # @param [Symbol] name The name of the lock
   # @param [Proc] block The block to execute within the lock
