@@ -84,15 +84,22 @@ class LLM::Agent
     #
     # The record's id when the agent was built around one, because that is
     # what a host already has - a row it can name from a route - and the
-    # agent's own otherwise. An agent answers `#record` too, so a caller
-    # reaching the same turn by either spelling computes the same key.
+    # agent's own otherwise.
+    #
+    # Asked as a question rather than as a class, and that is the whole of
+    # this method. A host reaches it with whatever it holds: an agent, a
+    # record, or an id. `LLM::Agent === agent` would answer "no" for the
+    # record, whose id is what the caller has and what the turn registered
+    # under - so the record's id is asked about, and a record is a thing
+    # that has an id of its own rather than an agent at all.
     # @param [String, Integer, LLM::Agent, Object] agent
     # @return [String, Integer]
     def key(agent)
       case agent
-      when LLM::Agent then agent.record&.id || agent.id
       when String, Integer then agent
-      else agent.respond_to?(:id) ? agent.id : agent
+      else
+        record = agent.record if agent.respond_to?(:record)
+        record&.id || agent.id
       end
     end
   end
