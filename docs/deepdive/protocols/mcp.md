@@ -109,7 +109,7 @@ mcp = LLM::MCP.http(
 )
 ```
 
-### Parallel web search and fetch
+#### Parallel web search and fetch
 
 [Parallel Search MCP](https://docs.parallel.ai/integrations/mcp/search-mcp)
 provides `web_search` and `web_fetch` over HTTP without a Parallel
@@ -133,26 +133,24 @@ mcp = LLM::MCP.http(
   }
 )
 
-mcp.session do
-  tools = mcp.tools
-  search = tools.find { _1.name == "web_search" }.new
-  fetch = tools.find { _1.name == "web_fetch" }.new
-  session_id = SecureRandom.uuid
-  queries = ["Ruby Fiber scheduler documentation"]
+tools = mcp.tools
+search = tools.find { _1.name == "web_search" }.new
+fetch = tools.find { _1.name == "web_fetch" }.new
+session_id = SecureRandom.uuid
+queries = ["Ruby Fiber scheduler documentation"]
 
-  puts LLM.json.dump(search.call(
-    objective: "Find the official Ruby Fiber scheduler documentation.",
-    search_queries: queries,
-    session_id:
-  ))
+puts LLM.json.dump(search.call(
+  objective: "Find the official Ruby Fiber scheduler documentation.",
+  search_queries: queries,
+  session_id:
+))
 
-  puts LLM.json.dump(fetch.call(
-    urls: ["https://docs.ruby-lang.org/en/master/Fiber.html"],
-    objective: "Explain how Ruby uses a Fiber scheduler.",
-    search_queries: queries,
-    session_id:
-  ))
-end
+puts LLM.json.dump(fetch.call(
+  urls: ["https://docs.ruby-lang.org/en/master/Fiber.html"],
+  objective: "Explain how Ruby uses a Fiber scheduler.",
+  search_queries: queries,
+  session_id:
+))
 ```
 
 To let an agent choose when to search or fetch, pass the discovered
