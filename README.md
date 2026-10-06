@@ -335,12 +335,16 @@ with (usually via a database). The background process
 would have one thread per agent, and it could run as
 many agents as it has threads. This is how the
 [r.uby.dev](https://r.uby.dev) website is configured,
-and it is the configuration that the [LLM.interrupt]()
+and it is the configuration that the
+[`LLM.interrupt`](https://r.uby.dev/api-docs/llm.rb/LLM.html#interrupt-class_method)
 method is optimized for: a single process with each agent
 running in its own thread.
 
-The [LLM.interrupt]() method has access to a process-wide
-registry that contains every active instance of [LLM::Agent](),
+The
+[`LLM.interrupt`](https://r.uby.dev/api-docs/llm.rb/LLM.html#interrupt-class_method)
+method has access to a process-wide
+registry that contains every active instance of
+[`LLM::Agent`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html),
 and that includes Sequel and ActiveRecord agents, too. An
 agent enters the registry when it starts a turn, and it
 exits the registry afterwards. The method returns true
