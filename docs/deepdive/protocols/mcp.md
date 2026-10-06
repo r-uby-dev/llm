@@ -109,6 +109,64 @@ mcp = LLM::MCP.http(
 )
 ```
 
+### Parallel web search and fetch
+
+[Parallel Search MCP](https://docs.parallel.ai/integrations/mcp/search-mcp)
+provides `web_search` and `web_fetch` over HTTP without a Parallel
+API key. The anonymous tier is free for exploration and light use,
+with rate limits and server-managed search settings.
+
+This example discovers the tools through the HTTP client, searches
+for Ruby documentation, then extracts excerpts from a specific page.
+It uses the default `net/http` transport and needs no model or provider
+credentials. Save it as `parallel_search.rb` and run
+`ruby parallel_search.rb` after installing `llm.rb`.
+
+```ruby
+require "llm"
+
+mcp = LLM::MCP.http(
+  url: "https://search.parallel.ai/mcp",
+  headers: {
+    "User-Agent" => "llm.rb/#{LLM::VERSION}",
+    "Accept" => "application/json, text/event-stream"
+  }
+)
+
+mcp.session do
+  tools = mcp.tools
+  search = tools.find { _1.name == "web_search" }.new
+  fetch = tools.find { _1.name == "web_fetch" }.new
+  session_id = SecureRandom.uuid
+  queries = ["Ruby Fiber scheduler documentation"]
+
+  puts LLM.json.dump(search.call(
+    objective: "Find the official Ruby Fiber scheduler documentation.",
+    search_queries: queries,
+    session_id:
+  ))
+
+  puts LLM.json.dump(fetch.call(
+    urls: ["https://docs.ruby-lang.org/en/master/Fiber.html"],
+    objective: "Explain how Ruby uses a Fiber scheduler.",
+    search_queries: queries,
+    session_id:
+  ))
+end
+```
+
+To let an agent choose when to search or fetch, pass the discovered
+tools to `talk` instead. Model inference is separate from the free
+MCP service and uses your chosen provider's credentials and pricing.
+Using the same `mcp` configuration above:
+
+```ruby
+llm = LLM.deepseek(key: ENV.fetch("DEEPSEEK_API_KEY"))
+agent = LLM::Agent.new(llm)
+agent.talk "Find the official Ruby Fiber scheduler docs and explain them.",
+           tools: mcp.tools
+```
+
 ### Prompts
 
 #### Overview
