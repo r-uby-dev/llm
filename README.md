@@ -329,20 +329,26 @@ end
 <summary>Cancel by record ID</summary>
 <br>
 
-A common deployment configuration is to run your
-agents in a background process that a web frontend
-can communicate with. This background process would
-have one thread per agent, and it could run as many
-agents as it has threads concurrently. This is how
-the [r.uby.dev](https://r.uby.dev) website is configured.
+A common deployment setup is to run your agents in a
+background process that a web frontend can communicate
+with (usually via a database). The background process
+would have one thread per agent, and it could run as
+many agents as it has threads. This is how the
+[r.uby.dev](https://r.uby.dev) website is configured,
+and it is the configuration that the [LLM.interrupt]()
+method is optimized for: a single process with each agent
+running in its own thread.
 
-The runtime also maintains a registry of all agents
-who are active (running a turn) and through this registry
-an interrupt can be sent to an agent by its record ID
-alone. For example, let's assume an ActiveRecord agent
-is running in a background process, it has the ID 7, and
-we want to interrupt it from the same background process
-in another job:
+The [LLM.interrupt]() method has access to a process-wide
+registry that contains every active instance of [LLM::Agent](),
+and that includes Sequel and ActiveRecord agents, too. An
+agent enters the registry when it starts a turn, and it
+exits the registry afterwards. The method returns true
+when it sent an interrupt, and otherwise it returns false.
+
+There is often a window between when an agent is queued
+and when it runs, so a poll approach lets you eventually
+interrupt the agent, or give up trying:
 
 ```ruby
 class InterruptJob
