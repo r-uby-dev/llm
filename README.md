@@ -326,6 +326,39 @@ end
 ```
 </details>
 <details>
+<summary>Cancel by record ID</summary>
+<br>
+
+A common deployment configuration is to run your
+agents in a background process that a web frontend
+can communicate with. This background process would
+have one thread per agent, and it could run as many
+agents as it has threads concurrently. This is how
+the [r.uby.dev](https://r.uby.dev) website is configured.
+
+The runtime also maintains a registry of all agents
+who are active (running a turn) and through this registry
+an interrupt can be sent to an agent by its record ID
+alone. For example, let's assume an ActiveRecord agent
+is running in a background process, it has the ID 7, and
+we want to interrupt it from the same background process
+in another job:
+
+```ruby
+class InterruptJob
+  def call(agent_id:)
+    attempts = 0
+    until LLM.interrupt(id: agent_id)
+      attempts += 1
+      break if attempts == 10
+      sleep 0.1
+    end
+  end
+end
+```
+</details>
+
+<details>
 <summary>Console (<code>binding.irb</code> for agents)</summary>
 <br>
 
