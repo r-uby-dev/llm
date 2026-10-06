@@ -71,6 +71,42 @@ rescue LLM::Interrupt
 end
 ```
 
+A canceller usually holds the agent, and `interrupt!` is then enough. In
+an application it often does not: the agent is built inside the job that
+runs the turn and stays a local variable for as long as the turn lasts,
+while the side that wants to stop it is a route handler that holds
+nothing but the row the conversation is stored in.
+
+So a turn registers itself for as long as it runs, and
+[`LLM.interrupt`](https://r.uby.dev/api-docs/llm.rb/LLM.html#interrupt-class_method)
+finds one by the agent or by an id: the same question asked with
+different things in hand.
+
+```ruby
+require "llm"
+
+llm = LLM.deepseek(key: ENV["DEEPSEEK_SECRET"])
+agent = LLM::Agent.new(llm, name: "robert", path: "agent.json")
+
+Thread.new do
+  sleep(2)
+  LLM.interrupt(id: agent.id)   # also: LLM.interrupt(agent: agent)
+end
+
+begin
+  agent.talk "write me a very long poem", stream: $stdout
+rescue LLM::Interrupt
+  puts "request cancelled!"
+end
+```
+
+The name is one value and not two. An agent built around a record
+answers to the record's id, because that is what a host already has in
+hand, and an agent with no record answers to its own. An id is compared
+with `==`, so a string, a number, or whatever a host holds that equals
+it will do. Passing neither an agent nor an id, or both, is an
+`ArgumentError` rather than a guess.
+
 #### Why would I use it?
 
 Cancellation prevents wasted time and tokens when the model goes
@@ -142,3 +178,17 @@ through
 or
 [`LLM::Tool#on_cancel`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool.html#on_cancel-instance_method),
 which takes precedence when both are defined.
+
+[`LLM.interrupt`](https://r.uby.dev/api-docs/llm.rb/LLM.html#interrupt-class_method)
+answers `false` when nothing was registered under the name it was given,
+and that is the ordinary race rather than a failure: a turn that ended
+between the lookup and the raise, or a cancel that arrived after it.
+The registry is one process and holds the agents that process is
+running, so a cancel that lands in a second worker, or in a process a
+deploy has not finished replacing, finds nothing there - and `false`
+must not be read as "the turn is over". An application that needs more
+than the fast path keeps a registry of its own, and one that runs a loop
+of its own can record a caller the same way:
+[`LLM::Agent::Interrupt`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent/Interrupt.html)
+is public for that reason, and what it does with the names is the
+caller's business.
