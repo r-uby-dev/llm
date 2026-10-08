@@ -47,8 +47,10 @@ assistants that read them, get their content.
 
 Anthropic, Google, and OpenAI implement the Files API, and so do the
 providers built on OpenAI's - Moonshot and Alibaba among them, which
-inherit it. A provider that has no Files API of its own, such as
-DeepSeek, Mistral, or xAI, raises `NotImplementedError`. `download` is
-OpenAI-only, so the OpenAI-compatible providers inherit that too. A file
-id belongs to the provider that minted it: DeepSeek, for example, raises
-`LLM::PromptError` when it is handed a file id from another provider.
+inherit it. DeepSeek implements the Files API too, scoped to images that
+a chat request references by `file_id`. A provider that has no Files API
+of its own, such as Mistral or xAI, raises `NotImplementedError`.
+`download` is OpenAI-only, so the OpenAI-compatible providers inherit
+that too. A file id belongs to the provider that minted it: a file id minted by
+another provider is passed through as-is, and fails when DeepSeek's API
+tries to resolve it.

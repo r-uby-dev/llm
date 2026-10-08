@@ -92,8 +92,11 @@ RSpec.describe "LLM::DeepSeek::RequestAdapter::Completion" do
         LLM::Object.from("file?" => true, "id" => "file_123", "mime_type" => "image/png")
       end
 
-      it "raises a prompt error that says there is no files api" do
-        expect { payload }.to raise_error(LLM::PromptError, /no Files API/)
+      it "adapts the remote file as a file content block" do
+        expect(payload).to eq(
+          role: "user",
+          content: [{type: :file, file_id: "file_123"}]
+        )
       end
     end
 
@@ -106,8 +109,8 @@ RSpec.describe "LLM::DeepSeek::RequestAdapter::Completion" do
         response!(choices: [LLM::Message.new("assistant", "hello")])
       end
 
-      it "raises a prompt error that says there is no files api" do
-        expect { payload }.to raise_error(LLM::PromptError, /no Files API/)
+      it "raises a prompt error that says the response is not a file" do
+        expect { payload }.to raise_error(LLM::PromptError, /not supported by the DeepSeek API/)
       end
     end
 
