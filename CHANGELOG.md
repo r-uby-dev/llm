@@ -219,6 +219,14 @@ record-backed conversation after each request, and adds
 
 ### Provider
 
+* **deepseek: add support for the Files API** <br>
+  [`LLM::DeepSeek#files`](https://r.uby.dev/api-docs/llm.rb/LLM/DeepSeek.html#files-instance_method)
+  now returns an
+  [`LLM::DeepSeek::Files`](https://r.uby.dev/api-docs/llm.rb/LLM/DeepSeek/Files.html)
+  object instead of raising `NotImplementedError`. Uploads default to
+  `purpose: "user_data"` - the only purpose DeepSeek accepts - and requests
+  go to the root of the API host, where DeepSeek serves its Files API.
+
 * **deepseek: support image attachments in chat completions** <br>
   DeepSeek's vision models now accept an image. A `:image_url` object is sent
   as an `image_url` item, and a local image file as a base64 data URI.

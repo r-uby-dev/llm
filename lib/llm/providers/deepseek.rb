@@ -20,6 +20,7 @@ module LLM
   class DeepSeek < OpenAI
     require_relative "deepseek/request_adapter"
     require_relative "deepseek/response_adapter"
+    require_relative "deepseek/files"
     require_relative "deepseek/images"
     include DeepSeek::RequestAdapter
 
@@ -38,9 +39,11 @@ module LLM
     end
 
     ##
-    # @raise [NotImplementedError]
+    # Provides an interface to DeepSeek's files API
+    # @see https://api-docs.deepseek.com/guides/files_api DeepSeek docs
+    # @return [LLM::DeepSeek::Files]
     def files
-      raise NotImplementedError
+      LLM::DeepSeek::Files.new(self)
     end
 
     ##

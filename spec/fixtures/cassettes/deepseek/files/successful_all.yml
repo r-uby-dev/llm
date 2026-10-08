@@ -1,0 +1,185 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.deepseek.com/files
+    headers:
+      User-Agent:
+      - llm.rb v16.0.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      Authorization:
+      - Bearer <redacted>
+      Content-Type:
+      - multipart/form-data; boundary=BOUNDARY__deadbeefdeadbeefdeadbeefdeadbeef
+    body:
+      encoding: UTF-8
+      string: "--BOUNDARY__deadbeefdeadbeefdeadbeefdeadbeef\r\nContent-Disposition:
+        form-data; name=\"file\";filename=\"haiku1.txt\"\r\nContent-Type: text/plain\r\n\r\nWhispers
+        through the trees,\nmoonlight dances on still waves --\nnight's breath softly
+        glows\n\r\n--BOUNDARY__deadbeefdeadbeefdeadbeefdeadbeef\r\nContent-Disposition:
+        form-data; name=\"purpose\"\r\n\r\nuser_data\r\n--BOUNDARY__deadbeefdeadbeefdeadbeefdeadbeef--\r\n"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+    body:
+      encoding: UTF-8
+      string: |-
+        {
+          "id": "file-api-all00000000000003",
+          "object": "file",
+          "bytes": 91,
+          "created_at": 1789000000,
+          "filename": "haiku1.txt",
+          "purpose": "user_data"
+        }
+  recorded_at: Thu, 08 Oct 2026 12:00:00 GMT
+- request:
+    method: post
+    uri: https://api.deepseek.com/files
+    headers:
+      User-Agent:
+      - llm.rb v16.0.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      Authorization:
+      - Bearer <redacted>
+      Content-Type:
+      - multipart/form-data; boundary=BOUNDARY__deadbeefdeadbeefdeadbeefdeadbeef
+    body:
+      encoding: UTF-8
+      string: "--BOUNDARY__deadbeefdeadbeefdeadbeefdeadbeef\r\nContent-Disposition:
+        form-data; name=\"file\";filename=\"haiku2.txt\"\r\nContent-Type: text/plain\r\n\r\nhaiku2
+        content\r\n--BOUNDARY__deadbeefdeadbeefdeadbeefdeadbeef\r\nContent-Disposition:
+        form-data; name=\"purpose\"\r\n\r\nuser_data\r\n--BOUNDARY__deadbeefdeadbeefdeadbeefdeadbeef--\r\n"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+    body:
+      encoding: UTF-8
+      string: |-
+        {
+          "id": "file-api-all00000000000004",
+          "object": "file",
+          "bytes": 95,
+          "created_at": 1789000000,
+          "filename": "haiku2.txt",
+          "purpose": "user_data"
+        }
+  recorded_at: Thu, 08 Oct 2026 12:00:00 GMT
+- request:
+    method: get
+    uri: https://api.deepseek.com/files
+    headers:
+      User-Agent:
+      - llm.rb v16.0.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      Authorization:
+      - Bearer <redacted>
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+    body:
+      encoding: UTF-8
+      string: |-
+        {
+          "object": "list",
+          "data": [
+            {
+              "id": "file-api-all00000000000003",
+              "object": "file",
+              "bytes": 91,
+              "created_at": 1789000000,
+              "filename": "haiku1.txt",
+              "purpose": "user_data"
+            },
+            {
+              "id": "file-api-all00000000000004",
+              "object": "file",
+              "bytes": 95,
+              "created_at": 1789000000,
+              "filename": "haiku2.txt",
+              "purpose": "user_data"
+            }
+          ],
+          "first_id": "file-api-all00000000000003",
+          "last_id": "file-api-all00000000000004",
+          "has_more": false
+        }
+  recorded_at: Thu, 08 Oct 2026 12:00:00 GMT
+- request:
+    method: delete
+    uri: https://api.deepseek.com/files/file-api-all00000000000003
+    headers:
+      User-Agent:
+      - llm.rb v16.0.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      Authorization:
+      - Bearer <redacted>
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+    body:
+      encoding: UTF-8
+      string: |-
+        {
+          "id": "file-api-all00000000000003",
+          "object": "file",
+          "deleted": true
+        }
+  recorded_at: Thu, 08 Oct 2026 12:00:00 GMT
+- request:
+    method: delete
+    uri: https://api.deepseek.com/files/file-api-all00000000000004
+    headers:
+      User-Agent:
+      - llm.rb v16.0.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      Authorization:
+      - Bearer <redacted>
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+    body:
+      encoding: UTF-8
+      string: |-
+        {
+          "id": "file-api-all00000000000004",
+          "object": "file",
+          "deleted": true
+        }
+  recorded_at: Thu, 08 Oct 2026 12:00:00 GMT
+recorded_with: VCR 6.4.0
