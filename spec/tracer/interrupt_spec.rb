@@ -147,12 +147,16 @@ RSpec.describe "the tracer's interrupt hook" do
       end
     end
 
-    let(:waited) do
-      thread = Thread.new do
+    let(:wait) do
+      Thread.new do
         ctx.wait(:thread)
       rescue LLM::Interrupt => ex
         ex
       end
+    end
+
+    let(:waited) do
+      thread = wait
       sleep 0.05
       ctx.interrupt!
       thread.join(2)
