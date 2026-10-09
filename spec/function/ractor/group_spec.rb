@@ -84,7 +84,7 @@ RSpec.describe LLM::Function::Ractor::Group do
     end
 
     it "reaches the calls after the one that has returned" do
-      expect { within { holding.wait } }.to raise_error(LLM::Interrupt)
+      expect { within { group.wait } }.to raise_error(LLM::Interrupt)
     end
   end
 end

@@ -101,7 +101,7 @@ RSpec.describe LLM::Function do
           fn.arguments = {}
         end
       end
-      let(:slow_task) { slow_function.task(:ractor) }
+      let(:slow_task) { LLM::Function::Ractor::Group.new [slow_function.task(:ractor)] }
 
       context "when the task is running" do
         before do

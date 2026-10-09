@@ -187,13 +187,13 @@ RSpec.describe LLM::Function::Ractor::Job do
       end
     end
 
-    let(:task) { function.task(:ractor) }
+    let(:group) { LLM::Function::Ractor::Group.new [function.task(:ractor)] }
 
     it "raises when the call was cancelled" do
-      task.spawn
+      group.spawn
       within { signal }
-      task.interrupt!
-      expect { within { task.wait } }.to raise_error(LLM::Interrupt)
+      group.interrupt!
+      expect { within { group.wait } }.to raise_error(LLM::Interrupt)
     end
   end
 end
