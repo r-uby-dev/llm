@@ -110,14 +110,14 @@ module LLM
     #  here: the call an interrupt ends never returned a result.
     # @param (see LLM::Tracer#on_tool_interrupt)
     # @return [void]
-    def on_tool_interrupt(ex:, span: nil, **)
+    def on_tool_interrupt(ex:, span:, **)
       @logger.info(
         tracer: "llm.rb (logger)",
         event: "tool.interrupt",
         provider: provider_name,
         operation: "execute_tool",
-        tool_id: span&.id,
-        tool_name: span&.name,
+        tool_id: span.id,
+        tool_name: span.name,
         error_class: ex.class.to_s,
         error_message: ex.message
       )
