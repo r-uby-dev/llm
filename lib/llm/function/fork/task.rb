@@ -205,8 +205,8 @@ class LLM::Function
     end
 
     ##
-    # The ending a child reports when its call was cut, announced as it is
-    # made rather than where it is raised.
+    # The ending a child reports when its call was interrupted, announced as
+    # it is made rather than where it is raised.
     #
     # **One call, one ending.** `@result` holds the exception, so a caller
     # that waits twice is given the same one twice - the strategy's own spec

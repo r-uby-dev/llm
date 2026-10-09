@@ -71,9 +71,6 @@ RSpec.describe LLM::Function::Fork::Task do
     task.alive? ? "the child is still running" : "the child has ended"
   end
 
-  ##
-  # A task for a tool, with a tracer when an example counts what a call was
-  # told rather than what it answered.
   def task_for(tool, id, tracer: nil)
     tool.function.dup.tap do |fn|
       fn.id = id
