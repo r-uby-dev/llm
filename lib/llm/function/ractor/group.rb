@@ -35,10 +35,22 @@ module LLM::Function::Ractor
     alias_method :cancel!, :interrupt!
 
     ##
+    # @raise [LLM::Interrupt]
+    #  When one or more tool calls were interrupted
     # @return [Array<LLM::Function::Return>]
     def wait
       spawn unless @spawned
-      @tasks.map(&:wait)
+      interrupt, results = nil, []
+      @tasks.each do |task|
+        result = task.wait
+        if result.value[:interrupt] and result.value[:cookie] == task.cookie
+          interrupt = LLM::Interrupt.new
+          task.tracer&.on_tool_interrupt(ex: interrupt, span: task.span)
+        else
+          results << result
+        end
+      end
+      interrupt ? raise(interrupt) : results
     end
     alias_method :value, :wait
   end

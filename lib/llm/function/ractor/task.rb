@@ -11,6 +11,18 @@ class LLM::Function
     attr_reader :mailbox
 
     ##
+    # @return [LLM::Tracer, nil]
+    attr_reader :tracer
+
+    ##
+    # @return [String]
+    attr_reader :cookie
+
+    ##
+    # @return [Object]
+    attr_reader :span
+
+    ##
     # @param [LLM::Function] fn
     # @param [Hash] options
     # @option options [LLM::Tracer, nil] :tracer
@@ -107,9 +119,7 @@ class LLM::Function
         spawn unless @mailbox
         id, name, value = mailbox.wait
         if value[:interrupt] and value[:cookie] == @cookie
-          interrupt = LLM::Interrupt.new
-          @tracer&.on_tool_interrupt(ex: interrupt, span: @span)
-          raise(interrupt)
+          Return.new(id, name, value)
         else
           result = Return.new(id, name, value)
           @tracer&.on_tool_finish(result:, span: @span)
