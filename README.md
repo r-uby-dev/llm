@@ -379,96 +379,71 @@ end
 </details>
 
 <details>
-<summary>Console (<code>binding.irb</code> for agents)</summary>
+<summary>Console</summary>
 <br>
 
 The [LLM::Agent#console](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#console-instance_method)
 method drops you into an interactive console that is built on
-top of curses. It can help you debug agents, test your tools,
-connect to MCP servers, and other A2A agents. The console stands
-out because it connects to the surrounding runtime and it can
-be extended by your code. Think of it as `binding.irb` but
-for agents.
+top of (n)curses. The `llm.rb` executable packaged with the gem
+is another way to access the console and ActiveRecord models who
+have called `acts_as_agent` can access the console as well
+(via `agent.console`).
+
+A console for an ActiveRecord model does not write back to the
+database. The `llm.rb` executable automatically associates a
+session with the current working directory and it can be resumed
+by calling `llm.rb` in the same directory at a later point.
+
+The console is not intended to compete with Claude, Codex and
+friends. It is much more limited, serves an entirely different
+purpose and is more like a debugger for your agents. The
+dependencies required by the console are not installed
+by default, and the easiest way to grab them is via
+`gem install llm-shell`.
 
 ##### Demo
 
 ![llm.rb console demo](demo.gif)
 
 
-##### Installation
-
-The console is distributed with llm.rb but it requires a number
-of optional dependencies to be installed separately. The following
-gems provide the full experience:
-
-    gem install unicode-display_width curses kramdown xchan.rb test-cmd.rb
-
-For convenience it is also possible to just use the following, it
-is a metagem that depends on llm.rb and all the dependencies it requires
-to run the console:
-
-    gem install llm-shell
-
-##### Persistence
-
-the `path:` option can be set on an agent for automatic persistence
-across console sessions. The `tools:` option attaches extra tools
-for the duration of the session. Recall previous turns with Ctrl+P and
-Ctrl+N.
-
-```ruby
-require "llm"
-require "llm/tools"
-
-llm = LLM.deepseek(key: ENV["KEY"])
-agent = LLM::Agent.new(llm, name: "my-agent", path: "agent.json")
-agent.console(tools: LLM::Tool.subclasses)
-```
-
-##### CLI
-
-The `llm.rb` executable is available on your PATH after installation.
-It starts a console session from any directory. The CLI auto-detects your
-provider from standard environment variables (`DEEPSEEK_API_KEY`,
-`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, etc.). Persistent sessions are
-stored under `~/.llm.rb/` and restored automatically on your next visit.
-
-```bash
-llm.rb                     # auto-detect from $PROVIDER_API_KEY
-llm.rb -p openai           # use OpenAI explicitly
-llm.rb -m gpt-5.6          # use a model other than the provider default
-llm.rb -c thread           # run tool calls on a separate thread
-llm.rb -n curb             # use libcurl as the HTTP transport
-llm.rb -x 900              # read timeout of 15 minutes
-llm.rb -t                  # temporary session, no persistence
-llm.rb -v                  # print the version
-llm.rb -h                  # print usage
-```
 </details>
 <details>
-<summary>Persistence</summary>
+<summary>Serialization</summary>
 <br>
 
-Set `path:` on an agent for automatic filesystem persistence:
-the agent restores conversation history from the file on startup
-and saves it back after every turn, with no manual serialization
-code. For database-backed persistence, ActiveRecord and Sequel
-integrations are also available. All persistence options use the same
-underlying serialization.
+Both [`LLM::Context`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html)
+and
+[`LLM::Agent`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html)
+can be serialized to JSON and written to disk.
+This feature is what supports the ActiveRecord
+and Sequel integrations too but rather than
+store the agent directly on disk it is stored
+in a database column instead.
+
+An agent can be configured to read from and
+write to a file automatically with the `path`
+option. When the file already exists, the agent
+is restored from the file and continues where
+he left off. After each turn the agent flushes
+its state to the file. The text file can be shared
+like any other text file and it can be used to
+restore the agent in another process or machine:
 
 ```ruby
 require "llm"
 
-llm = LLM.deepseek(key: ENV["KEY"])
-agent = LLM::Agent.new(llm, path: "session.json")
+path  = File.join(Dir.home, ".agents", "myagent.json")
+llm   = LLM.deepseek(key: ENV["KEY"])
+agent = LLM::Agent.new(llm, path:)
 agent.talk "remember my name is robert"
 
-# Next time, the conversation is restored automatically:
-agent = LLM::Agent.new(llm, path: "session.json")
+##
+# Resume the conversation where the agent left off
+agent = LLM::Agent.new(llm, path:)
 agent.talk "what's my name?"
 ```
 </details>
-<details><summary>ActiveRecord | Sequel</summary>
+<details><summary>ActiveRecord </summary>
 <br>
 
 Both
@@ -476,7 +451,7 @@ Both
 [`LLM::Agent`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html)
 can be serialized to JSON and stored in a database column.  The `jsonb`
 column type from PostgreSQL is recommended but it can also be stored as
-a string on other databases. ActiveRecord and Sequel support is optimized
+a string on other databases. ActiveRecord support is optimized
 for the `jsonb` column type and PostgreSQL.
 
 The column captures everything an agent has done up to that point,
@@ -485,8 +460,13 @@ metadata that carries runtime state. Each agent is an ActiveRecord
 model that calls `acts_as_agent` and each row represents an instance
 of that agent. It can be used with new and existing models alike.
 
-The column should have the name `data` but this can be changed with
-an option given to `acts_as_agent`:
+The column should have the name `data` but this can be
+changed when the `acts_as_agent` method is called (eg
+`acts_as_agent(data_column: :my_column)`). The column
+is updated after every request that an agent makes rather
+than every turn, so an unexpected interrupt can be resumed
+from from the last request and no progress (or spent tokens)
+are lost:
 
 ```ruby
 require "active_record"

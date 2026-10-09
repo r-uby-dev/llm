@@ -191,6 +191,7 @@ RSpec.describe "the tracer's interrupt hook" do
 
     include_examples "an interrupted call", :thread
     include_examples "an interrupted call", :fork
+    include_examples "an interrupted call", :async
   end
 
   describe "when a call answers" do
