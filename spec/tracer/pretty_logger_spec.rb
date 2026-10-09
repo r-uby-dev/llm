@@ -29,20 +29,16 @@ RSpec.describe LLM::Tracer::PrettyLogger do
   end
 
   describe "#on_tool_interrupt" do
-    let(:span) { LLM::Object.from(id: "call_1", name: "tool") }
+    let(:span) { LLM::Object.from(id: "call_1", name: "slow") }
     let(:ex) { LLM::Interrupt.new }
     before { tracer.on_tool_interrupt(ex:, span:) }
 
-    it "says the call was interrupted" do
-      expect(io.string).to include("interrupted")
+    it "says the call received an interrupt" do
+      expect(io.string).to include("received an interrupt")
     end
 
-    it "names the call that stopped" do
-      expect(io.string).to include("tool (call_1)")
-    end
-
-    it "names the exception the caller was given" do
-      expect(io.string).to include("LLM::Interrupt")
+    it "names the tool that was running" do
+      expect(io.string).to include("tool slow")
     end
   end
 end

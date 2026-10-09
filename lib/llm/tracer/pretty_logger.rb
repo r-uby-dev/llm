@@ -78,11 +78,12 @@ module LLM
 
     ##
     # @note A call that was cut never returned a result, so
-    #  this line is written from the span instead.
+    #  this line is written from the span instead. The
+    #  exception says nothing here: it is always an interrupt.
     # @param (see LLM::Tracer#on_tool_interrupt)
     # @return [void]
-    def on_tool_interrupt(ex:, span:, **)
-      @io.puts "#{timestamp} #{span.name} (#{span.id}) interrupted: #{ex.class}: #{ex.message}"
+    def on_tool_interrupt(span:, **)
+      @io.puts "#{timestamp} tool #{span.name} received an interrupt"
     end
 
     private
