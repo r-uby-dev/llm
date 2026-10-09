@@ -71,10 +71,14 @@ RSpec.describe LLM::Function::Fork::Task do
     task.alive? ? "the child is still running" : "the child has ended"
   end
 
-  def task_for(tool, id)
+  ##
+  # A task for a tool, with a tracer when an example counts what a call was
+  # told rather than what it answered.
+  def task_for(tool, id, tracer: nil)
     tool.function.dup.tap do |fn|
       fn.id = id
       fn.arguments = {}
+      fn.tracer = tracer if tracer
     end.task(:fork)
   end
 
@@ -136,6 +140,40 @@ RSpec.describe LLM::Function::Fork::Task do
 
       def call
         exit!(3)
+      end
+    end
+  end
+
+  ##
+  # A tracer that counts the endings it is told about, which is the only thing
+  # a call being waited on twice should change: the endings belong to the call,
+  # and the waits are the caller's.
+  let(:provider) { LLM.openai(key: "test") }
+  let(:tracer) { recorder.new(provider) }
+  let(:recorder) do
+    Class.new(LLM::Tracer) do
+      attr_reader :interrupts
+
+      def initialize(...)
+        super
+        @interrupts = []
+      end
+
+      def on_tool_start(id:, name:, arguments:, model:)
+        "span:#{id}"
+      end
+
+      def on_tool_interrupt(ex:, span:)
+        @interrupts << [ex, span]
+        nil
+      end
+
+      def on_tool_finish(result:, span:)
+        nil
+      end
+
+      def on_tool_error(ex:, span:)
+        nil
       end
     end
   end
@@ -202,7 +240,7 @@ RSpec.describe LLM::Function::Fork::Task do
   # The interrupt is kept as the exception the first wait raised, and a second
   # wait re-raises that same one rather than reading a channel that has gone.
   describe "a call that was interrupted" do
-    let(:task) { task_for(holding_tool, "call_2") }
+    let(:task) { task_for(holding_tool, "call_2", tracer:) }
     let(:first) { raised { within(task:) { task.wait } } }
     let(:second) { raised { within(task:) { task.wait } } }
 
@@ -222,6 +260,15 @@ RSpec.describe LLM::Function::Fork::Task do
 
     it "raises the same exception the first one raised" do
       expect(second).to equal(first)
+    end
+
+    ##
+    # The ending is the call's and the waits are the caller's, so a second wait
+    # that re-raises the same exception is not a second ending - which is why
+    # the announcement is made where the exception is built.
+    it "announces the interrupt once, however many times it is waited on" do
+      second
+      expect(tracer.interrupts.size).to eq(1)
     end
   end
 
