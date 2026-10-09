@@ -32,6 +32,10 @@ RSpec.describe "the tracer's interrupt hook" do
         nil
       end
 
+      def on_tool_interrupt(ex:, span:)
+        nil
+      end
+      
       def on_tool_finish(result:, span:)
         nil
       end

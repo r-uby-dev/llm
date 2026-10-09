@@ -33,6 +33,13 @@ module LLM
     end
 
     ##
+    # @param (see LLM::Tracer#on_tool_interrupt)
+    # @return [nil]
+    def on_tool_interrupt(**)
+      nil
+    end
+
+    ##
     # @param (see LLM::Tracer#on_tool_finish)
     # @return [nil]
     def on_tool_finish(**)
