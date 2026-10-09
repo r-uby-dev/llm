@@ -138,7 +138,7 @@ class LLM::Function
       spawn unless @spawned
       kind, data = @ch.result.recv
       @result = case kind
-                when :interrupt then LLM::Interrupt.new
+                when :interrupt then interrupted
                 when :result then Return.new(data[:id], data[:name], data[:value])
                 else raise ArgumentError, "Unknown fork message: #{kind.inspect}"
                 end
@@ -158,9 +158,6 @@ class LLM::Function
       })
       @tracer&.on_tool_finish(result: @result, span: @span)
       @result
-    rescue LLM::Interrupt => ex
-      @tracer&.on_tool_interrupt(ex:, span: @span)
-      raise
     ensure
       if @guarded.nil?
         reap
@@ -205,6 +202,23 @@ class LLM::Function
       @waited = true
     rescue Errno::ECHILD
       @waited = true
+    end
+
+    ##
+    # The ending a child reports when its call was cut, announced as it is
+    # made rather than where it is raised.
+    #
+    # **One call, one ending.** `@result` holds the exception, so a caller
+    # that waits twice is given the same one twice - the strategy's own spec
+    # pins that - and a rescue around the raise would have told a tracer about
+    # two endings for the one call. Announced here, where the exception is
+    # built, the number of times it is raised cannot change the number of
+    # endings a tracer hears about.
+    # @return [LLM::Interrupt]
+    def interrupted
+      interrupt = LLM::Interrupt.new
+      @tracer&.on_tool_interrupt(ex: interrupt, span: @span)
+      interrupt
     end
   end
 end
