@@ -52,9 +52,11 @@ module LLM
 
     ##
     # @param (see LLM::Tracer#on_tool_start)
-    # @return [void]
+    # @return [LLM::Object]
+    #  The span an ending is handed, with the call's id and name
     def on_tool_start(id:, name:, arguments:, **)
       @io.puts "#{timestamp} #{name}(#{format_arguments(arguments)})"
+      LLM::Object.from(id:, name:)
     end
 
     ##
