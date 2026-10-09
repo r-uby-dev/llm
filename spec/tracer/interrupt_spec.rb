@@ -135,21 +135,10 @@ RSpec.describe "the tracer's interrupt hook" do
     end
   end
 
-  describe "when the call is cut" do
-    let(:tool) do
-      Class.new(LLM::Tool) do
-        name "slow"
-
-        def call
-          sleep 10
-          {ok: true}
-        end
-      end
-    end
-
+  RSpec.shared_examples "a cut call" do |strategy|
     let(:wait) do
       Thread.new do
-        ctx.wait(:thread)
+        ctx.wait(strategy)
       rescue LLM::Interrupt => ex
         ex
       end
@@ -186,6 +175,22 @@ RSpec.describe "the tracer's interrupt hook" do
     it "still raises to the caller" do
       expect(waited).to be_a(LLM::Interrupt)
     end
+  end
+
+  describe "when the call is cut" do
+    let(:tool) do
+      Class.new(LLM::Tool) do
+        name "slow"
+
+        def call
+          sleep 10
+          {ok: true}
+        end
+      end
+    end
+
+    include_examples "a cut call", :thread
+    include_examples "a cut call", :fork
   end
 
   describe "when a call answers" do

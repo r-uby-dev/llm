@@ -158,6 +158,9 @@ class LLM::Function
       })
       @tracer&.on_tool_finish(result: @result, span: @span)
       @result
+    rescue LLM::Interrupt => ex
+      @tracer&.on_tool_interrupt(ex:, span: @span)
+      raise
     ensure
       if @guarded.nil?
         reap
