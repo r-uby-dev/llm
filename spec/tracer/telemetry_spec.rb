@@ -108,6 +108,26 @@ RSpec.describe LLM::Tracer::Telemetry do
     end
   end
 
+  describe "#on_tool_interrupt" do
+    let(:ex) { LLM::Interrupt.new }
+    let(:span) { tracer.on_tool_start(id: "call_1", name: "tool", arguments: {q: 1}, model: "gpt-4.1") }
+
+    before { tracer.on_tool_interrupt(ex:, span:) }
+
+    it "finishes the span" do
+      expect(tracer.spans.last.name).to eq("execute_tool tool")
+    end
+
+    it "does not record an error" do
+      expect(tracer.spans.last.attributes).not_to have_key("error.type")
+      expect(tracer.spans.last.status.ok?).to be(true)
+    end
+
+    it "adds an interrupt event of its own" do
+      expect(tracer.spans.last.events.map(&:name)).to include("gen_ai.tool.interrupt")
+    end
+  end
+
   describe "#start_trace" do
     let(:span) { tracer.on_request_start(operation: "chat", model: "test-model", request_id:) }
     let(:res) { double("LLM::Response", id: "res_123", model: "test-model", usage: LLM::Usage.new(input_tokens: 1, output_tokens: 2), service_tier: "default", system_fingerprint: "yabadabadoo") }

@@ -164,6 +164,15 @@ module LLM
     end
 
     ##
+    # @param (see LLM::Tracer#on_tool_interrupt)
+    # @return (see LLM::Tracer#on_tool_interrupt)
+    def on_tool_interrupt(ex:, span:)
+      return nil unless span
+      span.add_event("gen_ai.tool.interrupt")
+      span.tap(&:finish)
+    end
+
+    ##
     # @note
     # This method returns an empty array for exporters that
     # do not implement 'finished_spans' such as the OTLP
