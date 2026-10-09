@@ -77,10 +77,10 @@ module LLM
     end
 
     ##
-    # @note A call that was cut never returned a result, so
-    #  this line is written from the span instead. The
-    #  exception is received and not read: the signature is
-    #  the interface, and it always says the same thing.
+    # @note A tool call that has been interrupted is closed
+    #  by this callback. It receives a span that it can match
+    #  back to `on_tool_start`. In the case of this tracer
+    #  we just log values, though.
     # @param (see LLM::Tracer#on_tool_interrupt)
     # @return [void]
     def on_tool_interrupt(ex:, span:, **)

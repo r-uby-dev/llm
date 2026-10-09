@@ -9,7 +9,7 @@ require "stringio"
 # The return value matters as much as the line: it is the span
 # every ending is given, and a tracer that answers with the
 # writer's own value leaves an interrupt with nothing to name
-# the call that was cut.
+# the call it ended.
 RSpec.describe LLM::Tracer::PrettyLogger do
   let(:provider) { LLM.openai(key: "test") }
   let(:io) { StringIO.new }
