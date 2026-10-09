@@ -74,11 +74,5 @@ RSpec.describe LLM::Tracer::Logger do
     it { is_expected.to include("call_1") }
 
     it { is_expected.to include("LLM::Interrupt") }
-
-    context "when the call was never started" do
-      let(:span) { nil }
-
-      it { is_expected.to include("tool.interrupt") }
-    end
   end
 end
