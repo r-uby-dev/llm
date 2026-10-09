@@ -4,19 +4,9 @@ require "setup"
 require "stringio"
 
 RSpec.describe LLM::Tracer::Logger do
-  let(:provider) { LLM::OpenAI.new }
+  let(:provider) { LLM.openai(key: "test") }
   let(:io) { StringIO.new }
   let(:tracer) { described_class.new(provider, io:) }
-  let(:openai) do
-    Class.new do
-      def initialize
-        @host = "api.openai.com"
-        @port = 443
-      end
-    end
-  end
-
-  before { stub_const("LLM::OpenAI", openai) }
 
   describe "#on_request_start" do
     context "when given a chat operation" do
