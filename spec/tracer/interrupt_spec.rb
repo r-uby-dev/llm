@@ -165,6 +165,11 @@ RSpec.describe "the tracer's interrupt hook" do
     # example's, which is the shape a turn being cancelled by a request has.
     # The exception the caller saw is what this answers with, so an example
     # can ask about the ending and about the caller in one place.
+    ##
+    # Every example here reads this first, on a line of its own. A `let` that
+    # is named only inside a matcher is read after the expectation's own
+    # argument, so `expect(tracer.interrupts.first)....to equal(waited)` asks
+    # what happened before anything has - and answers with `nil.first`.
     let(:waited) do
       thread = Thread.new do
         ctx.wait(:thread)
@@ -188,7 +193,8 @@ RSpec.describe "the tracer's interrupt hook" do
     end
 
     it "names the exception the caller was given" do
-      expect(tracer.interrupts.first.first).to equal(waited)
+      given = waited
+      expect(tracer.interrupts.first.first).to equal(given)
     end
 
     ##
