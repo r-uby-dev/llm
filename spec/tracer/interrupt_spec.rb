@@ -190,7 +190,19 @@ RSpec.describe "the tracer's interrupt hook" do
     end
 
     include_examples "a cut call", :thread
-    include_examples "a cut call", :fork
+
+    ##
+    # `xchan` is not in the Gemfile, so the fork's examples are the ones
+    # that ask for it - the same guard the strategy's own file opens with.
+    context "on the fork strategy" do
+      before do
+        LLM.require "xchan", "~> 0.24" unless defined?(::Chan::UNIXSocket)
+      rescue LoadError
+        skip "xchan.rb is not installed"
+      end
+
+      include_examples "a cut call", :fork
+    end
   end
 
   describe "when a call answers" do
