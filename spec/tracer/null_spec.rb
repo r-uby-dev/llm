@@ -3,18 +3,8 @@
 require "setup"
 
 RSpec.describe LLM::Tracer::Null do
-  let(:provider) { LLM::OpenAI.new }
+  let(:provider) { LLM.openai(key: "test") }
   let(:tracer) { described_class.new(provider) }
-  let(:openai) do
-    Class.new do
-      def initialize
-        @host = "api.openai.com"
-        @port = 443
-      end
-    end
-  end
-
-  before { stub_const("LLM::OpenAI", openai) }
 
   describe "callbacks" do
     let(:ex) { RuntimeError.new("yabadabadoo") }
