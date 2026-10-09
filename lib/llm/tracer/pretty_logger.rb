@@ -81,8 +81,8 @@ module LLM
     #  this line is written from the span instead.
     # @param (see LLM::Tracer#on_tool_interrupt)
     # @return [void]
-    def on_tool_interrupt(ex:, span: nil, **)
-      @io.puts "#{timestamp} #{format_call(span)} interrupted: #{ex.class}: #{ex.message}"
+    def on_tool_interrupt(ex:, span:, **)
+      @io.puts "#{timestamp} #{span.name} (#{span.id}) interrupted: #{ex.class}: #{ex.message}"
     end
 
     private
@@ -136,14 +136,6 @@ module LLM
         str = value.inspect
         str.size > max ? "#{str[0...max]}..." : str
       end
-    end
-
-    ##
-    # The call a line is about, as `name (id)`, or "tool" when
-    # there is no span to read one from.
-    def format_call(span)
-      return "tool" unless span
-      [span.name, span.id && "(#{span.id})"].compact.join(" ")
     end
   end
 end

@@ -44,16 +44,5 @@ RSpec.describe LLM::Tracer::PrettyLogger do
     it "names the exception the caller was given" do
       expect(io.string).to include("LLM::Interrupt")
     end
-
-    ##
-    # A line with no call in it still says what happened,
-    # which is what a tracer with no span is told.
-    context "when the call was never started" do
-      let(:span) { nil }
-
-      it "writes the line without a call" do
-        expect(io.string).to include("tool interrupted")
-      end
-    end
   end
 end
