@@ -12,10 +12,10 @@ class LLM::Function
       @tracer.on_tool_finish(result:, span:)
       result
     rescue LLM::Interrupt => ex
-      @tracer.on_tool_interrupt(ex:, span:)
+      @tracer&.on_tool_interrupt(ex:, span:)
       raise
     rescue => ex
-      @tracer.on_tool_error(ex:, span:)
+      @tracer&.on_tool_error(ex:, span:)
       raise(ex)
     end
   end
