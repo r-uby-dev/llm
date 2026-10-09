@@ -3,17 +3,24 @@
 require "setup"
 
 ##
-# The tracer's interrupt hook, at the tool end.
+# The tracer's interrupt hooks, at the tool end.
 #
 # A request interrupt is announced by the transport, once. A tool is a
 # different shape: a cancel reaches every tool that is running and the
-# caller hears one exception, so the announcement belongs to the phase
-# rather than to a tool - and `Context#wait` is where it is made, because
-# that is the one frame every strategy's interrupt unwinds through.
+# caller hears one exception, so the phase announcement belongs to the
+# phase rather than to a tool - and `Context#wait` is where it is made,
+# because that is the one frame every strategy's interrupt unwinds through.
 #
-# The tool sleeps, so the interrupt lands while it is running and the
-# caller is inside `wait`. That is the same arrangement the interrupt
-# examples in `spec/context_spec.rb` use, with a tracer watching.
+# **And the call is announced as itself.** The same cancel that cuts the
+# phase cuts calls, and a tracer that pairs a start with an ending needs the
+# call's own: `on_tool_interrupt` is that ending, reached from
+# `LLM::Function::Tracing`, which is the module above the strategy - so the
+# tracer is told wherever the raise was issued from.
+#
+# The tool sleeps, so the interrupt lands while it is running and the caller
+# is inside `wait`. That is the same arrangement the interrupt examples in
+# `spec/context_spec.rb` and `spec/function/thread/task_spec.rb` use, with a
+# tracer watching the call rather than the tool.
 RSpec.describe "the tracer's interrupt hook" do
   let(:provider) { LLM.openai(key: "test") }
   let(:model) { "gpt-5.4" }
@@ -21,22 +28,37 @@ RSpec.describe "the tracer's interrupt hook" do
   let(:tracer) { recorder.new(provider) }
   let(:recorder) do
     Class.new(LLM::Tracer) do
-      attr_reader :calls
+      attr_reader :calls, :starts, :finishes, :interrupts
 
       def initialize(...)
         super
         @calls = []
+        @starts = []
+        @finishes = []
+        @interrupts = []
       end
 
+      ##
+      # The span is this tracer's own, and it is returned rather than
+      # recorded: the module under test is the one that has to carry it from
+      # here to the ending, and an example measures that by identity.
       def on_tool_start(id:, name:, arguments:, model:)
-        nil
+        span = "span:#{id}"
+        @starts << span
+        span
       end
 
       def on_tool_interrupt(ex:, span:)
+        @interrupts << [ex, span]
         nil
       end
-      
+
       def on_tool_finish(result:, span:)
+        @finishes << span
+        nil
+      end
+
+      def on_tool_error(ex:, span:)
         nil
       end
 
@@ -114,6 +136,109 @@ RSpec.describe "the tracer's interrupt hook" do
     it "announces nothing" do
       ctx.wait(:sequential)
       expect(tracer.calls).to be_empty
+    end
+  end
+
+  ##
+  # The call's own ending, on the strategy where a raise is issued into the
+  # call: `Thread#raise` lands on the thread the tool runs on, so the module
+  # that wrapped the call is the frame the exception unwinds through.
+  #
+  # The three in-process strategies reach `LLM::Function#call` - the fork and
+  # the ractor run `runner.call` and are their own story - so what this pins
+  # is the module above them, and the strategies' own files are where their
+  # delivery is pinned.
+  describe "when the call is cut" do
+    let(:tool) do
+      Class.new(LLM::Tool) do
+        name "slow"
+
+        def call
+          sleep 10
+          {ok: true}
+        end
+      end
+    end
+
+    ##
+    # The wait is on a thread of its own and the cancel comes from the
+    # example's, which is the shape a turn being cancelled by a request has.
+    # The exception the caller saw is what this answers with, so an example
+    # can ask about the ending and about the caller in one place.
+    let(:waited) do
+      thread = Thread.new do
+        ctx.wait(:thread)
+      rescue LLM::Interrupt => ex
+        ex
+      end
+      sleep 0.05
+      ctx.interrupt!
+      thread.join(2)
+      thread.value
+    end
+
+    it "closes the call" do
+      waited
+      expect(tracer.interrupts.size).to eq(1)
+    end
+
+    it "hands it the span its start returned" do
+      waited
+      expect(tracer.interrupts.first.last).to equal(tracer.starts.first)
+    end
+
+    it "names the exception the caller was given" do
+      expect(tracer.interrupts.first.first).to equal(waited)
+    end
+
+    ##
+    # One ending per call: an interrupt is not also a finish, or a reader
+    # counting rows would count two for a call that was cut.
+    it "does not also announce a finish" do
+      waited
+      expect(tracer.finishes).to be_empty
+    end
+
+    it "still raises to the caller" do
+      expect(waited).to be_a(LLM::Interrupt)
+    end
+  end
+
+  describe "when a call answers" do
+    let(:tool) do
+      Class.new(LLM::Tool) do
+        name "fast"
+
+        def call
+          {ok: true}
+        end
+      end
+    end
+
+    it "announces a finish rather than an interrupt" do
+      ctx.wait(:thread)
+      expect([tracer.finishes.size, tracer.interrupts.size]).to eq([1, 0])
+    end
+  end
+
+  ##
+  # A tool's failure is the model's to see rather than the turn's to end, so
+  # it is answered in band and nothing about it is an interrupt - which is
+  # what a tracer that read every ending as a cut call would be told.
+  describe "when a call fails" do
+    let(:tool) do
+      Class.new(LLM::Tool) do
+        name "failing"
+
+        def call
+          raise "no"
+        end
+      end
+    end
+
+    it "announces no interrupt" do
+      ctx.wait(:thread)
+      expect(tracer.interrupts).to be_empty
     end
   end
 end
