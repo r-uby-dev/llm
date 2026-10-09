@@ -59,4 +59,26 @@ RSpec.describe LLM::Tracer::Logger do
     before { tracer.on_tool_error(ex:) }
     it { is_expected.to include("tool.error") }
   end
+
+  describe "#on_tool_interrupt" do
+    subject(:output) { io.string }
+    let(:span) { LLM::Object.from(id: "call_1", name: "tool") }
+    let(:ex) { LLM::Interrupt.new }
+    before { tracer.on_tool_interrupt(ex:, span:) }
+
+    it { is_expected.to include("tool.interrupt") }
+
+    ##
+    # The span hands the call over, and a call that was cut
+    # has no result to be named by instead.
+    it { is_expected.to include("call_1") }
+
+    it { is_expected.to include("LLM::Interrupt") }
+
+    context "when the call was never started" do
+      let(:span) { nil }
+
+      it { is_expected.to include("tool.interrupt") }
+    end
+  end
 end
