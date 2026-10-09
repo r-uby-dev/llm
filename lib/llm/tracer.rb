@@ -173,6 +173,17 @@ module LLM
     end
 
     ##
+    # Called when a tool is interrupted.
+    # @param [LLM::Interrupt] ex
+    #  An instance of {LLM::Interrupt LLM::Interrupt}
+    # @param [Object, nil] span
+    #  The span/context object returned by {#on_tool_start}
+    # @return [void]
+    def on_tool_interrupt(ex:, span:)
+      raise NotImplementedError, "#{self.class} does not implement '#{__method__}'"
+    end
+
+    ##
     # Called after a local tool/function succeeds.
     # @param [LLM::Function::Return] result
     #  The tool return object.
