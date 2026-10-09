@@ -190,16 +190,7 @@ RSpec.describe "the tracer's interrupt hook" do
     end
 
     include_examples "a cut call", :thread
-
-    context "on the fork strategy" do
-      before do
-        LLM.require "xchan", "~> 0.24" unless defined?(::Chan::UNIXSocket)
-      rescue LoadError
-        skip "xchan.rb is not installed"
-      end
-
-      include_examples "a cut call", :fork
-    end
+    include_examples "a cut call", :fork
   end
 
   describe "when a call answers" do
