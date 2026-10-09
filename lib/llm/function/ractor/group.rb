@@ -43,7 +43,7 @@ module LLM::Function::Ractor
       interrupt, results = nil, []
       @tasks.each do |task|
         result = task.wait
-        if result.value[:interrupt] and result.value[:cookie] == task.cookie
+        if Hash === result.value and result.value[:interrupt] and result.value[:cookie] == task.cookie
           interrupt = LLM::Interrupt.new
           task.tracer&.on_tool_interrupt(ex: interrupt, span: task.span)
         else
