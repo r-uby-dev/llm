@@ -79,11 +79,12 @@ module LLM
     ##
     # @note A call that was cut never returned a result, so
     #  this line is written from the span instead. The
-    #  exception says nothing here: it is always an interrupt.
+    #  exception is received and not read: the signature is
+    #  the interface, and it always says the same thing.
     # @param (see LLM::Tracer#on_tool_interrupt)
     # @return [void]
-    def on_tool_interrupt(span:, **)
-      @io.puts "#{timestamp} tool #{span.name} received an interrupt"
+    def on_tool_interrupt(ex:, span:, **)
+      @io.puts "#{timestamp} tool #{span.name} (#{format_id(span.id)}) received an interrupt"
     end
 
     private
@@ -137,6 +138,14 @@ module LLM
         str = value.inspect
         str.size > max ? "#{str[0...max]}..." : str
       end
+    end
+
+    ##
+    # A call id, which is a long string that reads as gibberish:
+    # ten characters are enough to tell two of them apart.
+    def format_id(id)
+      id = id.to_s
+      id.size > 10 ? "#{id[0, 10]}..." : id
     end
   end
 end

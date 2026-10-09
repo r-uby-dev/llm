@@ -29,7 +29,7 @@ RSpec.describe LLM::Tracer::PrettyLogger do
   end
 
   describe "#on_tool_interrupt" do
-    let(:span) { LLM::Object.from(id: "call_1", name: "slow") }
+    let(:span) { LLM::Object.from(id: "call_abcdefghijkl", name: "slow") }
     let(:ex) { LLM::Interrupt.new }
     before { tracer.on_tool_interrupt(ex:, span:) }
 
@@ -39,6 +39,21 @@ RSpec.describe LLM::Tracer::PrettyLogger do
 
     it "names the tool that was running" do
       expect(io.string).to include("tool slow")
+    end
+
+    ##
+    # An id is a long string that reads as gibberish, so the line
+    # keeps the part that tells two of them apart.
+    it "keeps ten characters of the call's id" do
+      expect(io.string).to include("(call_abcde...)")
+    end
+
+    context "when the id is already short" do
+      let(:span) { LLM::Object.from(id: "call_1", name: "slow") }
+
+      it "leaves it whole" do
+        expect(io.string).to include("(call_1)")
+      end
     end
   end
 end
