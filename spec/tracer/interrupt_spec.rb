@@ -191,9 +191,6 @@ RSpec.describe "the tracer's interrupt hook" do
 
     include_examples "a cut call", :thread
 
-    ##
-    # `xchan` is not in the Gemfile, so the fork's examples are the ones
-    # that ask for it - the same guard the strategy's own file opens with.
     context "on the fork strategy" do
       before do
         LLM.require "xchan", "~> 0.24" unless defined?(::Chan::UNIXSocket)
