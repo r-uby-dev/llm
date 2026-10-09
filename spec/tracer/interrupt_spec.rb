@@ -38,10 +38,6 @@ RSpec.describe "the tracer's interrupt hook" do
         @interrupts = []
       end
 
-      ##
-      # The span is this tracer's own, and it is returned rather than
-      # recorded: the module under test is the one that has to carry it from
-      # here to the ending, and an example measures that by identity.
       def on_tool_start(id:, name:, arguments:, model:)
         span = "span:#{id}"
         @starts << span
@@ -139,15 +135,6 @@ RSpec.describe "the tracer's interrupt hook" do
     end
   end
 
-  ##
-  # The call's own ending, on the strategy where a raise is issued into the
-  # call: `Thread#raise` lands on the thread the tool runs on, so the module
-  # that wrapped the call is the frame the exception unwinds through.
-  #
-  # The three in-process strategies reach `LLM::Function#call` - the fork and
-  # the ractor run `runner.call` and are their own story - so what this pins
-  # is the module above them, and the strategies' own files are where their
-  # delivery is pinned.
   describe "when the call is cut" do
     let(:tool) do
       Class.new(LLM::Tool) do
@@ -160,16 +147,6 @@ RSpec.describe "the tracer's interrupt hook" do
       end
     end
 
-    ##
-    # The wait is on a thread of its own and the cancel comes from the
-    # example's, which is the shape a turn being cancelled by a request has.
-    # The exception the caller saw is what this answers with, so an example
-    # can ask about the ending and about the caller in one place.
-    ##
-    # Every example here reads this first, on a line of its own. A `let` that
-    # is named only inside a matcher is read after the expectation's own
-    # argument, so `expect(tracer.interrupts.first)....to equal(waited)` asks
-    # what happened before anything has - and answers with `nil.first`.
     let(:waited) do
       thread = Thread.new do
         ctx.wait(:thread)
@@ -197,9 +174,6 @@ RSpec.describe "the tracer's interrupt hook" do
       expect(tracer.interrupts.first.first).to equal(given)
     end
 
-    ##
-    # One ending per call: an interrupt is not also a finish, or a reader
-    # counting rows would count two for a call that was cut.
     it "does not also announce a finish" do
       waited
       expect(tracer.finishes).to be_empty
@@ -227,10 +201,6 @@ RSpec.describe "the tracer's interrupt hook" do
     end
   end
 
-  ##
-  # A tool's failure is the model's to see rather than the turn's to end, so
-  # it is answered in band and nothing about it is an interrupt - which is
-  # what a tracer that read every ending as a cut call would be told.
   describe "when a call fails" do
     let(:tool) do
       Class.new(LLM::Tool) do
