@@ -192,6 +192,14 @@ RSpec.describe "the tracer's interrupt hook" do
     include_examples "an interrupted call", :thread
     include_examples "an interrupted call", :fork
     include_examples "an interrupted call", :async
+
+    context "when the tool ran in a ractor" do
+      before do
+        skip "not supported by yajl or oj" unless ENV.fetch("JSON_PARSER", "json").downcase == "json"
+      end
+
+      include_examples "an interrupted call", :ractor
+    end
   end
 
   describe "when a call answers" do

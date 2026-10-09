@@ -28,7 +28,14 @@ RSpec.describe LLM::Function::Ractor::Group do
   # Runs the block on a thread of its own and joins it, so a wait that
   # never comes back is a failure that names the wait rather than a hang.
   def within(seconds = 5, &block)
-    thread = Thread.new(&block)
+    thread = Thread.new do
+      ##
+      # The block is expected to raise: a cancelled call is raised on the
+      # caller now, rather than answered with it, so a thread's own report
+      # of the exception would be noise.
+      Thread.current.report_on_exception = false
+      block.call
+    end
     thread.join(seconds) ? thread.value : raise("timed out after #{seconds} seconds")
   end
 
@@ -77,9 +84,7 @@ RSpec.describe LLM::Function::Ractor::Group do
     end
 
     it "reaches the calls after the one that has returned" do
-      expect(within { holding.wait }.to_h).to eq(
-        id: "call_2", name: "holding", value: {cancelled: true, reason: "interrupted"}
-      )
+      expect { within { holding.wait } }.to raise_error(LLM::Interrupt)
     end
   end
 end

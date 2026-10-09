@@ -15,10 +15,10 @@ require "setup"
 # - an interrupt that arrives before the tool runs is held until it does,
 #   and reaches the tool's `rescue` the same way, rather than being
 #   answered early with `{cancelled: true}` for a call that never ran;
-# - a tool that does not rescue is answered with `{cancelled: true}`,
-#   because the ractor's own `rescue` answers it - an exception does not
-#   cross a ractor boundary, so the answer to an interrupted call is this
-#   strategy's own.
+# - a tool that does not rescue is answered with a note that names the
+#   cancel, because the ractor's own `rescue` answers it - an exception
+#   cannot cross a ractor boundary, so the task raises `LLM::Interrupt`
+#   where the caller is waiting.
 #
 # **The held case detects the race rather than ordering it.** Nothing in
 # that example orders the interrupt against the ractor reaching
@@ -57,7 +57,14 @@ RSpec.describe LLM::Function::Ractor::Job do
   # Runs the block on a thread of its own and joins it, so a wait that
   # never ends is a failure that names the wait rather than a hang.
   def within(seconds = 5, &block)
-    thread = Thread.new(&block)
+    thread = Thread.new do
+      ##
+      # The block is expected to raise: a cancelled call is raised on the
+      # caller now, rather than answered with it, so a thread's own report
+      # of the exception would be noise.
+      Thread.current.report_on_exception = false
+      block.call
+    end
     thread.join(seconds) ? thread.value : raise("timed out after #{seconds} seconds")
   end
 
@@ -182,15 +189,11 @@ RSpec.describe LLM::Function::Ractor::Job do
 
     let(:task) { function.task(:ractor) }
 
-    it "answers that the call was cancelled" do
+    it "raises when the call was cancelled" do
       task.spawn
       within { signal }
       task.interrupt!
-      expect(within { task.wait.to_h }).to eq(
-        id: "call_3",
-        name: "brittle",
-        value: {cancelled: true, reason: "interrupted"}
-      )
+      expect { within { task.wait } }.to raise_error(LLM::Interrupt)
     end
   end
 end

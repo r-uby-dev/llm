@@ -111,7 +111,7 @@ RSpec.describe LLM::Function do
 
         it "interrupts the tool execution" do
           slow_task.interrupt!
-          expect(slow_task.wait.to_h).to eq(id: "call_3", name: "slow", value: {cancelled: true, reason: "interrupted"})
+          expect { slow_task.wait }.to raise_error(LLM::Interrupt)
         end
       end
 

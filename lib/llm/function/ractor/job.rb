@@ -14,13 +14,14 @@ class LLM::Function
     # @param [String] name
     # @param [Hash, Array, nil] arguments
     # @return [LLM::Function::Ractor::Job]
-    def initialize(mailbox, result, runner_class, id, name, arguments)
+    def initialize(mailbox, result, runner_class, id, name, arguments, cookie)
       @mailbox = mailbox
       @result = result
       @runner_class = runner_class
       @id = id
       @name = name
       @arguments = arguments
+      @cookie = cookie
     end
 
     ##
@@ -70,7 +71,7 @@ class LLM::Function
     end
 
     def spawn
-      @tool = ::Ractor.new(@mailbox, @runner_class, @id, @name, @arguments) do |mailbox, runner_class, id, name, arguments|
+      @tool = ::Ractor.new(@mailbox, @runner_class, @id, @name, @arguments, @cookie) do |mailbox, runner_class, id, name, arguments, cookie|
         ##
         # Before the watcher exists, because an interrupt can arrive
         # first: it is a message, and it waits in the inbox until the
@@ -129,7 +130,7 @@ class LLM::Function
         window.finished!
         mailbox.send([:done, id, name, result])
       rescue LLM::Interrupt
-        mailbox.send([:done, id, name, {cancelled: true, reason: "interrupted"}])
+        mailbox.send([:done, id, name, {interrupt: true, cookie:}])
       rescue => ex
         mailbox.send([:done, id, name, {error: true, type: ex.class.name, message: ex.message}])
       end

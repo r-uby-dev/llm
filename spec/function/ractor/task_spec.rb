@@ -25,10 +25,13 @@ require "setup"
 # for one that had not run yet - a cancel that said nothing. It is remembered
 # and delivered by `spawn`, which is where `:fork`'s task takes one too.
 #
-# **What the caller is given is this strategy's own answer**: a cancel that
-# escapes the tool is a return with `cancelled: true`, not a raise out of
-# `#wait`, which is the difference from `:fork` and is worth pinning beside
-# it.
+# **What the caller is given is what every strategy gives**: a cancel that
+# escapes the tool is raised out of `#wait` as `LLM::Interrupt`, on the
+# caller's thread. An exception cannot cross a ractor boundary, so the job
+# answers with a note that says the call was interrupted, and the task
+# raises it where the caller is waiting - and a note is only answered when
+# it names the task it was written for, so a cancel meant for another call
+# is not mistaken for this one.
 #
 # **Every wait has a deadline.** A raise cannot be relied on to interrupt
 # a wait on a ractor, so each of them runs on a thread of its own and is
@@ -47,7 +50,14 @@ RSpec.describe LLM::Function::Ractor::Task do
   # Runs the block on a thread of its own and joins it, so a wait that
   # never comes back is a failure that names the wait rather than a hang.
   def within(seconds = 5, &block)
-    thread = Thread.new(&block)
+    thread = Thread.new do
+      ##
+      # The block is expected to raise: a cancelled call is raised on the
+      # caller now, rather than answered with it, so a thread's own report
+      # of the exception would be noise.
+      Thread.current.report_on_exception = false
+      block.call
+    end
     thread.join(seconds) ? thread.value : raise("timed out after #{seconds} seconds")
   end
 
@@ -184,8 +194,9 @@ RSpec.describe LLM::Function::Ractor::Task do
 
   ##
   # And the same cancel on a call that does not rescue: the interrupt escapes
-  # the tool, and the job answers it as this strategy answers a cancel - a
-  # return with `cancelled: true`, rather than a raise out of `#wait`.
+  # the tool, the job answers with a note that says so, and the task raises
+  # `LLM::Interrupt` out of `#wait` - what the caller of any other strategy
+  # is given.
   describe "a call cancelled while the tool was starting that does not rescue" do
     let(:task) do
       holding_tool.function.dup.tap do |fn|
@@ -200,11 +211,8 @@ RSpec.describe LLM::Function::Ractor::Task do
       task.interrupt!
     end
 
-    it "answers with a cancelled return rather than raising" do
-      expect(returned.to_h).to eq(
-        id: "call_3", name: "holding",
-        value: {cancelled: true, reason: "interrupted"}
-      )
+    it "raises LLM::Interrupt" do
+      expect { returned }.to raise_error(LLM::Interrupt)
     end
   end
 
@@ -227,11 +235,8 @@ RSpec.describe LLM::Function::Ractor::Task do
       task.spawn
     end
 
-    it "answers with a cancelled return rather than raising" do
-      expect(returned.to_h).to eq(
-        id: "call_4", name: "holding",
-        value: {cancelled: true, reason: "interrupted"}
-      )
+    it "raises LLM::Interrupt" do
+      expect { returned }.to raise_error(LLM::Interrupt)
     end
   end
 end
