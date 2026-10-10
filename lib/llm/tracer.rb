@@ -14,6 +14,15 @@ module LLM
     require_relative "tracer/null"
     require_relative "tracer/pretty_logger"
     require_relative "tracer/registry"
+    require_relative "tracer/rescue"
+
+    ##
+    # @param [Class] klass
+    #  A subclalss of {LLM::Tracer}
+    # @return [void]
+    def self.inherited(klass)
+      klass.prepend Rescue
+    end
 
     ##
     # Returns the registry that counts the open scopes for each tracer.
