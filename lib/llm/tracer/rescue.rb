@@ -26,9 +26,8 @@ class LLM::Tracer
                    "[  class     ] #{ex.class}",
                    "[  message   ] #{ex.message}",
                    "[  backtrace ] ",
-                   "\n",
                    "#{(ex.backtrace || []).take(10).join("\n")}",
-                   "\n\n"
+                   ""
     end
 
     ##

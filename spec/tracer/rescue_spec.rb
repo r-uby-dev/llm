@@ -18,9 +18,8 @@ RSpec.describe LLM::Tracer::Rescue do
         "[  class     ] NotImplementedError",
         /\[  message   \] .*does not implement 'on_request_start'/,
         "[  backtrace ] ",
-        "\n",
         a_kind_of(String),
-        "\n\n"
+        ""
       )
       tracer.on_request_start(operation: "chat", request_id: "req_1")
     end
@@ -47,9 +46,8 @@ RSpec.describe LLM::Tracer::Rescue do
         "[  class     ] RuntimeError",
         "[  message   ] boom",
         "[  backtrace ] ",
-        "\n",
         a_kind_of(String),
-        "\n\n"
+        ""
       )
       tracer.on_interrupt(scope: :tool)
     end
