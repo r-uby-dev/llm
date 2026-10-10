@@ -228,12 +228,15 @@ module LLM
     #
     # The default raises, like every other hook.
     #
-    # Two rules for an implementation, and an open question beside them. A
+    # Two rules for an implementation, and a third thing worth knowing. A
     # tracer callback should never raise, because it runs on the agent's
     # own thread and code path in most cases and an error can crash the
     # agent it is tracing. It should return quickly, for the same reason.
-    # What to do with an error that a tracer does raise is still an open
-    # question, and this method does not settle it.
+    # And an error it does raise is contained rather than left to travel:
+    # {LLM::Tracer::Rescue} is prepended into every subclass and reports a
+    # `StandardError` or a `ScriptError` to standard error instead of
+    # letting it reach the caller. Anything outside those two still has
+    # the power to crash the agent, which is the part still open.
     # @param [Symbol] scope
     #  :request for a request, :tool for a tool, :agent for a turn that is
     #  between its requests
