@@ -54,6 +54,13 @@ module LLM
     end
 
     ##
+    # @param (see LLM::Tracer#on_interrupt)
+    # @return [nil]
+    def on_interrupt(**)
+      nil
+    end
+
+    ##
     # @param (see LLM::Tracer#set_finish_metadata_proc)
     # @return [self]
     def set_finish_metadata_proc(_proc = nil)
