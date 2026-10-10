@@ -208,24 +208,23 @@ module LLM
     ##
     # Called when a request, a tool, or a turn is interrupted.
     #
-    # Certain callbacks - {#on_request_start} and {#on_tool_start} -
-    # return spans that have to be closed by another callback. Which one
-    # closes it depends on the path the tracer took. The happy path sees
-    # {#on_request_start} open a span and {#on_request_finish} close it,
-    # and {#on_request_finish} is not certain to be the one:
-    # {#on_request_error} might close it instead, and this method with a
-    # `:request` scope is another path that can close a request's span.
-    # {#on_tool_start} opens a span too, and closing it is a different
-    # set of methods - {#on_tool_finish}, {#on_tool_interrupt}, or
-    # {#on_tool_error}.
+    # Certain callbacks - such as {#on_request_start}, and {#on_tool_start} -
+    # return spans to the caller that have to be closed by another callback
+    # method. The second callback method varies, and it depends on the
+    # path the tracer took. The happy path would see {#on_request_start}
+    # open a span, and {#on_request_finish} would close it.
     #
-    # This method is not always given a span it can close. A `:tool` pass
-    # has none, because a cancel reaches every tool that is running and
-    # the caller hears one exception, so the announcement belongs to no
-    # one tool. A `:agent` turn has none either: it is announced when the
-    # interrupt lands between two of its requests, which is the one point
-    # of a turn that has no span of its own. The `:request` scope is the
-    # exception.
+    # But {#on_request_finish} is not certain to close the span.
+    # {#on_request_error} might also close it, and {#on_interrupt} with a
+    # `:request` scope is another path that could close a request span.
+    #
+    # The {#on_tool_start} method also opens a span, and it can be closed
+    # by a different set of methods: {#on_tool_finish}, {#on_tool_interrupt},
+    # and {#on_tool_error}.
+    #
+    # This method ({#on_interrupt}) is not always given a span that it can
+    # close, and in the case of a `:agent` or `:tool` scope there is no
+    # span to close. The `:request` scope is the exception.
     #
     # The default raises, like every other hook.
     #
