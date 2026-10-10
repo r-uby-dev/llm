@@ -16,6 +16,13 @@ require "setup"
 # after the hook exists - so a tracer defined at load time
 # here would prove the mechanism works while telling us
 # nothing about the order the requires are in.
+#
+# **And the first example uses `on_request_start` rather
+# than `on_interrupt`.** It is about the base class raising
+# for a hook nobody answered, which is the case the module
+# has to contain, and `on_request_start` is the hook whose
+# default has always done that. `on_interrupt` is the one
+# that only just started to.
 RSpec.describe LLM::Tracer::Rescue do
   let(:provider) { LLM.openai(key: "test") }
   let(:tracer) { klass.new(provider) }
@@ -25,10 +32,10 @@ RSpec.describe LLM::Tracer::Rescue do
 
     it "reports it rather than raising it" do
       expect($stderr).to receive(:puts).with(
-        /crashed: NotImplementedError \(.+\] does not implement 'on_interrupt'/,
+        /crashed: NotImplementedError \(.+\] does not implement 'on_request_start'/,
         a_kind_of(String)
       )
-      tracer.on_interrupt(scope: :request)
+      tracer.on_request_start(operation: "chat", request_id: "req_1")
     end
   end
 
