@@ -9,17 +9,22 @@ class LLM::Tracer
   #
   # When an error occurs, it is dumped to standard
   # error and does not travel up the stack. But
-  # LLM::Interrupt, and any other exception which
-  # does not inherit from RuntimeError, can crash
+  # LLM::Interrupt, and any other exception not
+  # covered by the 'ERRORS' constant can crash
   # the tracer. So it handles most cases but not
   # all, and LLM::Interrupt travelling up the stack
   # is intentional.
   module Rescue
+    ##
+    # @api private
+    ERRORS = [StandardError, ScriptError]
+    private_constant :ERRORS
+
     def on_exit
       super
     rescue LLM::Interrupt
       raise
-    rescue => ex
+    rescue *ERRORS => ex
       $stderr.puts "#{self.class} crashed: #{ex.class} (#{ex.message})",
                    ex.backtrace.take(10).join("\n")
     end
@@ -28,7 +33,7 @@ class LLM::Tracer
       super
     rescue LLM::Interrupt
       raise
-    rescue => ex
+    rescue *ERRORS => ex
       $stderr.puts "#{self.class} crashed: #{ex.class} (#{ex.message})",
                    ex.backtrace.take(10).join("\n")
     end
@@ -37,7 +42,7 @@ class LLM::Tracer
       super
     rescue LLM::Interrupt
       raise
-    rescue => ex
+    rescue *ERRORS => ex
       $stderr.puts "#{self.class} crashed: #{ex.class} (#{ex.message})",
                    ex.backtrace.take(10).join("\n")
     end
@@ -46,7 +51,7 @@ class LLM::Tracer
       super
     rescue LLM::Interrupt
       raise
-    rescue => ex
+    rescue *ERRORS => ex
       $stderr.puts "#{self.class} crashed: #{ex.class} (#{ex.message})",
                    ex.backtrace.take(10).join("\n")
     end
@@ -55,7 +60,7 @@ class LLM::Tracer
       super
     rescue LLM::Interrupt
       raise
-    rescue => ex
+    rescue *ERRORS => ex
       $stderr.puts "#{self.class} crashed: #{ex.class} (#{ex.message})",
                    ex.backtrace.take(10).join("\n")
     end
@@ -64,7 +69,7 @@ class LLM::Tracer
       super
     rescue LLM::Interrupt
       raise
-    rescue => ex
+    rescue *ERRORS => ex
       $stderr.puts "#{self.class} crashed: #{ex.class} (#{ex.message})",
                    ex.backtrace.take(10).join("\n")
     end
@@ -73,7 +78,7 @@ class LLM::Tracer
       super
     rescue LLM::Interrupt
       raise
-    rescue => ex
+    rescue *ERRORS => ex
       $stderr.puts "#{self.class} crashed: #{ex.class} (#{ex.message})",
                    ex.backtrace.take(10).join("\n")
     end
@@ -82,7 +87,7 @@ class LLM::Tracer
       super
     rescue LLM::Interrupt
       raise
-    rescue => ex
+    rescue *ERRORS => ex
       $stderr.puts "#{self.class} crashed: #{ex.class} (#{ex.message})",
                    ex.backtrace.take(10).join("\n")
     end
@@ -91,7 +96,7 @@ class LLM::Tracer
       super
     rescue LLM::Interrupt
       raise
-    rescue => ex
+    rescue *ERRORS => ex
       $stderr.puts "#{self.class} crashed: #{ex.class} (#{ex.message})",
                    ex.backtrace.take(10).join("\n")
     end

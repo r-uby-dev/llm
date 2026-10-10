@@ -9,10 +9,6 @@ module LLM
   # {LLM::Tracer::Logger LLM::Tracer::Logger} for example
   # tracer implementations.
   class Tracer
-    require_relative "tracer/logger"
-    require_relative "tracer/telemetry"
-    require_relative "tracer/null"
-    require_relative "tracer/pretty_logger"
     require_relative "tracer/registry"
     require_relative "tracer/rescue"
 
@@ -23,6 +19,11 @@ module LLM
     def self.inherited(klass)
       klass.prepend Rescue
     end
+
+    require_relative "tracer/logger"
+    require_relative "tracer/telemetry"
+    require_relative "tracer/null"
+    require_relative "tracer/pretty_logger"
 
     ##
     # Returns the registry that counts the open scopes for each tracer.
