@@ -208,31 +208,32 @@ module LLM
     ##
     # Called when a request, a tool, or a turn is interrupted.
     #
-    # An interrupt is not a failure, so this is not {#on_request_error} or
-    # {#on_tool_error} under another name: it is the third ending either
-    # scope can have, and it is called before {LLM::Interrupt} reaches the
-    # caller, so a tracer that has to record what happened to a turn does it
-    # while the work is still the work in flight.
+    # Work is drawn as spans. A hook that starts something returns a span
+    # that is open - {#on_request_start} and {#on_tool_start} do - and an
+    # open span has to be closed. More than one hook can close one: the
+    # ordinary ending is {#on_request_finish}, a failure is
+    # {#on_request_error}, and an interrupt is this. It is called before
+    # {LLM::Interrupt} reaches the caller, so what was cut is closed while
+    # it is still the work that was in flight.
     #
-    # A request is announced once, by the transport. A tool is announced
-    # once for the phase rather than once per tool: a cancel reaches every
-    # tool that is running and the caller hears one exception, so there is
-    # no one tool the announcement belongs to. A turn is announced as
-    # `:agent` when the interrupt lands between two of its requests, which
-    # is the one point of a turn that has no span of its own.
+    # What arrives depends on the scope. A request is announced once, by
+    # the transport, with the span {#on_request_start} returned and the
+    # request's id. A tool is announced once for the phase rather than
+    # once per tool: a cancel reaches every tool that is running and the
+    # caller hears one exception, so the announcement belongs to no one
+    # tool - a tool's span belongs to the call, and {#on_tool_interrupt}
+    # closes it. A turn is announced as `:agent` when the interrupt lands
+    # between two of its requests, which is the one point of a turn that
+    # has no span of its own.
     #
-    # The default raises, like every other hook of the lifecycle. A tracer
-    # that means to record what happened to a turn has to answer for the
-    # ending, and one that does not should say so rather than drop it.
+    # The default raises, like every other hook.
     #
-    # **What a raise here costs, and where it is paid.** This hook is called
-    # where the interrupt is, so an error raised in it is raised in place of
-    # the interrupt: a caller waiting for {LLM::Interrupt} would hear about
-    # a tracer instead, and a cancel would arrive as a broken tracer. A
-    # tracer should never crash an agent, and this hook is the one place
-    # where that is not a preference - so a tracer's failure has to be
-    # contained somewhere, and the call sites are where it is contained
-    # today.
+    # Two rules for an implementation, and an open question beside them. A
+    # tracer callback should never raise, because it runs on the agent's
+    # own thread and code path in most cases and an error can crash the
+    # agent it is tracing. It should return quickly, for the same reason.
+    # What to do with an error that a tracer does raise is still an open
+    # question, and this method does not settle it.
     # @param [Symbol] scope
     #  :request for a request, :tool for a tool, :agent for a turn that is
     #  between its requests
