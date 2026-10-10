@@ -30,9 +30,14 @@ RSpec.describe LLM::Tracer::Rescue do
   describe "a hook the tracer does not implement" do
     let(:klass) { Class.new(LLM::Tracer) }
 
+    ##
+    # The message is matched in its stable halves rather than
+    # whole. Both ends of it name the class, and the class is
+    # anonymous - so what is printed there is an address, and
+    # an address is not a thing to write a regexp around.
     it "reports it rather than raising it" do
       expect($stderr).to receive(:puts).with(
-        /crashed: NotImplementedError \(.+\] does not implement 'on_request_start'/,
+        /crashed: NotImplementedError \(.*does not implement 'on_request_start'\)/,
         a_kind_of(String)
       )
       tracer.on_request_start(operation: "chat", request_id: "req_1")
