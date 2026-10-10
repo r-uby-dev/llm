@@ -16,6 +16,22 @@ class LLM::Tracer
   # is intentional.
   module Rescue
     ##
+    # @param [StandardError] ex
+    # @return [void]
+    def self.crash(tracer, ex)
+      $stderr.puts "",
+                   "an llm.rb tracer has crashed.",
+                   "",
+                   "[  tracer    ] #{tracer.class}",
+                   "[  class     ] #{ex.class}",
+                   "[  message   ] #{ex.message}",
+                   "[  backtrace ] ",
+                   "\n",
+                   "#{(ex.backtrace || []).take(10).join("\n")}",
+                   "\n\n"
+    end
+
+    ##
     # @api private
     ERRORS = [StandardError, ScriptError]
     private_constant :ERRORS
@@ -25,8 +41,7 @@ class LLM::Tracer
     rescue LLM::Interrupt
       raise
     rescue *ERRORS => ex
-      $stderr.puts "#{self.class} crashed: #{ex.class} (#{ex.message})",
-                   ex.backtrace.take(10).join("\n")
+      LLM::Tracer::Rescue.crash(self, ex)
     end
 
     def on_request_start(...)
@@ -34,8 +49,7 @@ class LLM::Tracer
     rescue LLM::Interrupt
       raise
     rescue *ERRORS => ex
-      $stderr.puts "#{self.class} crashed: #{ex.class} (#{ex.message})",
-                   ex.backtrace.take(10).join("\n")
+      LLM::Tracer::Rescue.crash(self, ex)
     end
 
     def on_request_finish(...)
@@ -43,8 +57,7 @@ class LLM::Tracer
     rescue LLM::Interrupt
       raise
     rescue *ERRORS => ex
-      $stderr.puts "#{self.class} crashed: #{ex.class} (#{ex.message})",
-                   ex.backtrace.take(10).join("\n")
+      LLM::Tracer::Rescue.crash(self, ex)
     end
 
     def on_request_error(...)
@@ -52,8 +65,7 @@ class LLM::Tracer
     rescue LLM::Interrupt
       raise
     rescue *ERRORS => ex
-      $stderr.puts "#{self.class} crashed: #{ex.class} (#{ex.message})",
-                   ex.backtrace.take(10).join("\n")
+      LLM::Tracer::Rescue.crash(self, ex)
     end
 
     def on_tool_start(...)
@@ -61,8 +73,7 @@ class LLM::Tracer
     rescue LLM::Interrupt
       raise
     rescue *ERRORS => ex
-      $stderr.puts "#{self.class} crashed: #{ex.class} (#{ex.message})",
-                   ex.backtrace.take(10).join("\n")
+      LLM::Tracer::Rescue.crash(self, ex)
     end
 
     def on_tool_interrupt(...)
@@ -70,8 +81,7 @@ class LLM::Tracer
     rescue LLM::Interrupt
       raise
     rescue *ERRORS => ex
-      $stderr.puts "#{self.class} crashed: #{ex.class} (#{ex.message})",
-                   ex.backtrace.take(10).join("\n")
+      LLM::Tracer::Rescue.crash(self, ex)
     end
 
     def on_tool_finish(...)
@@ -79,8 +89,7 @@ class LLM::Tracer
     rescue LLM::Interrupt
       raise
     rescue *ERRORS => ex
-      $stderr.puts "#{self.class} crashed: #{ex.class} (#{ex.message})",
-                   ex.backtrace.take(10).join("\n")
+      LLM::Tracer::Rescue.crash(self, ex)
     end
 
     def on_tool_error(...)
@@ -88,8 +97,7 @@ class LLM::Tracer
     rescue LLM::Interrupt
       raise
     rescue *ERRORS => ex
-      $stderr.puts "#{self.class} crashed: #{ex.class} (#{ex.message})",
-                   ex.backtrace.take(10).join("\n")
+      LLM::Tracer::Rescue.crash(self, ex)
     end
 
     def on_interrupt(...)
@@ -97,8 +105,7 @@ class LLM::Tracer
     rescue LLM::Interrupt
       raise
     rescue *ERRORS => ex
-      $stderr.puts "#{self.class} crashed: #{ex.class} (#{ex.message})",
-                   ex.backtrace.take(10).join("\n")
+      LLM::Tracer::Rescue.crash(self, ex)
     end
   end
 end
