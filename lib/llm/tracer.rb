@@ -221,11 +221,18 @@ module LLM
     # `:agent` when the interrupt lands between two of its requests, which
     # is the one point of a turn that has no span of its own.
     #
-    # The default does nothing, which is the difference from the rest of the
-    # lifecycle. Every other hook raises, because a tracer that means to draw
-    # a request has to answer for it - but an interrupt is delivered to
-    # whatever tracer happens to be bound, and a hook that raised here would
-    # replace the interrupt every caller is written against.
+    # The default raises, like every other hook of the lifecycle. A tracer
+    # that means to record what happened to a turn has to answer for the
+    # ending, and one that does not should say so rather than drop it.
+    #
+    # **What a raise here costs, and where it is paid.** This hook is called
+    # where the interrupt is, so an error raised in it is raised in place of
+    # the interrupt: a caller waiting for {LLM::Interrupt} would hear about
+    # a tracer instead, and a cancel would arrive as a broken tracer. A
+    # tracer should never crash an agent, and this hook is the one place
+    # where that is not a preference - so a tracer's failure has to be
+    # contained somewhere, and the call sites are where it is contained
+    # today.
     # @param [Symbol] scope
     #  :request for a request, :tool for a tool, :agent for a turn that is
     #  between its requests
@@ -237,6 +244,7 @@ module LLM
     #  The id, as passed to {#on_request_start}, when the scope is a request
     # @return [void]
     def on_interrupt(scope:, span: nil, request_id: nil)
+      raise NotImplementedError, "#{self.class} does not implement '#{__method__}'"
     end
 
     ##
