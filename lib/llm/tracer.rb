@@ -208,23 +208,24 @@ module LLM
     ##
     # Called when a request, a tool, or a turn is interrupted.
     #
-    # Work is drawn as spans. A hook that starts something returns a span
-    # that is open - {#on_request_start} and {#on_tool_start} do - and an
-    # open span has to be closed. More than one hook can close one: the
-    # ordinary ending is {#on_request_finish}, a failure is
-    # {#on_request_error}, and an interrupt is this. It is called before
-    # {LLM::Interrupt} reaches the caller, so what was cut is closed while
-    # it is still the work that was in flight.
+    # Certain callbacks - {#on_request_start} and {#on_tool_start} -
+    # return spans that have to be closed by another callback. Which one
+    # closes it depends on the path the tracer took. The happy path sees
+    # {#on_request_start} open a span and {#on_request_finish} close it,
+    # and {#on_request_finish} is not certain to be the one:
+    # {#on_request_error} might close it instead, and this method with a
+    # `:request` scope is another path that can close a request's span.
+    # {#on_tool_start} opens a span too, and closing it is a different
+    # set of methods - {#on_tool_finish}, {#on_tool_interrupt}, or
+    # {#on_tool_error}.
     #
-    # What arrives depends on the scope. A request is announced once, by
-    # the transport, with the span {#on_request_start} returned and the
-    # request's id. A tool is announced once for the phase rather than
-    # once per tool: a cancel reaches every tool that is running and the
-    # caller hears one exception, so the announcement belongs to no one
-    # tool - a tool's span belongs to the call, and {#on_tool_interrupt}
-    # closes it. A turn is announced as `:agent` when the interrupt lands
-    # between two of its requests, which is the one point of a turn that
-    # has no span of its own.
+    # This method is not always given a span it can close. A `:tool` pass
+    # has none, because a cancel reaches every tool that is running and
+    # the caller hears one exception, so the announcement belongs to no
+    # one tool. A `:agent` turn has none either: it is announced when the
+    # interrupt lands between two of its requests, which is the one point
+    # of a turn that has no span of its own. The `:request` scope is the
+    # exception.
     #
     # The default raises, like every other hook.
     #
