@@ -383,14 +383,14 @@ module LLM
   #  Whether anything was reached
   def interrupt(agent: nil, id: nil, attempts: 1, interval: 0.1)
     result = false
-    attempts.times do
+    attempts.times do |count|
       record = LLM::Agent.registry.find(agent:, id:)
       if record
         record.interrupt!
         result = true
         break
       else
-        break if attempts == 1
+        break if count == 1
         sleep(interval)
       end
     end
