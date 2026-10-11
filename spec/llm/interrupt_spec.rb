@@ -16,8 +16,8 @@ require "setup"
 # the case this method meets when the turn it was waiting for is gone.
 RSpec.describe LLM do
   describe ".interrupt" do
-    let(:provider) { LLM.openai(key: "test") }
-    let(:agent) { LLM::Agent.new(provider, model: "gpt-5.4", mode: :completions) }
+    let(:llm) { LLM.openai(key: "test") }
+    let(:agent) { LLM::Agent.new(llm, model: "gpt-5.4") }
     let(:registry) { LLM::Agent.registry }
 
     before { allow(LLM).to receive(:sleep) }
