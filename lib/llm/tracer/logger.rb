@@ -124,6 +124,19 @@ module LLM
     end
 
     ##
+    # @param (see LLM::Tracer#on_interrupt)
+    # @return [void]
+    def on_interrupt(scope:, request_id: nil, **)
+      @logger.info(
+        tracer: "llm.rb (logger)",
+        event: "interrupt",
+        provider: provider_name,
+        scope:,
+        request_id:
+      )
+    end
+
+    ##
     # No-op.
     # @return [nil]
     def on_exit
