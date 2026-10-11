@@ -1,3 +1,2 @@
 ---
 BUNDLE_PATH: ".bundle/gems"
-BUNDLE_BUILD__SQLITE3: "--enable-system-libraries --with-sqlite3-include=/usr/local/include --with-sqlite3-lib=/usr/local/lib"
