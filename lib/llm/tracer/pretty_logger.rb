@@ -89,15 +89,12 @@ module LLM
 
     ##
     # @note An interrupt is not an error, so it is not logged as one, and
-    #  the line says which scope it was rather than describing it as a
-    #  request or a tool: a request is announced by the transport, a tool
-    #  pass by `Context#wait`, and a turn - between two of its requests -
-    #  by the agent. The tool that was cut is named by `on_tool_interrupt`,
-    #  and there is nothing here to close.
+    #  what the line carries is the scope it was: a request, a tool pass,
+    #  or a turn between two of its requests.
     # @param (see LLM::Tracer#on_interrupt)
     # @return [void]
     def on_interrupt(scope:, **)
-      @io.puts "#{timestamp} #{provider_name} #{scope} received an interrupt"
+      @io.puts "#{timestamp} #{provider_name} interrupt received (scope=#{scope})"
     end
 
     ##
