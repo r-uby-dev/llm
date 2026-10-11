@@ -412,12 +412,11 @@ interrupt the agent, or give up trying:
 ```ruby
 class InterruptJob
   def call(agent_id:)
-    attempts = 0
-    until LLM.interrupt(id: agent_id)
-      attempts += 1
-      break if attempts == 10
-      sleep 0.1
-    end
+    LLM.interrupt(
+      id: agent_id,
+      attempts: 10,
+      interval: 0.1
+    )
   end
 end
 ```

@@ -377,13 +377,24 @@ module LLM
   # @see LLM::Agent::Registry
   # @param [LLM::Agent, nil] agent
   # @param [String, Integer, nil] id
+  # @param [Integer] attempts
+  # @param [Numeric] interval
   # @return [Boolean]
   #  Whether anything was reached
-  def interrupt(agent: nil, id: nil)
-    found = LLM::Agent.registry.find(agent:, id:)
-    return false unless found
-    found.interrupt!
-    true
+  def interrupt(agent: nil, id: nil, attempts: 1, interval: 0.1)
+    result = false
+    attempts.times do
+      record = LLM::Agent.registry.find(agent:, id:)
+      if record
+        record.interrupt!
+        result = true
+        break
+      else
+        break if attempts == 1
+        sleep(interval)
+      end
+    end
+    result
   end
 
   ##
