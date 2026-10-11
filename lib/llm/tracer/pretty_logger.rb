@@ -88,9 +88,6 @@ module LLM
     end
 
     ##
-    # @note An interrupt is not an error, so it is not logged as one, and
-    #  what the line carries is the scope it was: a request, a tool pass,
-    #  or a turn between two of its requests.
     # @param (see LLM::Tracer#on_interrupt)
     # @return [void]
     def on_interrupt(scope:, **)
