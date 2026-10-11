@@ -128,6 +128,48 @@ RSpec.describe LLM::Tracer::Telemetry do
     end
   end
 
+  describe "#on_interrupt" do
+    context "when the scope is a request" do
+      let(:span) { tracer.on_request_start(operation: "chat", model: "test-model", request_id:) }
+
+      before { tracer.on_interrupt(scope: :request, span:, request_id:) }
+
+      it "finishes the span" do
+        expect(tracer.spans.last.name).to eq("chat test-model")
+      end
+
+      it "records error.type" do
+        expect(tracer.spans.last.attributes["error.type"]).to eq("LLM::Interrupt")
+      end
+
+      it "reports the span as an error" do
+        expect(tracer.spans.last.status.ok?).to be(false)
+      end
+
+      it "adds the event a finished request gets" do
+        expect(tracer.spans.last.events.map(&:name)).to include("gen_ai.request.finish")
+      end
+    end
+
+    context "when the scope is a tool" do
+      it "closes no span of its own" do
+        expect { tracer.on_interrupt(scope: :tool) }.not_to change { tracer.spans.size }
+      end
+    end
+
+    context "when the scope is a turn" do
+      it "closes no span of its own" do
+        expect { tracer.on_interrupt(scope: :agent) }.not_to change { tracer.spans.size }
+      end
+    end
+
+    context "when the scope is not one of the three" do
+      it "refuses it" do
+        expect { tracer.on_interrupt(scope: :nonsense) }.to raise_error(LLM::Error)
+      end
+    end
+  end
+
   describe "#start_trace" do
     let(:span) { tracer.on_request_start(operation: "chat", model: "test-model", request_id:) }
     let(:res) { double("LLM::Response", id: "res_123", model: "test-model", usage: LLM::Usage.new(input_tokens: 1, output_tokens: 2), service_tier: "default", system_fingerprint: "yabadabadoo") }
