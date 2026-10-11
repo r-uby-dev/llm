@@ -7,7 +7,11 @@ require "llm/tools/exec"
 
 RSpec.describe LLM::Tool::Bundle do
   let(:tool) { described_class.new }
-  let(:dir) { Dir.mktmpdir("bundle-spec") }
+  ##
+  # macOS keeps TMPDIR under /var, a symlink
+  # to /private/var, and a command reports the
+  # resolved path as its cwd.
+  let(:dir) { File.realpath(Dir.mktmpdir("bundle-spec")) }
   let(:gemfile) { File.join(dir, "Gemfile") }
 
   around do |example|
