@@ -177,7 +177,7 @@ RSpec.describe LLM::Tracer::Telemetry do
           "",
           "[  tracer    ] LLM::Tracer::Telemetry",
           "[  class     ] LLM::Error",
-          "[  message   ] scope ':nonsense' is not a valid tracer scope",
+          "[  message   ] scope 'nonsense' is not a valid tracer scope",
           "[  backtrace ] ",
           a_kind_of(String),
           ""
