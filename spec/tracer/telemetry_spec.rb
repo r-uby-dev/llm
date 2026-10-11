@@ -163,9 +163,26 @@ RSpec.describe LLM::Tracer::Telemetry do
       end
     end
 
+    ##
+    # The refusal is a raise, and the raise is not what a caller sees:
+    # every subclass is prepended with `LLM::Tracer::Rescue`, which
+    # reports an error a hook raises rather than letting it travel. So
+    # the assertion is about where the refusal lands, which is the only
+    # part of it anybody meets.
     context "when the scope is not one of the three" do
-      it "refuses it" do
-        expect { tracer.on_interrupt(scope: :nonsense) }.to raise_error(LLM::Error)
+      it "reports the refusal rather than raising it" do
+        expect($stderr).to receive(:puts).with(
+          "",
+          "an llm.rb tracer has crashed.",
+          "",
+          "[  tracer    ] LLM::Tracer::Telemetry",
+          "[  class     ] LLM::Error",
+          "[  message   ] scope ':nonsense' is not a valid tracer scope",
+          "[  backtrace ] ",
+          a_kind_of(String),
+          ""
+        )
+        tracer.on_interrupt(scope: :nonsense)
       end
     end
   end
