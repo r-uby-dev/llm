@@ -58,15 +58,15 @@ jobs:
   macos:
     runs-on: macos-latest
     name: macOS (Ruby ${{ matrix.ruby-version }})
-    # macOS runs and queues more slowly than Linux, so this job is one Ruby
-    # and one parser, and its timeout is what a run needs rather than what a
-    # stall allows. PostgreSQL is left unconfigured: the linux job's service
-    # container has no macOS equivalent, and the ORM specs skip themselves
-    # when LLMRB_POSTGRESQL_URL is unset.
+    # macOS runs and queues more slowly than Linux, so this job is one
+    # parser rather than three, and its timeout is what a run needs rather
+    # than what a stall allows. PostgreSQL is left unconfigured: the linux
+    # job's service container has no macOS equivalent, and the ORM specs
+    # skip themselves when LLMRB_POSTGRESQL_URL is unset.
     timeout-minutes: 30
     strategy:
       matrix:
-        ruby-version: ['4.0']
+        ruby-version: ['3.4', '4.0']
         json-parser: ['JSON']
 
     steps:
