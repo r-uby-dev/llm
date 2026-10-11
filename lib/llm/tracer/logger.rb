@@ -129,7 +129,7 @@ module LLM
     def on_interrupt(scope:, request_id: nil, **)
       @logger.info(
         tracer: "llm.rb (logger)",
-        event: "interrupt",
+        event: "#{scope}.interrupt",
         provider: provider_name,
         scope:,
         request_id:
