@@ -173,6 +173,48 @@ module LLM
     end
 
     ##
+    # @param [Symbol] scope
+    # @param [Object] span
+    # @param [String] request_id
+    # @return [void]
+    def on_interrupt(scope:, span: nil, request_id: nil)
+      case scope
+      when :request
+        ##
+        # This is where we match on_request_start and
+        # close the span it had opened. It is the only
+        # scope where we have a span to close.
+        attributes = {"error.type" => "LLM::Interrupt"}
+        attributes.each { span.set_attribute(_1, _2) }
+        span.status = OpenTelemetry::Trace::Status.error("request interrupted")
+        span.add_event("gen_ai.request.finish")
+        span.tap(&:finish)
+      when :tool
+        ##
+        # This means an interrupt was received when
+        # an agent was running tools and no request
+        # was active at the time.
+        #
+        # There is no span to close, and each tool
+        # call is closed by #{on_tool_interrupt}.
+        # There is seemingly nothing useful to do
+        # here.
+      when :agent
+        ##
+        # This means an interrupt was received when
+        # an agent was between requests and no request
+        # was active at the time.
+        #
+        # There is no span to close, and no tools are
+        # running. There is seemingly nothing useful to
+        # do here.
+      else
+        raise LLM::Error,
+              "scope '#{scope}' is not a valid tracer scope"
+      end
+    end
+
+    ##
     # @note
     # This method returns an empty array for exporters that
     # do not implement 'finished_spans' such as the OTLP
