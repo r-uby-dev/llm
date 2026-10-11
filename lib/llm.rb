@@ -390,7 +390,7 @@ module LLM
         result = true
         break
       else
-        break if (count+1) == 1
+        break if (count+1) == attempts
         sleep(interval)
       end
     end
