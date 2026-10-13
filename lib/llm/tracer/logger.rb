@@ -95,10 +95,6 @@ module LLM
     # @param (see LLM::Tracer#on_tool_error)
     # @return [void]
     def on_tool_error(ex:, **)
-      ##
-      # The return is what a failing call is answered with, so the class
-      # and the message are read from its value: `ex.class` is
-      # `LLM::Function::Return`, which names nothing that went wrong.
       @logger.error(
         tracer: "llm.rb (logger)",
         event: "tool.error",
@@ -110,8 +106,6 @@ module LLM
     end
 
     ##
-    # @note The span is the only thing that can name the call
-    #  here: the call an interrupt ends never returned a result.
     # @param (see LLM::Tracer#on_tool_interrupt)
     # @return [void]
     def on_tool_interrupt(ex:, span:, **)
