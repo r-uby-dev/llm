@@ -105,7 +105,7 @@ module LLM::Function::Async
             # to the caller.
             ex
           ensure
-            @finished_at = Time.now
+            @finished_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
             ##
             # The tool has answered, so a cancel that arrives from here on
             # asks nothing - which is the no-op a cancel that arrives once

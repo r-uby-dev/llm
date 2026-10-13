@@ -23,7 +23,11 @@ class LLM::Function
 
     ##
     # Returns when a task finished, or nil
-    # @return [Time, nil]
+    # @note
+    #  This method captures a monotonic clock
+    #  time (Process::CLOCK_MONOTONIC) rather
+    #  than a Time object.
+    # @return [Float, nil]
     attr_reader :finished_at
 
     ##
