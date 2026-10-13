@@ -12,16 +12,12 @@ class LLM::Function
     attr_reader :function
 
     ##
-    # The tracer this call is reported to, when there is one.
-    #
-    # A group reads it rather than carrying one of its own, because the
-    # task is what holds the span `on_tool_start` returned, and a
-    # callback without its span is a callback a tracer cannot pair.
+    # The tracer for the task
     # @return [LLM::Tracer, nil]
     attr_reader :tracer
 
     ##
-    # The span {LLM::Tracer#on_tool_start} returned for this call.
+    # The span returned by {LLM::Tracer#on_tool_start}
     # @return [Object]
     attr_reader :span
 

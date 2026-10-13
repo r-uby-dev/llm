@@ -22,8 +22,10 @@ class LLM::Function
     # @return [LLM::Function::Fork::Task]
     def spawn
       @span = @tracer&.on_tool_start(
-        id: @function.id, name: @function.name,
-        arguments: @function.arguments, model: @function.model
+        id: @function.id,
+        name: @function.name,
+        arguments: @function.arguments,
+        model: @function.model
       )
       return if @guarded
       @ch = channels
@@ -133,31 +135,29 @@ class LLM::Function
     # @return [LLM::Function::Return]
     def wait
       return @guarded if @guarded
-      raise @result if Exception === @result
-      return @result if @result
+      return @result.unbox if @result
       spawn unless @spawned
       kind, data = @ch.result.recv
       @result = case kind
-                when :interrupt then interrupted
-                when :result then Return.new(data[:id], data[:name], data[:value])
-                else raise ArgumentError, "Unknown fork message: #{kind.inspect}"
+                when :interrupt then LLM::Object.from(unbox: LLM::Interrupt.new)
+                when :result then LLM::Object.from(unbox: Return.new(data[:id], data[:name], data[:value]))
+                else raise ArgumentError, "unknown fork message: #{kind.inspect}"
                 end
-      raise @result if Exception === @result
       reap
-      @tracer&.on_tool_finish(result: @result, span: @span)
-      @result
+      @result.unbox
     rescue EOFError
       ##
-      # Held in `@result` rather than answered once, so a second wait is given
-      # the same return the way it is for every other ending.
+      # Stored in `@result` so a second wait is
+      # given the same return as the first call.
       reap
-      @result = Return.new(@function.id, @function.name, {
-        error: true,
-        type: EOFError.name,
-        message: "the tool exited unexpectedly"
-      })
-      @tracer&.on_tool_finish(result: @result, span: @span)
-      @result
+      @result = LLM::Object.from(unbox:
+        Return.new(@function.id, @function.name, {
+          error: true,
+          type: EOFError.name,
+          message: "the tool exited unexpectedly"
+        })
+      )
+      @result.unbox
     ensure
       if @guarded.nil?
         reap
@@ -202,23 +202,6 @@ class LLM::Function
       @waited = true
     rescue Errno::ECHILD
       @waited = true
-    end
-
-    ##
-    # The ending a child reports when its call was interrupted, announced as
-    # it is made rather than where it is raised.
-    #
-    # **One call, one ending.** `@result` holds the exception, so a caller
-    # that waits twice is given the same one twice - the strategy's own spec
-    # pins that - and a rescue around the raise would have told a tracer about
-    # two endings for the one call. Announced here, where the exception is
-    # built, the number of times it is raised cannot change the number of
-    # endings a tracer hears about.
-    # @return [LLM::Interrupt]
-    def interrupted
-      interrupt = LLM::Interrupt.new
-      @tracer&.on_tool_interrupt(ex: interrupt, span: @span)
-      interrupt
     end
   end
 end
