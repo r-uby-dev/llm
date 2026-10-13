@@ -147,20 +147,14 @@ module LLM::Function::Thread
     # @return [LLM::Function::Return]
     def wait
       return @guarded if @guarded
-      raise @result if Exception === @result
       return @result.unbox if @result
       spawn unless @thread
       begin
         @result = LLM::Object.from(unbox: @thread.value)
-        @tracer&.on_tool_finish(result: @result.unbox, span:)
       rescue LLM::Interrupt => ex
-        @tracer&.on_tool_interrupt(ex:, span:)
-        @result = ex
-        raise
+        @result = LLM::Object.from(unbox: ex)
       rescue => ex
-        @tracer&.on_tool_error(ex:, span:)
-        @result = ex
-        raise
+        @result = LLM::Object.from(unbox: ex)
       end
       @result.unbox
     end
@@ -173,12 +167,6 @@ module LLM::Function::Thread
     end
 
     private
-
-    ##
-    # @return [Object]
-    def span
-      @span
-    end
 
     ##
     # The window the body opened, from wherever it is.

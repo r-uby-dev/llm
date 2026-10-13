@@ -666,9 +666,9 @@ RSpec.describe LLM::Function do
           sleep 0.05 until task.alive?
         end
 
-        it "raises LLM::Interrupt on the thread" do
+        it "answers with an LLM::Interrupt on the thread" do
           task.interrupt!
-          expect { task.wait }.to raise_error(LLM::Interrupt)
+          expect(task.wait).to be_a(LLM::Interrupt)
         end
       end
 

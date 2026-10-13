@@ -39,7 +39,20 @@ module LLM::Function::Thread
     # @return [Array<LLM::Function::Return>]
     def wait
       spawn unless @spawned
-      @tasks.map(&:wait)
+      interrupt = nil
+      vals = @tasks.map do |task|
+        val = task.wait
+        if LLM::Interrupt === val
+          interrupt = val
+          task.tracer&.on_tool_interrupt(ex: val, span: task.span)
+        elsif Exception === val
+          task.tracer&.on_tool_error(ex: val, span: task.span)
+        else
+          task.tracer&.on_tool_finish(result: val, span: task.span)
+          val
+        end
+      end
+      interrupt ? raise(interrupt) : vals
     end
     alias_method :value, :wait
   end

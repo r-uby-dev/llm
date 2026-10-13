@@ -103,7 +103,7 @@ RSpec.describe LLM::Function::Thread::Task do
     before { task.interrupt! }
 
     it "is held rather than dropped" do
-      expect { within { task.wait } }.to raise_error(LLM::Interrupt)
+      expect(within { task.wait }).to be_a(LLM::Interrupt)
     end
 
     ##
@@ -139,7 +139,7 @@ RSpec.describe LLM::Function::Thread::Task do
       end
 
       it "still raises to the caller" do
-        expect { within { task.wait } }.to raise_error(LLM::Interrupt)
+        expect(within { task.wait }).to be_a(LLM::Interrupt)
       end
     end
 
@@ -168,7 +168,7 @@ RSpec.describe LLM::Function::Thread::Task do
     end
 
     it "raises at the tool" do
-      expect { within { task.wait } }.to raise_error(LLM::Interrupt)
+      expect(within { task.wait }).to be_a(LLM::Interrupt)
     end
 
     it "runs the hook once the call has ended" do
@@ -214,7 +214,7 @@ RSpec.describe LLM::Function::Thread::Task do
 
     it "interrupts the call" do
       task.interrupt!
-      expect { within { task.wait } }.to raise_error(LLM::Interrupt)
+      expect(within { task.wait }).to be_a(LLM::Interrupt)
     end
   end
 
@@ -258,7 +258,7 @@ RSpec.describe LLM::Function::Thread::Task do
     before { task.interrupt! }
 
     it "is held rather than dropped" do
-      expect { within { task.wait } }.to raise_error(LLM::Interrupt)
+      expect(within { task.wait }).to be_a(LLM::Interrupt)
     end
   end
 
