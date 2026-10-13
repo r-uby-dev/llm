@@ -31,16 +31,18 @@ class LLM::Function
     alias_method :cancel!, :interrupt!
 
     ##
-    # Wait for the calls to answer.
+    # This method waits for one or more tasks to
+    # return. Within this method, the tracer
+    # associated with a task closes the `on_tool_start`
+    # span that was opened when the task spawned.
     #
-    # This is where the calls are reported to the tracer. A task answers
-    # with its outcome - the value the tool returned, or the exception
-    # it ended with - and a group is the frame that knows a call was
-    # interrupted, so it is the frame that tells the tracer and then
-    # raises, which puts the callback before the caller sees anything.
-    #
-    # A strategy whose tasks report themselves, or whose ending is not
-    # an outcome, answers with its own {#wait}.
+    # @note
+    #  This method might raise an {LLM::Interrupt}
+    #  if one or more tasks were interrupted but
+    #  only after the tracer has accounted for each
+    #  task and collected an exit status from each
+    #  of them.
+    # @raise [LLM::Interrupt]
     # @return [Array<LLM::Function::Return>]
     def wait
       spawn unless @spawned
