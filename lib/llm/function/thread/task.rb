@@ -147,11 +147,23 @@ module LLM::Function::Thread
     # @return [LLM::Function::Return]
     def wait
       return @guarded if @guarded
-      return @result.value if @result
+      raise result if Exception === result
+      return result.value if result
       spawn unless @thread
-      @result = LLM::Object.from(value: @thread.value)
-      @tracer&.on_tool_finish(result: @result, span: @span)
-      @result
+      begin
+        value = @thread.value
+        @result = LLM::Object.from(value:)
+        @tracer&.on_tool_finish(result:, span:)
+      rescue LLM::Interrupt => ex
+        @tracer&.on_tool_interrupt(ex:, span:)
+        @result = ex
+        raise
+      rescue => ex
+        @tracer&.on_tool_error(:ex, span:)
+        @result = ex
+        raise
+      end
+      result
     end
     alias_method :value, :wait
 
@@ -162,6 +174,18 @@ module LLM::Function::Thread
     end
 
     private
+
+    ##
+    # @return [LLM::Object]
+    def result
+      @result
+    end
+
+    ##
+    # @return [Object]
+    def span
+      @span
+    end
 
     ##
     # The window the body opened, from wherever it is.
