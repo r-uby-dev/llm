@@ -69,12 +69,16 @@ class LLM::Function
     alias_method :cancel!, :interrupt!
 
     ##
-    # Answers with the call's outcome, once the call has ended.
+    # This method returns an instance of
+    # {LLM::Function::Return} or {LLM::Interrupt}
+    # when the task has received an interrupt.
     #
-    # A strategy answers rather than raises: an `LLM::Interrupt` is an
-    # outcome like any other, and {LLM::Function::Group#wait} is what raises
-    # it, after it has reported every call. A second wait is answered from
-    # what the first one took.
+    # An exception that occurs inside a tool is
+    # rescued, and returned by this method as a
+    # {LLM::Function::Return} object. It can be
+    # distinguished from other returns through
+    # the {LLM::Function::Return#error?} method.
+    #
     # @abstract
     # @return [LLM::Function::Return, LLM::Interrupt]
     def wait
