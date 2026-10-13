@@ -152,8 +152,6 @@ module LLM::Function::Thread
         @result = LLM::Object.from(unbox: @thread.value)
       rescue LLM::Interrupt => ex
         @result = LLM::Object.from(unbox: ex)
-      rescue => ex
-        @result = LLM::Object.from(unbox: ex)
       end
       @result.unbox
     end
