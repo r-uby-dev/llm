@@ -32,13 +32,13 @@ module LLM::Function::Thread
     ##
     # @return [nil]
     def spawn
-      return if @guarded
       @span = @tracer&.on_tool_start(
         id: @function.id,
         name: @function.name,
         arguments: @function.arguments,
         model: @function.model
       )
+      return if @guarded
       @ready = Queue.new
       @thread = ::Thread.new do
         ##

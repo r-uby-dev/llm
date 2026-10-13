@@ -50,10 +50,12 @@ class LLM::Function
         if LLM::Interrupt === val
           interrupt = val
           task.tracer&.on_tool_interrupt(ex: val, span: task.span)
-        elsif Exception === val
-          task.tracer&.on_tool_error(ex: val, span: task.span)
         else
-          task.tracer&.on_tool_finish(result: val, span: task.span)
+          if val.error?
+            task.tracer&.on_tool_error(ex: val, span: task.span)
+          else
+            task.tracer&.on_tool_finish(result: val, span: task.span)
+          end
           val
         end
       end
