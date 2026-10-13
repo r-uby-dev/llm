@@ -135,6 +135,7 @@ class LLM::Function
     private
 
     def build_task(result)
+      @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       ::Ractor.new(result, @runner_class, @id, @name, @arguments, @cookie) do |result, runner_class, id, name, arguments, cookie|
         LLM::Function::Ractor::Job.new(
           ::Ractor.current,

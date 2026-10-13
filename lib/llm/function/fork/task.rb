@@ -39,6 +39,7 @@ class LLM::Function
         @cancelled = false
         @ch.control.write(:interrupt)
       end
+      @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       @pid = Kernel.fork do
         ##
         # The child inherits the parent's terminal. When

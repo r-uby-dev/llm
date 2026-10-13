@@ -98,6 +98,7 @@ module LLM::Function::Async
             # a LLM::Function::Return object. An LLM::Interrupt
             # escapes this method call, and it is rescued
             # here and pushed onto the queue.
+            @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
             @queue << function.call
           rescue LLM::Interrupt => ex
             @queue << ex

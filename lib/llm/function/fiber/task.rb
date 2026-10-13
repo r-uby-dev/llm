@@ -100,6 +100,7 @@ module LLM::Function::Fiber
             # to prevent - this fiber raised before the call was reached, so
             # the tool's own `rescue` never saw the interrupt.
             @window.running!
+            @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
             @queue << function.call
           rescue LLM::Interrupt => ex
             @queue << ex

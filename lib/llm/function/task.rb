@@ -22,6 +22,15 @@ class LLM::Function
     attr_reader :span
 
     ##
+    # Returns when a task started, or nil
+    # @note
+    #  This method captures a monotonic clock
+    #  time (Process::CLOCK_MONOTONIC) rather
+    #  than a Time object.
+    # @return [Float, nil]
+    attr_reader :started_at
+
+    ##
     # Returns when a task finished, or nil
     # @note
     #  This method captures a monotonic clock

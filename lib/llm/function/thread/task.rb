@@ -64,6 +64,7 @@ module LLM::Function::Thread
         # instead, and opens on the call.
         ::Thread.new { @window.interrupt! } if @cancelled
         @window.running!
+        @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
         function.call
       ensure
         @finished_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
