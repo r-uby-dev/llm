@@ -12,7 +12,6 @@ class LLM::Function
     # @return [LLM::Function::Fork::Task]
     def initialize(fn, options = {})
       super
-      @tracer = options.fetch(:tracer, nil)
       @spawned = false
       @waited = false
       @cancelled = false

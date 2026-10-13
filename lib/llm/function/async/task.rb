@@ -16,7 +16,6 @@ module LLM::Function::Async
     # @option options [LLM::Function::Async::Reactor] :reactor
     def initialize(fn, options = {})
       super
-      @tracer = options.fetch(:tracer, nil)
       @reactor = options[:reactor]
     end
 

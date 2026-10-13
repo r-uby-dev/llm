@@ -39,7 +39,6 @@ class LLM::Function
       @name = options.fetch(:name)
       @arguments = options.fetch(:arguments)
       @model = options.fetch(:model, nil)
-      @tracer = options.fetch(:tracer, nil)
       @cancelled = false
       @cookie = SecureRandom.hex
     end

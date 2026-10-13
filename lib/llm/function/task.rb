@@ -33,6 +33,7 @@ class LLM::Function
     def initialize(fn, options = {})
       @function = fn
       @guarded = options[:guarded]
+      @tracer = options[:tracer]
     end
 
     ##
