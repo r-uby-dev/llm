@@ -476,7 +476,7 @@ RSpec.describe LLM::Function do
 
         it "answers the caller" do
           result = Timeout.timeout(2) { task.wait }
-          expect([result.class, result.message]).to eq([RuntimeError, "hook failed"])
+          expect([result.class, result.message]).to eq([LLM::Interrupt, "LLM::Interrupt"])
         end
       end
     end

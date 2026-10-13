@@ -90,20 +90,17 @@ module LLM::Function::Async
         # tool.
         @window.interrupt!(wait: false) if @cancelled
         task.defer_cancel do
-          result = begin
-            ##
-            # The call opens here, and it is what a deferred ask is issued
-            # against. What the window guarantees is that the raise is not
-            # asked for before the call; the dispatch itself is code, and a
-            # raise can land in it, which is the same gap `Fork::Job` has
-            # between `running!` and `runner.call`.
+          begin
             @window.running!
-            function.call
-          rescue LLM::Interrupt => ex
             ##
-            # The interrupt is the block's result, and the queue carries it
-            # to the caller.
-            ex
+            # The 'function.call' method call will rescue
+            # subclasses of StandardError and turn it into
+            # a LLM::Function::Return object. An LLM::Interrupt
+            # escapes this method call, and it is rescued
+            # here and pushed onto the queue.
+            @queue << function.call
+          rescue LLM::Interrupt => ex
+            @queue << ex
           ensure
             @finished_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
             ##
@@ -119,17 +116,9 @@ module LLM::Function::Async
             # `interrupted?` means.
             function.interrupt! if @window.interrupted?
           end
-          @queue << result
         end
-      rescue LLM::Interrupt, StandardError => e
-        ##
-        # This runs after the `defer_cancel` block's `ensure`, so the tool is
-        # told first and the caller second. It answers a hook whose own
-        # error unwound past the push, and it is the backstop for an
-        # interrupt that arrived from somewhere other than the call above -
-        # which is why the interrupt is pushed and not raised on.
+      rescue LLM::Interrupt => e
         @queue << e
-        raise unless LLM::Interrupt === e
       end
       nil
     end

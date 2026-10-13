@@ -101,20 +101,8 @@ module LLM::Function::Fiber
             # the tool's own `rescue` never saw the interrupt.
             @window.running!
             @queue << function.call
-          rescue LLM::Interrupt, StandardError => ex
-            ##
-            # The interrupt is stored on the queue rather than raised on.
-            # `LLM::Interrupt` is a subclass of `Exception`, and one that is
-            # left to raise kills the scheduler's thread and takes the tasks
-            # running on it with it - the caller reads the queue and raises
-            # the interrupt on its own thread or fiber, and this task exits
-            # silently.
-            #
-            # The rescue names the interrupt rather than leaving it to a bare
-            # rescue, because a bare rescue - and `rescue => ex` - reaches
-            # only `StandardError`.
+          rescue LLM::Interrupt => ex
             @queue << ex
-            raise unless LLM::Interrupt === ex
           ensure
             @finished_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
             ##
