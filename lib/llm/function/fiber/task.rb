@@ -179,20 +179,10 @@ module LLM::Function::Fiber
     # @return [LLM::Function::Return]
     def wait
       return @guarded if @guarded
-      raise @result.unbox if Exception === @result&.unbox
       return @result.unbox if @result
       spawn unless @fiber
       @result = LLM::Object.from(unbox: @queue.pop)
-      if LLM::Interrupt === @result.unbox
-        @tracer&.on_tool_interrupt(ex: @result.unbox, span:)
-        raise @result.unbox
-      elsif Exception === @result.unbox
-        @tracer&.on_tool_error(ex: @result.unbox, span:)
-        raise @result.unbox
-      else
-        @tracer&.on_tool_finish(result: @result.unbox, span:)
-        @result.unbox
-      end
+      @result.unbox
     end
     alias_method :value, :wait
 

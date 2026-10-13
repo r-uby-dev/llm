@@ -464,7 +464,8 @@ RSpec.describe LLM::Function do
         end
 
         it "answers the caller" do
-          expect { Timeout.timeout(2) { task.wait } }.to raise_error(RuntimeError, "hook failed")
+          result = Timeout.timeout(2) { task.wait }
+          expect([result.class, result.message]).to eq([RuntimeError, "hook failed"])
         end
       end
     end
@@ -702,9 +703,9 @@ RSpec.describe LLM::Function do
             sleep 0.05 until slow_task.alive?
           end
 
-          it "raises LLM::Interrupt on the underlying fiber" do
+          it "answers with an LLM::Interrupt on the underlying fiber" do
             slow_task.interrupt!
-            expect { slow_task.wait }.to raise_error(LLM::Interrupt)
+            expect(slow_task.wait).to be_a(LLM::Interrupt)
           end
         end
 

@@ -196,22 +196,12 @@ module LLM::Function::Async
     # @return [LLM::Function::Return]
     def wait
       return @guarded if @guarded
-      raise @result.unbox if Exception === @result&.unbox
       return @result.unbox if @result
       begin
         spawn unless @queue
+        @alive = false
         @result = LLM::Object.from(unbox: @queue.pop)
-        @alive  = false
-        if LLM::Interrupt === @result.unbox
-          @tracer&.on_tool_interrupt(ex: @result.unbox, span:)
-          raise(@result.unbox)
-        elsif Exception === @result.unbox
-          @tracer&.on_tool_error(ex: @result.unbox, span:)
-          raise(@result.unbox)
-        else
-          @tracer&.on_tool_finish(result: @result.unbox, span:)
-          @result.unbox
-        end
+        @result.unbox
       ensure
         @reactor&.stop
       end
@@ -222,14 +212,6 @@ module LLM::Function::Async
     # @return [Class]
     def group_class
       LLM::Function::Async::Group
-    end
-
-    private
-
-    ##
-    # @return [Object]
-    def span
-      @span
     end
   end
 end

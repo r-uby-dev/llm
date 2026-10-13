@@ -102,25 +102,18 @@ RSpec.describe LLM::Function::Fiber::Task do
   end
 
   ##
-  # Runs the block inside a reactor and answers with the exception it ended
-  # with. Expectations are made on what this returns rather than inside the
-  # block, because a raise under `Async` is logged and never reaches RSpec - so
-  # an example that asserts in there can pass having measured nothing.
-  #
-  # The interrupt is named rather than left to `rescue => ex`, which reaches
-  # only `StandardError` - and an interrupt sits outside it, so a bare rescue
-  # here would let the very exception the examples are about walk out of the
-  # reactor and fail the example from the outside.
+  # Runs the block inside a reactor and answers what it answered: the
+  # value it returned, or the exception it raised. A task answers a
+  # cancel rather than raising it, so both outcomes are the block's own
+  # and neither is swallowed.
   def react(timeout = 5, &block)
-    error = nil
     Async do |root|
       root.with_timeout(timeout) do
         block.call
       rescue LLM::Interrupt, StandardError => ex
-        error = ex
+        ex
       end
-    end
-    error
+    end.wait
   end
 
   ##
@@ -198,12 +191,12 @@ RSpec.describe LLM::Function::Fiber::Task do
 
       it "leaves the reactor usable" do
         sibling = task_for(quick)
-        error = react do
+        result = react do
           task.wait
           sibling.spawn
           sibling.wait
         end
-        expect(error).to be_nil
+        expect(result).to be_a(LLM::Function::Return)
       end
 
       ##

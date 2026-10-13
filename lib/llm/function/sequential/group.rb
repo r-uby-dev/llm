@@ -52,9 +52,12 @@ module LLM::Function::Sequential
 
     ##
     # @return [Array<LLM::Function::Return>]
+    ##
+    # @see LLM::Function::Group#wait
+    # @return [Array<LLM::Function::Return>]
     def wait
       @owner = Thread.current
-      @tasks.map(&:wait)
+      super
     ensure
       @owner = nil
     end

@@ -119,11 +119,9 @@ class LLM::Function
         spawn unless @mailbox
         id, name, value = mailbox.wait
         if Hash === value and value[:interrupt] and value[:cookie] == @cookie
-          Return.new(id, name, value)
+          LLM::Interrupt.new
         else
-          result = Return.new(id, name, value)
-          @tracer&.on_tool_finish(result:, span: @span)
-          result
+          Return.new(id, name, value)
         end
       end
     end

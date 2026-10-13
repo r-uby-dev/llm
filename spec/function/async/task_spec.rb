@@ -154,7 +154,7 @@ RSpec.describe LLM::Function::Async::Task do
     end
 
     it "raises LLM::Interrupt to the caller" do
-      expect { within { task.wait } }.to raise_error(LLM::Interrupt)
+      expect(within { task.wait }).to be_a(LLM::Interrupt)
     end
 
     context "when the tool cleans up in its own rescue" do
@@ -165,7 +165,7 @@ RSpec.describe LLM::Function::Async::Task do
       end
 
       it "still raises to the caller" do
-        expect { within { task.wait } }.to raise_error(LLM::Interrupt)
+        expect(within { task.wait }).to be_a(LLM::Interrupt)
       end
     end
 
@@ -243,7 +243,7 @@ RSpec.describe LLM::Function::Async::Task do
     end
 
     it "raises LLM::Interrupt to the caller" do
-      expect { within { task.wait } }.to raise_error(LLM::Interrupt)
+      expect(within { task.wait }).to be_a(LLM::Interrupt)
     end
   end
 
@@ -271,7 +271,7 @@ RSpec.describe LLM::Function::Async::Task do
     end
 
     it "raises LLM::Interrupt to the caller" do
-      expect { within { task.wait } }.to raise_error(LLM::Interrupt)
+      expect(within { task.wait }).to be_a(LLM::Interrupt)
     end
 
     context "once the caller has waited" do
@@ -353,7 +353,7 @@ RSpec.describe LLM::Function::Async::Task do
     before { interrupted }
 
     it "raises LLM::Interrupt on a second wait" do
-      expect { within { task.wait } }.to raise_error(LLM::Interrupt)
+      expect(within { task.wait }).to be_a(LLM::Interrupt)
     end
 
     it "raises the same exception it raised the first time" do

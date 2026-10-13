@@ -36,10 +36,10 @@ module LLM::Function::Fiber
     alias_method :cancel!, :interrupt!
 
     ##
+    # @see LLM::Function::Group#wait
     # @return [Array<LLM::Function::Return>]
     def wait
-      spawn unless @spawned
-      @tasks.map(&:wait)
+      super
     end
     alias_method :value, :wait
   end
