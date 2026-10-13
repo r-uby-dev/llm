@@ -49,5 +49,6 @@ module LLM::Function::Async
     ensure
       @reactor.stop
     end
+    alias_method :value, :wait
   end
 end

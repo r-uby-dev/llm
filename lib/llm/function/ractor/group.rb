@@ -38,19 +38,15 @@ module LLM::Function::Ractor
     # @raise [LLM::Interrupt]
     #  When one or more tool calls were interrupted
     # @return [Array<LLM::Function::Return>]
+    ##
+    # @see LLM::Function::Group#wait
+    # @note The cookie judgement is not here any more: the task that
+    #  reads the mailbox is what knows whether a message names its own
+    #  call, so it answers with an {LLM::Interrupt} when it does and the
+    #  shared wait reports it.
+    # @return [Array<LLM::Function::Return>]
     def wait
-      spawn unless @spawned
-      interrupt, results = nil, []
-      @tasks.each do |task|
-        result = task.wait
-        if Hash === result.value and result.value[:interrupt] and result.value[:cookie] == task.cookie
-          interrupt = LLM::Interrupt.new
-          task.tracer&.on_tool_interrupt(ex: interrupt, span: task.span)
-        else
-          results << result
-        end
-      end
-      interrupt ? raise(interrupt) : results
+      super
     end
     alias_method :value, :wait
   end

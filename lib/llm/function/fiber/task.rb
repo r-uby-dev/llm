@@ -191,13 +191,5 @@ module LLM::Function::Fiber
     def group_class
       LLM::Function::Fiber::Group
     end
-
-    private
-
-    ##
-    # @return [Object]
-    def span
-      @span
-    end
   end
 end

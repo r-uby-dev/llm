@@ -142,7 +142,11 @@ RSpec.describe LLM::Function do
       before do
         tool.tracer = tracer
         tool.model = "gpt-4.1"
-        task.wait
+        ##
+        # The group is what reports the call: a task answers with its
+        # outcome, and the frame that knows the call was interrupted is
+        # the frame that tells the tracer.
+        task.group_class.new([task]).wait
       end
 
       it "traces the tool start" do
