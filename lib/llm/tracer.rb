@@ -200,22 +200,19 @@ module LLM
     end
 
     ##
-    # Called after a local tool/function succeeds.
+    # Called after a tool/function succeeds.
     #
-    # It is called when the caller waits on the call rather than when the
-    # call itself ended, and on that caller's thread rather than the thread
-    # that ran the tool. A group reports its calls in the order they were
-    # made, and `finished_at` is what recovers the order they finished in.
+    # This method is called once per tool - in a batch -
+    # and only after all tools have been spawned and
+    # waited on. The `finished_at` parameter lets you
+    # know when a tool finished (as a monotonic clock).
+    #
     # @param [LLM::Function::Return] result
     #  The tool return object.
     # @param [Object, nil] span
     #  The span/context object returned by {#on_tool_start}.
     # @param [Float, nil] finished_at
-    #  When the call itself ended, as `Process::CLOCK_MONOTONIC` seconds.
-    #  That clock is the one a duration is measured on, so a start read from
-    #  it in {#on_tool_start} is what this is subtracted from, and a `Time`
-    #  is not. It is nil for a call that never ran, because a guard blocked
-    #  it or its tool could not be built.
+    #  When the tool returned, as a monotonic clock.
     # @return [void]
     def on_tool_finish(result:, span:, finished_at:)
       raise NotImplementedError, "#{self.class} does not implement '#{__method__}'"
