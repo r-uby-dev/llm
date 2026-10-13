@@ -95,13 +95,17 @@ module LLM
     # @param (see LLM::Tracer#on_tool_error)
     # @return [void]
     def on_tool_error(ex:, **)
+      ##
+      # The return is what a failing call is answered with, so the class
+      # and the message are read from its value: `ex.class` is
+      # `LLM::Function::Return`, which names nothing that went wrong.
       @logger.error(
         tracer: "llm.rb (logger)",
         event: "tool.error",
         provider: provider_name,
         operation: "execute_tool",
-        error_class: ex.class.to_s,
-        error_message: ex.message
+        error_class: ex.value[:type],
+        error_message: ex.value[:message]
       )
     end
 
