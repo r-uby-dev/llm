@@ -31,7 +31,6 @@ module LLM::Function::Fiber
     # @param [Hash] options
     def initialize(fn, options = {})
       super
-      @tracer = options.fetch(:tracer, nil)
     end
 
     ##
