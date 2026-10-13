@@ -98,13 +98,21 @@ RSpec.describe LLM::Tracer::Telemetry do
   end
 
   describe "#on_tool_error" do
-    let(:ex) { RuntimeError.new("yabadabadoo") }
+    let(:ex) { LLM::Function::Return.new("call_1", "tool", {error: true, type: "RuntimeError", message: "yabadabadoo"}) }
     let(:span) { tracer.on_tool_start(id: "call_1", name: "tool", arguments: {q: 1}, model: "gpt-4.1") }
 
     before { tracer.on_tool_error(ex:, span:, started_at: Time.now, finished_at: Time.now) }
 
-    it "records error.type" do
+    it "records the error type the return carries" do
       expect(tracer.spans.last.attributes["error.type"]).to eq("RuntimeError")
+    end
+
+    ##
+    # The failure is read from the return, and a read that raised would
+    # take the span with it: the callback finishes a span it never
+    # finished before.
+    it "finishes the span" do
+      expect(tracer.spans.last.name).to eq("execute_tool tool")
     end
   end
 
