@@ -147,13 +147,12 @@ module LLM::Function::Thread
     # @return [LLM::Function::Return]
     def wait
       return @guarded if @guarded
-      raise result if Exception === result
-      return result.value if result
+      raise @result if Exception === @result
+      return @result.unbox if @result
       spawn unless @thread
       begin
-        value = @thread.value
-        @result = LLM::Object.from(value:)
-        @tracer&.on_tool_finish(result:, span:)
+        @result = LLM::Object.from(unbox: @thread.value)
+        @tracer&.on_tool_finish(result: @result.unbox, span:)
       rescue LLM::Interrupt => ex
         @tracer&.on_tool_interrupt(ex:, span:)
         @result = ex
@@ -163,7 +162,7 @@ module LLM::Function::Thread
         @result = ex
         raise
       end
-      result
+      @result.unbox
     end
     alias_method :value, :wait
 
@@ -174,12 +173,6 @@ module LLM::Function::Thread
     end
 
     private
-
-    ##
-    # @return [LLM::Object]
-    def result
-      @result
-    end
 
     ##
     # @return [Object]
