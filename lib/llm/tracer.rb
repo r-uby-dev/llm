@@ -184,10 +184,16 @@ module LLM
 
     ##
     # Called when a tool is interrupted.
+    #
+    # See {#on_tool_finish} for when it is called, and on which thread.
     # @param [LLM::Interrupt] ex
     #  An instance of {LLM::Interrupt LLM::Interrupt}
     # @param [Object, nil] span
     #  The span/context object returned by {#on_tool_start}
+    # @param [Float, nil] finished_at
+    #  When the call itself ended, as `Process::CLOCK_MONOTONIC` seconds, or
+    #  nil for a call that never ran. See {#on_tool_finish} for the clock,
+    #  and for why a start read from it is what this is subtracted from.
     # @return [void]
     def on_tool_interrupt(ex:, span:, finished_at:)
       raise NotImplementedError, "#{self.class} does not implement '#{__method__}'"
@@ -195,10 +201,21 @@ module LLM
 
     ##
     # Called after a local tool/function succeeds.
+    #
+    # It is called when the caller waits on the call rather than when the
+    # call itself ended, and on that caller's thread rather than the thread
+    # that ran the tool. A group reports its calls in the order they were
+    # made, and `finished_at` is what recovers the order they finished in.
     # @param [LLM::Function::Return] result
     #  The tool return object.
     # @param [Object, nil] span
     #  The span/context object returned by {#on_tool_start}.
+    # @param [Float, nil] finished_at
+    #  When the call itself ended, as `Process::CLOCK_MONOTONIC` seconds.
+    #  That clock is the one a duration is measured on, so a start read from
+    #  it in {#on_tool_start} is what this is subtracted from, and a `Time`
+    #  is not. It is nil for a call that never ran, because a guard blocked
+    #  it or its tool could not be built.
     # @return [void]
     def on_tool_finish(result:, span:, finished_at:)
       raise NotImplementedError, "#{self.class} does not implement '#{__method__}'"
@@ -206,10 +223,23 @@ module LLM
 
     ##
     # Called when a local tool/function raises.
-    # @param [Exception] ex
-    #  The raised error.
+    #
+    # A tool that raises is answered in band: {LLM::Function#call} turns the
+    # exception into a {LLM::Function::Return}, so what arrives here is
+    # usually the return the model was given rather than the exception that
+    # caused it, and an `ex.message` written for the second reads nothing
+    # from the first. See {#on_tool_finish} for when it is called.
+    # @param [Exception, LLM::Function::Return] ex
+    #  The failure: the raised error, or the in-band return that answered
+    #  it. The return carries the exception's class and message in its
+    #  value, under `:type` and `:message`, and does not answer `message`
+    #  itself.
     # @param [Object, nil] span
     #  The span/context object returned by {#on_tool_start}.
+    # @param [Float, nil] finished_at
+    #  When the call itself ended, as `Process::CLOCK_MONOTONIC` seconds, or
+    #  nil for a call that never ran. See {#on_tool_finish} for the clock,
+    #  and for why a start read from it is what this is subtracted from.
     # @return [void]
     def on_tool_error(ex:, span:, finished_at:)
       raise NotImplementedError, "#{self.class} does not implement '#{__method__}'"
