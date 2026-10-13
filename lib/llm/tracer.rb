@@ -203,16 +203,18 @@ module LLM
     # Called after a tool/function succeeds.
     #
     # This method is called once per tool - in a batch -
-    # and only after all tools have been spawned and
-    # waited on. The `finished_at` parameter lets you
-    # know when a tool finished (as a monotonic clock).
+    # and only after all tools have been spawned in parallel
+    # and then waited on sequentially. The `finished_at`
+    # parameter lets you know when a tool has finished
+    # (as a monotonic clock) since it cannot be inferred
+    # from the time the method is called.
     #
     # @param [LLM::Function::Return] result
-    #  The tool return object.
-    # @param [Object, nil] span
-    #  The span/context object returned by {#on_tool_start}.
-    # @param [Float, nil] finished_at
-    #  When the tool returned, as a monotonic clock.
+    #  An {LLM::Function::Return}
+    # @param [Object] span
+    #  The span/context object returned by {#on_tool_start}
+    # @param [Float] finished_at
+    #  When the tool returned, as a monotonic clock
     # @return [void]
     def on_tool_finish(result:, span:, finished_at:)
       raise NotImplementedError, "#{self.class} does not implement '#{__method__}'"
@@ -221,22 +223,26 @@ module LLM
     ##
     # Called when a local tool/function raises.
     #
-    # A tool that raises is answered in band: {LLM::Function#call} turns the
-    # exception into a {LLM::Function::Return}, so what arrives here is
-    # usually the return the model was given rather than the exception that
-    # caused it, and an `ex.message` written for the second reads nothing
-    # from the first. See {#on_tool_finish} for when it is called.
-    # @param [Exception, LLM::Function::Return] ex
-    #  The failure: the raised error, or the in-band return that answered
-    #  it. The return carries the exception's class and message in its
-    #  value, under `:type` and `:message`, and does not answer `message`
-    #  itself.
+    # This method is called once per tool - in a batch -
+    # and only after all tools have been spawned in parallel
+    # and then waited on sequentially. The `finished_at`
+    # parameter lets you know when a tool has finished
+    # (as a monotonic clock) since it cannot be inferred
+    # from the time the method is called.
+    #
+    # @note
+    #  This method provides the callback with
+    #  an {LLM::Function::Return} object that
+    #  encapsulates the exception a tool failed
+    #  with. It does _not_ provide an Exception
+    #  object.
+    #
+    # @param [LLM::Function::Return] ex
+    #  An {LLM::Function::Return} that holds the error
     # @param [Object, nil] span
     #  The span/context object returned by {#on_tool_start}.
     # @param [Float, nil] finished_at
-    #  When the call itself ended, as `Process::CLOCK_MONOTONIC` seconds, or
-    #  nil for a call that never ran. See {#on_tool_finish} for the clock,
-    #  and for why a start read from it is what this is subtracted from.
+    #  When the tool returned, as a monotonic clock
     # @return [void]
     def on_tool_error(ex:, span:, finished_at:)
       raise NotImplementedError, "#{self.class} does not implement '#{__method__}'"
