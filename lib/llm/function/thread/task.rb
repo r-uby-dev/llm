@@ -26,12 +26,19 @@ module LLM::Function::Thread
     # @param [Hash] options
     def initialize(fn, options = {})
       super
+      @tracer = options.fetch(:tracer, nil)
     end
 
     ##
     # @return [nil]
     def spawn
       return if @guarded
+      @span = @tracer&.on_tool_start(
+        id: @function.id,
+        name: @function.name,
+        arguments: @function.arguments,
+        model: @function.model
+      )
       @ready = Queue.new
       @thread = ::Thread.new do
         ##
@@ -141,7 +148,9 @@ module LLM::Function::Thread
     def wait
       return @guarded if @guarded
       spawn unless @thread
-      @thread.value
+      result = @thread.value
+      @tracer&.on_tool_finish(result:, span: @span)
+      result
     end
     alias_method :value, :wait
 
