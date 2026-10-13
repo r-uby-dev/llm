@@ -156,10 +156,10 @@ module LLM
     # @return (see LLM::Tracer#on_tool_error)
     def on_tool_error(ex:, span:, started_at:, finished_at:)
       return nil unless span
-      attributes = {"error.type" => ex.class.to_s}.compact
+      attributes = {"error.type" => ex.value[:type]}.compact
       attributes.each { span.set_attribute(_1, _2) }
       span.add_event("gen_ai.tool.finish")
-      span.status = ::OpenTelemetry::Trace::Status.error(ex.message)
+      span.status = ::OpenTelemetry::Trace::Status.error(ex.value[:message].to_s)
       span.tap(&:finish)
     end
 
