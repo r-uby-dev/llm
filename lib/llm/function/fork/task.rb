@@ -149,13 +149,8 @@ class LLM::Function
       # Stored in `@result` so a second wait is
       # given the same return as the first call.
       reap
-      @result = LLM::Object.from(
-        unbox: @function.return(
-          error: true,
-          type: EOFError.name,
-          message: "the tool exited unexpectedly"
-        )
-      )
+      val = @function.return(error: true, type: EOFError.name, message: "the tool exited unexpectedly")
+      @result = LLM::Object.from(unbox: val)
       @result.unbox
     ensure
       if @guarded.nil?
