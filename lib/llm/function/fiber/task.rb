@@ -37,6 +37,12 @@ module LLM::Function::Fiber
     ##
     # @return [nil]
     def spawn
+      @span = @tracer&.on_tool_start(
+        id: @function.id,
+        name: @function.name,
+        arguments: @function.arguments,
+        model: @function.model
+      )
       return if @guarded
       if Fiber.scheduler.nil?
         raise ArgumentError, "Fiber concurrency requires Fiber.scheduler"
@@ -50,12 +56,6 @@ module LLM::Function::Fiber
           "cannot be held until the tool starts: it would be delivered " \
           "before the call, and the tool would never run"
       else
-        @span = @tracer&.on_tool_start(
-          id: @function.id,
-          name: @function.name,
-          arguments: @function.arguments,
-          model: @function.model
-        )
         ##
         # The body hands its ending back through a queue, the way
         # `LLM::Function::Async::Task` does, rather than through the fiber.

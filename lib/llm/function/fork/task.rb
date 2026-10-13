@@ -21,11 +21,11 @@ class LLM::Function
     ##
     # @return [LLM::Function::Fork::Task]
     def spawn
-      return if @guarded
       @span = @tracer&.on_tool_start(
         id: @function.id, name: @function.name,
         arguments: @function.arguments, model: @function.model
       )
+      return if @guarded
       @ch = channels
       ##
       # **A cancel that arrived before this is written now, before the fork.**

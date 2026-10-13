@@ -47,11 +47,11 @@ class LLM::Function
     ##
     # @return [LLM::Function::Ractor::Task]
     def spawn
-      return if @guarded
       @span = @tracer&.on_tool_start(
         id: @id, name: @name,
         arguments: @arguments, model: @model
       )
+      return if @guarded
       ##
       # The result is delivered to a ractor of this task's own rather
       # than through its mailbox. The mailbox ractor answers `alive?`

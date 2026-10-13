@@ -69,15 +69,15 @@ module LLM::Function::Async
     # `StandardError`.
     # @return [nil]
     def spawn
-      return if @guarded
-      @queue = Queue.new
-      @alive = !@cancelled
       @span  = @tracer&.on_tool_start(
         id: @function.id,
         name: @function.name,
         arguments: @function.arguments,
         model: @function.model
       )
+      return if @guarded
+      @queue = Queue.new
+      @alive = !@cancelled
       @reactor.submit do
         task = Async::Task.current
         @task = task
