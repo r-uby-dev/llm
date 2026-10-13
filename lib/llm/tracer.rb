@@ -187,7 +187,13 @@ module LLM
     ##
     # Called when a tool is interrupted.
     #
-    # See {#on_tool_finish} for when it is called, and on which thread.
+    # This method is called once per tool - in a batch -
+    # and only after all tools have been spawned in parallel
+    # and then waited on sequentially. The `*_at` parameters
+    # let you know when a tool has started and finished (as a
+    # monotonic clock) since it cannot be inferred from the
+    # time the method is called.
+    #
     # @param [LLM::Interrupt] ex
     #  An instance of {LLM::Interrupt LLM::Interrupt}
     # @param [Object, nil] span
@@ -206,10 +212,10 @@ module LLM
     #
     # This method is called once per tool - in a batch -
     # and only after all tools have been spawned in parallel
-    # and then waited on sequentially. The `finished_at`
-    # parameter lets you know when a tool has finished
-    # (as a monotonic clock) since it cannot be inferred
-    # from the time the method is called.
+    # and then waited on sequentially. The `*_at` parameters
+    # let you know when a tool has started and finished (as a
+    # monotonic clock) since it cannot be inferred from the
+    # time the method is called.
     #
     # @param [LLM::Function::Return] result
     #  An {LLM::Function::Return}
@@ -229,10 +235,10 @@ module LLM
     #
     # This method is called once per tool - in a batch -
     # and only after all tools have been spawned in parallel
-    # and then waited on sequentially. The `finished_at`
-    # parameter lets you know when a tool has finished
-    # (as a monotonic clock) since it cannot be inferred
-    # from the time the method is called.
+    # and then waited on sequentially. The `*_at` parameters
+    # let you know when a tool has started and finished (as a
+    # monotonic clock) since it cannot be inferred from the
+    # time the method is called.
     #
     # @note
     #  This method provides the callback with
