@@ -227,12 +227,6 @@ module LLM::Function::Async
     private
 
     ##
-    # @return [LLM::Object]
-    def result
-      @result
-    end
-
-    ##
     # @return [Object]
     def span
       @span
