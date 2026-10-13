@@ -10,6 +10,11 @@ class LLM::Function
   module Array
     ##
     # Calls all functions in a collection sequentially.
+    #
+    # This is the direct path, and it reports nothing about the calls to a
+    # tracer. The tool callbacks belong to {LLM::Function::Group#wait}, which
+    # is what `task(strategy).wait` builds, so a caller that wants the calls
+    # reported asks for the group.
     # @return [Array<LLM::Function::Return>]
     #  Returns values to be reported back to the LLM.
     def call
