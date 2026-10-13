@@ -55,7 +55,7 @@ RSpec.describe LLM::Tracer::Logger do
 
   describe "#on_tool_error" do
     subject(:output) { io.string }
-    let(:ex) { RuntimeError.new("yabadabadoo") }
+    let(:ex) { LLM::Function::Return.new("call_1", "tool", {error: true, type: "RuntimeError", message: "yabadabadoo"}) }
     before { tracer.on_tool_error(ex:, finished_at: Time.now) }
     it { is_expected.to include("tool.error") }
   end
