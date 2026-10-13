@@ -31,7 +31,6 @@
 #   end
 class LLM::Function
   require_relative "function/registry"
-  require_relative "function/tracing"
   require_relative "function/array"
   require_relative "function/group"
   require_relative "function/sequential/group"
@@ -51,7 +50,6 @@ class LLM::Function
   require_relative "function/ractor/group"
 
   extend LLM::Function::Registry
-  prepend LLM::Function::Tracing
 
   ##
   # Returns strategies that execute in an isolated environment.
