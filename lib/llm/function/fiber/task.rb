@@ -31,6 +31,7 @@ module LLM::Function::Fiber
     # @param [Hash] options
     def initialize(fn, options = {})
       super
+      @tracer = options.fetch(:tracer, nil)
     end
 
     ##
@@ -49,6 +50,12 @@ module LLM::Function::Fiber
           "cannot be held until the tool starts: it would be delivered " \
           "before the call, and the tool would never run"
       else
+        @span = @tracer&.on_tool_start(
+          id: @function.id,
+          name: @function.name,
+          arguments: @function.arguments,
+          model: @function.model
+        )
         ##
         # The body hands its ending back through a queue, the way
         # `LLM::Function::Async::Task` does, rather than through the fiber.
@@ -172,10 +179,20 @@ module LLM::Function::Fiber
     # @return [LLM::Function::Return]
     def wait
       return @guarded if @guarded
+      raise @result.unbox if Exception === @result.unbox
+      return @result.unbox if @result
       spawn unless @fiber
-      @result ||= @queue.pop
-      raise @result if Exception === @result
-      @result
+      @result = LLM::Object.from(unbox: @queue.pop)
+      if LLM::Interrupt === @result.unbox
+        @tracer&.on_tool_interrupt(ex: @result.unbox, span:)
+        raise @result.unbox
+      elsif Exception === @result.unbox
+        @tracer&.on_tool_error(ex: @result.unbox, span:)
+        raise @result.unbox
+      else
+        @tracer&.on_tool_finish(result: @result.unbox, span:)
+        @result.unbox
+      end
     end
     alias_method :value, :wait
 
@@ -183,6 +200,14 @@ module LLM::Function::Fiber
     # @return [Class]
     def group_class
       LLM::Function::Fiber::Group
+    end
+
+    private
+
+    ##
+    # @return [Object]
+    def span
+      @span
     end
   end
 end
