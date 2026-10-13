@@ -51,9 +51,6 @@ module LLM
     end
 
     ##
-    # @note An "ending" describes the method
-    #  that matches the end of a tool call, and it can be one of:
-    #  on_tool_finish, on_tool_error or on_tool_interrupt.
     # @param (see LLM::Tracer#on_tool_start)
     # @return [LLM::Object]
     #  The span an ending is handed, with the call's id and name
@@ -73,18 +70,10 @@ module LLM
     # @param (see LLM::Tracer#on_tool_error)
     # @return [void]
     def on_tool_error(ex:, **)
-      ##
-      # The failure is the return's, and its value is what names it:
-      # `ex.class` is `LLM::Function::Return` and says nothing about what
-      # went wrong.
       @io.puts "#{timestamp} tool error #{ex.value[:type]}: #{ex.value[:message]}"
     end
 
     ##
-    # @note A tool call that has been interrupted is closed
-    #  by this callback. It receives a span that it can match
-    #  back to `on_tool_start`. In the case of this tracer
-    #  we just log values, though.
     # @param (see LLM::Tracer#on_tool_interrupt)
     # @return [void]
     def on_tool_interrupt(ex:, span:, **)
