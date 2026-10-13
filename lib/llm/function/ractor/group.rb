@@ -35,15 +35,7 @@ module LLM::Function::Ractor
     alias_method :cancel!, :interrupt!
 
     ##
-    # @raise [LLM::Interrupt]
-    #  When one or more tool calls were interrupted
-    # @return [Array<LLM::Function::Return>]
-    ##
     # @see LLM::Function::Group#wait
-    # @note The cookie judgement is not here any more: the task that
-    #  reads the mailbox is what knows whether a message names its own
-    #  call, so it answers with an {LLM::Interrupt} when it does and the
-    #  shared wait reports it.
     # @return [Array<LLM::Function::Return>]
     def wait
       super
