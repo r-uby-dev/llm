@@ -36,13 +36,9 @@ module LLM::Function::Fork
 
     ##
     # @see LLM::Function::Group#wait
-    # @note This is not the shared wait: a fork's task reports
-    #  the call itself, because the ending it answers with is a
-    #  raise rather than an outcome.
     # @return [Array<LLM::Function::Return>]
     def wait
-      spawn unless @spawned
-      @tasks.map(&:wait)
+      super
     end
     alias_method :value, :wait
   end
