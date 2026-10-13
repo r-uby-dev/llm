@@ -160,8 +160,10 @@ RSpec.describe LLM::Function do
 
       it "traces the tool finish" do
         expect(tracer).to have_received(:on_tool_finish).with(
-          result: have_attributes(id: "call_1", name: "system", value: {"ok" => true}),
-          span: :span
+          hash_including(
+            result: have_attributes(id: "call_1", name: "system", value: {"ok" => true}),
+            span: :span
+          )
         )
       end
     end
@@ -230,8 +232,10 @@ RSpec.describe LLM::Function do
 
         it "traces the tool finish" do
           expect(tracer).to have_received(:on_tool_finish).with(
-            result: have_attributes(id: "call_1", name: "system", value: {"ok" => true}),
-            span: :span
+            hash_including(
+              result: have_attributes(id: "call_1", name: "system", value: {"ok" => true}),
+              span: :span
+            )
           )
         end
       end

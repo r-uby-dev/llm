@@ -18,8 +18,10 @@ RSpec.describe LLM::Tracer::Null do
 
     it "noops on tool callbacks" do
       expect(tracer.on_tool_start(id: "call_1", name: "tool", arguments: {})).to be_nil
-      expect(tracer.on_tool_finish(result: LLM::Function::Return.new("call_1", "tool", {}))).to be_nil
-      expect(tracer.on_tool_error(ex:, span: nil)).to be_nil
+      expect(tracer.on_tool_finish(
+        result: LLM::Function::Return.new("call_1", "tool", {}), finished_at: Time.now
+      )).to be_nil
+      expect(tracer.on_tool_error(ex:, span: nil, finished_at: Time.now)).to be_nil
     end
   end
 end

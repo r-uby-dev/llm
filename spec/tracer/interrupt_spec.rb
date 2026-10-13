@@ -44,17 +44,17 @@ RSpec.describe "the tracer's interrupt hook" do
         span
       end
 
-      def on_tool_interrupt(ex:, span:)
+      def on_tool_interrupt(ex:, span:, finished_at:)
         @interrupts << [ex, span]
         nil
       end
 
-      def on_tool_finish(result:, span:)
+      def on_tool_finish(result:, span:, finished_at:)
         @finishes << span
         nil
       end
 
-      def on_tool_error(ex:, span:)
+      def on_tool_error(ex:, span:, finished_at:)
         nil
       end
 

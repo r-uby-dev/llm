@@ -89,7 +89,7 @@ RSpec.describe LLM::Tracer::Telemetry do
     let(:span) { tracer.on_tool_start(id: "call_1", name: "tool", arguments: {q: 1}, model: "gpt-4.1") }
     let(:result) { LLM::Function::Return.new("call_1", "tool", {ok: true}) }
 
-    before { tracer.on_tool_finish(result:, span:) }
+    before { tracer.on_tool_finish(result:, span:, finished_at: Time.now) }
 
     it "finishes the span" do
       expect(span.name).to eq("execute_tool tool")
@@ -101,7 +101,7 @@ RSpec.describe LLM::Tracer::Telemetry do
     let(:ex) { RuntimeError.new("yabadabadoo") }
     let(:span) { tracer.on_tool_start(id: "call_1", name: "tool", arguments: {q: 1}, model: "gpt-4.1") }
 
-    before { tracer.on_tool_error(ex:, span:) }
+    before { tracer.on_tool_error(ex:, span:, finished_at: Time.now) }
 
     it "records error.type" do
       expect(tracer.spans.last.attributes["error.type"]).to eq("RuntimeError")
@@ -112,7 +112,7 @@ RSpec.describe LLM::Tracer::Telemetry do
     let(:ex) { LLM::Interrupt.new }
     let(:span) { tracer.on_tool_start(id: "call_1", name: "tool", arguments: {q: 1}, model: "gpt-4.1") }
 
-    before { tracer.on_tool_interrupt(ex:, span:) }
+    before { tracer.on_tool_interrupt(ex:, span:, finished_at: Time.now) }
 
     it "finishes the span" do
       expect(tracer.spans.last.name).to eq("execute_tool tool")

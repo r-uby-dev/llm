@@ -66,7 +66,7 @@ RSpec.describe LLM::Tracer do
 
     it "raises NotImplementedError" do
       expect {
-        tracer.on_tool_finish(result:, span: nil)
+        tracer.on_tool_finish(result:, span: nil, finished_at: Time.now)
       }.to raise_error(NotImplementedError)
     end
   end
@@ -76,7 +76,7 @@ RSpec.describe LLM::Tracer do
 
     it "raises NotImplementedError" do
       expect {
-        tracer.on_tool_error(ex:, span: nil)
+        tracer.on_tool_error(ex:, span: nil, finished_at: Time.now)
       }.to raise_error(NotImplementedError)
     end
   end
