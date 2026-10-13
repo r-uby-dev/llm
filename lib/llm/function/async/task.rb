@@ -161,40 +161,15 @@ module LLM::Function::Async
     alias_method :cancel!, :interrupt!
 
     ##
-    # Wait for the result queue to contain a value.
-    #
-    # It stops the reactor on the way out, which is also where a cancel's
-    # cost is paid: `interrupt!` is a message and a return like every other
-    # strategy's, and a tool that will not stop meets the join and the kill
-    # here rather than in the caller's cancel.
-    #
-    # **A second wait is answered from what the first one took.** `pop` takes
-    # the item, so holding it is what makes a task answerable more than once -
-    # which is what `Thread#value` does for the other in-process strategy, and
-    # what the ractor's task is asserted to do. The exception case is held the
-    # same way, so a call that was interrupted answers on every wait rather
-    # than blocking on an empty queue.
-    #
-    # What it answers is the call's outcome, an `LLM::Interrupt` included: a
-    # cancel is handed back rather than raised, held like any other result,
-    # and the group that waits on this task is what raises it once every call
-    # has been reported. A `StandardError` does not travel this way, because
-    # `function.call` answers one as a return and a hook that fails in the
-    # block's `ensure` fails inside the reactor, where the caller does not
-    # hear it. So an exception here is a cancel, whether it arrived before
-    # the call or during it.
-    #
-    # The guarded path returns before any of that, so a task whose guard
-    # blocked it does not stop a reactor it never used - which matters in a
-    # group, where the reactor is not its own.
-    # @return [LLM::Function::Return, LLM::Interrupt]
+    # @see LLM::Function::Task#wait
+    # @return (see LLM::Function::Task#wait)
     def wait
       return @guarded if @guarded
       return @result.unbox if @result
       begin
         spawn unless @queue
-        @alive = false
         @result = LLM::Object.from(unbox: @queue.pop)
+        @alive = false
         @result.unbox
       ensure
         @reactor&.stop
