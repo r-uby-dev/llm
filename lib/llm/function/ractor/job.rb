@@ -72,6 +72,7 @@ class LLM::Function
 
     def spawn
       @tool = ::Ractor.new(@mailbox, @runner_class, @id, @name, @arguments, @cookie) do |mailbox, runner_class, id, name, arguments, cookie|
+        finished_at = -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) }
         ##
         # Before the watcher exists, because an interrupt can arrive
         # first: it is a message, and it waits in the inbox until the
@@ -128,11 +129,11 @@ class LLM::Function
         # work is done is a no-op rather than a reason to throw the
         # result away.
         window.finished!
-        mailbox.send([:done, id, name, result])
+        mailbox.send([:done, id, name, result, finished_at.()])
       rescue LLM::Interrupt
-        mailbox.send([:done, id, name, {interrupt: true, cookie:}])
+        mailbox.send([:done, id, name, {interrupt: true, cookie:}, finished_at.()])
       rescue => ex
-        mailbox.send([:done, id, name, {error: true, type: ex.class.name, message: ex.message}])
+        mailbox.send([:done, id, name, {error: true, type: ex.class.name, message: ex.message}, finished_at.()])
       end
     end
   end

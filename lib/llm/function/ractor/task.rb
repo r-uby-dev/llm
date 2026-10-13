@@ -116,7 +116,7 @@ class LLM::Function
       return @guarded if @guarded
       @result ||= begin
         spawn unless @mailbox
-        id, name, value = mailbox.wait
+        id, name, value, @finished_at = mailbox.wait
         if Hash === value and value[:interrupt] and value[:cookie] == @cookie
           LLM::Interrupt.new
         else
