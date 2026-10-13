@@ -213,7 +213,10 @@ RSpec.describe LLM::Function do
         before do
           tool.tracer = tracer
           tool.model = "gpt-4.1"
-          task.wait
+          ##
+          # The group is what reports a fork's call, because a fork's
+          # task answers from the parent rather than the child.
+          task.group_class.new([task]).wait
         end
 
         it "traces the tool start" do
@@ -286,8 +289,8 @@ RSpec.describe LLM::Function do
             brittle_task.interrupt!
           end
 
-          it "propagates LLM::Interrupt" do
-            expect { brittle_task.wait }.to raise_error(LLM::Interrupt)
+          it "answers with LLM::Interrupt" do
+            expect(brittle_task.wait).to be_a(LLM::Interrupt)
           end
         end
       end

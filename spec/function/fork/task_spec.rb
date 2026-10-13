@@ -238,8 +238,9 @@ RSpec.describe LLM::Function::Fork::Task do
   # wait re-raises that same one rather than reading a channel that has gone.
   describe "a call that was interrupted" do
     let(:task) { task_for(holding_tool, "call_2", tracer:) }
-    let(:first) { raised { within(task:) { task.wait } } }
-    let(:second) { raised { within(task:) { task.wait } } }
+    let(:group) { task.group_class.new([task]) }
+    let(:first) { within(task:) { task.wait } }
+    let(:second) { within(task:) { task.wait } }
 
     before do
       task.spawn
@@ -247,15 +248,15 @@ RSpec.describe LLM::Function::Fork::Task do
       first
     end
 
-    it "raises LLM::Interrupt on the first wait" do
+    it "answers with LLM::Interrupt on the first wait" do
       expect(first).to be_a(LLM::Interrupt)
     end
 
-    it "raises LLM::Interrupt on a second wait" do
+    it "answers with LLM::Interrupt on a second wait" do
       expect(second).to be_a(LLM::Interrupt)
     end
 
-    it "raises the same exception the first one raised" do
+    it "answers the same exception the first one answered" do
       expect(second).to equal(first)
     end
 
@@ -263,8 +264,8 @@ RSpec.describe LLM::Function::Fork::Task do
     # The ending is the call's and the waits are the caller's, so a second wait
     # that re-raises the same exception is not a second ending - which is why
     # the announcement is made where the exception is built.
-    it "announces the interrupt once, however many times it is waited on" do
-      second
+    it "announces the interrupt where the group waits" do
+      raised { group.wait }
       expect(tracer.interrupts.size).to eq(1)
     end
   end
@@ -312,7 +313,7 @@ RSpec.describe LLM::Function::Fork::Task do
     end
 
     it "gives the caller LLM::Interrupt" do
-      expect(error).to be_a(LLM::Interrupt)
+      expect(within(task:) { task.wait }).to be_a(LLM::Interrupt)
     end
   end
 
