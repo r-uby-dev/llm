@@ -196,21 +196,21 @@ module LLM::Function::Async
     # @return [LLM::Function::Return]
     def wait
       return @guarded if @guarded
-      raise @result if Exception === @result
-      return @result.value if @result
+      raise @result.unbox if Exception === @result&.unbox
+      return @result.unbox if @result
       begin
         spawn unless @queue
-        @result = LLM::Object.from(value: @queue.pop)
-        @alive = false
-        if LLM::Interrupt === @result
-          @tracer&.on_tool_interrupt(ex: @result, span:)
-          raise(@result)
-        elsif Exception === @result
-          @tracer&.on_tool_error(ex: @result, span:)
-          raise(@result)
+        @result = LLM::Object.from(unbox: @queue.pop)
+        @alive  = false
+        if LLM::Interrupt === @result.unbox
+          @tracer&.on_tool_interrupt(ex: @result.unbox, span:)
+          raise(@result.unbox)
+        elsif Exception === @result.unbox
+          @tracer&.on_tool_error(ex: @result.unbox, span:)
+          raise(@result.unbox)
         else
-          @tracer&.on_tool_finish(result:, span:)
-          @result
+          @tracer&.on_tool_finish(result: @result.unbox, span:)
+          @result.unbox
         end
       ensure
         @reactor&.stop
