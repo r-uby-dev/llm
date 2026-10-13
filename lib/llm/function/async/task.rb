@@ -16,6 +16,7 @@ module LLM::Function::Async
     # @option options [LLM::Function::Async::Reactor] :reactor
     def initialize(fn, options = {})
       super
+      @tracer = options.fetch(:tracer, nil)
       @reactor = options[:reactor]
     end
 
@@ -71,6 +72,12 @@ module LLM::Function::Async
       return if @guarded
       @queue = Queue.new
       @alive = !@cancelled
+      @span  = @tracer&.on_tool_start(
+        id: @function.id,
+        name: @function.name,
+        arguments: @function.arguments,
+        model: @function.model
+      )
       @reactor.submit do
         task = Async::Task.current
         @task = task
@@ -189,12 +196,22 @@ module LLM::Function::Async
     # @return [LLM::Function::Return]
     def wait
       return @guarded if @guarded
+      raise @result if Exception === @result
+      return @result.value if @result
       begin
         spawn unless @queue
-        @result ||= @queue.pop
+        @result = LLM::Object.from(value: @queue.pop)
         @alive = false
-        raise @result if Exception === @result
-        @result
+        if LLM::Interrupt === @result
+          @tracer&.on_tool_interrupt(ex: @result, span:)
+          raise(@result)
+        elsif Exception === @result
+          @tracer&.on_tool_error(ex: @result, span:)
+          raise(@result)
+        else
+          @tracer&.on_tool_finish(result:, span:)
+          @result
+        end
       ensure
         @reactor&.stop
       end
@@ -205,6 +222,20 @@ module LLM::Function::Async
     # @return [Class]
     def group_class
       LLM::Function::Async::Group
+    end
+
+    private
+
+    ##
+    # @return [LLM::Object]
+    def result
+      @result
+    end
+
+    ##
+    # @return [Object]
+    def span
+      @span
     end
   end
 end
