@@ -147,9 +147,9 @@ module LLM::Function::Thread
     # @return [LLM::Function::Return]
     def wait
       return @guarded if @guarded
-      return @result if @result
+      return @result.value if @result
       spawn unless @thread
-      @result = @thread.value
+      @result = LLM::Object.from(value: @thread.value)
       @tracer&.on_tool_finish(result: @result, span: @span)
       @result
     end
