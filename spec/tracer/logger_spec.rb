@@ -49,14 +49,14 @@ RSpec.describe LLM::Tracer::Logger do
   describe "#on_tool_finish" do
     subject(:output) { io.string }
     let(:result) { LLM::Function::Return.new("call_1", "tool", {ok: true}) }
-    before { tracer.on_tool_finish(result:, finished_at: Time.now) }
+    before { tracer.on_tool_finish(result:, started_at: Time.now, finished_at: Time.now) }
     it { is_expected.to include("tool.finish") }
   end
 
   describe "#on_tool_error" do
     subject(:output) { io.string }
     let(:ex) { LLM::Function::Return.new("call_1", "tool", {error: true, type: "RuntimeError", message: "yabadabadoo"}) }
-    before { tracer.on_tool_error(ex:, finished_at: Time.now) }
+    before { tracer.on_tool_error(ex:, started_at: Time.now, finished_at: Time.now) }
     it { is_expected.to include("tool.error") }
   end
 
@@ -64,7 +64,7 @@ RSpec.describe LLM::Tracer::Logger do
     subject(:output) { io.string }
     let(:span) { LLM::Object.from(id: "call_1", name: "tool") }
     let(:ex) { LLM::Interrupt.new }
-    before { tracer.on_tool_interrupt(ex:, span:, finished_at: Time.now) }
+    before { tracer.on_tool_interrupt(ex:, span:, started_at: Time.now, finished_at: Time.now) }
 
     it { is_expected.to include("tool.interrupt") }
 

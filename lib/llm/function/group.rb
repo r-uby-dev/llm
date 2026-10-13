@@ -48,15 +48,15 @@ class LLM::Function
       spawn unless @spawned
       interrupt = nil
       vals = @tasks.map do |task|
-        val, finished_at = task.wait, task.finished_at
+        val, started_at, finished_at = task.wait, task.started_at, task.finished_at
         if LLM::Interrupt === val
           interrupt = val
-          task.tracer&.on_tool_interrupt(ex: val, span: task.span, finished_at:)
+          task.tracer&.on_tool_interrupt(ex: val, span: task.span, started_at:, finished_at:)
         else
           if val.error?
-            task.tracer&.on_tool_error(ex: val, span: task.span, finished_at:)
+            task.tracer&.on_tool_error(ex: val, span: task.span, started_at:, finished_at:)
           else
-            task.tracer&.on_tool_finish(result: val, span: task.span, finished_at:)
+            task.tracer&.on_tool_finish(result: val, span: task.span, started_at:, finished_at:)
           end
           val
         end

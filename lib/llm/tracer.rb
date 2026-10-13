@@ -195,7 +195,7 @@ module LLM
     #  nil for a call that never ran. See {#on_tool_finish} for the clock,
     #  and for why a start read from it is what this is subtracted from.
     # @return [void]
-    def on_tool_interrupt(ex:, span:, finished_at:)
+    def on_tool_interrupt(ex:, span:, started_at:, finished_at:)
       raise NotImplementedError, "#{self.class} does not implement '#{__method__}'"
     end
 
@@ -216,7 +216,7 @@ module LLM
     # @param [Float] finished_at
     #  When the tool returned, as a monotonic clock
     # @return [void]
-    def on_tool_finish(result:, span:, finished_at:)
+    def on_tool_finish(result:, span:, started_at:, finished_at:)
       raise NotImplementedError, "#{self.class} does not implement '#{__method__}'"
     end
 
@@ -244,7 +244,7 @@ module LLM
     # @param [Float, nil] finished_at
     #  When the tool returned, as a monotonic clock
     # @return [void]
-    def on_tool_error(ex:, span:, finished_at:)
+    def on_tool_error(ex:, span:, started_at:, finished_at:)
       raise NotImplementedError, "#{self.class} does not implement '#{__method__}'"
     end
 

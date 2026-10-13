@@ -38,17 +38,17 @@ RSpec.describe LLM::Tracer::Multi do
         "#{@span_prefix}:tool"
       end
 
-      def on_tool_interrupt(ex:, span:, finished_at:)
+      def on_tool_interrupt(ex:, span:, started_at:, finished_at:)
         @calls << [:on_tool_interrupt, {ex:, span:}]
         nil
       end
 
-      def on_tool_finish(result:, span:, finished_at:)
+      def on_tool_finish(result:, span:, started_at:, finished_at:)
         @calls << [:on_tool_finish, {result:, span:}]
         nil
       end
 
-      def on_tool_error(ex:, span:, finished_at:)
+      def on_tool_error(ex:, span:, started_at:, finished_at:)
         @calls << [:on_tool_error, {ex:, span:}]
         nil
       end
@@ -140,7 +140,7 @@ RSpec.describe LLM::Tracer::Multi do
       spans = multi.on_tool_start(id: "call_1", name: "tool", arguments: {q: 1}, model: "gpt-4.1")
       expect(spans).to eq(["a:tool", "b:tool"])
 
-      multi.on_tool_finish(result:, span: spans, finished_at: Time.now)
+      multi.on_tool_finish(result:, span: spans, started_at: Time.now, finished_at: Time.now)
 
       finish_a = tracer_a.calls.find { |name,| name == :on_tool_finish }
       expect(finish_a[1][:span]).to eq("a:tool")
@@ -152,8 +152,8 @@ RSpec.describe LLM::Tracer::Multi do
       interrupt = LLM::Interrupt.new("stop")
       ex = RuntimeError.new("boom")
 
-      expect { multi.on_tool_interrupt(ex: interrupt, span: spans, finished_at: Time.now) }.not_to raise_error
-      multi.on_tool_error(ex:, span: spans, finished_at: Time.now)
+      expect { multi.on_tool_interrupt(ex: interrupt, span: spans, started_at: Time.now, finished_at: Time.now) }.not_to raise_error
+      multi.on_tool_error(ex:, span: spans, started_at: Time.now, finished_at: Time.now)
 
       expect(tracer_a.calls.map(&:first)).to include(:on_tool_interrupt, :on_tool_error)
       error_a = tracer_a.calls.find { |name,| name == :on_tool_error }

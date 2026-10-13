@@ -160,16 +160,16 @@ RSpec.describe LLM::Function::Fork::Task do
         "span:#{id}"
       end
 
-      def on_tool_interrupt(ex:, span:, finished_at:)
+      def on_tool_interrupt(ex:, span:, started_at:, finished_at:)
         @interrupts << [ex, span]
         nil
       end
 
-      def on_tool_finish(result:, span:, finished_at:)
+      def on_tool_finish(result:, span:, started_at:, finished_at:)
         nil
       end
 
-      def on_tool_error(ex:, span:, finished_at:)
+      def on_tool_error(ex:, span:, started_at:, finished_at:)
         nil
       end
     end

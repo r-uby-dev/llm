@@ -74,27 +74,27 @@ class LLM::Tracer
     ##
     # @param (see LLM::Tracer#on_tool_interrupt)
     # @return [void]
-    def on_tool_interrupt(ex:, span:, finished_at:)
+    def on_tool_interrupt(ex:, span:, started_at:, finished_at:)
       span.each.with_index do |s, i|
-        @tracers[i].on_tool_interrupt(ex:, span: s, finished_at:)
+        @tracers[i].on_tool_interrupt(ex:, span: s, started_at:, finished_at:)
       end
     end
 
     ##
     # @param (see LLM::Tracer#on_tool_finish)
     # @return [void]
-    def on_tool_finish(result:, span:, finished_at:)
+    def on_tool_finish(result:, span:, started_at:, finished_at:)
       span.each.with_index do |s, i|
-        @tracers[i].on_tool_finish(result:, span: s, finished_at:)
+        @tracers[i].on_tool_finish(result:, span: s, started_at:, finished_at:)
       end
     end
 
     ##
     # @param (see LLM::Tracer#on_tool_error)
     # @return [void]
-    def on_tool_error(ex:, span:, finished_at:)
+    def on_tool_error(ex:, span:, started_at:, finished_at:)
       span.each.with_index do |s, i|
-        @tracers[i].on_tool_error(ex:, span: s, finished_at:)
+        @tracers[i].on_tool_error(ex:, span: s, started_at:, finished_at:)
       end
     end
 
