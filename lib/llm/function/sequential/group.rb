@@ -51,8 +51,6 @@ module LLM::Function::Sequential
     alias_method :cancel!, :interrupt!
 
     ##
-    # @return [Array<LLM::Function::Return>]
-    ##
     # @see LLM::Function::Group#wait
     # @return [Array<LLM::Function::Return>]
     def wait
