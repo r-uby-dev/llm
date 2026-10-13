@@ -136,7 +136,7 @@ class LLM::Function
       return @guarded if @guarded
       return @result.unbox if @result
       spawn unless @spawned
-      kind, data = @ch.result.recv
+      kind, data, @finished_at = @ch.result.recv
       @result = case kind
                 when :interrupt then LLM::Object.from(unbox: LLM::Interrupt.new)
                 when :result then LLM::Object.from(unbox: Return.new(data[:id], data[:name], data[:value]))

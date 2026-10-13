@@ -40,11 +40,11 @@ class LLM::Function
       # result is written, so an interrupt that arrives once the work is
       # done is a no-op rather than a reason to throw the result away.
       @window.finished!
-      @ch.result.write([:result, result])
+      @ch.result.write([:result, result, finished_at])
     rescue LLM::Interrupt
-      @ch.result.write([:interrupt])
+      @ch.result.write([:interrupt, nil, finished_at])
     rescue => ex
-      @ch.result.write([:result, error(ex)])
+      @ch.result.write([:result, error(ex), finished_at])
     ensure
       ##
       # For the paths above that did not reach the line, and nil-safe for
@@ -112,6 +112,10 @@ class LLM::Function
       end
       ready.pop
       thread
+    end
+
+    def finished_at
+      Process.clock_gettime(Process::CLOCK_MONOTONIC)
     end
   end
 end
