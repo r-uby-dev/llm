@@ -160,11 +160,13 @@ module LLM::Function::Fiber
     # what the first one took - the same way `Thread#value` answers, and the
     # way `LLM::Function::Ractor::Task` is expected to.
     #
-    # Anything that is an exception is raised rather than returned. An
-    # interrupt is the usual one: a held cancel arrives here as the exception
-    # the block ended with, and so does one raised at a call that was already
-    # running.
-    # @return [LLM::Function::Return]
+    # What it answers is the call's outcome, an `LLM::Interrupt` included: a
+    # cancel is handed back rather than raised, held like any other result,
+    # and the group that waits on this task is what raises it once every call
+    # has been reported. A `StandardError` does not travel this way, because
+    # `function.call` answers one as a return, so an exception here is a
+    # cancel whether it arrived before the call or during it.
+    # @return [LLM::Function::Return, LLM::Interrupt]
     def wait
       return @guarded if @guarded
       return @result.unbox if @result
