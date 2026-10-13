@@ -318,7 +318,7 @@ class LLM::Function
     # {LLM::Function.isolated} stays lazy on purpose, because there the
     # tool is built in the child process or the ractor and this instance
     # is not the one that runs.
-    options = options.merge(guarded: options[:guarded] || resolve(strategy))
+    options = options.merge(tracer:, guarded: options[:guarded] || resolve(strategy))
     case strategy
     when :sequential
       Sequential::Task.new(self, options)

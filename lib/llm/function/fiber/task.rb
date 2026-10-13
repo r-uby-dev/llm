@@ -179,7 +179,7 @@ module LLM::Function::Fiber
     # @return [LLM::Function::Return]
     def wait
       return @guarded if @guarded
-      raise @result.unbox if Exception === @result.unbox
+      raise @result.unbox if Exception === @result&.unbox
       return @result.unbox if @result
       spawn unless @fiber
       @result = LLM::Object.from(unbox: @queue.pop)
