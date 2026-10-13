@@ -153,20 +153,8 @@ module LLM::Function::Fiber
     alias_method :cancel!, :interrupt!
 
     ##
-    # Wait for the body to hand its result back.
-    #
-    # **It answers more than once.** `Queue#pop` takes the item, so the value
-    # is kept rather than popped again, and a second wait is answered from
-    # what the first one took - the same way `Thread#value` answers, and the
-    # way `LLM::Function::Ractor::Task` is expected to.
-    #
-    # What it answers is the call's outcome, an `LLM::Interrupt` included: a
-    # cancel is handed back rather than raised, held like any other result,
-    # and the group that waits on this task is what raises it once every call
-    # has been reported. A `StandardError` does not travel this way, because
-    # `function.call` answers one as a return, so an exception here is a
-    # cancel whether it arrived before the call or during it.
-    # @return [LLM::Function::Return, LLM::Interrupt]
+    # @see LLM::Function::Task#wait
+    # @return (see LLM::Function::Task#wait)
     def wait
       return @guarded if @guarded
       return @result.unbox if @result
