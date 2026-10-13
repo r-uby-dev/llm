@@ -147,10 +147,11 @@ module LLM::Function::Thread
     # @return [LLM::Function::Return]
     def wait
       return @guarded if @guarded
+      return @result if @result
       spawn unless @thread
-      result = @thread.value
-      @tracer&.on_tool_finish(result:, span: @span)
-      result
+      @result = @thread.value
+      @tracer&.on_tool_finish(result: @result, span: @span)
+      @result
     end
     alias_method :value, :wait
 
