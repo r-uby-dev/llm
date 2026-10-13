@@ -172,17 +172,22 @@ module LLM::Function::Async
     # the item, so holding it is what makes a task answerable more than once -
     # which is what `Thread#value` does for the other in-process strategy, and
     # what the ractor's task is asserted to do. The exception case is held the
-    # same way, so a call that was interrupted re-raises on every wait rather
-    # than raising once and then blocking on an empty queue.
+    # same way, so a call that was interrupted answers on every wait rather
+    # than blocking on an empty queue.
     #
-    # Anything that is an exception is raised rather than returned, which is
-    # what `Thread#value` and `Fiber#value` do. An interrupt is the usual
-    # one, and a hook that raised from the block's `ensure` is the other.
+    # What it answers is the call's outcome, an `LLM::Interrupt` included: a
+    # cancel is handed back rather than raised, held like any other result,
+    # and the group that waits on this task is what raises it once every call
+    # has been reported. A `StandardError` does not travel this way, because
+    # `function.call` answers one as a return and a hook that fails in the
+    # block's `ensure` fails inside the reactor, where the caller does not
+    # hear it. So an exception here is a cancel, whether it arrived before
+    # the call or during it.
     #
     # The guarded path returns before any of that, so a task whose guard
     # blocked it does not stop a reactor it never used - which matters in a
     # group, where the reactor is not its own.
-    # @return [LLM::Function::Return]
+    # @return [LLM::Function::Return, LLM::Interrupt]
     def wait
       return @guarded if @guarded
       return @result.unbox if @result
