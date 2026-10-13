@@ -72,7 +72,7 @@ RSpec.describe LLM::Tracer do
   end
 
   describe "#on_tool_error" do
-    let(:ex) { RuntimeError.new("yabadabadoo") }
+    let(:ex) { LLM::Function::Return.new("call_1", "tool", {error: true, type: "RuntimeError", message: "yabadabadoo"}) }
 
     it "raises NotImplementedError" do
       expect {
