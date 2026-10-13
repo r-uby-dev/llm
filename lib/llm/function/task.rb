@@ -69,8 +69,14 @@ class LLM::Function
     alias_method :cancel!, :interrupt!
 
     ##
+    # Answers with the call's outcome, once the call has ended.
+    #
+    # A strategy answers rather than raises: an `LLM::Interrupt` is an
+    # outcome like any other, and {LLM::Function::Group#wait} is what raises
+    # it, after it has reported every call. A second wait is answered from
+    # what the first one took.
     # @abstract
-    # @return [LLM::Function::Return]
+    # @return [LLM::Function::Return, LLM::Interrupt]
     def wait
       raise NotImplementedError
     end
