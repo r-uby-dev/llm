@@ -66,6 +66,7 @@ module LLM::Function::Thread
         @window.running!
         function.call
       ensure
+        @finished_at = Time.now
         ##
         # The window closes before the hook runs, so a cancel that arrives
         # once the call has returned finds nothing to interrupt - which is

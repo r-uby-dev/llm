@@ -22,6 +22,11 @@ class LLM::Function
     attr_reader :span
 
     ##
+    # Returns when a task finished, or nil
+    # @return [Time, nil]
+    attr_reader :finished_at
+
+    ##
     # @param [LLM::Function] fn
     # @param [Hash] options
     #  An optional set of options that are specific
@@ -34,6 +39,7 @@ class LLM::Function
       @function = fn
       @guarded = options[:guarded]
       @tracer = options[:tracer]
+      @finished_at = nil
     end
 
     ##

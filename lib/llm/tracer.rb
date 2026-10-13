@@ -189,7 +189,7 @@ module LLM
     # @param [Object, nil] span
     #  The span/context object returned by {#on_tool_start}
     # @return [void]
-    def on_tool_interrupt(ex:, span:)
+    def on_tool_interrupt(ex:, span:, finished_at:)
       raise NotImplementedError, "#{self.class} does not implement '#{__method__}'"
     end
 
@@ -200,7 +200,7 @@ module LLM
     # @param [Object, nil] span
     #  The span/context object returned by {#on_tool_start}.
     # @return [void]
-    def on_tool_finish(result:, span:)
+    def on_tool_finish(result:, span:, finished_at:)
       raise NotImplementedError, "#{self.class} does not implement '#{__method__}'"
     end
 
@@ -211,7 +211,7 @@ module LLM
     # @param [Object, nil] span
     #  The span/context object returned by {#on_tool_start}.
     # @return [void]
-    def on_tool_error(ex:, span:)
+    def on_tool_error(ex:, span:, finished_at:)
       raise NotImplementedError, "#{self.class} does not implement '#{__method__}'"
     end
 

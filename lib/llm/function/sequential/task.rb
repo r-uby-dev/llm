@@ -29,7 +29,11 @@ module LLM::Function::Sequential
     ##
     # @return [LLM::Function::Return]
     def wait
-      @result ||= @guarded || function.call
+      @result = @result ? @result.unbox : begin
+        @result = LLM::Object.from(unbox: @guarded || function.call)
+        @finished_at = Time.now
+        @result
+      end&.unbox
     end
     alias_method :value, :wait
 

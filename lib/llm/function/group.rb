@@ -49,12 +49,12 @@ class LLM::Function
         val = task.wait
         if LLM::Interrupt === val
           interrupt = val
-          task.tracer&.on_tool_interrupt(ex: val, span: task.span)
+          task.tracer&.on_tool_interrupt(ex: val, span: task.span, finished_at: task.finished_at)
         else
           if val.error?
-            task.tracer&.on_tool_error(ex: val, span: task.span)
+            task.tracer&.on_tool_error(ex: val, span: task.span, finished_at: task.finished_at)
           else
-            task.tracer&.on_tool_finish(result: val, span: task.span)
+            task.tracer&.on_tool_finish(result: val, span: task.span, finished_at: task.finished_at)
           end
           val
         end

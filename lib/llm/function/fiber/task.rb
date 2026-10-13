@@ -116,6 +116,7 @@ module LLM::Function::Fiber
             @queue << ex
             raise unless LLM::Interrupt === ex
           ensure
+            @finished_at = Time.now
             ##
             # The tool has answered, so a cancel that arrives from here on
             # asks nothing - which is the no-op a cancel that arrives once
