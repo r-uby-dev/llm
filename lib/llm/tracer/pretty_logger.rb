@@ -73,7 +73,11 @@ module LLM
     # @param (see LLM::Tracer#on_tool_error)
     # @return [void]
     def on_tool_error(ex:, **)
-      @io.puts "#{timestamp} tool error #{ex.class}: #{ex.message}"
+      ##
+      # The failure is the return's, and its value is what names it:
+      # `ex.class` is `LLM::Function::Return` and says nothing about what
+      # went wrong.
+      @io.puts "#{timestamp} tool error #{ex.value[:type]}: #{ex.value[:message]}"
     end
 
     ##
