@@ -159,7 +159,7 @@ module LLM::Function::Thread
         @result = ex
         raise
       rescue => ex
-        @tracer&.on_tool_error(:ex, span:)
+        @tracer&.on_tool_error(ex:, span:)
         @result = ex
         raise
       end
