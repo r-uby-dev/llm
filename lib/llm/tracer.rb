@@ -190,10 +190,11 @@ module LLM
     #  An instance of {LLM::Interrupt LLM::Interrupt}
     # @param [Object, nil] span
     #  The span/context object returned by {#on_tool_start}
+    # @param [Float, nil] started_at
+    #  When the call opened, or nil for a call that never ran
     # @param [Float, nil] finished_at
-    #  When the call itself ended, as `Process::CLOCK_MONOTONIC` seconds, or
-    #  nil for a call that never ran. See {#on_tool_finish} for the clock,
-    #  and for why a start read from it is what this is subtracted from.
+    #  When the call ended, or nil for a call that never ran. See
+    #  {#on_tool_finish} for the clock the two are read from
     # @return [void]
     def on_tool_interrupt(ex:, span:, started_at:, finished_at:)
       raise NotImplementedError, "#{self.class} does not implement '#{__method__}'"
@@ -213,8 +214,14 @@ module LLM
     #  An {LLM::Function::Return}
     # @param [Object] span
     #  The span/context object returned by {#on_tool_start}
-    # @param [Float] finished_at
-    #  When the tool returned, as a monotonic clock
+    # @param [Float, nil] started_at
+    #  When the call opened, as `Process::CLOCK_MONOTONIC` seconds, or nil
+    #  when the call never ran: a guard blocked it, or its tool could not
+    #  be built
+    # @param [Float, nil] finished_at
+    #  When the call ended, on the same clock, or nil when the call never
+    #  ran. A duration is the difference between the two, and neither is
+    #  comparable with `Time.now`
     # @return [void]
     def on_tool_finish(result:, span:, started_at:, finished_at:)
       raise NotImplementedError, "#{self.class} does not implement '#{__method__}'"
@@ -241,8 +248,11 @@ module LLM
     #  An {LLM::Function::Return} that holds the error
     # @param [Object, nil] span
     #  The span/context object returned by {#on_tool_start}.
+    # @param [Float, nil] started_at
+    #  When the call opened, or nil for a call that never ran
     # @param [Float, nil] finished_at
-    #  When the tool returned, as a monotonic clock
+    #  When the call ended, or nil for a call that never ran. See
+    #  {#on_tool_finish} for the clock the two are read from
     # @return [void]
     def on_tool_error(ex:, span:, started_at:, finished_at:)
       raise NotImplementedError, "#{self.class} does not implement '#{__method__}'"
