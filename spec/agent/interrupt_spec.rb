@@ -3,20 +3,7 @@
 require "setup"
 require "timeout"
 
-##
-# A turn is a loop, and between two of its requests there is nothing in
-# flight to close and nothing running to raise into - so a cancel that
-# arrived there reached nothing at all, until the loop named the caller it is
-# running under and the caller learned to answer `interrupt!`.
-#
-# Every wait here has a deadline, so a hook that never fires is a failing
-# example rather than a suite that stops where the hook was expected.
 class BlockingTracer < LLM::Tracer
-  ##
-  # The thread the interrupt was announced on. It is the assertion this
-  # class exists for: the callback belongs to the turn's thread, not to the
-  # canceller's.
-  # @return [Thread, nil]
   attr_reader :interrupt_thread
 
   def initialize(llm, arrived:, gate:)
@@ -28,15 +15,6 @@ class BlockingTracer < LLM::Tracer
     nil
   end
 
-  ##
-  # The end of a request, which is the window itself: the provider has
-  # answered, the transport has taken the request out of its map, and no
-  # tool is running. The example is told the loop is there, and the loop
-  # waits to be cancelled.
-  #
-  # A tracer rather than a stream, because a stream would put the response
-  # through the streaming path and this example is about the turn between
-  # two requests, not about how a response arrives.
   def on_request_finish(operation:, res:, model: nil, span: nil, outputs: nil, metadata: nil, request_id: nil)
     @arrived << :finish
     @gate.pop
@@ -47,10 +25,6 @@ class BlockingTracer < LLM::Tracer
     nil
   end
 
-  ##
-  # The phase the caller ends, announced by `LLM::Agent#run_loop` where it
-  # catches the raise - the same hook the tool phase is announced through,
-  # and on the thread the raise was delivered to.
   def on_interrupt(scope: nil)
     @interrupt_thread = Thread.current
     @arrived << [:interrupt, scope]
@@ -58,11 +32,6 @@ class BlockingTracer < LLM::Tracer
   end
 end
 
-##
-# The same window, on the path a retry opens: the request that was made
-# failed and the next one has not been, so there is nothing in flight and
-# nothing running. A retry is announced before the backoff, so a stream is
-# the interface for it and no response is parsed to reach it.
 class BlockingRetry < LLM::Stream
   def initialize(arrived:, gate:)
     @arrived, @gate = arrived, gate
@@ -74,12 +43,6 @@ class BlockingRetry < LLM::Stream
   end
 end
 
-##
-# And the window before any request was made. A compactor runs at the top
-# of `Context#talk`, before a prompt is built and before the transport is
-# asked for anything, so a turn cancelled here has nothing at all in
-# flight - which is the moment an application that offers a cancel from
-# the first claim has to be able to honour.
 class BlockingCompactor < LLM::Compactor
   def call(arrived:, gate:, **)
     arrived << :compaction
