@@ -978,8 +978,7 @@ module LLM
         tracer = @tracer || @llm.tracer
         caller = LLM::Object.from(thread: Thread.current,
                                   fiber: @llm.request_owner,
-                                  scheduler: Fiber.scheduler,
-                                  tracer:).extend(Interrupt)
+                                  scheduler: Fiber.scheduler).extend(Interrupt)
         @ctx.instance_variable_set(:@caller, caller)
         tracer.start_trace(name: "llm.turn", trace_group_id: SecureRandom.uuid_v7)
         REGISTRY.enter(self)
