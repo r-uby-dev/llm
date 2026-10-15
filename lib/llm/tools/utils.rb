@@ -122,7 +122,7 @@ class LLM::Tool
 
     ##
     # requires test-cmd.rb
-    LLM.require "test-cmd.rb", "~> 2.7.2"
+    LLM.require "test-cmd.rb", "~> 2.7.3"
     Command = Test::Command
   end
 end
