@@ -181,7 +181,7 @@ class LLM::Bedrock
         f.arguments = payload["input"] || {}
         f.tracer = @stream.extra[:tracer]
         f.model = @stream.extra[:model]
-        f.guard = @stream.extra[:guard]
+        f.intercept = @stream.extra[:intercept]
       end
       [fn, registered ? nil : fn.unavailable]
     end

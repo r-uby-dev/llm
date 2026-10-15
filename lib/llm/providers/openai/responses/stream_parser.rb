@@ -265,7 +265,7 @@ class LLM::OpenAI
         fn.arguments = arguments
         fn.tracer = @stream.extra[:tracer]
         fn.model = @stream.extra[:model]
-        fn.guard = @stream.extra[:guard]
+        fn.intercept = @stream.extra[:intercept]
       end
       [fn, (registered ? nil : fn.unavailable)]
     end
