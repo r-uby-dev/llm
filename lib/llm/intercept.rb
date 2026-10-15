@@ -2,17 +2,22 @@
 
 module LLM
   ##
-  # An intercept sits between the model and a tool call. It decides
-  # whether the call runs, and what the call is: the
-  # {LLM::Function LLM::Function} handed to {#call call} is the pending
-  # call itself, so an intercept can rewrite its arguments in place and
-  # let the call continue by returning `nil`.
+  # When a model requests a tool call the
+  # runtime represents it as an {LLM::Function}
+  # that an intercept can see before it is
+  # called. An intercept can return its own
+  # {LLM::Function::Return} object that acts
+  # as the response to the tool call, or it
+  # can return `nil` to let the tool call
+  # execute as normal.
   #
-  # A call that should not run is closed by returning an instance of
-  # {LLM::Function::Return LLM::Function::Return}: the tool never runs, and
-  # the model is given that return as the call's result.
+  # An intercept can also see the parameters
+  # a model has requested to send to a tool,
+  # and it can modify them in-place before the
+  # tool is called.
   #
-  # {LLM::Intercept::Null LLM::Intercept::Null} is a no-op and the default.
+  # The default intercept is {LLM::Intercept::Null LLM::Intercept::Null}
+  # and it is a noop.
   class Intercept
     require_relative "intercept/null"
     require_relative "intercept/multi"
