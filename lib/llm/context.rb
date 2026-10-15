@@ -103,9 +103,9 @@ module LLM
     #   {LLM::Transformer::Null}.
     # @option params [Hash] :transformer_options
     #   Options passed to the transformer's `call` method. Defaults to `{}`.
-    # @option params [Class<LLM::Guard>, nil] :guard
+    # @option params [Class<LLM::Intercept>, nil] :guard
     #   A guard class to supervise agentic tool execution. Defaults to
-    #   {LLM::Guard::Null}.
+    #   {LLM::Intercept::Null}.
     # @option params [Hash] :guard_options
     #   Options passed to the guard's `call` method. Defaults to `{}`.
     # @option params [Array<LLM::Function>, nil] :tools Defaults to nil
@@ -133,7 +133,7 @@ module LLM
         options: params.delete(:transformer_options) || {}
       }
       @guard = {
-        klass: params.delete(:guard) || LLM::Guard::Null,
+        klass: params.delete(:guard) || LLM::Intercept::Null,
         options: params.delete(:guard_options) || {}
       }
       @retry_budget = params.delete(:retry_budget) || 0
@@ -180,7 +180,7 @@ module LLM
     # via {LLM::Stream#on_tool_call}. A blocked call yields its in-band
     # `guard_error` return without executing.
     #
-    # @return [LLM::Guard]
+    # @return [LLM::Intercept]
     def guard
       @guard[:klass].new(llm).tap { _1.instance_variable_set(:@context, self) }
     end

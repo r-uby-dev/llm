@@ -13,8 +13,6 @@ module LLM
   # the model is given that return as the call's result.
   #
   # {LLM::Intercept::Null LLM::Intercept::Null} is a no-op and the default.
-  # {LLM::Guard LLM::Guard} is the name this class had before it was
-  # renamed, and it is kept as an alias of it.
   class Intercept
     require_relative "intercept/null"
     require_relative "intercept/multi"
@@ -78,9 +76,3 @@ module LLM
     end
   end
 end
-
-##
-# {LLM::Guard LLM::Guard} is the name {LLM::Intercept LLM::Intercept} had
-# before it was renamed. It is kept so that code written against it keeps
-# working, and it is the same class rather than a copy of it.
-LLM::Guard = LLM::Intercept
