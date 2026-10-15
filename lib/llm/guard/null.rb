@@ -7,11 +7,8 @@ class LLM::Guard
   # {LLM::Context LLM::Context}.
   class Null < self
     ##
-    # @param [LLM::Function] function
-    #  The pending function (ignored)
-    # @param [Hash] opts
-    #  Per-call options (ignored)
-    # @return [nil]
+    # @param (see LLM::Guard#call)
+    # @return (see LLM::Guard#call)
     def call(function:, **opts)
       nil
     end

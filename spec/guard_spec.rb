@@ -14,38 +14,60 @@ RSpec.describe LLM::Guard do
     end
   end
   let(:function) { tool.function.tap { |fn| fn.id = "call_1" } }
+  let(:null_guard) { LLM::Guard::Null.new(provider) }
+  let(:result) { null_guard.call(function:) }
 
   describe LLM::Guard::Null do
     it "never blocks" do
-      expect(described_class.new(ctx).call(function:)).to be_nil
+      expect(result).to be_nil
     end
 
+    ##
+    # A guard is built with a provider and the context is attached to it
+    # by the context that wired it, so what `#guard` answers is an
+    # instance rather than the class it was configured with.
     it "is the default guard" do
-      expect(ctx.guard).to eq(LLM::Guard::Null)
+      expect(ctx.guard).to be_a(LLM::Guard::Null)
+    end
+
+    it "carries the context it was wired to" do
+      expect(ctx.guard.send(:context)).to equal(ctx)
     end
   end
 
   describe "context wiring" do
-    it "keeps a custom guard class" do
-      guard = Class.new(LLM::Guard) do
+    let(:blocking) do
+      Class.new(LLM::Guard) do
         def call(function:, **)
           "stop"
         end
       end
-      expect(LLM::Context.new(provider, guard:).guard).to eq(guard)
     end
+    let(:wired) { LLM::Context.new(provider, guard: blocking) }
 
-    it "passes guard_options to the guard" do
-      threshold = nil
-      guard = Class.new(LLM::Guard) do
+    it "keeps a custom guard class" do
+      expect(wired.guard).to be_a(blocking)
+    end
+  end
+
+  describe "guard options" do
+    let(:seen) { [] }
+    let(:guard) do
+      seen = self.seen
+      Class.new(LLM::Guard) do
         define_method(:call) do |function:, **opts|
-          threshold = opts[:threshold]
+          seen << opts[:threshold]
           nil
         end
       end
-      ctx = LLM::Context.new(provider, guard:, guard_options: {threshold: 5})
-      ctx.guard.new(ctx).call(function:, **ctx.instance_variable_get(:@guard)[:options])
-      expect(threshold).to eq(5)
+    end
+    let(:ctx) { LLM::Context.new(provider, guard:, guard_options: {threshold: 5}) }
+    let(:called) { ctx.guard.call(function:, **ctx.instance_variable_get(:@guard)[:options]) }
+
+    before { called }
+
+    it "passes guard_options to the guard" do
+      expect(seen).to eq([5])
     end
   end
 end

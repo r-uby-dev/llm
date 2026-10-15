@@ -2,38 +2,61 @@
 
 module LLM
   ##
-  # {LLM::Guard LLM::Guard} is the superclass for context-level
-  # supervisors in llm.rb.
+  # A guard decides if a tool
+  # call should run or not. A guard
+  # can answer on a tool's behalf
+  # by returning an instance of
+  # {LLM::Function::Return LLM::Function::Return}.
+  # When a Return is returned the
+  # tool call never runs but the
+  # model still gets a response,
+  # and when `nil` is returned
+  # the tool call is scheduled to
+  # run.
   #
-  # A guard is bound to a context and decides whether a tool call should
-  # be blocked before it runs. Each subclass implements {#call} and returns
-  # an {LLM::Function::Return LLM::Function::Return} that closes the
-  # pending tool call, or `nil` when execution should continue. The guard
-  # is stamped onto the functions the context binds, so it runs whenever a
-  # task is spawned — including tool calls queued from a stream.
-  # {LLM::Guard::Null LLM::Guard::Null} is a no-op and the default.
+  # A guard can also mutate the
+  # {LLM::Function LLM::Function}
+  # given to its `call` method so
+  # it can mutate tool parameters in-place,
+  # and let the tool call continue
+  # by returning `nil`.
   class Guard
     require_relative "guard/null"
+    require_relative "guard/multi"
 
     ##
-    # @return [LLM::Context]
-    attr_reader :ctx
+    # @param [LLM::Agent,LLM::Context] ctx
+    #  An agent, or its context.
+    # @param [Array<LLM::Guard>]
+    #  One or more subclasses of {LLM::Guard LLM::Guard}
+    def self.multi(llm, *guards)
+      Multi.new(
+        llm,
+        *guards
+      )
+    end
 
     ##
-    # @param ctx [LLM::Context, LLM::Agent]
+    # @return [LLM::Provider]
+    attr_reader :llm
+
+    ##
+    # @param [LLM::Provider] llm
     # @return [LLM::Guard]
-    def initialize(ctx)
-      @ctx = LLM::Agent === ctx ? ctx.instance_variable_get(:@ctx) : ctx
+    def initialize(llm)
+      @llm = llm
     end
 
     ##
     # @abstract
     # @param [LLM::Function] function
-    #  The pending function the guard is deciding about.
-    # @param opts [Hash] Per-call options
+    #  A pending function
+    # @param opts [Hash]
+    #  The contents of 'guard_options:'
     # @return [LLM::Function::Return, nil]
-    #  A tool return that closes this function's pending call when it
-    #  should be blocked, or nil when execution should continue.
+    #  Returns a {LLM::Function::Return LLM::Function::Return},
+    #  or nil. When nil is returned, the tool call continues,
+    #  otherwise the Return object is the tool call's response
     def call(function:, **opts)
       raise NotImplementedError
     end
@@ -41,15 +64,21 @@ module LLM
     private
 
     ##
+    # @return [LLM::Context]
+    def context
+      @context
+    end
+
+    ##
     # @return [LLM::Stream]
     def stream
-      @ctx.params[:stream]
+      context.params[:stream]
     end
 
     ##
     # @return [LLM::Buffer]
     def messages
-      @ctx.messages
+      context.messages
     end
   end
 end

@@ -180,9 +180,9 @@ module LLM
     # via {LLM::Stream#on_tool_call}. A blocked call yields its in-band
     # `guard_error` return without executing.
     #
-    # @return [Class<LLM::Guard>]
+    # @return [LLM::Guard]
     def guard
-      @guard[:klass]
+      @guard[:klass].new(llm).tap { _1.instance_variable_set(:@context, self) }
     end
 
     ##
@@ -265,11 +265,10 @@ module LLM
     # @return [Array<LLM::Function>]
     def pending_functions
       return_ids = returns.map(&:id)
-      guard = @guard[:klass].new(self)
       @messages
         .select(&:assistant?)
         .flat_map do |msg|
-          fns = msg.functions.select { _1.pending? && !return_ids.include?(_1.id) }
+          fns = msg.functions.select { _1.pending? and !return_ids.include?(_1.id) }
           fns.each do |fn|
             fn.tracer = tracer
             fn.model  = msg.model
@@ -675,7 +674,7 @@ module LLM
       @llm.with(**headers) do
         history = @messages.to_a
         params = @params.merge(params).reject { self.class.params.include?(_1.to_s) }
-        extra = params.slice(:model, :tools).merge!(ctx: self, tracer:, guard: @guard[:klass].new(self))
+        extra = params.slice(:model, :tools).merge!(ctx: self, tracer:, guard:)
         params[:stream] = LLM::Stream.try(params[:stream], extra:)
         res_id = params[:store] == false ? nil : @messages.find(&:assistant?)&.response&.response_id
         input = res_id ? [] : history
@@ -696,7 +695,7 @@ module LLM
         history = @messages.to_a
         params = params.merge(messages: history)
         params = @params.merge(params).reject { self.class.params.include?(_1.to_s) }
-        extra = params.slice(:model, :tools).merge!(ctx: self, tracer:, guard: @guard[:klass].new(self))
+        extra = params.slice(:model, :tools).merge!(ctx: self, tracer:, guard:)
         params[:stream] = LLM::Stream.try(params[:stream], extra:)
         messages = transform(prompt, params)
         @stream = params[:stream]
