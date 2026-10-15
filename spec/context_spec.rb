@@ -706,7 +706,7 @@ RSpec.describe LLM::Context do
     end
 
     it "spawns a task even when a guard is configured" do
-      guard = Class.new(LLM::Guard) do
+      guard = Class.new(LLM::Intercept) do
         def call(function:, **)
           LLM::Function::Return.new(function.id, function.name, {
             error: true, type: "guard_error", message: "stop"
@@ -754,7 +754,7 @@ RSpec.describe LLM::Context do
     let(:responses) { provider.responses }
     let(:response) { double(choices: [LLM::Message.new("assistant", "hello", model:)]) }
     let(:guard) do
-      Class.new(LLM::Guard) do
+      Class.new(LLM::Intercept) do
         def call(function:, **)
           LLM::Function::Return.new(function.id, function.name, {
             error: true, type: "guard_error", message: "stop"
@@ -830,7 +830,7 @@ RSpec.describe LLM::Context do
 
     context "with a guard that wants to stop execution" do
       let(:guard) do
-        Class.new(LLM::Guard) do
+        Class.new(LLM::Intercept) do
           def call(function:, **)
             LLM::Function::Return.new(function.id, function.name, {
               error: true, type: "guard_error", message: "stop"
