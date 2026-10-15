@@ -91,14 +91,6 @@ jobs:
   windows:
     runs-on: windows-latest
     name: Windows (Ruby ${{ matrix.ruby-version }})
-    # Windows is where a path, a native gem or a `fork` breaks, and a job
-    # that says so with a log is the point, even when the first run is red.
-    # `curses` and `curb` are source-only and bind libraries the image does
-    # not ship, so the Gemfile leaves them out there - which is also why
-    # `rake spec` leaves the console specs out. `services:` has no Windows
-    # equivalent, so PostgreSQL is left unconfigured and the ORM specs skip
-    # themselves. One parser, because the ractor specs do not work on
-    # Oj/Yajl (see #249).
     timeout-minutes: 30
     strategy:
       matrix:
