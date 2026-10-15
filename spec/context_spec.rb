@@ -705,15 +705,15 @@ RSpec.describe LLM::Context do
       )
     end
 
-    it "spawns a task even when a guard is configured" do
-      guard = Class.new(LLM::Intercept) do
+    it "spawns a task even when an intercept is configured" do
+      intercept = Class.new(LLM::Intercept) do
         def call(function:, **)
           LLM::Function::Return.new(function.id, function.name, {
-            error: true, type: "guard_error", message: "stop"
+            error: true, type: "intercept_error", message: "stop"
           })
         end
       end
-      ctx = LLM::Context.new(provider, model:, guard:)
+      ctx = LLM::Context.new(provider, model:, intercept:)
       task = ctx.spawn(tool, :thread)
       expect(task.wait.to_h).to eq(
         id: "call_1",
@@ -753,11 +753,11 @@ RSpec.describe LLM::Context do
     let(:per_call_stream) { LLM::Stream.new }
     let(:responses) { provider.responses }
     let(:response) { double(choices: [LLM::Message.new("assistant", "hello", model:)]) }
-    let(:guard) do
+    let(:intercept) do
       Class.new(LLM::Intercept) do
         def call(function:, **)
           LLM::Function::Return.new(function.id, function.name, {
-            error: true, type: "guard_error", message: "stop"
+            error: true, type: "intercept_error", message: "stop"
           })
         end
       end
@@ -782,8 +782,8 @@ RSpec.describe LLM::Context do
       expect(ctx.wait(:sequential)).to eq([LLM::Function::Return.new("call_1", "system", {"ok" => true})])
     end
 
-    it "waits queued stream work even when a guard is configured" do
-      ctx = LLM::Context.new(provider, model:, stream:, guard:)
+    it "waits queued stream work even when an intercept is configured" do
+      ctx = LLM::Context.new(provider, model:, stream:, intercept:)
       stream.queue << LLM::Function::Return.new("call_1", "system", {"ok" => true})
       expect(ctx.wait(:thread)).to eq([LLM::Function::Return.new("call_1", "system", {"ok" => true})])
     end
@@ -828,19 +828,19 @@ RSpec.describe LLM::Context do
       end
     end
 
-    context "with a guard that wants to stop execution" do
-      let(:guard) do
+    context "with an intercept that wants to stop execution" do
+      let(:intercept) do
         Class.new(LLM::Intercept) do
           def call(function:, **)
             LLM::Function::Return.new(function.id, function.name, {
-              error: true, type: "guard_error", message: "stop"
+              error: true, type: "intercept_error", message: "stop"
             })
           end
         end
       end
 
-      it "returns guarded results before spawning pending functions" do
-        ctx = LLM::Context.new(provider, model:, stream:, guard:)
+      it "returns intercepted results before spawning pending functions" do
+        ctx = LLM::Context.new(provider, model:, stream:, intercept:)
         ctx.messages << LLM::Message.new("assistant", nil, {
           tools: [tool],
           tool_calls: [
@@ -850,7 +850,7 @@ RSpec.describe LLM::Context do
         pending = ctx.pending_functions
         expect(pending).not_to receive(:spawn)
         allow(ctx).to receive(:functions).and_return(pending)
-        expect(ctx.wait(:thread).map(&:value)).to eq([{error: true, type: "guard_error", message: "stop"}])
+        expect(ctx.wait(:thread).map(&:value)).to eq([{error: true, type: "intercept_error", message: "stop"}])
       end
     end
   end
