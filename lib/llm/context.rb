@@ -46,7 +46,7 @@ module LLM
     # @api private
     # @return [Array<Symbol>]
     def self.params
-      %w[guard retry_budget concurrency transformer compactor record id]
+      %w[intercept retry_budget concurrency transformer compactor record id]
     end
 
     ##
@@ -103,11 +103,11 @@ module LLM
     #   {LLM::Transformer::Null}.
     # @option params [Hash] :transformer_options
     #   Options passed to the transformer's `call` method. Defaults to `{}`.
-    # @option params [Class<LLM::Intercept>, nil] :guard
-    #   A guard class to supervise agentic tool execution. Defaults to
+    # @option params [Class<LLM::Intercept>, nil] :intercept
+    #   An intercept class to supervise agentic tool execution. Defaults to
     #   {LLM::Intercept::Null}.
-    # @option params [Hash] :guard_options
-    #   Options passed to the guard's `call` method. Defaults to `{}`.
+    # @option params [Hash] :intercept_options
+    #   Options passed to the intercept's `call` method. Defaults to `{}`.
     # @option params [Array<LLM::Function>, nil] :tools Defaults to nil
     # @option params [Array<String>, nil] :skills Defaults to nil
     def initialize(llm, params = {})
@@ -132,9 +132,9 @@ module LLM
         klass: params.delete(:transformer) || LLM::Transformer::Null,
         options: params.delete(:transformer_options) || {}
       }
-      @guard = {
-        klass: params.delete(:guard) || LLM::Intercept::Null,
-        options: params.delete(:guard_options) || {}
+      @intercept = {
+        klass: params.delete(:intercept) || LLM::Intercept::Null,
+        options: params.delete(:intercept_options) || {}
       }
       @retry_budget = params.delete(:retry_budget) || 0
     end
@@ -169,20 +169,21 @@ module LLM
     alias_method :compacted?, :compacted
 
     ##
-    # Returns the configured guard class.
+    # Returns the configured intercept class.
     #
-    # Guards are context-level supervisors for agentic execution. A guard can
-    # inspect the runtime state and decide whether pending tool work should be
-    # blocked before the context keeps looping.
+    # Intercepts are context-level supervisors for agentic execution. An
+    # intercept can inspect the runtime state, rewrite a pending call, and
+    # decide whether tool work should be blocked before the context keeps
+    # looping.
     #
-    # The guard is stamped onto the functions the context binds, so it runs
-    # whenever a task is spawned — including tool calls queued from a stream
-    # via {LLM::Stream#on_tool_call}. A blocked call yields its in-band
-    # `guard_error` return without executing.
+    # The intercept is stamped onto the functions the context binds, so it
+    # runs whenever a task is spawned — including tool calls queued from a
+    # stream via {LLM::Stream#on_tool_call}. A blocked call yields its
+    # in-band `intercept_error` return without executing.
     #
     # @return [LLM::Intercept]
-    def guard
-      @guard[:klass].new(llm).tap { _1.instance_variable_set(:@context, self) }
+    def intercept
+      @intercept[:klass].new(llm).tap { _1.instance_variable_set(:@context, self) }
     end
 
     ##
@@ -272,7 +273,7 @@ module LLM
           fns.each do |fn|
             fn.tracer = tracer
             fn.model  = msg.model
-            fn.guard  = guard
+            fn.intercept  = intercept
           end
         end.extend(LLM::Function::Array)
     end
@@ -329,8 +330,8 @@ module LLM
       if stream.queue.empty?
         ##
         # Every pending function is spawned as a task that checks its own
-        # guard (stamped on the function) before running. Blocked tasks
-        # yield their guard's return, so all pending calls still close.
+        # intercept (stamped on the function) before running. Blocked tasks
+        # yield their intercept's return, so all pending calls still close.
         tools = except.empty? ? pending_functions : pending_functions - except
         @queue = tools.task(strategy)
         returns = @queue.wait
@@ -674,7 +675,7 @@ module LLM
       @llm.with(**headers) do
         history = @messages.to_a
         params = @params.merge(params).reject { self.class.params.include?(_1.to_s) }
-        extra = params.slice(:model, :tools).merge!(ctx: self, tracer:, guard:)
+        extra = params.slice(:model, :tools).merge!(ctx: self, tracer:, intercept: intercept)
         params[:stream] = LLM::Stream.try(params[:stream], extra:)
         res_id = params[:store] == false ? nil : @messages.find(&:assistant?)&.response&.response_id
         input = res_id ? [] : history
@@ -695,7 +696,7 @@ module LLM
         history = @messages.to_a
         params = params.merge(messages: history)
         params = @params.merge(params).reject { self.class.params.include?(_1.to_s) }
-        extra = params.slice(:model, :tools).merge!(ctx: self, tracer:, guard:)
+        extra = params.slice(:model, :tools).merge!(ctx: self, tracer:, intercept: intercept)
         params[:stream] = LLM::Stream.try(params[:stream], extra:)
         messages = transform(prompt, params)
         @stream = params[:stream]
