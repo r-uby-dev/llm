@@ -169,21 +169,12 @@ module LLM
     alias_method :compacted?, :compacted
 
     ##
-    # Returns the configured intercept class.
-    #
-    # Intercepts are context-level supervisors for agentic execution. An
-    # intercept can inspect the runtime state, rewrite a pending call, and
-    # decide whether tool work should be blocked before the context keeps
-    # looping.
-    #
-    # The intercept is stamped onto the functions the context binds, so it
-    # runs whenever a task is spawned — including tool calls queued from a
-    # stream via {LLM::Stream#on_tool_call}. A blocked call yields its
-    # in-band `intercept_error` return without executing.
-    #
+    # @see LLM::Intercept
     # @return [LLM::Intercept]
     def intercept
-      @intercept[:klass].new(llm).tap { _1.instance_variable_set(:@context, self) }
+      @intercept[:klass]
+        .new(llm)
+        .tap { _1.instance_variable_set(:@context, self) }
     end
 
     ##
