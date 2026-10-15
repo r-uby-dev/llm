@@ -42,7 +42,7 @@ module LLM::Function::Fiber
         arguments: @function.arguments,
         model: @function.model
       )
-      return if @guarded
+      return if @intercepted
       if Fiber.scheduler.nil?
         raise ArgumentError, "Fiber concurrency requires Fiber.scheduler"
       elsif !Fiber.scheduler.respond_to?(:fiber_interrupt)
@@ -157,7 +157,7 @@ module LLM::Function::Fiber
     # @see LLM::Function::Task#wait
     # @return (see LLM::Function::Task#wait)
     def wait
-      return @guarded if @guarded
+      return @intercepted if @intercepted
       return @result.unbox if @result
       spawn unless @fiber
       @result = LLM::Object.from(unbox: @queue.pop)

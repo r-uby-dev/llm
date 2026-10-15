@@ -44,13 +44,13 @@ class LLM::Function
     # @param [Hash] options
     #  An optional set of options that are specific
     #  to a given concurrency strategy.
-    # @option options [LLM::Function::Return, nil] :guarded
-    #  A blocked return produced by the function's guard, or the in-band
+    # @option options [LLM::Function::Return, nil] :intercepted
+    #  A blocked return produced by the function's intercept, or the in-band
     #  error for a tool that cannot be built. When set, the task yields it
     #  without running the tool.
     def initialize(fn, options = {})
       @function = fn
-      @guarded = options[:guarded]
+      @intercepted = options[:intercepted]
       @tracer = options[:tracer]
       @finished_at = nil
     end

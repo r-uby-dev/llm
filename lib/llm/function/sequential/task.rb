@@ -31,7 +31,7 @@ module LLM::Function::Sequential
     def wait
       @result = @result ? @result : begin
         @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-        @result = LLM::Object.from(unbox: @guarded || function.call)
+        @result = LLM::Object.from(unbox: @intercepted || function.call)
         @finished_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
         @result
       end

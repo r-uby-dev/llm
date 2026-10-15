@@ -50,7 +50,7 @@ class LLM::Function
         id: @id, name: @name,
         arguments: @arguments, model: @model
       )
-      return if @guarded
+      return if @intercepted
       ##
       # The result is delivered to a ractor of this task's own rather
       # than through its mailbox. The mailbox ractor answers `alive?`
@@ -113,7 +113,7 @@ class LLM::Function
     # {LLM::Function::Thread::Task#wait} answers from the thread's value.
     # @return [LLM::Function::Return]
     def wait
-      return @guarded if @guarded
+      return @intercepted if @intercepted
       @result ||= begin
         spawn unless @mailbox
         id, name, value, @finished_at = mailbox.wait

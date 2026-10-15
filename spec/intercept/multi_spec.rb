@@ -36,7 +36,7 @@ RSpec.describe LLM::Intercept::Multi do
     Class.new(LLM::Intercept) do
       define_method(:call) do |function:, **|
         order << :blocking
-        function.return(error: true, type: "guard_error", message: "stop")
+        function.return(error: true, type: "intercept_error", message: "stop")
       end
     end
   end

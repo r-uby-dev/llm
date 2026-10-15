@@ -74,7 +74,7 @@ module LLM::Function::Async
         arguments: @function.arguments,
         model: @function.model
       )
-      return if @guarded
+      return if @intercepted
       @queue = Queue.new
       @alive = !@cancelled
       @reactor.submit do
@@ -165,7 +165,7 @@ module LLM::Function::Async
     # @see LLM::Function::Task#wait
     # @return (see LLM::Function::Task#wait)
     def wait
-      return @guarded if @guarded
+      return @intercepted if @intercepted
       return @result.unbox if @result
       begin
         spawn unless @queue

@@ -24,14 +24,14 @@ RSpec.describe LLM::Intercept do
 
     ##
     # An intercept is built with a provider and the context is attached to
-    # it by the context that wired it, so what `#guard` returns is an
+    # it by the context that wired it, so what `#intercept` returns is an
     # instance rather than the class it was configured with.
     it "is the default intercept" do
-      expect(ctx.guard).to be_a(LLM::Intercept::Null)
+      expect(ctx.intercept).to be_a(LLM::Intercept::Null)
     end
 
     it "carries the context it was wired to" do
-      expect(ctx.guard.send(:context)).to equal(ctx)
+      expect(ctx.intercept.send(:context)).to equal(ctx)
     end
   end
 
@@ -43,16 +43,16 @@ RSpec.describe LLM::Intercept do
         end
       end
     end
-    let(:wired) { LLM::Context.new(provider, guard: blocking) }
+    let(:wired) { LLM::Context.new(provider, intercept: blocking) }
 
     it "keeps a custom intercept class" do
-      expect(wired.guard).to be_a(blocking)
+      expect(wired.intercept).to be_a(blocking)
     end
   end
 
-  describe "guard options" do
+  describe "intercept options" do
     let(:seen) { [] }
-    let(:guard) do
+    let(:intercept) do
       seen = self.seen
       Class.new(LLM::Intercept) do
         define_method(:call) do |function:, **opts|
@@ -61,12 +61,12 @@ RSpec.describe LLM::Intercept do
         end
       end
     end
-    let(:ctx) { LLM::Context.new(provider, guard:, guard_options: {threshold: 5}) }
-    let(:called) { ctx.guard.call(function:, **ctx.instance_variable_get(:@guard)[:options]) }
+    let(:ctx) { LLM::Context.new(provider, intercept:, intercept_options: {threshold: 5}) }
+    let(:called) { ctx.intercept.call(function:, **ctx.instance_variable_get(:@intercept)[:options]) }
 
     before { called }
 
-    it "passes guard_options to the guard" do
+    it "passes intercept_options to the intercept" do
       expect(seen).to eq([5])
     end
   end
