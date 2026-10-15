@@ -675,7 +675,7 @@ module LLM
       @llm.with(**headers) do
         history = @messages.to_a
         params = @params.merge(params).reject { self.class.params.include?(_1.to_s) }
-        extra = params.slice(:model, :tools).merge!(ctx: self, tracer:, intercept: intercept)
+        extra = params.slice(:model, :tools).merge!(ctx: self, tracer:, intercept:)
         params[:stream] = LLM::Stream.try(params[:stream], extra:)
         res_id = params[:store] == false ? nil : @messages.find(&:assistant?)&.response&.response_id
         input = res_id ? [] : history
@@ -696,7 +696,7 @@ module LLM
         history = @messages.to_a
         params = params.merge(messages: history)
         params = @params.merge(params).reject { self.class.params.include?(_1.to_s) }
-        extra = params.slice(:model, :tools).merge!(ctx: self, tracer:, intercept: intercept)
+        extra = params.slice(:model, :tools).merge!(ctx: self, tracer:, intercept:)
         params[:stream] = LLM::Stream.try(params[:stream], extra:)
         messages = transform(prompt, params)
         @stream = params[:stream]

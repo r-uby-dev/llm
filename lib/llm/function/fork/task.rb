@@ -26,7 +26,7 @@ class LLM::Function
         arguments: @function.arguments,
         model: @function.model
       )
-      return if @guarded
+      return if @intercepted
       @ch = channels
       ##
       # **A cancel that arrived before this is written now, before the fork.**
@@ -97,12 +97,12 @@ class LLM::Function
     # until its watcher looks, which is how a cancel that arrives a moment
     # later is delivered too.
     #
-    # A task the guard blocked never forks, and one that has answered has
+    # A task the intercept blocked never forks, and one that has answered has
     # nothing left to tell: both are a no-op, the way
     # {LLM::Function::Return#interrupt!} says one is.
     # @return [nil]
     def interrupt!
-      return nil if @waited || @guarded
+      return nil if @waited || @intercepted
       if @ch
         @ch.control.write(:interrupt)
       else
@@ -134,7 +134,7 @@ class LLM::Function
     # it would be an exception to the rule that a tool's failure is in band.
     # @return [LLM::Function::Return]
     def wait
-      return @guarded if @guarded
+      return @intercepted if @intercepted
       return @result.unbox if @result
       spawn unless @spawned
       kind, data, @finished_at = @ch.result.recv
@@ -154,7 +154,7 @@ class LLM::Function
       @result = LLM::Object.from(unbox: val)
       @result.unbox
     ensure
-      if @guarded.nil?
+      if @intercepted.nil?
         reap
         [@ch.control, @ch.result].each { _1.close unless _1.closed? } if @ch
       end
@@ -173,9 +173,9 @@ class LLM::Function
     # The controls and results channels.
     #
     # They are built by `spawn` and not by {#interrupt!}, so a task that never
-    # forks never opens a socketpair - a guard blocks many of them, and that is
-    # the common case. A cancel that arrives before `spawn` is recorded instead,
-    # and written by it.
+    # forks never opens a socketpair - an intercept blocks many of them, and
+    # that is the common case. A cancel that arrives before `spawn` is recorded
+    # instead, and written by it.
     # @return [LLM::Object]
     def channels
       LLM::Object.from(
@@ -192,7 +192,7 @@ class LLM::Function
     # only be reaped once.
     # @return [void]
     def reap
-      return if @waited || @guarded || !@pid
+      return if @waited || @intercepted || !@pid
       ::Process.waitpid(@pid)
       @waited = true
     rescue Errno::ECHILD
