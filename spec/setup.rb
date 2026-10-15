@@ -23,7 +23,7 @@ RSpec.configure do |config|
 
   config.before(:each) do |example|
     next unless example.metadata[:fork]
-    Process.respond_to?(:fork) ? skip("fork is not available") : nil
+    Process.respond_to?(:fork) ? nil : skip("fork is not available")
   end
 
   config.before(:each) do |example|
