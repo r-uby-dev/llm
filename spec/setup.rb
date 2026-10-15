@@ -21,13 +21,6 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
-  ##
-  # The tag a skip reads is also derived from where an example lives and
-  # from what its description says, so a file that is nothing but fork or
-  # ractor examples - `spec/function/fork`, `spec/function/ractor` - and a
-  # group whose description names one do not have to repeat it. The one
-  # case with nothing to read is a task built on a group's default
-  # strategy, and those groups carry the tag.
   config.define_derived_metadata do |meta|
     description = "#{meta[:full_description]}#{meta[:description]}"
     path = meta[:file_path].to_s
