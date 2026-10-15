@@ -135,14 +135,7 @@ RSpec.describe "the tracer's interrupt hook" do
     end
   end
 
-  RSpec.shared_examples "an interrupted call" do |strategy|
-    ##
-    # Windows has no `fork`, and the strategy is what says whether the call
-    # can be made: the example is skipped there rather than failed.
-    before do
-      skip "fork is not available" if strategy == :fork && !Process.respond_to?(:fork)
-    end
-
+  RSpec.shared_examples "an interrupted call", :fork do |strategy|
     let(:wait) do
       Thread.new do
         ctx.wait(strategy)

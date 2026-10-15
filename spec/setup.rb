@@ -21,28 +21,14 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
-  ##
-  # Windows has no `fork`, and the fork specs ask whether `xchan.rb` is
-  # installed rather than whether a process can be forked. An example that
-  # runs a tool on a fork is skipped where `fork` is not there: it is one
-  # of the files under `spec/function/fork`, one tagged `:fork`, or one
-  # whose group says in its description that a fork is what the tool runs
-  # on - which is how `spec/agent_spec.rb` and `spec/context_spec.rb` ask
-  # for one. The tracer's shared group asks its own strategy.
   config.before(:each) do |example|
-    skip "fork is not available" if !Process.respond_to?(:fork) && fork_example?(example)
+    next unless example.metadata[:fork]
+    Process.respond_to?(:fork) ? skip("fork is not available") : nil
   end
 
-  ##
-  # A ractor is not usable on Windows either: a call that runs a tool in
-  # one does not come back, and the examples that run one - the ractor
-  # specs, and the rest of the suite where it asks for one - do not come
-  # back either. Such an example is skipped the way a fork example is: it
-  # is one of the files under `spec/function/ractor`, one tagged `:ractor`
-  # (a task built on a group's default strategy cannot say so in a
-  # description), or one whose description names a ractor.
   config.before(:each) do |example|
-    skip "a ractor hangs on this platform" if !ractors? && ractor_example?(example)
+    next unless example.metadata[:ractor]
+    Gem.win_platform? ? skip("ractor known to hang on Windows") : nil
   end
 
   config.around(:each, :interval) do |example|
@@ -83,15 +69,6 @@ VCR.configure do |config|
   end
 end
 
-##
-# True when a call can be run in a ractor. It cannot on Windows, where a
-# call that runs a tool in one does not come back. The question is asked
-# by a hook rather than while this file loads, the way the rest of these
-# helpers are.
-def ractors?
-  !Gem.win_platform?
-end
-
 def cassette_recorded?(example)
   vcr = example.metadata[:vcr] || {}
   name = vcr[:cassette_name]
@@ -99,24 +76,3 @@ def cassette_recorded?(example)
   File.exist?(File.join(VCR.configuration.cassette_library_dir, "#{name}.yml"))
 end
 
-##
-# True when an example runs a tool on a fork. The files under
-# `spec/function/fork` are fork examples whole, and the rest say so in the
-# description their group was given, or with a `:fork` tag.
-def fork_example?(example)
-  metadata = example.metadata
-  metadata[:fork] ||
-    metadata[:file_path].include?("/function/fork/") ||
-    metadata[:full_description].match?(/fork/i)
-end
-
-##
-# True when an example runs a tool in a ractor. The files under
-# `spec/function/ractor` are ractor examples whole, and the rest say so in
-# the description their group was given, or with a `:ractor` tag.
-def ractor_example?(example)
-  metadata = example.metadata
-  metadata[:ractor] ||
-    metadata[:file_path].include?("/function/ractor/") ||
-    metadata[:full_description].match?(/ractor/i)
-end
