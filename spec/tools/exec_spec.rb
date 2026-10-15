@@ -104,13 +104,6 @@ RSpec.describe LLM::Tool::Exec do
   end
 
   describe "when spawning a real command" do
-    ##
-    # **The command is the interpreter the suite runs on.** Every command
-    # here has to be one that exists wherever the suite runs: `echo`,
-    # `printf`, `sh`, `false` and `sleep` are shell builtins or simply
-    # absent on Windows, and an example that asks for one fails there for a
-    # reason that is not the tool's. Ruby is there, and it is what these
-    # examples spawn.
     let(:arguments) { [RbConfig.ruby, "-e", "STDOUT.write('hello world')"] }
     let(:result) { tool.call(arguments:) }
 
