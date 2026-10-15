@@ -2,13 +2,18 @@
 
 class LLM::Intercept
   ##
-  # The {LLM::Intercept::Multi LLM::Intercept::Multi} class lets
-  # you combine multiple intercepts into a single intercept. The
-  # first intercept that returns an instance of
+  # The {LLM::Intercept::Multi LLM::Intercept::Multi}
+  # class combines multiple intercepts into a single
+  # intercept.
+  #
+  # The first intercept that returns an instance of
   # {LLM::Function::Return LLM::Function::Return}
   # stops all other intercepts from running, and when
-  # an intercept returns `nil` the next one in the chain
+  # an intercept returns `nil` the next one in the list
+  # is called. When all intercepts return nil, the tool
   # is called.
+  #
+  # @see LLM::Intercept
   class Multi < self
     ##
     # @param [LLM::Provider] llm

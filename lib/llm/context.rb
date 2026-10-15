@@ -104,8 +104,7 @@ module LLM
     # @option params [Hash] :transformer_options
     #   Options passed to the transformer's `call` method. Defaults to `{}`.
     # @option params [Class<LLM::Intercept>, nil] :intercept
-    #   An intercept class to supervise agentic tool execution. Defaults to
-    #   {LLM::Intercept::Null}.
+    #   Defaults to {LLM::Intercept::Null LLM::Intercept::Null}.
     # @option params [Hash] :intercept_options
     #   Options passed to the intercept's `call` method. Defaults to `{}`.
     # @option params [Array<LLM::Function>, nil] :tools Defaults to nil
