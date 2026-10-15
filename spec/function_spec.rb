@@ -45,13 +45,13 @@ RSpec.describe LLM::Function do
       end
     end
 
-    describe "when calling #value" do
+    describe "when calling #value", :ractor do
       subject(:value) { task.value.to_h }
 
       it { is_expected.to eq(id: "call_1", name: "system", value: {"ok" => true}) }
     end
 
-    describe "when checking #alive?" do
+    describe "when checking #alive?", :ractor do
       let(:slow_tool) do
         Class.new(LLM::Tool) do
           name "slow"
@@ -81,7 +81,7 @@ RSpec.describe LLM::Function do
       end
     end
 
-    describe "when interrupting a task" do
+    describe "when interrupting a task", :ractor do
       before do
         skip "not supported by yajl or oj" unless ENV.fetch("JSON_PARSER", "json").downcase == "json"
       end
@@ -136,7 +136,7 @@ RSpec.describe LLM::Function do
       )
     end
 
-    context "when configured with a tracer" do
+    context "when configured with a tracer", :ractor do
       let(:tracer) { double("tracer", on_tool_start: :span, on_tool_finish: nil) }
 
       before do
@@ -481,7 +481,7 @@ RSpec.describe LLM::Function do
       end
     end
 
-    describe "when the tool runs in a child process" do
+    describe "when the tool runs in a child process", :fork do
       let(:tool_class) do
         Class.new(LLM::Tool) do
           name "forked"
@@ -511,7 +511,7 @@ RSpec.describe LLM::Function do
       end
     end
 
-    describe "when the tool runs in a ractor" do
+    describe "when the tool runs in a ractor", :ractor do
       before do
         skip "not supported by yajl or oj" unless ENV.fetch("JSON_PARSER", "json").downcase == "json"
       end
