@@ -21,13 +21,13 @@ RSpec.describe LLM::Function do
   end
 
   describe "when building a return" do
-    subject(:result) { tool.return(error: true, type: "guard_error", message: "stop") }
+    subject(:result) { tool.return(error: true, type: "intercept_error", message: "stop") }
 
     it "builds a return using the function's id and name" do
       expect(result.to_h).to eq(
         id: "call_1",
         name: "system",
-        value: {error: true, type: "guard_error", message: "stop"}
+        value: {error: true, type: "intercept_error", message: "stop"}
       )
     end
   end
@@ -175,19 +175,19 @@ RSpec.describe LLM::Function do
         expect(task.wait.to_h).to eq(id: "call_1", name: "system", value: {"ok" => true})
       end
 
-      let(:guarded_tool) do
+      let(:intercepted_tool) do
         tool_class.function.dup.tap do |fn|
           fn.id = "call_5"
           fn.arguments = {"command" => "date"}
-          fn.guard = ->(function:) { function.return(error: true, type: "guard_error", message: "stop") }
+          fn.intercept = ->(function:) { function.return(error: true, type: "intercept_error", message: "stop") }
         end
       end
 
-      it "returns the guard result when the tool is blocked" do
-        expect(guarded_tool.task(:fork).wait.to_h).to eq(
+      it "returns the intercepted result when the tool is blocked" do
+        expect(intercepted_tool.task(:fork).wait.to_h).to eq(
           id: "call_5",
           name: "system",
-          value: {error: true, type: "guard_error", message: "stop"}
+          value: {error: true, type: "intercept_error", message: "stop"}
         )
       end
 
@@ -359,9 +359,9 @@ RSpec.describe LLM::Function do
         expect { function.task(:thread) }.to change { tool_class.instances }.by(1)
       end
 
-      context "when the tool is blocked by a guard" do
+      context "when the tool is blocked by an intercept" do
         before do
-          function.guard = ->(function:) { function.return(error: true, type: "guard_error", message: "stop") }
+          function.intercept = ->(function:) { function.return(error: true, type: "intercept_error", message: "stop") }
         end
 
         it "does not resolve the runner" do
