@@ -14,8 +14,9 @@ bundler = ENV["bundler"] || "bundle"
 # binds (n)curses, so it is left out of the bundle on Windows, where there
 # is no ncurses to bind. `llm/console` requires it when it loads, and every
 # file under `spec/console` requires `llm/console`, so those files die with
-# a `LoadError` before an example runs: they are dropped from the run
-# instead of loaded and failed, which keeps `rake spec` the one entry point.
+# a `LoadError` before an example runs: the task below names them and drops
+# them, rather than excluding them with a pattern that does not match them
+# there, and `rake spec` stays the one entry point.
 def curses?
   require "curses"
   true
@@ -53,9 +54,9 @@ end
 
 desc "Run all tests"
 task :spec do
-  args = ["spec"]
-  args.push("--exclude-pattern", "spec/console/**/*_spec.rb") unless curses?
-  sh(bundler, "exec", "rspec", *args)
+  paths = ["spec"]
+  paths = Dir["spec/**/*_spec.rb"].reject { _1.start_with?("spec/console/") } unless curses?
+  sh(bundler, "exec", "rspec", *paths)
 end
 
 desc "Start a console with all providers loaded"
