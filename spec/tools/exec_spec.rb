@@ -27,7 +27,7 @@ RSpec.describe LLM::Tool::Exec do
 
   describe "#call" do
     it "raises when the command exceeds the timeout" do
-      expect { tool.call(arguments: ["sleep", "10"], timeout: 0.1) }.to raise_error(
+      expect { tool.call(arguments: [RbConfig.ruby, "-e", "sleep 10"], timeout: 0.1) }.to raise_error(
         RuntimeError,
         "command timed out after 0.1s"
       )
@@ -104,14 +104,19 @@ RSpec.describe LLM::Tool::Exec do
   end
 
   describe "when spawning a real command" do
-    let(:arguments) { ["echo", ""] }
+    ##
+    # **The command is the interpreter the suite runs on.** Every command
+    # here has to be one that exists wherever the suite runs: `echo`,
+    # `printf`, `sh`, `false` and `sleep` are shell builtins or simply
+    # absent on Windows, and an example that asks for one fails there for a
+    # reason that is not the tool's. Ruby is there, and it is what these
+    # examples spawn.
+    let(:arguments) { [RbConfig.ruby, "-e", "STDOUT.write('hello world')"] }
     let(:result) { tool.call(arguments:) }
 
-    context "given echo" do
-      let(:arguments) { ["echo", "hello world"] }
-
+    context "when the command writes to stdout" do
       it "captures fixed stdout" do
-        expect(result).to include(ok: true, stdout: "hello world\n", stderr: "")
+        expect(result).to include(ok: true, stdout: "hello world", stderr: "")
       end
 
       it "reports how long the command ran" do
@@ -123,8 +128,8 @@ RSpec.describe LLM::Tool::Exec do
       end
     end
 
-    context "given sleep" do
-      let(:arguments) { ["sleep", "1"] }
+    context "when the command sleeps" do
+      let(:arguments) { [RbConfig.ruby, "-e", "sleep 1"] }
       let(:seconds) { result[:duration].to_f }
 
       it "measures how long the command ran" do
@@ -132,8 +137,8 @@ RSpec.describe LLM::Tool::Exec do
       end
     end
 
-    context "given printf" do
-      let(:arguments) { ["printf", "no-newline"] }
+    context "when the command writes without a newline" do
+      let(:arguments) { [RbConfig.ruby, "-e", "STDOUT.write('no-newline')"] }
 
       it "captures fixed stdout" do
         expect(result[:stdout]).to eq("no-newline")
@@ -144,16 +149,16 @@ RSpec.describe LLM::Tool::Exec do
       end
     end
 
-    context "given sh" do
-      let(:arguments) { ["sh", "-c", "echo oops >&2"] }
+    context "when the command writes to stderr" do
+      let(:arguments) { [RbConfig.ruby, "-e", "STDERR.write('oops')"] }
 
       it "captures fixed stderr" do
-        expect(result).to include(ok: true, stdout: "", stderr: "oops\n")
+        expect(result).to include(ok: true, stdout: "", stderr: "oops")
       end
     end
 
-    context "given false" do
-      let(:arguments) { ["false"] }
+    context "when the command fails" do
+      let(:arguments) { [RbConfig.ruby, "-e", "exit 1"] }
 
       it "reports a failing command" do
         expect(result[:ok]).to be(false)
@@ -178,7 +183,7 @@ RSpec.describe LLM::Tool::Exec do
 
     context "when given env" do
       let(:tool) { described_class.new(env: {"EXEC_SPEC_FOO" => "bar"}) }
-      let(:arguments) { ["sh", "-c", "printf %s \"$EXEC_SPEC_FOO\""] }
+      let(:arguments) { [RbConfig.ruby, "-e", "STDOUT.write(ENV['EXEC_SPEC_FOO'].to_s)"] }
 
       it "sets environment for the spawned command" do
         expect(result).to include(ok: true, stdout: "bar", stderr: "")
