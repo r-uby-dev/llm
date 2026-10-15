@@ -181,11 +181,11 @@ class LLM::Function
   attr_accessor :model
 
   ##
-  # Returns the guard class that protects this function, or nil.
-  # The context stamps the guard onto the functions it binds, so any task
-  # built from this function checks it before the tool runs.
-  # @return [Class<LLM::Guard>, nil]
-  attr_accessor :guard
+  # Returns the intercept class that supervises this function, or nil.
+  # The context stamps the intercept onto the functions it binds, so any
+  # task built from this function checks it before the tool runs.
+  # @return [Class<LLM::Intercept>, nil]
+  attr_accessor :intercept
 
   ##
   # @param [String] name The function name
@@ -281,7 +281,7 @@ class LLM::Function
   #   not been spawned already holds a live instance, and
   #   {LLM::Function::Array#task} builds one for every pending function at
   #   once. A tool that cannot be built carries the same in-band error the
-  #   guard produces rather than raising, so a constructor's failure
+  #   intercept produces rather than raising, so a constructor's failure
   #   answers the model on every strategy.
   # @param [Symbol] strategy
   #   Controls concurrency strategy:
@@ -296,10 +296,10 @@ class LLM::Function
   #   Returns a task whose `#value` is an {LLM::Function::Return}.
   def task(strategy, options = {})
     ##
-    # Check the function's guard on the calling thread before handing
+    # Check the function's intercept on the calling thread before handing
     # the tool to the strategy. The task carries the blocked result and
-    # returns it without running if the guard intervenes.
-    options = options.merge(guarded: @guard&.call(function: self))
+    # returns it without running if the intercept intervenes.
+    options = options.merge(intercepted: @intercept&.call(function: self))
     ##
     # Resolve the runner here, on the calling thread, before the task
     # returned below exists for another thread to interrupt.
@@ -314,11 +314,11 @@ class LLM::Function
     # so a tool whose `initialize` wants a current `Async::Task` or a
     # scheduler-installed fiber does not get one.
     #
-    # A guarded task runs nothing, so it resolves nothing. A strategy in
+    # An intercepted task runs nothing, so it resolves nothing. A strategy in
     # {LLM::Function.isolated} stays lazy on purpose, because there the
     # tool is built in the child process or the ractor and this instance
     # is not the one that runs.
-    options = options.merge(tracer:, guarded: options[:guarded] || resolve(strategy))
+    options = options.merge(tracer:, intercepted: options[:intercepted] || resolve(strategy))
     case strategy
     when :sequential
       Sequential::Task.new(self, options)
@@ -505,7 +505,7 @@ class LLM::Function
   #
   # {#call_function} resolves inside its own rescue, and that rescue is what
   # answers the model with an error rather than raising into the turn.
-  # Resolving earlier keeps that promise by producing the return the guard
+  # Resolving earlier keeps that promise by producing the return the intercept
   # would have produced.
   #
   # An interrupt is re-raised rather than answered, which is what
