@@ -9,6 +9,20 @@ remotes = %w[openai google anthropic deepseek]
 locals  = %w[ollama llamacpp]
 bundler = ENV["bundler"] || "bundle"
 
+##
+# True when the `curses` gem can be loaded. It is a source release that
+# binds (n)curses, so it is left out of the bundle on Windows, where there
+# is no ncurses to bind. `llm/console` requires it when it loads, and every
+# file under `spec/console` requires `llm/console`, so those files die with
+# a `LoadError` before an example runs: they are dropped from the run
+# instead of loaded and failed, which keeps `rake spec` the one entry point.
+def curses?
+  require "curses"
+  true
+rescue LoadError
+  false
+end
+
 desc "Run linter"
 task :rubocop do
   sh "#{bundler} exec rubocop"
@@ -39,7 +53,9 @@ end
 
 desc "Run all tests"
 task :spec do
-  sh "#{bundler} exec rspec spec"
+  args = ["spec"]
+  args.push("--exclude-pattern", "spec/console/**/*_spec.rb") unless curses?
+  sh(bundler, "exec", "rspec", *args)
 end
 
 desc "Start a console with all providers loaded"

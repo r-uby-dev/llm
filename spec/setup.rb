@@ -21,6 +21,20 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
+  ##
+  # Windows has no `fork`, and the fork specs ask whether `xchan.rb` is
+  # installed rather than whether a process can be forked. An example that
+  # runs a tool on a fork is skipped where `fork` is not there: it is one
+  # of the files under `spec/function/fork`, or one whose group says in
+  # its description that a fork is what the tool runs on - which is how
+  # `spec/function_spec.rb`, `spec/agent_spec.rb` and `spec/context_spec.rb`
+  # ask for one. The tracer's shared group asks its own strategy.
+  unless Process.respond_to?(:fork)
+    config.before(:each) do |example|
+      skip "fork is not available" if fork_example?(example)
+    end
+  end
+
   config.around(:each, :interval) do |example|
     example.run
   ensure
@@ -64,4 +78,14 @@ def cassette_recorded?(example)
   name = vcr[:cassette_name]
   return false unless name
   File.exist?(File.join(VCR.configuration.cassette_library_dir, "#{name}.yml"))
+end
+
+##
+# True when an example runs a tool on a fork. The files under
+# `spec/function/fork` are fork examples whole, and the rest say so in the
+# description their group was given.
+def fork_example?(example)
+  metadata = example.metadata
+  metadata[:file_path].include?("/function/fork/") ||
+    metadata[:full_description].match?(/fork|child process/i)
 end
