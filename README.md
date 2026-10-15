@@ -958,40 +958,69 @@ end
 
 #### Hooks
 
-<details><summary>Guards</summary>
+<details><summary>Intercepts</summary>
 <br>
 
-[`LLM::Guard`](https://r.uby.dev/api-docs/llm.rb/LLM/Guard.html)
-is the hook that sees every tool call before it runs. A guard
-can let a call through, cancel it, block it with an error, or
-even answer for it. Because it runs before the tool, anything
-it intercepts never executes. Policy, validation, quotas, and
-cost ceilings all live here.
+When a model requests a tool call, the
+runtime represents it as a [`LLM::Function`](https://r.uby.dev/api-docs/llm.rb/LLM/Function.html)
+object that a subclass of [`LLM::Intercept`](https://r.uby.dev/api-docs/llm.rb/LLM/Intercept.html)
+can see _before_ it is called. An intercept
+can return on behalf of the tool call, and so
+the tool call is never made. Or it can return
+nil, and let the tool call continue as normal.
 
-Agents and contexts use
-[`LLM::Guard::Null`](https://r.uby.dev/api-docs/llm.rb/LLM/Guard/Null.html)
-by default, so a guard only runs when you configure one. To
-write your own guard, subclass
-[`LLM::Guard`](https://r.uby.dev/api-docs/llm.rb/LLM/Guard.html)
-and implement
-[`LLM::Guard#call`](https://r.uby.dev/api-docs/llm.rb/LLM/Guard.html#call-instance_method).
-The pending call arrives as `function:`. Return a value to close
-the call, or `nil` to let it run:
+Maybe best of all, an intercept can modify
+the arguments given to a [`LLM::Function`](https://r.uby.dev/api-docs/llm.rb/LLM/Function.html)
+in-place, before the tool call is made. This
+allows an intercept to modify what the model
+wanted to send to a function, and then let
+the function be called as normal.
+
+This also works for MCP tools - so you might
+be able to imagine an intercept that wrapped
+a comment body at 80 columns, or parsed a
+markdown post into HTML, before the tool
+call is made.
+
+A simple example:
 
 ```ruby
-class PolicyGuard < LLM::Guard
+require "llm"
+
+class Sandbox < LLM::Intercept
   def call(function:)
     if function.name == "exec"
-      function.return(error: true, type: "policy_error",
-                      message: "exec is disabled")
+      function.return(error: true, type: "permission_error", message: "exec is disabled")
     end
   end
 end
 
 llm = LLM.deepseek(key: ENV["KEY"])
-agent = LLM::Agent.new(llm, tools: [LLM::Tool::Exec, ReadFile], guard: PolicyGuard)
+agent = LLM::Agent.new(llm, tools: [LLM::Tool::Exec, ReadFile], intercept: Sandbox)
 ```
 </details>
+
+A multi-intercept example. <br>
+
+Each intercept is called in order they're given
+and the first one that returns an
+[`LLM::Function::Return`](https://r.uby.dev/api-docs/llm.rb/LLM/Function/Return.html)
+stops the tool call from being made.
+
+This feature lets you combine multiple intercepts
+into a single intercept that calls out to all of
+them:
+
+```ruby
+require "llm"
+
+llm       = LLM.deepseek(key: ENV["KEY"])
+mcp       = LLM::MCP.stdio(argv: ["bundle", "exec", "slack-mcp"])
+intercept = LLM::Intercept.multi(llm, WrapComment, BlockBadLanguage)
+agent     = LLM::Agent.new(llm, tools: [mcp.tools], intercept:)
+
+agent.talk "Tell slack channel I'm AFK", stream: $stdout
+```
 
 <details>
 <summary>Transformers</summary>
