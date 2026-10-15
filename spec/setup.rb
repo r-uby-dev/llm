@@ -25,13 +25,27 @@ RSpec.configure do |config|
   # Windows has no `fork`, and the fork specs ask whether `xchan.rb` is
   # installed rather than whether a process can be forked. An example that
   # runs a tool on a fork is skipped where `fork` is not there: it is one
-  # of the files under `spec/function/fork`, or one whose group says in
-  # its description that a fork is what the tool runs on - which is how
-  # `spec/function_spec.rb`, `spec/agent_spec.rb` and `spec/context_spec.rb`
-  # ask for one. The tracer's shared group asks its own strategy.
+  # of the files under `spec/function/fork`, one tagged `:fork`, or one
+  # whose group says in its description that a fork is what the tool runs
+  # on - which is how `spec/agent_spec.rb` and `spec/context_spec.rb` ask
+  # for one. The tracer's shared group asks its own strategy.
   unless Process.respond_to?(:fork)
     config.before(:each) do |example|
       skip "fork is not available" if fork_example?(example)
+    end
+  end
+
+  ##
+  # A ractor is not usable on Windows either: a call that runs a tool in
+  # one does not come back, and the examples that run one - the ractor
+  # specs, and the rest of the suite where it asks for one - do not come
+  # back either. Such an example is skipped the way a fork example is: it
+  # is one of the files under `spec/function/ractor`, one tagged `:ractor`
+  # (a task built on a group's default strategy cannot say so in a
+  # description), or one whose description names a ractor.
+  unless ractors?
+    config.before(:each) do |example|
+      skip "a ractor hangs on this platform" if ractor_example?(example)
     end
   end
 
@@ -81,11 +95,30 @@ def cassette_recorded?(example)
 end
 
 ##
+# True when a call can be run in a ractor. It cannot on Windows, where a
+# call that runs a tool in one does not come back.
+def ractors?
+  !Gem.win_platform?
+end
+
+##
 # True when an example runs a tool on a fork. The files under
 # `spec/function/fork` are fork examples whole, and the rest say so in the
-# description their group was given.
+# description their group was given, or with a `:fork` tag.
 def fork_example?(example)
   metadata = example.metadata
-  metadata[:file_path].include?("/function/fork/") ||
-    metadata[:full_description].match?(/fork|child process/i)
+  metadata[:fork] ||
+    metadata[:file_path].include?("/function/fork/") ||
+    metadata[:full_description].match?(/fork/i)
+end
+
+##
+# True when an example runs a tool in a ractor. The files under
+# `spec/function/ractor` are ractor examples whole, and the rest say so in
+# the description their group was given, or with a `:ractor` tag.
+def ractor_example?(example)
+  metadata = example.metadata
+  metadata[:ractor] ||
+    metadata[:file_path].include?("/function/ractor/") ||
+    metadata[:full_description].match?(/ractor/i)
 end
