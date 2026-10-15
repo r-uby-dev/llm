@@ -2,9 +2,11 @@
 
 class LLM::Intercept
   ##
-  # {LLM::Intercept::Null LLM::Intercept::Null} is a no-op intercept. It
-  # never blocks pending tool work and is the default intercept used by
-  # {LLM::Context LLM::Context}.
+  # The {LLM::Intercept::Null LLM::Intercept::Null} class
+  # is the default intercept, and it does nothing but allow
+  # the tool call through.
+  #
+  # @see LLM::Intercept
   class Null < self
     ##
     # @param (see LLM::Intercept#call)
