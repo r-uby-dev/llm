@@ -46,6 +46,57 @@ to avoid launching the same process multiple times. For HTTP,
 [`LLM::MCP#session`](https://r.uby.dev/api-docs/llm.rb/LLM/MCP.html#session-instance_method)
 carries little benefit.
 
+### Local repository lookup with Sem
+
+[Sem](https://github.com/Ataraxy-Labs/sem) provides symbol lookup and
+source search through a local stdio MCP server. Install Sem following
+its upstream instructions and verify `sem --version`. This example
+uses the existing stdio client; no model credentials are needed.
+
+Save the following as `sem_code.rb`, then run it with an existing
+Git checkout and a symbol in that checkout:
+
+```bash
+SEM_REPO=/absolute/path/to/repo ruby sem_code.rb parse_config
+```
+
+```ruby
+require "llm"
+
+repo = File.realpath(ENV.fetch("SEM_REPO"))
+query = ARGV.fetch(0)
+mcp = LLM::MCP.stdio(
+  argv: [ENV.fetch("SEM_BIN", "sem"), "mcp"],
+  env: {"SEM_REPO" => repo},
+  cwd: repo
+)
+
+mcp.session do
+  lookup = mcp.tools.find { |tool| tool.name == "sem_find" }
+  raise "Server did not expose sem_find" unless lookup
+
+  puts LLM.json.dump(lookup.new.call(
+    query: query,
+    mode: "context",
+    token_budget: 1200
+  ))
+end
+```
+
+Use `SEM_BIN=/absolute/path/to/sem` if Sem is not on PATH. Keeping
+discovery and lookup inside `session` reuses the child process. The
+first query may build a repository index; an empty result can mean
+the symbol was not found. Consult the discovered tool schema for
+the installed Sem version.
+
+For an agent conversation, pass only the tool classes you intend
+to expose, for example `mcp.tools.select { |t| t.name == "sem_find" }`,
+inside the same session. This filters the model's available tools,
+not the server's permissions. The full Sem server also exposes
+validation tools that can execute commands: use trusted checkouts
+and host permissions. `SEM_REPO` is not a sandbox. The lookup does
+not edit source files, but Sem may write its local index.
+
 ### HTTP
 
 #### Overview
