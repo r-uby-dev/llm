@@ -11,13 +11,10 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     name: Linux (Ruby ${{ matrix.ruby-version }})
-    # A suite that stalls should be a red check rather than an afternoon:
-    # this is the only thing that stops a hung example, because a job that
-    # never finishes has no log to read.
     timeout-minutes: 15
     strategy:
       matrix:
-        ruby-version: ['4.0']
+        ruby-version: ['4.0', '4.1.0-preview1']
         json-parser: ['JSON', 'Oj', 'Yajl']
 
     services:
@@ -58,15 +55,10 @@ jobs:
   macos:
     runs-on: macos-latest
     name: macOS (Ruby ${{ matrix.ruby-version }})
-    # macOS runs and queues more slowly than Linux, so this job is one
-    # parser rather than three, and its timeout is what a run needs rather
-    # than what a stall allows. PostgreSQL is left unconfigured: the linux
-    # job's service container has no macOS equivalent, and the ORM specs
-    # skip themselves when LLMRB_POSTGRESQL_URL is unset.
     timeout-minutes: 30
     strategy:
       matrix:
-        ruby-version: ['4.0']
+        ruby-version: ['4.0', '4.1.0-preview1']
         json-parser: ['JSON']
 
     steps:
@@ -94,7 +86,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        ruby-version: ['4.0']
+        ruby-version: ['4.0', '4.1.0-preview1']
         json-parser: ['JSON']
 
     steps:
@@ -112,52 +104,3 @@ jobs:
         JSON_PARSER: ${{ matrix.json-parser }}
       run: bundle exec rake spec
 
-#  openbsd:
-#    runs-on: ubuntu-latest
-#    name: OpenBSD
-#    continue-on-error: true
-#    env:
-#      bundler: "bundle33"
-#    steps:
-#    - uses: actions/checkout@v4
-#    - name: Run tests
-#      uses: vmactions/openbsd-vm@v1
-#      with:
-#        copyback: false
-#        envs: "bundler"
-#        run: |
-#          pkg_add ruby-3.4.9
-#          pkg_add postgresql-client
-#          bundle33 install
-#          bundle33 exec ruby33 -e 'require "pg"'
-#          bundle33 exec rake
-
-#  netbsd:
-#    runs-on: ubuntu-latest
-#    name: NetBSD
-#    continue-on-error: true
-#    steps:
-#    - uses: actions/checkout@v4
-#    - name: Run tests
-#      uses: vmactions/netbsd-vm@v1
-#      with:
-#        copyback: false
-#        run: |
-#          pkg_add ruby-3.3.11
-#          bundle33 install
-#          bundle33 exec rake
-
-#  freebsd:
-#    runs-on: ubuntu-latest
-#    name: FreeBSD
-#    continue-on-error: true
-#    steps:
-#    - uses: actions/checkout@v4
-#    - name: Run tests
-#      uses: vmactions/freebsd-vm@v1
-#      with:
-#        copyback: false
-#        run: |
-#          pkg-static install -y pkgconf rubygem-bundler
-#          bundle install
-#          bundle exec rake
