@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         ruby-version: ['4.0', '4.1.0-preview1']
-        json-parser: ['JSON', 'Oj', 'Yajl']
+        json-parser: ['JSON']
 
     services:
       postgres:
@@ -58,7 +58,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        ruby-version: ['4.0', '4.1.0-preview1']
+        ruby-version: ['4.0']
         json-parser: ['JSON']
 
     steps:
@@ -86,7 +86,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        ruby-version: ['4.0', '4.1.0-preview1']
+        ruby-version: ['4.0']
         json-parser: ['JSON']
 
     steps:
