@@ -10,7 +10,6 @@ gem "cgi", "~> 0.4.2"
 ##
 # JSON parsers
 gem "oj", require: false
-gem "yajl-ruby", require: false
 
 ##
 # Gems that don't work on Windows
