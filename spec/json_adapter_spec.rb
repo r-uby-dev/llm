@@ -2,6 +2,23 @@
 
 require "setup"
 
+RSpec.describe "LLM.json=" do
+  around do |example|
+    adapter = LLM.json
+    example.run
+  ensure
+    LLM.json = adapter
+  end
+
+  it "rejects the removed Yajl adapter" do
+    expect { LLM.json = :yajl }.to raise_error(TypeError, "Adapter must be a subclass of LLM::JSONAdapter")
+  end
+
+  it "does not define the removed Yajl adapter" do
+    expect(LLM::JSONAdapter.const_defined?(:Yajl, false)).to be(false)
+  end
+end
+
 RSpec.describe LLM::JSONAdapter::JSON do
   describe "when dumping an invalid UTF-8 string" do
     let(:invalid_utf8) { "\xFF\xFE".b.force_encoding("UTF-8") }

@@ -83,7 +83,7 @@ RSpec.describe LLM::Function do
 
     describe "when interrupting a task", :ractor do
       before do
-        skip "not supported by yajl or oj" unless ENV.fetch("JSON_PARSER", "json").downcase == "json"
+        skip "not supported by oj" unless ENV.fetch("JSON_PARSER", "json").downcase == "json"
       end
 
       let(:tool) do
@@ -526,7 +526,7 @@ RSpec.describe LLM::Function do
 
     describe "when the tool runs in a ractor", :ractor do
       before do
-        skip "not supported by yajl or oj" unless ENV.fetch("JSON_PARSER", "json").downcase == "json"
+        skip "not supported by oj" unless ENV.fetch("JSON_PARSER", "json").downcase == "json"
       end
 
       let(:tool_class) do

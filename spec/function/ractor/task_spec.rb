@@ -39,11 +39,11 @@ require "setup"
 # this is about, and an example for it has to fail rather than hang.
 RSpec.describe LLM::Function::Ractor::Task do
   ##
-  # The ractor's examples are not supported by yajl or oj, and the matrix
+  # The ractor's examples are not supported by oj, and the matrix
   # spells the cell that supports them `JSON`, so the parser is compared
   # as it is written.
   before do
-    skip "not supported by yajl or oj" unless ENV.fetch("JSON_PARSER", "json").downcase == "json"
+    skip "not supported by oj" unless ENV.fetch("JSON_PARSER", "json").downcase == "json"
   end
 
   ##

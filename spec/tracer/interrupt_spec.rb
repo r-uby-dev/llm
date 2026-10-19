@@ -200,7 +200,7 @@ RSpec.describe "the tracer's interrupt hook" do
 
     context "when the tool ran in a ractor" do
       before do
-        skip "not supported by yajl or oj" unless ENV.fetch("JSON_PARSER", "json").downcase == "json"
+        skip "not supported by oj" unless ENV.fetch("JSON_PARSER", "json").downcase == "json"
       end
 
       include_examples "an interrupted call", :ractor

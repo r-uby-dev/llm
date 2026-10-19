@@ -14,6 +14,7 @@ before) can be seen in [changelog/old.md](changelog/old.md).
 | Old | New |
 |-----|-----|
 | Ruby 3.4 or later | Ruby 4.0 or later |
+| `LLM.json = :yajl` | `LLM.json = :oj` |
 
 ### Ruby
 
