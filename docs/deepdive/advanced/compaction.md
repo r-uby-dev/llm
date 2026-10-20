@@ -27,6 +27,18 @@ The `keep:` parameter accepts an integer count or a percentage
 string like `"80%"`, and defaults to `64`. When `Truncate` is used
 through a context or an agent, `keep:` is given as
 `compactor_options: {keep: N}` rather than to the compactor itself.
+#### Agent class-level configuration
+
+An agent class can configure its compactor and compactor options.
+The options are passed to the compactor's `call` method.
+
+```ruby
+class MyAgent < LLM::Agent
+  compactor LLM::Compactor::Truncate
+  compactor_options keep: 32
+end
+
+agent = MyAgent.new(llm)
 The default compactor is
 [`LLM::Compactor::Null`](https://r.uby.dev/api-docs/llm.rb/LLM/Compactor/Null.html),
 which does nothing. A compactor can also be used standalone:

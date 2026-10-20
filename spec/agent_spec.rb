@@ -1319,8 +1319,56 @@ RSpec.describe LLM::Agent, "class-level configuration" do
   it "hands a Symbol back for an instance to resolve" do
     expect(klass.description).to eq(:described_here)
   end
-
   it "resolves it on the instance" do
     expect(klass.new(provider).description).to eq("the agent's own words")
+  end
+  it "passes a configured compactor class to the context" do
+    agent_class = Class.new(LLM::Agent) do
+      compactor LLM::Compactor::Truncate
+    end
+
+    agent = agent_class.new(provider)
+    ctx = agent.instance_variable_get(:@ctx)
+
+    expect(ctx.instance_variable_get(:@compactor)[:klass])
+      .to eq(LLM::Compactor::Truncate)
+  end
+
+  it "resolves a Symbol compactor on the instance" do
+    agent_class = Class.new(LLM::Agent) do
+      compactor :configured_compactor
+
+      def configured_compactor = LLM::Compactor::Truncate
+    end
+
+    agent = agent_class.new(provider)
+    ctx = agent.instance_variable_get(:@ctx)
+
+    expect(ctx.instance_variable_get(:@compactor)[:klass])
+      .to eq(LLM::Compactor::Truncate)
+  end
+
+  it "resolves a Proc compactor on the instance" do
+    agent_class = Class.new(LLM::Agent) do
+      compactor { LLM::Compactor::Truncate }
+    end
+
+    agent = agent_class.new(provider)
+    ctx = agent.instance_variable_get(:@ctx)
+
+    expect(ctx.instance_variable_get(:@compactor)[:klass])
+      .to eq(LLM::Compactor::Truncate)
+  end
+
+  it "passes compactor options to the context" do
+    agent_class = Class.new(LLM::Agent) do
+      compactor LLM::Compactor::Truncate
+      compactor_options keep: 10
+    end
+    agent = agent_class.new(provider)
+    ctx = agent.instance_variable_get(:@ctx)
+
+    expect(ctx.instance_variable_get(:@compactor)[:options])
+      .to eq(keep: 10)
   end
 end

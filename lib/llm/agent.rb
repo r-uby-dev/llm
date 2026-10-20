@@ -55,6 +55,7 @@ module LLM
                 retry_budget model
                 skills schema
                 tracer stream
+                compactor compactor_options
                 tools concurrency
                 instructions confirm
                 intercept]
@@ -116,6 +117,8 @@ module LLM
     # @option properties [String, Symbol, Proc] :model
     # @option properties [LLM::Tracer, Symbol, Proc] :tracer
     # @option properties [LLM::Stream, Symbol, Proc] :stream
+    # @option properties [Object, Symbol, Proc, nil] :compactor
+    # @option properties [Hash, Proc, nil] :compactor_options
     # @option properties [LLM::Schema, Symbol, Proc] :schema
     # @option properties [Array<LLM::Function>, Symbol, Proc] :tools
     # @option properties [Array<String>, Symbol, Proc] :skills
@@ -267,6 +270,31 @@ module LLM
         @tracer
       else
         @tracer = block || tracer
+      end
+    end
+    ##
+    # Set or get an agent's compactor.
+    # @param [Object, Symbol, Proc, nil] compactor
+    # @param [Proc] block
+    # @return [Object, Symbol, Proc, nil]
+    def self.compactor(compactor = UNDEFINED, &block)
+      if compactor.equal?(UNDEFINED) and block.nil?
+        @compactor
+      else
+        @compactor = block || compactor
+      end
+    end
+
+    ##
+    # Set or get an agent's compactor options.
+    # @param [Hash, Proc, nil] options
+    # @param [Proc] block
+    # @return [Hash, Proc, nil]
+    def self.compactor_options(options = UNDEFINED, &block)
+      if options.equal?(UNDEFINED) and block.nil?
+        @compactor_options
+      else
+        @compactor_options = block || options
       end
     end
 

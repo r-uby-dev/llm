@@ -29,6 +29,11 @@ before) can be seen in [changelog/old.md](changelog/old.md).
 
 ### Agent
 
+* **agent: add class-level compactor configuration** <br>
+  Agent classes can now configure `compactor` and
+  `compactor_options`, including values resolved from
+  Symbols and Procs.
+
 * **agent: `LLM.interrupt` returns the agent it interrupted** <br>
   [`LLM.interrupt`](https://r.uby.dev/api-docs/llm.rb/LLM.html#interrupt-class_method)
   returns the agent it found and interrupted
