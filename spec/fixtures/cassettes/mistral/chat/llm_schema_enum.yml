@@ -8,14 +8,14 @@ http_interactions:
       string: '{"messages":[{"role":"user","content":[{"type":"text","text":"Your
         favorite fruit is pineapple"}]},{"role":"user","content":[{"type":"text","text":"What
         fruit is your favorite?"}]}],"model":"mistral-large-latest","response_format":{"type":"json_schema","json_schema":{"name":"JSONSchema","schema":{"type":"object","properties":{"fruit":{"description":"The
-        favorite fruit","enum":["apple","pineapple","orange"],"type":"string"}},"required":["fruit"]}}}}'
+        favorite fruit","enum":["apple","pineapple","orange"],"type":"string"}},"required":["fruit"],"additionalProperties":false}}},"stream":false}'
     headers:
       User-Agent:
-      - llm.rb v12.1.0
+      - llm.rb v17.0.1
+      Authorization:
+      - Bearer TOKEN
       Content-Type:
       - application/json
-      Authorization:
-      - Bearer HLAqrnifGXE0eWiKDvy6moMIPArCSYno
       Transfer-Encoding:
       - chunked
       Accept-Encoding:
@@ -28,56 +28,56 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Thu, 09 Jul 2026 05:22:38 GMT
+      - Tue, 20 Oct 2026 15:02:40 GMT
       Content-Type:
       - application/json
       Transfer-Encoding:
       - chunked
       Connection:
       - keep-alive
-      Set-Cookie:
-      - __cf_bm=kpOQrcFgNVZFPS8m.LDkE9GPdcNO5vqvpzqyXEMlOfo-1783574557.4773602-1.0.1.1-RkyoPzgT29vvHsDTOZ4HJ7.vzWjVUZTKFwUzTVhdkzrVErXaBhklcreLmXJ2pm_KNRYQV0.ms.XLRLvihEgGH21XY4Iwbk4wjjiQkN8.YM.LJK_e.vx0oBWTqNOsCQFJ;
-        HttpOnly; SameSite=None; Secure; Path=/; Domain=mistral.ai; Expires=Thu, 09
-        Jul 2026 05:52:38 GMT
       Mistral-Correlation-Id:
-      - '019f4553-f380-7902-b656-93cec6341a5f'
+      - 01a159d6-0286-78e8-b987-5759b34bd4cd
       X-Kong-Request-Id:
-      - '019f4553-f380-7902-b656-93cec6341a5f'
+      - 01a159d6-0286-78e8-b987-5759b34bd4cd
       X-Max-Retry-Attempts-Reached:
-      - 'false'
+      - 'true'
       X-Ratelimit-Limit-Tokens-Minute:
-      - '400000'
+      - '800000'
       X-Ratelimit-Remaining-Tokens-Minute:
-      - '399409'
+      - '798785'
       X-Ratelimit-Tokens-Query-Cost:
-      - '27'
+      - '24'
       X-Ratelimit-Limit-Req-Minute:
-      - '15'
+      - '30'
       X-Ratelimit-Remaining-Req-Minute:
-      - '9'
+      - '18'
       X-Envoy-Upstream-Service-Time:
-      - '419'
+      - '579'
       Server:
       - cloudflare
       Access-Control-Allow-Origin:
       - "*"
       X-Kong-Upstream-Latency:
-      - '420'
+      - '581'
       X-Kong-Proxy-Latency:
-      - '11'
-      X-Content-Type-Options:
-      - nosniff
+      - '79'
       Cf-Cache-Status:
       - DYNAMIC
+      Set-Cookie:
+      - __cf_bm=csSWJGs_SF0.QUFoxGpI5rptqjcnioNpv6yK9tjNshs-1792508559.8818538-1.0.1.1-DirJDhkBbYbGms8i.1eUj4hOj9sdmaP53py.Ebj0X7Is.BFd7srxep_QFzXZDqMKF.baF1uFpI8lSqJAiDc5.jlC6DS5A2cYsw5.PvTncFG_gBrHLvLpF1ecHKFn6sJJ;
+        HttpOnly; SameSite=None; Secure; Path=/; Domain=mistral.ai; Expires=Tue, 20
+        Oct 2026 15:32:40 GMT
       Strict-Transport-Security:
       - max-age=15552000; includeSubDomains; preload
+      X-Content-Type-Options:
+      - nosniff
       Cf-Ray:
-      - a184e4583a9e630c-GRU
+      - a4d8e7a33a9c195d-GRU
       Alt-Svc:
       - h3=":443"; ma=86400
     body:
       encoding: ASCII-8BIT
-      string: '{"id":"38dba1621456476a8d8acd89f77e50e3","created":1783574557,"model":"mistral-large-latest","usage":{"prompt_tokens":16,"total_tokens":27,"completion_tokens":11,"prompt_tokens_details":{"cached_tokens":0}},"object":"chat.completion","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","tool_calls":null,"content":"{\n  \"fruit\":
-        \"pineapple\"\n}"}}]}'
-  recorded_at: Thu, 09 Jul 2026 05:22:37 GMT
+      string: '{"id":"ea78e09db9bb4f28ba6a1c1cac7a74b5","created":1792508560,"model":"mistral-large-latest","usage":{"prompt_tokens":16,"total_tokens":24,"completion_tokens":8,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":0},"service_tier":"standard"},"object":"chat.completion","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","tool_calls":null,"content":"{\"fruit\":
+        \"pineapple\"}"}}]}'
+  recorded_at: Tue, 20 Oct 2026 15:02:38 GMT
 recorded_with: VCR 6.4.0

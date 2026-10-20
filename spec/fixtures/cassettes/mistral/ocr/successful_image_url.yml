@@ -8,9 +8,9 @@ http_interactions:
       string: '{"model":"mistral-ocr-latest","document":{"type":"image_url","image_url":"https://raw.githubusercontent.com/github/explore/main/topics/ruby/ruby.png"}}'
     headers:
       User-Agent:
-      - llm.rb v12.2.0
+      - llm.rb v17.0.1
       Authorization:
-      - Bearer HLAqrnifGXE0eWiKDvy6moMIPArCSYno
+      - Bearer TOKEN
       Content-Type:
       - application/json
       Accept-Encoding:
@@ -23,7 +23,7 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Fri, 10 Jul 2026 05:30:53 GMT
+      - Tue, 20 Oct 2026 15:02:54 GMT
       Content-Type:
       - application/json
       Transfer-Encoding:
@@ -31,29 +31,29 @@ http_interactions:
       Connection:
       - keep-alive
       Set-Cookie:
-      - __cf_bm=.QWIepiSwTnHFoZw6dJodUVeQ7mibALW4NozabJF8kQ-1783661453.1875765-1.0.1.1-MEuRURJFeW0fKL0hB0E182qzPNYRUbXAR0ImuwylGdUF7ITHItKA1lrStCY7L6KzMdT4cmkgPqpd170hqZ7164pmIc.GEo7TDuB9YTWpeoeFUB9MNKC4FsULcoVsXGit;
-        HttpOnly; SameSite=None; Secure; Path=/; Domain=mistral.ai; Expires=Fri, 10
-        Jul 2026 06:00:53 GMT
+      - __cf_bm=ZmDeawWpnmtINouKaJvSrZhK5xR.KoFWAjQIk7rNKkE-1792508573.5653932-1.0.1.1-EqVGBd8oU.47cbTnatPyw4bN3tZOSLrDHCh1um8zafBvs2_rfCnKy0tCb_AwHnWaA6amCqu8YlcxxNIjh9391onrnIJgc_q8ffEiwGn5WjyZw.dOGgkEFpCJGrDS1cfI;
+        HttpOnly; SameSite=None; Secure; Path=/; Domain=mistral.ai; Expires=Tue, 20
+        Oct 2026 15:32:54 GMT
       Mistral-Correlation-Id:
-      - '019f4a81-dfdd-7089-b774-14227df5e7bf'
+      - 01a159d6-37e8-7904-b2c4-1de1bb7eb79b
       X-Kong-Request-Id:
-      - '019f4a81-dfdd-7089-b774-14227df5e7bf'
+      - 01a159d6-37e8-7904-b2c4-1de1bb7eb79b
       X-Ratelimit-Limit-Ocr-Pages-Minute:
-      - '1250'
+      - '2500'
       X-Ratelimit-Remaining-Ocr-Pages-Minute:
-      - '1220'
+      - '2470'
       X-Ratelimit-Ocr-Pages-Query-Cost:
       - '1'
       X-Envoy-Upstream-Service-Time:
-      - '479'
+      - '595'
       Server:
       - cloudflare
       Access-Control-Allow-Origin:
       - "*"
       X-Kong-Upstream-Latency:
-      - '480'
+      - '597'
       X-Kong-Proxy-Latency:
-      - '14'
+      - '30'
       X-Content-Type-Options:
       - nosniff
       Cf-Cache-Status:
@@ -61,11 +61,12 @@ http_interactions:
       Strict-Transport-Security:
       - max-age=15552000; includeSubDomains; preload
       Cf-Ray:
-      - a18d2dd26a62c547-GRU
+      - a4d8e7f8cd896ea6-GRU
       Alt-Svc:
       - h3=":443"; ma=86400
     body:
       encoding: ASCII-8BIT
-      string: '{"pages":[{"index":0,"markdown":"2","images":[],"tables":[],"hyperlinks":[],"header":null,"footer":null,"dimensions":{"dpi":200,"height":288,"width":288},"confidence_scores":null,"blocks":[{"top_left_x":0,"top_left_y":0,"bottom_right_x":288,"bottom_right_y":288,"content":"2","type":"list"}]}],"model":"mistral-ocr-latest","document_annotation":null,"usage_info":{"pages_processed":1,"doc_size_bytes":49053}}'
-  recorded_at: Fri, 10 Jul 2026 05:30:52 GMT
+      string: '{"pages":[{"index":0,"markdown":"# 8","images":[],"tables":[],"hyperlinks":[],"header":null,"footer":null,"dimensions":{"dpi":200,"height":288,"width":288},"confidence_scores":null,"blocks":[{"top_left_x":0,"top_left_y":0,"bottom_right_x":287,"bottom_right_y":287,"content":"#
+        8","confidence_scores":null,"type":"title"}]}],"model":"mistral-ocr-latest","document_annotation":null,"usage_info":{"pages_processed":1,"doc_size_bytes":49053}}'
+  recorded_at: Tue, 20 Oct 2026 15:02:52 GMT
 recorded_with: VCR 6.4.0

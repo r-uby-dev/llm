@@ -7,14 +7,14 @@ http_interactions:
       encoding: UTF-8
       string: '{"messages":[{"role":"user","content":[{"type":"text","text":"Return
         probability 1 for true and 0 for false. Does the earth orbit the sun?"}]}],"model":"mistral-large-latest","response_format":{"type":"json_schema","json_schema":{"name":"JSONSchema","schema":{"type":"object","properties":{"probability":{"description":"The
-        answer''s probability","type":"integer"}},"required":["probability"]}}}}'
+        answer''s probability","type":"integer"}},"required":["probability"],"additionalProperties":false}}},"stream":false}'
     headers:
       User-Agent:
-      - llm.rb v12.1.0
+      - llm.rb v17.0.1
+      Authorization:
+      - Bearer TOKEN
       Content-Type:
       - application/json
-      Authorization:
-      - Bearer HLAqrnifGXE0eWiKDvy6moMIPArCSYno
       Transfer-Encoding:
       - chunked
       Accept-Encoding:
@@ -27,7 +27,7 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Thu, 09 Jul 2026 05:22:27 GMT
+      - Tue, 20 Oct 2026 15:02:39 GMT
       Content-Type:
       - application/json
       Transfer-Encoding:
@@ -35,35 +35,35 @@ http_interactions:
       Connection:
       - keep-alive
       Set-Cookie:
-      - __cf_bm=y94.p0BIrUUBQUeOjF_QZwUDNnfzS_QEKE08kUPKNHk-1783574546.8059719-1.0.1.1-Y1n_UGfHSvavlKAhs3cmOdkvNfUkBDCnTxjaPbdqwTpCGzb25jgvcqTZWuCNH5QdK9mKFDuHyMnQy5ChjN8B3d_vIWOg5zk5wK8jB2YnZOCvsQvOrdm1kqUXHE21SpD0;
-        HttpOnly; SameSite=None; Secure; Path=/; Domain=mistral.ai; Expires=Thu, 09
-        Jul 2026 05:52:27 GMT
+      - __cf_bm=dt4NwnghulhNQbCkL9jxfTIJ8JsTjQk6nmWnPSuc.x8-1792508557.186886-1.0.1.1-ePDTYj2dkSyJIBELcBWohAZ7Yo6w.dLOXvUJ.mplAAK_hJ_34dI_hS24wjSDVjY74dfDysu4dAusHMc3sQMpg6b5S0rkfD7pCCUpJ2bO0CvJ4swn6__DtmE72AWDXgYB;
+        HttpOnly; SameSite=None; Secure; Path=/; Domain=mistral.ai; Expires=Tue, 20
+        Oct 2026 15:32:39 GMT
       Mistral-Correlation-Id:
-      - '019f4553-c9d1-7054-be5e-79c619537beb'
+      - 01a159d5-f7e2-7b1a-a72d-5a9473b66635
       X-Kong-Request-Id:
-      - '019f4553-c9d1-7054-be5e-79c619537beb'
+      - 01a159d5-f7e2-7b1a-a72d-5a9473b66635
       X-Max-Retry-Attempts-Reached:
-      - 'false'
+      - 'true'
       X-Ratelimit-Limit-Tokens-Minute:
-      - '400000'
+      - '800000'
       X-Ratelimit-Remaining-Tokens-Minute:
-      - '399436'
+      - '798809'
       X-Ratelimit-Tokens-Query-Cost:
       - '33'
       X-Ratelimit-Limit-Req-Minute:
-      - '15'
+      - '30'
       X-Ratelimit-Remaining-Req-Minute:
-      - '10'
+      - '19'
       X-Envoy-Upstream-Service-Time:
-      - '411'
+      - '2437'
       Server:
       - cloudflare
       Access-Control-Allow-Origin:
       - "*"
       X-Kong-Upstream-Latency:
-      - '412'
+      - '2439'
       X-Kong-Proxy-Latency:
-      - '12'
+      - '14'
       X-Content-Type-Options:
       - nosniff
       Cf-Cache-Status:
@@ -71,12 +71,12 @@ http_interactions:
       Strict-Transport-Security:
       - max-age=15552000; includeSubDomains; preload
       Cf-Ray:
-      - a184e4158cfe5417-GRU
+      - a4d8e7926ee27ec3-GRU
       Alt-Svc:
       - h3=":443"; ma=86400
     body:
       encoding: ASCII-8BIT
-      string: '{"id":"bd927bac8f8a4f21a76142778f18ee42","created":1783574546,"model":"mistral-large-latest","usage":{"prompt_tokens":22,"total_tokens":33,"completion_tokens":11,"prompt_tokens_details":{"cached_tokens":0}},"object":"chat.completion","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","tool_calls":null,"content":"{\n  \"probability\":
+      string: '{"id":"137badb980564f9cb8810292b21f6a21","created":1792508557,"model":"mistral-large-latest","usage":{"prompt_tokens":22,"total_tokens":33,"completion_tokens":11,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":0},"service_tier":"standard"},"object":"chat.completion","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","tool_calls":null,"content":"{\n  \"probability\":
         1\n}"}}]}'
-  recorded_at: Thu, 09 Jul 2026 05:22:27 GMT
+  recorded_at: Tue, 20 Oct 2026 15:02:37 GMT
 recorded_with: VCR 6.4.0

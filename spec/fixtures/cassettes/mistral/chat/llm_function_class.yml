@@ -8,14 +8,14 @@ http_interactions:
       string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
         a bot that can run UNIX commands"}]},{"role":"user","content":[{"type":"text","text":"What
         is the date?"}]}],"model":"mistral-large-latest","tools":[{"type":"function","function":{"name":"system","description":"Runs
-        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}]}'
+        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}],"stream":false}'
     headers:
       User-Agent:
-      - llm.rb v12.1.0
+      - llm.rb v17.0.1
+      Authorization:
+      - Bearer TOKEN
       Content-Type:
       - application/json
-      Authorization:
-      - Bearer HLAqrnifGXE0eWiKDvy6moMIPArCSYno
       Transfer-Encoding:
       - chunked
       Accept-Encoding:
@@ -28,58 +28,58 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Thu, 09 Jul 2026 05:22:03 GMT
+      - Tue, 20 Oct 2026 15:02:33 GMT
       Content-Type:
       - application/json
       Transfer-Encoding:
       - chunked
       Connection:
       - keep-alive
-      Set-Cookie:
-      - __cf_bm=UU3WBC9O0avdSGWN5McPV4tYpJB66dlZxqRG.khB3Ag-1783574522.8813183-1.0.1.1-vCRhpLxwFtZHEDDqKloQVElyjsKQfkqWUQGx8OY0cvl7PKQMCF.UmQIAEAmNPGjxp3aKZ3CZ81e.bT3tCkF8mzSiorNYSr1mGQDefz1R5x2WAEPcpVYmXNTRWXVgTEqz;
-        HttpOnly; SameSite=None; Secure; Path=/; Domain=mistral.ai; Expires=Thu, 09
-        Jul 2026 05:52:03 GMT
       Mistral-Correlation-Id:
-      - '019f4553-6c61-7502-951e-2eb5416f0c42'
+      - 01a159d5-e7bb-7452-856c-9b08327c543e
       X-Kong-Request-Id:
-      - '019f4553-6c61-7502-951e-2eb5416f0c42'
+      - 01a159d5-e7bb-7452-856c-9b08327c543e
       X-Max-Retry-Attempts-Reached:
-      - 'false'
+      - 'true'
       X-Ratelimit-Limit-Tokens-Minute:
-      - '400000'
+      - '800000'
       X-Ratelimit-Remaining-Tokens-Minute:
-      - '399915'
+      - '799343'
       X-Ratelimit-Tokens-Query-Cost:
       - '85'
       X-Ratelimit-Limit-Req-Minute:
-      - '15'
+      - '30'
       X-Ratelimit-Remaining-Req-Minute:
-      - '14'
+      - '23'
       X-Envoy-Upstream-Service-Time:
-      - '548'
+      - '462'
       Server:
       - cloudflare
       Access-Control-Allow-Origin:
       - "*"
       X-Kong-Upstream-Latency:
-      - '548'
+      - '463'
       X-Kong-Proxy-Latency:
-      - '10'
-      X-Content-Type-Options:
-      - nosniff
+      - '14'
       Cf-Cache-Status:
       - DYNAMIC
+      Set-Cookie:
+      - __cf_bm=kK9aIzk4HWRcdEzB_7NyeySUpiWjzvSwKgNmL6yToMg-1792508553.0303595-1.0.1.1-eIdwOLm5D2wdHQ.35MQ4K8HlTVsMiN1ZCu072iRnEPJODIjzcC3OJGhSbdNLh73ahh9lQsbp6N5b22vJZagZZ2wrbDmzCNsWO_UyTTKh7Qo1PvOZ2JxBhngE4zlflxll;
+        HttpOnly; SameSite=None; Secure; Path=/; Domain=mistral.ai; Expires=Tue, 20
+        Oct 2026 15:32:33 GMT
       Strict-Transport-Security:
       - max-age=15552000; includeSubDomains; preload
+      X-Content-Type-Options:
+      - nosniff
       Cf-Ray:
-      - a184e37ffbfd1d27-GRU
+      - a4d8e7786f8cf1ed-GRU
       Alt-Svc:
       - h3=":443"; ma=86400
     body:
       encoding: ASCII-8BIT
-      string: '{"id":"668c6b129e054b3e98ff5370928fd493","created":1783574523,"model":"mistral-large-latest","usage":{"prompt_tokens":75,"total_tokens":85,"completion_tokens":10,"prompt_tokens_details":{"cached_tokens":0}},"object":"chat.completion","choices":[{"index":0,"finish_reason":"tool_calls","message":{"role":"assistant","tool_calls":[{"id":"SLRQgnoaO","type":"function","function":{"name":"system","arguments":"{\"command\":
+      string: '{"id":"48a05aaa58f940dcba84c6c307857281","created":1792508553,"model":"mistral-large-latest","usage":{"prompt_tokens":75,"total_tokens":85,"completion_tokens":10,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":0},"service_tier":"standard"},"object":"chat.completion","choices":[{"index":0,"finish_reason":"tool_calls","message":{"role":"assistant","tool_calls":[{"id":"H1V91QMe0","type":"function","function":{"name":"system","arguments":"{\"command\":
         \"date\"}"},"index":0}],"content":""}}]}'
-  recorded_at: Thu, 09 Jul 2026 05:22:03 GMT
+  recorded_at: Tue, 20 Oct 2026 15:02:31 GMT
 - request:
     method: post
     uri: https://api.mistral.ai/v1/chat/completions
@@ -87,16 +87,16 @@ http_interactions:
       encoding: UTF-8
       string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
         a bot that can run UNIX commands"}]},{"role":"user","content":[{"type":"text","text":"What
-        is the date?"}]},{"role":"assistant","content":"","tool_calls":[{"id":"SLRQgnoaO","type":"function","function":{"name":"system","arguments":"{\"command\":
-        \"date\"}"},"index":0}]},{"role":"tool","name":"system","tool_call_id":"SLRQgnoaO","content":"{\"success\":\"2025-08-24\"}"}],"model":"mistral-large-latest","tools":[{"type":"function","function":{"name":"system","description":"Runs
-        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}]}'
+        is the date?"}]},{"role":"assistant","content":null,"tool_calls":[{"id":"H1V91QMe0","type":"function","function":{"name":"system","arguments":"{\"command\":
+        \"date\"}"},"index":0}]},{"role":"tool","name":"system","tool_call_id":"H1V91QMe0","content":"{\"success\":\"2025-08-24\"}"}],"model":"mistral-large-latest","tools":[{"type":"function","function":{"name":"system","description":"Runs
+        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}],"stream":false}'
     headers:
       User-Agent:
-      - llm.rb v12.1.0
+      - llm.rb v17.0.1
+      Authorization:
+      - Bearer TOKEN
       Content-Type:
       - application/json
-      Authorization:
-      - Bearer HLAqrnifGXE0eWiKDvy6moMIPArCSYno
       Transfer-Encoding:
       - chunked
       Accept-Encoding:
@@ -109,7 +109,7 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Thu, 09 Jul 2026 05:22:04 GMT
+      - Tue, 20 Oct 2026 15:02:34 GMT
       Content-Type:
       - application/json
       Transfer-Encoding:
@@ -117,35 +117,35 @@ http_interactions:
       Connection:
       - keep-alive
       Set-Cookie:
-      - __cf_bm=9iUsXrm5jJULtbUe2ad_YB44Oa5Yfk36YHFEKslSKeA-1783574523.6731791-1.0.1.1-OSP4YF9WgWyaads6DTkABYpz_SKxwpQdsdvi1KQi9A9x2uDoeD1EFY6SnGnEfWZj4E7r4Hen3EGaJuo4519mz.kIuP7ZMj04IN1EaqnLhD37D8dZhG9NCp_L0xxPFSkX;
-        HttpOnly; SameSite=None; Secure; Path=/; Domain=mistral.ai; Expires=Thu, 09
-        Jul 2026 05:52:04 GMT
+      - __cf_bm=K3kYyBft_vIC_ncQRqjzVyDyvnNS_yveOP5zpaG6.KY-1792508553.7849264-1.0.1.1-57rDYihXkaLx6WT1t26lzKa6QFkNPA3efzGCkOmj3K6GGAWfQYXp5EbUshIy4mH1F_cuOq1gT5S3SSVbmVGAI49FM7WUSylLAMLiX.i0k1Rz1oBEShPaEjXldOC64GUD;
+        HttpOnly; SameSite=None; Secure; Path=/; Domain=mistral.ai; Expires=Tue, 20
+        Oct 2026 15:32:34 GMT
       Mistral-Correlation-Id:
-      - '019f4553-6f77-7858-a01c-9575123c4a38'
+      - 01a159d5-ea9d-782f-b57b-ac87351a65fa
       X-Kong-Request-Id:
-      - '019f4553-6f77-7858-a01c-9575123c4a38'
+      - 01a159d5-ea9d-782f-b57b-ac87351a65fa
       X-Max-Retry-Attempts-Reached:
-      - 'false'
+      - 'true'
       X-Ratelimit-Limit-Tokens-Minute:
-      - '400000'
+      - '800000'
       X-Ratelimit-Remaining-Tokens-Minute:
-      - '399843'
+      - '799223'
       X-Ratelimit-Tokens-Query-Cost:
-      - '72'
+      - '120'
       X-Ratelimit-Limit-Req-Minute:
-      - '15'
+      - '30'
       X-Ratelimit-Remaining-Req-Minute:
-      - '13'
+      - '22'
       X-Envoy-Upstream-Service-Time:
-      - '433'
+      - '473'
       Server:
       - cloudflare
       Access-Control-Allow-Origin:
       - "*"
       X-Kong-Upstream-Latency:
-      - '433'
+      - '474'
       X-Kong-Proxy-Latency:
-      - '13'
+      - '22'
       X-Content-Type-Options:
       - nosniff
       Cf-Cache-Status:
@@ -153,12 +153,12 @@ http_interactions:
       Strict-Transport-Security:
       - max-age=15552000; includeSubDomains; preload
       Cf-Ray:
-      - a184e384f8c85c96-GRU
+      - a4d8e77d2b35630c-GRU
       Alt-Svc:
       - h3=":443"; ma=86400
     body:
       encoding: ASCII-8BIT
-      string: '{"id":"39bdaa0a6ec745afbabfd9f948d15a7a","created":1783574523,"model":"mistral-large-latest","usage":{"prompt_tokens":101,"total_tokens":120,"completion_tokens":19,"prompt_tokens_details":{"cached_tokens":48}},"object":"chat.completion","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","tool_calls":null,"content":"The
+      string: '{"id":"9117797384fb495caad7b52583320b23","created":1792508553,"model":"mistral-large-latest","usage":{"prompt_tokens":101,"total_tokens":120,"completion_tokens":19,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":0},"service_tier":"standard"},"object":"chat.completion","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","tool_calls":null,"content":"The
         current date is **Saturday, August 24, 2025**."}}]}'
-  recorded_at: Thu, 09 Jul 2026 05:22:04 GMT
+  recorded_at: Tue, 20 Oct 2026 15:02:32 GMT
 recorded_with: VCR 6.4.0

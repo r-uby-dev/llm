@@ -10,14 +10,14 @@ http_interactions:
         should be one answer per lineAn answer should be a number, for example: 5Nothing
         else"}]},{"role":"user","content":[{"type":"text","text":"What is 3+2 ?"}]},{"role":"user","content":[{"type":"text","text":"What
         is 5+5 ?"}]},{"role":"user","content":[{"type":"text","text":"What is 5+7
-        ?"}]}],"model":"mistral-large-latest"}'
+        ?"}]}],"model":"mistral-large-latest","stream":false}'
     headers:
       User-Agent:
-      - llm.rb v12.1.0
+      - llm.rb v17.0.1
+      Authorization:
+      - Bearer TOKEN
       Content-Type:
       - application/json
-      Authorization:
-      - Bearer HLAqrnifGXE0eWiKDvy6moMIPArCSYno
       Transfer-Encoding:
       - chunked
       Accept-Encoding:
@@ -30,55 +30,55 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Thu, 09 Jul 2026 05:20:42 GMT
+      - Tue, 20 Oct 2026 15:02:21 GMT
       Content-Type:
       - application/json
       Transfer-Encoding:
       - chunked
       Connection:
       - keep-alive
+      Set-Cookie:
+      - __cf_bm=uvNTE7vDT1fM5IzcSK6QnGzc.C_5yqxvEvTZCFNogQs-1792508541.129399-1.0.1.1-fCfcSr1lyH47cx.C7nUUK41oXqNImttwaU1.pv91TBOmOqMOW3q26RIOmP2WsTRU4hN3l9a.sMBF8cTwsr_vX3ZSDwshnxgSjDoemlrqRIIzKqraeiiOVSHjh1dz2pv6;
+        HttpOnly; SameSite=None; Secure; Path=/; Domain=mistral.ai; Expires=Tue, 20
+        Oct 2026 15:32:21 GMT
       Mistral-Correlation-Id:
-      - '019f4552-30bf-7604-af35-ddcef674620c'
+      - 01a159d5-b92d-7ff1-96b6-33b22846d168
       X-Kong-Request-Id:
-      - '019f4552-30bf-7604-af35-ddcef674620c'
+      - 01a159d5-b92d-7ff1-96b6-33b22846d168
       X-Max-Retry-Attempts-Reached:
-      - 'false'
+      - 'true'
       X-Ratelimit-Limit-Tokens-Minute:
-      - '400000'
+      - '800000'
       X-Ratelimit-Remaining-Tokens-Minute:
-      - '399931'
+      - '799931'
       X-Ratelimit-Tokens-Query-Cost:
       - '69'
       X-Ratelimit-Limit-Req-Minute:
-      - '15'
+      - '30'
       X-Ratelimit-Remaining-Req-Minute:
-      - '14'
+      - '29'
       X-Envoy-Upstream-Service-Time:
-      - '372'
+      - '467'
       Server:
       - cloudflare
       Access-Control-Allow-Origin:
       - "*"
       X-Kong-Upstream-Latency:
-      - '373'
+      - '469'
       X-Kong-Proxy-Latency:
-      - '11'
-      Cf-Cache-Status:
-      - DYNAMIC
-      Set-Cookie:
-      - __cf_bm=EsLRiGOm18gn3mAjs63vzHwYqYrKmqi634wNSDWlBKo-1783574442.067909-1.0.1.1-jFCRF6RgjzUkSUi7J1Ks._M56I7DMz_iRzr1Asy_lpa_5QAPxesY1XLmsiQeitBkPRSFdymHQ5OOnzyGJHsvnlOh8Pr86FUkCKqwzGf.hCUylQ6gFIWwCs10alvRmkbp;
-        HttpOnly; SameSite=None; Secure; Path=/; Domain=mistral.ai; Expires=Thu, 09
-        Jul 2026 05:50:42 GMT
-      Strict-Transport-Security:
-      - max-age=15552000; includeSubDomains; preload
+      - '25'
       X-Content-Type-Options:
       - nosniff
+      Cf-Cache-Status:
+      - DYNAMIC
+      Strict-Transport-Security:
+      - max-age=15552000; includeSubDomains; preload
       Cf-Ray:
-      - a184e186ea5e5cf3-GRU
+      - a4d8e72e0f636252-GRU
       Alt-Svc:
       - h3=":443"; ma=86400
     body:
       encoding: ASCII-8BIT
-      string: '{"id":"7aff5fa745724182b34278ec09bf6c53","created":1783574442,"model":"mistral-large-latest","usage":{"prompt_tokens":61,"total_tokens":69,"completion_tokens":8,"prompt_tokens_details":{"cached_tokens":0}},"object":"chat.completion","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","tool_calls":null,"content":"5\n10\n12"}}]}'
-  recorded_at: Thu, 09 Jul 2026 05:20:42 GMT
+      string: '{"id":"fcd14b767e89485280b2edfbdc22d480","created":1792508541,"model":"mistral-large-latest","usage":{"prompt_tokens":61,"total_tokens":69,"completion_tokens":8,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":0},"service_tier":"standard"},"object":"chat.completion","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","tool_calls":null,"content":"5\n10\n12"}}]}'
+  recorded_at: Tue, 20 Oct 2026 15:02:19 GMT
 recorded_with: VCR 6.4.0

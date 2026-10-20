@@ -10,14 +10,14 @@ http_interactions:
         There should be one answer per line. An answer should be a number, for example:
         5. Nothing else"}]},{"role":"user","content":[{"type":"text","text":"What
         is 3+2 ?"}]},{"role":"user","content":[{"type":"text","text":"What is 5+5
-        ?"}]},{"role":"user","content":[{"type":"text","text":"What is 5+7 ?"}]}],"model":"mistral-large-latest","stream":true,"stream_options":{"include_usage":true}}'
+        ?"}]},{"role":"user","content":[{"type":"text","text":"What is 5+7 ?"}]}],"model":"mistral-large-latest","stream_options":{"include_usage":true},"stream":true}'
     headers:
       User-Agent:
-      - llm.rb v12.1.0
+      - llm.rb v17.0.1
+      Authorization:
+      - Bearer TOKEN
       Content-Type:
       - application/json
-      Authorization:
-      - Bearer HLAqrnifGXE0eWiKDvy6moMIPArCSYno
       Transfer-Encoding:
       - chunked
       Accept-Encoding:
@@ -30,7 +30,7 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Thu, 09 Jul 2026 05:21:13 GMT
+      - Tue, 20 Oct 2026 15:02:27 GMT
       Content-Type:
       - text/event-stream; charset=utf-8
       Transfer-Encoding:
@@ -38,50 +38,50 @@ http_interactions:
       Connection:
       - keep-alive
       Mistral-Correlation-Id:
-      - '019f4552-a8c3-7def-af77-5b32703fad3d'
+      - 01a159d5-cfbf-7da9-a46b-0a28b75dd117
       X-Kong-Request-Id:
-      - '019f4552-a8c3-7def-af77-5b32703fad3d'
+      - 01a159d5-cfbf-7da9-a46b-0a28b75dd117
       X-Max-Retry-Attempts-Reached:
-      - 'false'
+      - 'true'
       X-Envoy-Upstream-Service-Time:
-      - '340'
+      - '281'
       Server:
       - cloudflare
       Access-Control-Allow-Origin:
       - "*"
       X-Kong-Upstream-Latency:
-      - '341'
+      - '282'
       X-Kong-Proxy-Latency:
-      - '12'
+      - '19'
       Cf-Cache-Status:
       - DYNAMIC
       Set-Cookie:
-      - __cf_bm=_coKnIenv_.Jv9j2j5yVgIznentJn8YWM.j5YlVHEHY-1783574472.7924035-1.0.1.1-9xBt9ARyVHO9VQ6qPbvd9L5avmfDcoEKCc0bYZajsuI74E_twtjMIfRUmu8ARl0RDg9CK1QTPTZ6ClJ2pX06CY36YMt1QZCSg8Z56W97IFVyDyV3EEyEowjV8R0yEkfK;
-        HttpOnly; SameSite=None; Secure; Path=/; Domain=mistral.ai; Expires=Thu, 09
-        Jul 2026 05:51:13 GMT
+      - __cf_bm=867WcUMKwNuCqeilSAhBw6_03or9ZOG5Zlc50RwkRss-1792508546.8799405-1.0.1.1-CQ.aT2GJ2zruI_vjkYUbc2pz16BP8XCagpl7MPk9iEU3NpMUZ2aXAL5LrW7goocvBquupApJWbYeoaasLqMpeSUe01u1hHkmTvYV60WDsjuGaEOh9y2SdzAgnQaz3kuU;
+        HttpOnly; SameSite=None; Secure; Path=/; Domain=mistral.ai; Expires=Tue, 20
+        Oct 2026 15:32:27 GMT
       Strict-Transport-Security:
       - max-age=15552000; includeSubDomains; preload
       X-Content-Type-Options:
       - nosniff
       Cf-Ray:
-      - a184e246faa6621d-GRU
+      - a4d8e751f8899872-GRU
       Alt-Svc:
       - h3=":443"; ma=86400
     body:
       encoding: UTF-8
       string: |+
-        data: {"id":"c72d2d53eff54ef78031b38606b33c46","object":"chat.completion.chunk","created":1783574473,"model":"mistral-large-latest","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
+        data: {"id":"fbbadd38d4e748e590cc8cb7626594c6","object":"chat.completion.chunk","created":1792508547,"model":"mistral-large-latest","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
 
-        data: {"id":"c72d2d53eff54ef78031b38606b33c46","object":"chat.completion.chunk","created":1783574473,"model":"mistral-large-latest","choices":[{"index":0,"delta":{"content":"5"},"finish_reason":null}],"p":"abcdefghijklmnopqrstuvwx"}
+        data: {"id":"fbbadd38d4e748e590cc8cb7626594c6","object":"chat.completion.chunk","created":1792508547,"model":"mistral-large-latest","choices":[{"index":0,"delta":{"content":"5"},"finish_reason":null}],"p":"abcdefghijkl"}
 
-        data: {"id":"c72d2d53eff54ef78031b38606b33c46","object":"chat.completion.chunk","created":1783574473,"model":"mistral-large-latest","choices":[{"index":0,"delta":{"content":"\n1"},"finish_reason":null}],"p":"abcdefghijklmnopqrstuvwxy"}
+        data: {"id":"fbbadd38d4e748e590cc8cb7626594c6","object":"chat.completion.chunk","created":1792508547,"model":"mistral-large-latest","choices":[{"index":0,"delta":{"content":"\n1"},"finish_reason":null}],"p":"abcdefghijklmnopqrstuvwxyz01234"}
 
-        data: {"id":"c72d2d53eff54ef78031b38606b33c46","object":"chat.completion.chunk","created":1783574473,"model":"mistral-large-latest","choices":[{"index":0,"delta":{"content":"0\n12"},"finish_reason":null}],"p":"abcdefghijklmnopqrstuvwxy"}
+        data: {"id":"fbbadd38d4e748e590cc8cb7626594c6","object":"chat.completion.chunk","created":1792508547,"model":"mistral-large-latest","choices":[{"index":0,"delta":{"content":"0\n12"},"finish_reason":null}],"p":"abcdefghijklmnopqrstuvwxyz"}
 
-        data: {"id":"c72d2d53eff54ef78031b38606b33c46","object":"chat.completion.chunk","created":1783574473,"model":"mistral-large-latest","choices":[{"index":0,"delta":{"content":""},"finish_reason":"stop"}],"usage":{"prompt_tokens":64,"total_tokens":72,"completion_tokens":8,"prompt_tokens_details":{"cached_tokens":0}},"p":"abcdefghijklmnopqr"}
+        data: {"id":"fbbadd38d4e748e590cc8cb7626594c6","object":"chat.completion.chunk","created":1792508547,"model":"mistral-large-latest","choices":[{"index":0,"delta":{"content":""},"finish_reason":"stop"}],"usage":{"prompt_tokens":64,"total_tokens":72,"completion_tokens":8,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":0},"service_tier":"standard"},"p":"abcdefghijklmnopqrstuvwxyz01"}
 
         data: [DONE]
 
-  recorded_at: Thu, 09 Jul 2026 05:21:13 GMT
+  recorded_at: Tue, 20 Oct 2026 15:02:25 GMT
 recorded_with: VCR 6.4.0
 ...

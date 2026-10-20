@@ -8,14 +8,14 @@ http_interactions:
       string: '{"messages":[{"role":"user","content":[{"type":"text","text":"Return
         the numbers 10 and 12"}]},{"role":"user","content":[{"type":"text","text":"Keep
         them in the same order"}]}],"model":"mistral-large-latest","response_format":{"type":"json_schema","json_schema":{"name":"JSONSchema","schema":{"type":"object","properties":{"answers":{"description":"The
-        answer to two questions","type":"array","items":{"type":"integer"}}},"required":["answers"]}}}}'
+        answer to two questions","type":"array","items":{"type":"integer"}}},"required":["answers"],"additionalProperties":false}}},"stream":false}'
     headers:
       User-Agent:
-      - llm.rb v12.1.0
+      - llm.rb v17.0.1
+      Authorization:
+      - Bearer TOKEN
       Content-Type:
       - application/json
-      Authorization:
-      - Bearer HLAqrnifGXE0eWiKDvy6moMIPArCSYno
       Transfer-Encoding:
       - chunked
       Accept-Encoding:
@@ -28,56 +28,56 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Thu, 09 Jul 2026 05:22:48 GMT
+      - Tue, 20 Oct 2026 15:02:41 GMT
       Content-Type:
       - application/json
       Transfer-Encoding:
       - chunked
       Connection:
       - keep-alive
-      Set-Cookie:
-      - __cf_bm=p_u4qceX3RK0t0RqdoFpRE.YYQRzT8xFP0Pv0.eVmQk-1783574568.150019-1.0.1.1-PtruPfh4cux7Uw7gTvEzC_JNA_qPC77WGun58gkB3cszl5hq0kX.P8zF2nDsXUSqobiGtJyN.NY2Es.5DDx3EaN.uEVE3QFTNuqwFiC8YR51EYf8Zz.SgeGnhNad6GUj;
-        HttpOnly; SameSite=None; Secure; Path=/; Domain=mistral.ai; Expires=Thu, 09
-        Jul 2026 05:52:48 GMT
       Mistral-Correlation-Id:
-      - '019f4554-1d32-7d2c-a189-5b1c596be60b'
+      - 01a159d6-0643-7dbc-b6b8-efe5f3dedb11
       X-Kong-Request-Id:
-      - '019f4554-1d32-7d2c-a189-5b1c596be60b'
+      - 01a159d6-0643-7dbc-b6b8-efe5f3dedb11
       X-Max-Retry-Attempts-Reached:
-      - 'false'
+      - 'true'
       X-Ratelimit-Limit-Tokens-Minute:
-      - '400000'
+      - '800000'
       X-Ratelimit-Remaining-Tokens-Minute:
-      - '399377'
+      - '798753'
       X-Ratelimit-Tokens-Query-Cost:
       - '32'
       X-Ratelimit-Limit-Req-Minute:
-      - '15'
+      - '30'
       X-Ratelimit-Remaining-Req-Minute:
-      - '8'
+      - '17'
       X-Envoy-Upstream-Service-Time:
-      - '447'
+      - '486'
       Server:
       - cloudflare
       Access-Control-Allow-Origin:
       - "*"
       X-Kong-Upstream-Latency:
-      - '449'
+      - '487'
       X-Kong-Proxy-Latency:
-      - '11'
-      X-Content-Type-Options:
-      - nosniff
+      - '54'
       Cf-Cache-Status:
       - DYNAMIC
+      Set-Cookie:
+      - __cf_bm=rYQvhS5YsvnOo5fSg4UMW1s19LxhQoiFLPlcAkGQiy8-1792508560.8391526-1.0.1.1-fLPQzNjMnQrW9saaaU.the.KC0MZ1HlJlf_eexA5iUgvzYIq1Kx3uYi5U5NbypYxQHdHW3Te7HELOS2t_KrRek5imF2rOU9.RGPj7o7PsfKEbQ.UF9.KG16z1yHREkaK;
+        HttpOnly; SameSite=None; Secure; Path=/; Domain=mistral.ai; Expires=Tue, 20
+        Oct 2026 15:32:41 GMT
       Strict-Transport-Security:
       - max-age=15552000; includeSubDomains; preload
+      X-Content-Type-Options:
+      - nosniff
       Cf-Ray:
-      - a184e49ae9c6cd6d-GRU
+      - a4d8e7a939b3cd97-GRU
       Alt-Svc:
       - h3=":443"; ma=86400
     body:
       encoding: ASCII-8BIT
-      string: '{"id":"0490b2c178c64b838f3e8b4f5ab48f5a","created":1783574568,"model":"mistral-large-latest","usage":{"prompt_tokens":20,"total_tokens":32,"completion_tokens":12,"prompt_tokens_details":{"cached_tokens":0}},"object":"chat.completion","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","tool_calls":null,"content":"{\"answers\":
+      string: '{"id":"9350180b366d4e2ca54d44e2e478c225","created":1792508561,"model":"mistral-large-latest","usage":{"prompt_tokens":20,"total_tokens":32,"completion_tokens":12,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":0},"service_tier":"standard"},"object":"chat.completion","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","tool_calls":null,"content":"{\"answers\":
         [10, 12]}"}}]}'
-  recorded_at: Thu, 09 Jul 2026 05:22:48 GMT
+  recorded_at: Tue, 20 Oct 2026 15:02:39 GMT
 recorded_with: VCR 6.4.0
