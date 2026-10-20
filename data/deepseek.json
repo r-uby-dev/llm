@@ -8,62 +8,10 @@
   "name": "DeepSeek",
   "doc": "https://api-docs.deepseek.com/quick_start/pricing",
   "models": {
-    "deepseek-v4-flash-vision-exp": {
-      "id": "deepseek-v4-flash-vision-exp",
-      "name": "DeepSeek V4 Flash Vision Exp",
-      "description": "DeepSeek V4.1 Flash model for reasoning and agentic coding",
-      "family": "deepseek-flash",
-      "attachment": true,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "toggle"
-        },
-        {
-          "type": "effort",
-          "values": [
-            "low",
-            "high",
-            "max"
-          ]
-        }
-      ],
-      "tool_call": true,
-      "interleaved": {
-        "field": "reasoning_content"
-      },
-      "structured_output": true,
-      "temperature": true,
-      "knowledge": "2025-05",
-      "release_date": "2026-09-10",
-      "last_updated": "2026-09-10",
-      "modalities": {
-        "input": [
-          "text",
-          "image"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 1000000,
-        "output": 393216
-      },
-      "status": "deprecated",
-      "cost": {
-        "input": 0.15,
-        "output": 0.6,
-        "reasoning": 0.6,
-        "cache_read": 0.003
-      },
-      "canonical_model_id": "deepseek/deepseek-v4.1-flash"
-    },
     "deepseek-flash": {
       "id": "deepseek-flash",
-      "name": "DeepSeek V4.1 Flash",
-      "description": "DeepSeek V4.1 Flash model for reasoning and agentic coding",
+      "name": "DeepSeek V4.1 Flash 1017",
+      "description": "October 17 update of DeepSeek V4.1 Flash with improved reasoning, coding, agentic tasks, and visual understanding",
       "family": "deepseek-flash",
       "attachment": true,
       "reasoning": true,
@@ -87,8 +35,8 @@
       "structured_output": true,
       "temperature": true,
       "knowledge": "2025-05",
-      "release_date": "2026-09-10",
-      "last_updated": "2026-09-10",
+      "release_date": "2026-10-17",
+      "last_updated": "2026-10-17",
       "modalities": {
         "input": [
           "text",
@@ -100,7 +48,7 @@
       },
       "open_weights": true,
       "limit": {
-        "context": 1000000,
+        "context": 1048576,
         "output": 393216
       },
       "cost": {
@@ -109,7 +57,7 @@
         "reasoning": 0.6,
         "cache_read": 0.003
       },
-      "canonical_model_id": "deepseek/deepseek-v4.1-flash"
+      "canonical_model_id": "deepseek/deepseek-v4.1-flash-1017"
     },
     "deepseek-v4-pro": {
       "id": "deepseek-v4-pro",
@@ -137,7 +85,7 @@
       },
       "structured_output": true,
       "temperature": true,
-      "release_date": "2026-08-12",
+      "release_date": "2026-08-13",
       "last_updated": "2026-08-22",
       "modalities": {
         "input": [
@@ -149,7 +97,7 @@
       },
       "open_weights": true,
       "limit": {
-        "context": 1000000,
+        "context": 1048576,
         "output": 393216
       },
       "cost": {
@@ -163,7 +111,7 @@
     "deepseek-v4-flash": {
       "id": "deepseek-v4-flash",
       "name": "DeepSeek V4 Flash",
-      "description": "DeepSeek V4.1 Flash model for reasoning and agentic coding",
+      "description": "October 17 update of DeepSeek V4.1 Flash with improved reasoning, coding, agentic tasks, and visual understanding",
       "family": "deepseek-flash",
       "attachment": true,
       "reasoning": true,
@@ -187,8 +135,8 @@
       "structured_output": true,
       "temperature": true,
       "knowledge": "2025-05",
-      "release_date": "2026-09-10",
-      "last_updated": "2026-09-10",
+      "release_date": "2026-10-17",
+      "last_updated": "2026-10-17",
       "modalities": {
         "input": [
           "text",
@@ -200,7 +148,7 @@
       },
       "open_weights": true,
       "limit": {
-        "context": 1000000,
+        "context": 1048576,
         "output": 393216
       },
       "status": "deprecated",
@@ -210,7 +158,59 @@
         "reasoning": 0.6,
         "cache_read": 0.003
       },
-      "canonical_model_id": "deepseek/deepseek-v4.1-flash"
+      "canonical_model_id": "deepseek/deepseek-v4.1-flash-1017"
+    },
+    "deepseek-v4-flash-vision-exp": {
+      "id": "deepseek-v4-flash-vision-exp",
+      "name": "DeepSeek V4 Flash Vision Exp",
+      "description": "October 17 update of DeepSeek V4.1 Flash with improved reasoning, coding, agentic tasks, and visual understanding",
+      "family": "deepseek-flash",
+      "attachment": true,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        },
+        {
+          "type": "effort",
+          "values": [
+            "low",
+            "high",
+            "max"
+          ]
+        }
+      ],
+      "tool_call": true,
+      "interleaved": {
+        "field": "reasoning_content"
+      },
+      "structured_output": true,
+      "temperature": true,
+      "knowledge": "2025-05",
+      "release_date": "2026-10-17",
+      "last_updated": "2026-10-17",
+      "modalities": {
+        "input": [
+          "text",
+          "image"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 1048576,
+        "output": 393216
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 0.15,
+        "output": 0.6,
+        "reasoning": 0.6,
+        "cache_read": 0.003
+      },
+      "canonical_model_id": "deepseek/deepseek-v4.1-flash-1017"
     }
   }
 }

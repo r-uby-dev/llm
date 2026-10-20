@@ -112,10 +112,10 @@
         "field": "reasoning_content"
       },
       "structured_output": true,
-      "temperature": true,
+      "temperature": false,
       "knowledge": "2025-01",
-      "release_date": "2026-04-21",
-      "last_updated": "2026-04-21",
+      "release_date": "2026-04-20",
+      "last_updated": "2026-04-20",
       "modalities": {
         "input": [
           "text",
@@ -135,7 +135,8 @@
         "input": 0.95,
         "output": 4,
         "cache_read": 0.16
-      }
+      },
+      "canonical_model_id": "moonshotai/kimi-k2.6"
     },
     "kimi-k2.7-code": {
       "id": "kimi-k2.7-code",

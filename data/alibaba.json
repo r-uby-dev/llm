@@ -8,6 +8,625 @@
   "name": "Alibaba",
   "doc": "https://www.alibabacloud.com/help/en/model-studio/models",
   "models": {
+    "qwen3.5-35b-a3b": {
+      "id": "qwen3.5-35b-a3b",
+      "name": "Qwen3.5 35B-A3B",
+      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        },
+        {
+          "type": "budget_tokens"
+        }
+      ],
+      "tool_call": true,
+      "structured_output": true,
+      "temperature": true,
+      "release_date": "2026-02-23",
+      "last_updated": "2026-02-23",
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "video"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 262144,
+        "output": 65536
+      },
+      "cost": {
+        "input": 0.25,
+        "output": 2
+      }
+    },
+    "kimi-k3": {
+      "id": "kimi-k3",
+      "name": "Kimi K3",
+      "description": "Multimodal Kimi model with 1M context and toggleable max-effort thinking for long-horizon agent work",
+      "family": "kimi-k3",
+      "attachment": true,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        },
+        {
+          "type": "effort",
+          "values": [
+            "low",
+            "high",
+            "max"
+          ]
+        }
+      ],
+      "tool_call": true,
+      "interleaved": {
+        "field": "reasoning_content"
+      },
+      "structured_output": true,
+      "temperature": false,
+      "release_date": "2026-07-16",
+      "last_updated": "2026-07-16",
+      "modalities": {
+        "input": [
+          "text",
+          "image"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 1048576,
+        "output": 1048576
+      },
+      "cost": {
+        "input": 3,
+        "output": 15,
+        "cache_read": 0.3
+      },
+      "canonical_model_id": "moonshotai/kimi-k3"
+    },
+    "qwen3-livetranslate-flash-realtime": {
+      "id": "qwen3-livetranslate-flash-realtime",
+      "type": "realtime",
+      "name": "Qwen3-LiveTranslate Flash Realtime",
+      "description": "Speech generation model for controllable voice, narration, and audio delivery",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": false,
+      "tool_call": false,
+      "temperature": true,
+      "knowledge": "2024-04",
+      "release_date": "2025-09-22",
+      "last_updated": "2025-09-22",
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "audio",
+          "video"
+        ],
+        "output": [
+          "text",
+          "audio"
+        ]
+      },
+      "open_weights": false,
+      "limit": {
+        "context": 53248,
+        "output": 4096
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 10,
+        "output": 10,
+        "input_audio": 10,
+        "output_audio": 38
+      }
+    },
+    "qwen3-vl-30b-a3b": {
+      "id": "qwen3-vl-30b-a3b",
+      "name": "Qwen3-VL 30B-A3B",
+      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        },
+        {
+          "type": "budget_tokens"
+        }
+      ],
+      "tool_call": true,
+      "temperature": true,
+      "knowledge": "2025-04",
+      "release_date": "2025-04",
+      "last_updated": "2025-04",
+      "modalities": {
+        "input": [
+          "text",
+          "image"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 131072,
+        "output": 32768
+      },
+      "cost": {
+        "input": 0.2,
+        "output": 0.8,
+        "reasoning": 2.4
+      }
+    },
+    "qwen3-next-80b-a3b-instruct": {
+      "id": "qwen3-next-80b-a3b-instruct",
+      "name": "Qwen3-Next 80B-A3B Instruct",
+      "description": "Qwen instruction model for multilingual chat, reasoning, and tool use",
+      "family": "qwen",
+      "attachment": false,
+      "reasoning": false,
+      "tool_call": true,
+      "temperature": true,
+      "knowledge": "2025-04",
+      "release_date": "2025-09",
+      "last_updated": "2025-09",
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 131072,
+        "output": 32768
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 0.5,
+        "output": 2
+      }
+    },
+    "qwen3-coder-plus": {
+      "id": "qwen3-coder-plus",
+      "name": "Qwen3 Coder Plus",
+      "description": "Hosted Qwen coder for software agents, repo edits, and long-context code",
+      "family": "qwen",
+      "attachment": false,
+      "reasoning": false,
+      "tool_call": true,
+      "temperature": true,
+      "knowledge": "2025-04",
+      "release_date": "2025-07-23",
+      "last_updated": "2025-07-23",
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 1048576,
+        "output": 65536
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 1,
+        "output": 5
+      }
+    },
+    "qwen3.7-plus": {
+      "id": "qwen3.7-plus",
+      "name": "Qwen3.7 Plus",
+      "description": "Multimodal Qwen workhorse for long-context agents, visual inputs, and coding",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        },
+        {
+          "type": "budget_tokens"
+        }
+      ],
+      "tool_call": true,
+      "interleaved": {
+        "field": "reasoning_content"
+      },
+      "structured_output": true,
+      "temperature": true,
+      "knowledge": "2025-04",
+      "release_date": "2026-06-02",
+      "last_updated": "2026-06-04",
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "video"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": false,
+      "limit": {
+        "context": 1000000,
+        "output": 131072
+      },
+      "cost": {
+        "input": 0.4,
+        "output": 1.6,
+        "cache_read": 0.04,
+        "cache_write": 0.5,
+        "tiers": [
+          {
+            "input": 1.2,
+            "output": 4.8,
+            "cache_read": 0.12,
+            "cache_write": 1.5,
+            "tier": {
+              "type": "context",
+              "size": 256000
+            }
+          }
+        ],
+        "context_over_200k": {
+          "input": 1.2,
+          "output": 4.8,
+          "cache_read": 0.12,
+          "cache_write": 1.5
+        }
+      }
+    },
+    "qwen3-235b-a22b": {
+      "id": "qwen3-235b-a22b",
+      "name": "Qwen3 235B-A22B",
+      "description": "Large open Qwen MoE for multilingual reasoning, coding, and tool use",
+      "family": "qwen",
+      "attachment": false,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        },
+        {
+          "type": "budget_tokens"
+        }
+      ],
+      "tool_call": true,
+      "temperature": true,
+      "knowledge": "2025-04",
+      "release_date": "2025-04",
+      "last_updated": "2025-04",
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 131072,
+        "output": 16384
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 0.7,
+        "output": 2.8,
+        "reasoning": 8.4
+      }
+    },
+    "qwq-plus": {
+      "id": "qwq-plus",
+      "name": "QwQ Plus",
+      "description": "Qwen reasoning model for deliberate problem solving, math, and coding",
+      "family": "qwen",
+      "attachment": false,
+      "reasoning": true,
+      "reasoning_options": [],
+      "tool_call": true,
+      "temperature": true,
+      "knowledge": "2024-04",
+      "release_date": "2025-03-05",
+      "last_updated": "2025-03-05",
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": false,
+      "limit": {
+        "context": 131072,
+        "output": 8192
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 0.8,
+        "output": 2.4
+      }
+    },
+    "qwen3-vl-235b-a22b": {
+      "id": "qwen3-vl-235b-a22b",
+      "name": "Qwen3-VL 235B-A22B",
+      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "budget_tokens"
+        }
+      ],
+      "tool_call": true,
+      "temperature": true,
+      "knowledge": "2025-04",
+      "release_date": "2025-04",
+      "last_updated": "2025-04",
+      "modalities": {
+        "input": [
+          "text",
+          "image"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 131072,
+        "output": 32768
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 0.7,
+        "output": 2.8,
+        "reasoning": 8.4
+      }
+    },
+    "qwen-plus": {
+      "id": "qwen-plus",
+      "name": "Qwen Plus",
+      "description": "Qwen instruction model for multilingual chat, reasoning, and tool use",
+      "family": "qwen",
+      "attachment": false,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        },
+        {
+          "type": "budget_tokens"
+        }
+      ],
+      "tool_call": true,
+      "structured_output": true,
+      "temperature": true,
+      "knowledge": "2024-04",
+      "release_date": "2024-01-25",
+      "last_updated": "2025-09-11",
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": false,
+      "limit": {
+        "context": 1000000,
+        "output": 32768
+      },
+      "cost": {
+        "input": 0.4,
+        "output": 1.2,
+        "reasoning": 4,
+        "tiers": [
+          {
+            "input": 1.2,
+            "output": 3.6,
+            "reasoning": 12,
+            "tier": {
+              "type": "context",
+              "size": 256000
+            }
+          }
+        ],
+        "context_over_200k": {
+          "input": 1.2,
+          "output": 3.6,
+          "reasoning": 12
+        }
+      }
+    },
+    "qwen3.6-max-preview": {
+      "id": "qwen3.6-max-preview",
+      "name": "Qwen3.6 Max Preview",
+      "description": "Flagship Qwen model for complex reasoning, coding, and agentic workflows",
+      "family": "qwen",
+      "attachment": false,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        },
+        {
+          "type": "budget_tokens"
+        }
+      ],
+      "tool_call": true,
+      "temperature": true,
+      "knowledge": "2025-04",
+      "release_date": "2026-04-20",
+      "last_updated": "2026-04-20",
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": false,
+      "limit": {
+        "context": 262144,
+        "output": 65536
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 1.3,
+        "output": 7.8,
+        "cache_read": 0.13,
+        "cache_write": 1.625
+      }
+    },
+    "qwen2-5-14b-instruct": {
+      "id": "qwen2-5-14b-instruct",
+      "name": "Qwen2.5 14B Instruct",
+      "description": "Qwen instruction model for multilingual chat, reasoning, and tool use",
+      "family": "qwen",
+      "attachment": false,
+      "reasoning": false,
+      "tool_call": true,
+      "temperature": true,
+      "knowledge": "2024-04",
+      "release_date": "2024-09",
+      "last_updated": "2024-09",
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 131072,
+        "output": 8192
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 0.35,
+        "output": 1.4
+      }
+    },
+    "glm-5.2": {
+      "id": "glm-5.2",
+      "name": "GLM-5.2",
+      "description": "Open flagship GLM for long-horizon coding agents and million-token context work",
+      "family": "glm",
+      "attachment": false,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        },
+        {
+          "type": "effort",
+          "values": [
+            "high",
+            "max"
+          ]
+        }
+      ],
+      "tool_call": true,
+      "interleaved": {
+        "field": "reasoning_content"
+      },
+      "structured_output": true,
+      "temperature": true,
+      "release_date": "2026-06-13",
+      "last_updated": "2026-06-13",
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 1000000,
+        "output": 131072
+      },
+      "cost": {
+        "input": 1.4,
+        "output": 4.4,
+        "cache_read": 0.28,
+        "cache_write": 0
+      },
+      "canonical_model_id": "zhipuai/glm-5.2"
+    },
+    "qwen3.7-max": {
+      "id": "qwen3.7-max",
+      "name": "Qwen3.7 Max",
+      "description": "Qwen frontier model tuned for agent frameworks, coding assistants, and long tasks",
+      "family": "qwen",
+      "attachment": false,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        },
+        {
+          "type": "budget_tokens"
+        }
+      ],
+      "tool_call": true,
+      "structured_output": true,
+      "temperature": true,
+      "release_date": "2026-05-21",
+      "last_updated": "2026-05-21",
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": false,
+      "limit": {
+        "context": 1000000,
+        "output": 131072
+      },
+      "cost": {
+        "input": 2.5,
+        "output": 7.5,
+        "cache_read": 0.5,
+        "cache_write": 3.125
+      }
+    },
     "qwen-flash": {
       "id": "qwen-flash",
       "name": "Qwen Flash",
@@ -24,6 +643,7 @@
         }
       ],
       "tool_call": true,
+      "structured_output": true,
       "temperature": true,
       "knowledge": "2024-04",
       "release_date": "2025-07-28",
@@ -43,7 +663,238 @@
       },
       "cost": {
         "input": 0.05,
-        "output": 0.4
+        "output": 0.4,
+        "tiers": [
+          {
+            "input": 0.25,
+            "output": 2,
+            "tier": {
+              "type": "context",
+              "size": 256000
+            }
+          }
+        ],
+        "context_over_200k": {
+          "input": 0.25,
+          "output": 2
+        }
+      }
+    },
+    "qwen-vl-max": {
+      "id": "qwen-vl-max",
+      "name": "Qwen-VL Max",
+      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": false,
+      "tool_call": true,
+      "temperature": true,
+      "knowledge": "2024-04",
+      "release_date": "2024-04-08",
+      "last_updated": "2025-08-13",
+      "modalities": {
+        "input": [
+          "text",
+          "image"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": false,
+      "limit": {
+        "context": 131072,
+        "output": 8192
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 0.8,
+        "output": 3.2
+      }
+    },
+    "qwen2-5-omni-7b": {
+      "id": "qwen2-5-omni-7b",
+      "name": "Qwen2.5-Omni 7B",
+      "description": "Qwen omni model for text, vision, audio, and multimodal agent tasks",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": false,
+      "tool_call": true,
+      "temperature": true,
+      "knowledge": "2024-04",
+      "release_date": "2024-12",
+      "last_updated": "2024-12",
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "audio",
+          "video"
+        ],
+        "output": [
+          "text",
+          "audio"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 32768,
+        "output": 2048
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 0.1,
+        "output": 0.4,
+        "input_audio": 6.76
+      }
+    },
+    "qwen-omni-turbo-realtime": {
+      "id": "qwen-omni-turbo-realtime",
+      "type": "realtime",
+      "name": "Qwen-Omni Turbo Realtime",
+      "description": "Qwen omni model for text, vision, audio, and multimodal agent tasks",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": false,
+      "tool_call": true,
+      "temperature": true,
+      "knowledge": "2024-04",
+      "release_date": "2025-05-08",
+      "last_updated": "2025-05-08",
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "audio"
+        ],
+        "output": [
+          "text",
+          "audio"
+        ]
+      },
+      "open_weights": false,
+      "limit": {
+        "context": 32768,
+        "output": 2048
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 0.27,
+        "output": 1.07,
+        "input_audio": 4.44,
+        "output_audio": 8.89
+      }
+    },
+    "qwen3-coder-480b-a35b-instruct": {
+      "id": "qwen3-coder-480b-a35b-instruct",
+      "name": "Qwen3-Coder 480B-A35B Instruct",
+      "description": "Open Qwen coding heavyweight for repository reasoning and agentic engineering",
+      "family": "qwen",
+      "attachment": false,
+      "reasoning": false,
+      "tool_call": true,
+      "temperature": true,
+      "knowledge": "2025-04",
+      "release_date": "2025-04",
+      "last_updated": "2025-04",
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 262144,
+        "output": 65536
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 1.5,
+        "output": 7.5,
+        "tiers": [
+          {
+            "input": 2.7,
+            "output": 13.5,
+            "tier": {
+              "type": "context",
+              "size": 32000
+            }
+          },
+          {
+            "input": 4.5,
+            "output": 22.5,
+            "tier": {
+              "type": "context",
+              "size": 128000
+            }
+          }
+        ]
+      }
+    },
+    "qwen2-5-vl-7b-instruct": {
+      "id": "qwen2-5-vl-7b-instruct",
+      "name": "Qwen2.5-VL 7B Instruct",
+      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": false,
+      "tool_call": true,
+      "temperature": true,
+      "knowledge": "2024-04",
+      "release_date": "2024-09",
+      "last_updated": "2024-09",
+      "modalities": {
+        "input": [
+          "text",
+          "image"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 131072,
+        "output": 8192
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 0.35,
+        "output": 1.05
+      }
+    },
+    "qwen3-max": {
+      "id": "qwen3-max",
+      "name": "Qwen3 Max",
+      "description": "Flagship Qwen3 model for coding agents, complex reasoning, and tool use",
+      "family": "qwen",
+      "attachment": false,
+      "reasoning": false,
+      "tool_call": true,
+      "temperature": true,
+      "knowledge": "2025-04",
+      "release_date": "2025-09-23",
+      "last_updated": "2025-09-23",
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": false,
+      "limit": {
+        "context": 262144,
+        "output": 65536
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 1.2,
+        "output": 6
       }
     },
     "qwen3.5-flash": {
@@ -93,10 +944,10 @@
       },
       "canonical_model_id": "alibaba/qwen3.5-flash"
     },
-    "qwen3.7-max": {
-      "id": "qwen3.7-max",
-      "name": "Qwen3.7 Max",
-      "description": "Qwen frontier model tuned for agent frameworks, coding assistants, and long tasks",
+    "qwen3-32b": {
+      "id": "qwen3-32b",
+      "name": "Qwen3 32B",
+      "description": "Dense open Qwen model for self-hosted chat, reasoning, and coding",
       "family": "qwen",
       "attachment": false,
       "reasoning": true,
@@ -110,8 +961,9 @@
       ],
       "tool_call": true,
       "temperature": true,
-      "release_date": "2026-05-21",
-      "last_updated": "2026-05-21",
+      "knowledge": "2025-04",
+      "release_date": "2025-04",
+      "last_updated": "2025-04",
       "modalities": {
         "input": [
           "text"
@@ -120,16 +972,16 @@
           "text"
         ]
       },
-      "open_weights": false,
+      "open_weights": true,
       "limit": {
-        "context": 1000000,
-        "output": 131072
+        "context": 131072,
+        "output": 16384
       },
+      "status": "deprecated",
       "cost": {
-        "input": 2.5,
-        "output": 7.5,
-        "cache_read": 0.5,
-        "cache_write": 3.125
+        "input": 0.7,
+        "output": 2.8,
+        "reasoning": 8.4
       }
     },
     "qwen2-5-32b-instruct": {
@@ -157,24 +1009,66 @@
         "context": 131072,
         "output": 8192
       },
+      "status": "deprecated",
       "cost": {
         "input": 0.7,
         "output": 2.8
       }
     },
-    "qwq-plus": {
-      "id": "qwq-plus",
-      "name": "QwQ Plus",
-      "description": "Qwen reasoning model for deliberate problem solving, math, and coding",
+    "qwen3-omni-flash": {
+      "id": "qwen3-omni-flash",
+      "name": "Qwen3-Omni Flash",
+      "description": "Qwen omni model for text, vision, audio, and multimodal agent tasks",
       "family": "qwen",
-      "attachment": false,
+      "attachment": true,
       "reasoning": true,
-      "reasoning_options": [],
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        }
+      ],
       "tool_call": true,
       "temperature": true,
       "knowledge": "2024-04",
-      "release_date": "2025-03-05",
-      "last_updated": "2025-03-05",
+      "release_date": "2025-09-15",
+      "last_updated": "2025-09-15",
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "audio",
+          "video"
+        ],
+        "output": [
+          "text",
+          "audio"
+        ]
+      },
+      "open_weights": false,
+      "limit": {
+        "context": 65536,
+        "output": 16384
+      },
+      "cost": {
+        "input": 0.43,
+        "output": 1.66,
+        "input_audio": 3.81,
+        "output_audio": 15.11
+      }
+    },
+    "qwen3-coder-flash": {
+      "id": "qwen3-coder-flash",
+      "name": "Qwen3 Coder Flash",
+      "description": "Qwen coding model for software agents, repository edits, and code reasoning",
+      "family": "qwen",
+      "attachment": false,
+      "reasoning": false,
+      "tool_call": true,
+      "structured_output": true,
+      "temperature": true,
+      "knowledge": "2025-04",
+      "release_date": "2025-07-28",
+      "last_updated": "2025-07-28",
       "modalities": {
         "input": [
           "text"
@@ -185,18 +1079,75 @@
       },
       "open_weights": false,
       "limit": {
-        "context": 131072,
-        "output": 8192
+        "context": 1000000,
+        "output": 65536
       },
       "cost": {
-        "input": 0.8,
-        "output": 2.4
+        "input": 0.3,
+        "output": 1.5,
+        "tiers": [
+          {
+            "input": 0.5,
+            "output": 2.5,
+            "tier": {
+              "type": "context",
+              "size": 32000
+            }
+          },
+          {
+            "input": 0.8,
+            "output": 4,
+            "tier": {
+              "type": "context",
+              "size": 128000
+            }
+          },
+          {
+            "input": 1.6,
+            "output": 9.6,
+            "tier": {
+              "type": "context",
+              "size": 256000
+            }
+          }
+        ]
       }
     },
-    "qwen2-5-vl-72b-instruct": {
-      "id": "qwen2-5-vl-72b-instruct",
-      "name": "Qwen2.5-VL 72B Instruct",
-      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
+    "qwen-vl-ocr": {
+      "id": "qwen-vl-ocr",
+      "name": "Qwen-VL OCR",
+      "description": "OCR model for extracting structured text from documents and screenshots",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": false,
+      "tool_call": false,
+      "temperature": true,
+      "knowledge": "2024-04",
+      "release_date": "2024-10-28",
+      "last_updated": "2025-04-13",
+      "modalities": {
+        "input": [
+          "text",
+          "image"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": false,
+      "limit": {
+        "context": 34096,
+        "output": 4096
+      },
+      "cost": {
+        "input": 0.07,
+        "output": 0.16
+      }
+    },
+    "qwen2-5-72b-instruct": {
+      "id": "qwen2-5-72b-instruct",
+      "name": "Qwen2.5 72B Instruct",
+      "description": "Qwen instruction model for multilingual chat, reasoning, and tool use",
       "family": "qwen",
       "attachment": false,
       "reasoning": false,
@@ -207,8 +1158,7 @@
       "last_updated": "2024-09",
       "modalities": {
         "input": [
-          "text",
-          "image"
+          "text"
         ],
         "output": [
           "text"
@@ -219,15 +1169,16 @@
         "context": 131072,
         "output": 8192
       },
+      "status": "deprecated",
       "cost": {
-        "input": 2.8,
-        "output": 8.4
+        "input": 1.4,
+        "output": 5.6
       }
     },
-    "qwen3-vl-plus": {
-      "id": "qwen3-vl-plus",
-      "name": "Qwen3-VL Plus",
-      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
+    "qwen-turbo": {
+      "id": "qwen-turbo",
+      "name": "Qwen Turbo",
+      "description": "Efficient Qwen model for fast chat, extraction, and high-volume workloads",
       "family": "qwen",
       "attachment": false,
       "reasoning": true,
@@ -241,13 +1192,12 @@
       ],
       "tool_call": true,
       "temperature": true,
-      "knowledge": "2025-04",
-      "release_date": "2025-09-23",
-      "last_updated": "2025-09-23",
+      "knowledge": "2024-04",
+      "release_date": "2024-11-01",
+      "last_updated": "2025-04-28",
       "modalities": {
         "input": [
-          "text",
-          "image"
+          "text"
         ],
         "output": [
           "text"
@@ -255,41 +1205,31 @@
       },
       "open_weights": false,
       "limit": {
-        "context": 262144,
-        "output": 32768
+        "context": 1000000,
+        "output": 16384
       },
+      "status": "deprecated",
       "cost": {
-        "input": 0.2,
-        "output": 1.6,
-        "reasoning": 4.8
+        "input": 0.05,
+        "output": 0.2,
+        "reasoning": 0.5
       }
     },
-    "qwen3.5-27b": {
-      "id": "qwen3.5-27b",
-      "name": "Qwen3.5 27B",
-      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
+    "qwen3-coder-30b-a3b-instruct": {
+      "id": "qwen3-coder-30b-a3b-instruct",
+      "name": "Qwen3-Coder 30B-A3B Instruct",
+      "description": "Smaller Qwen coder for efficient local agents and repo-level fixes",
       "family": "qwen",
-      "attachment": true,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "toggle"
-        },
-        {
-          "type": "budget_tokens"
-        }
-      ],
+      "attachment": false,
+      "reasoning": false,
       "tool_call": true,
-      "structured_output": true,
       "temperature": true,
-      "release_date": "2026-02-23",
-      "last_updated": "2026-02-23",
+      "knowledge": "2025-04",
+      "release_date": "2025-04",
+      "last_updated": "2025-04",
       "modalities": {
         "input": [
-          "text",
-          "image",
-          "video",
-          "audio"
+          "text"
         ],
         "output": [
           "text"
@@ -300,71 +1240,42 @@
         "context": 262144,
         "output": 65536
       },
+      "status": "deprecated",
       "cost": {
-        "input": 0.3,
-        "output": 2.4
+        "input": 0.45,
+        "output": 2.25,
+        "tiers": [
+          {
+            "input": 0.75,
+            "output": 3.75,
+            "tier": {
+              "type": "context",
+              "size": 32000
+            }
+          },
+          {
+            "input": 1.2,
+            "output": 6,
+            "tier": {
+              "type": "context",
+              "size": 128000
+            }
+          }
+        ]
       }
     },
-    "deepseek-v4-flash-0731": {
-      "id": "deepseek-v4-flash-0731",
-      "name": "DeepSeek V4 Flash 0731",
-      "description": "Official DeepSeek V4 Flash release with enhanced agentic capabilities and integrated DSpark speculative decoding",
-      "family": "deepseek-flash",
-      "attachment": false,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "toggle"
-        },
-        {
-          "type": "effort",
-          "values": [
-            "high",
-            "max"
-          ]
-        }
-      ],
-      "tool_call": true,
-      "interleaved": {
-        "field": "reasoning_content"
-      },
-      "structured_output": true,
-      "temperature": true,
-      "knowledge": "2025-05",
-      "release_date": "2026-07-31",
-      "last_updated": "2026-07-31",
-      "modalities": {
-        "input": [
-          "text"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 1000000,
-        "output": 384000
-      },
-      "cost": {
-        "input": 0.2,
-        "output": 0.4,
-        "cache_read": 0.04
-      },
-      "canonical_model_id": "deepseek/deepseek-v4-flash-0731"
-    },
-    "qwen-max": {
-      "id": "qwen-max",
-      "name": "Qwen Max",
-      "description": "Flagship Qwen model for complex reasoning, coding, and agentic workflows",
+    "qwen-plus-character-ja": {
+      "id": "qwen-plus-character-ja",
+      "name": "Qwen Plus Character (Japanese)",
+      "description": "Qwen instruction model for multilingual chat, reasoning, and tool use",
       "family": "qwen",
       "attachment": false,
       "reasoning": false,
-      "tool_call": true,
+      "tool_call": false,
       "temperature": true,
       "knowledge": "2024-04",
-      "release_date": "2024-04-03",
-      "last_updated": "2025-01-25",
+      "release_date": "2024-01",
+      "last_updated": "2024-01",
       "modalities": {
         "input": [
           "text"
@@ -375,47 +1286,12 @@
       },
       "open_weights": false,
       "limit": {
-        "context": 32768,
-        "output": 8192
-      },
-      "cost": {
-        "input": 1.6,
-        "output": 6.4
-      }
-    },
-    "qwen3-next-80b-a3b-thinking": {
-      "id": "qwen3-next-80b-a3b-thinking",
-      "name": "Qwen3-Next 80B-A3B (Thinking)",
-      "description": "Efficient Qwen thinking model for local reasoning, math, and coding agents",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "budget_tokens"
-        }
-      ],
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2025-04",
-      "release_date": "2025-09",
-      "last_updated": "2025-09",
-      "modalities": {
-        "input": [
-          "text"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 131072,
-        "output": 32768
+        "context": 8192,
+        "output": 512
       },
       "cost": {
         "input": 0.5,
-        "output": 6
+        "output": 1.4
       }
     },
     "qwen3.8-max": {
@@ -475,162 +1351,9 @@
       },
       "canonical_model_id": "alibaba/qwen3.8-max"
     },
-    "kimi-k3": {
-      "id": "kimi-k3",
-      "name": "Kimi K3",
-      "description": "Multimodal Kimi model with 1M context and toggleable max-effort thinking for long-horizon agent work",
-      "family": "kimi-k3",
-      "attachment": true,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "effort",
-          "values": [
-            "low",
-            "high",
-            "max"
-          ]
-        }
-      ],
-      "tool_call": true,
-      "interleaved": {
-        "field": "reasoning_content"
-      },
-      "structured_output": true,
-      "temperature": false,
-      "release_date": "2026-07-16",
-      "last_updated": "2026-07-16",
-      "modalities": {
-        "input": [
-          "text",
-          "image"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 1048576,
-        "output": 1048576
-      },
-      "cost": {
-        "input": 3,
-        "output": 15,
-        "cache_read": 0.3
-      },
-      "canonical_model_id": "moonshotai/kimi-k3"
-    },
-    "qwen-plus-character-ja": {
-      "id": "qwen-plus-character-ja",
-      "name": "Qwen Plus Character (Japanese)",
-      "description": "Qwen instruction model for multilingual chat, reasoning, and tool use",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": false,
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2024-04",
-      "release_date": "2024-01",
-      "last_updated": "2024-01",
-      "modalities": {
-        "input": [
-          "text"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": false,
-      "limit": {
-        "context": 8192,
-        "output": 512
-      },
-      "cost": {
-        "input": 0.5,
-        "output": 1.4
-      }
-    },
-    "qwen3.5-plus": {
-      "id": "qwen3.5-plus",
-      "name": "Qwen3.5 Plus",
-      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "toggle"
-        },
-        {
-          "type": "budget_tokens"
-        }
-      ],
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2025-04",
-      "release_date": "2026-02-16",
-      "last_updated": "2026-02-16",
-      "modalities": {
-        "input": [
-          "text",
-          "image",
-          "video"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": false,
-      "limit": {
-        "context": 1000000,
-        "output": 65536
-      },
-      "cost": {
-        "input": 0.4,
-        "output": 2.4,
-        "reasoning": 2.4
-      }
-    },
-    "qwen3-livetranslate-flash-realtime": {
-      "id": "qwen3-livetranslate-flash-realtime",
-      "name": "Qwen3-LiveTranslate Flash Realtime",
-      "description": "Speech generation model for controllable voice, narration, and audio delivery",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": false,
-      "tool_call": false,
-      "temperature": true,
-      "knowledge": "2024-04",
-      "release_date": "2025-09-22",
-      "last_updated": "2025-09-22",
-      "modalities": {
-        "input": [
-          "text",
-          "image",
-          "audio",
-          "video"
-        ],
-        "output": [
-          "text",
-          "audio"
-        ]
-      },
-      "open_weights": false,
-      "limit": {
-        "context": 53248,
-        "output": 4096
-      },
-      "cost": {
-        "input": 10,
-        "output": 10,
-        "input_audio": 10,
-        "output_audio": 38
-      }
-    },
-    "qwen2-5-72b-instruct": {
-      "id": "qwen2-5-72b-instruct",
-      "name": "Qwen2.5 72B Instruct",
+    "qwen2-5-7b-instruct": {
+      "id": "qwen2-5-7b-instruct",
+      "name": "Qwen2.5 7B Instruct",
       "description": "Qwen instruction model for multilingual chat, reasoning, and tool use",
       "family": "qwen",
       "attachment": false,
@@ -653,15 +1376,125 @@
         "context": 131072,
         "output": 8192
       },
+      "status": "deprecated",
       "cost": {
-        "input": 1.4,
-        "output": 5.6
+        "input": 0.175,
+        "output": 0.7
       }
     },
-    "qwen3-32b": {
-      "id": "qwen3-32b",
-      "name": "Qwen3 32B",
-      "description": "Dense open Qwen model for self-hosted chat, reasoning, and coding",
+    "qwen-omni-turbo": {
+      "id": "qwen-omni-turbo",
+      "name": "Qwen-Omni Turbo",
+      "description": "Qwen omni model for text, vision, audio, and multimodal agent tasks",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": false,
+      "tool_call": true,
+      "temperature": true,
+      "knowledge": "2024-04",
+      "release_date": "2025-01-19",
+      "last_updated": "2025-03-26",
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "audio",
+          "video"
+        ],
+        "output": [
+          "text",
+          "audio"
+        ]
+      },
+      "open_weights": false,
+      "limit": {
+        "context": 32768,
+        "output": 2048
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 0.07,
+        "output": 0.27,
+        "input_audio": 4.44,
+        "output_audio": 8.89
+      }
+    },
+    "qwen2-5-vl-72b-instruct": {
+      "id": "qwen2-5-vl-72b-instruct",
+      "name": "Qwen2.5-VL 72B Instruct",
+      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": false,
+      "tool_call": true,
+      "temperature": true,
+      "knowledge": "2024-04",
+      "release_date": "2024-09",
+      "last_updated": "2024-09",
+      "modalities": {
+        "input": [
+          "text",
+          "image"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 131072,
+        "output": 8192
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 2.8,
+        "output": 8.4
+      }
+    },
+    "qwen3.5-27b": {
+      "id": "qwen3.5-27b",
+      "name": "Qwen3.5 27B",
+      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        },
+        {
+          "type": "budget_tokens"
+        }
+      ],
+      "tool_call": true,
+      "structured_output": true,
+      "temperature": true,
+      "release_date": "2026-02-23",
+      "last_updated": "2026-02-23",
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "video"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 262144,
+        "output": 65536
+      },
+      "cost": {
+        "input": 0.3,
+        "output": 2.4
+      }
+    },
+    "qwen3-8b": {
+      "id": "qwen3-8b",
+      "name": "Qwen3 8B",
+      "description": "Qwen instruction model for multilingual chat, reasoning, and tool use",
       "family": "qwen",
       "attachment": false,
       "reasoning": true,
@@ -689,20 +1522,52 @@
       "open_weights": true,
       "limit": {
         "context": 131072,
-        "output": 16384
+        "output": 8192
       },
+      "status": "deprecated",
       "cost": {
-        "input": 0.7,
-        "output": 2.8,
-        "reasoning": 8.4
+        "input": 0.18,
+        "output": 0.7,
+        "reasoning": 2.1
       }
     },
-    "qwen-plus": {
-      "id": "qwen-plus",
-      "name": "Qwen Plus",
-      "description": "Qwen instruction model for multilingual chat, reasoning, and tool use",
+    "qwen3-asr-flash": {
+      "id": "qwen3-asr-flash",
+      "type": "transcription",
+      "name": "Qwen3-ASR Flash",
+      "description": "Speech transcription model for accurate audio-to-text and captioning workflows",
       "family": "qwen",
       "attachment": false,
+      "reasoning": false,
+      "tool_call": false,
+      "temperature": false,
+      "knowledge": "2024-04",
+      "release_date": "2025-09-08",
+      "last_updated": "2025-09-08",
+      "modalities": {
+        "input": [
+          "audio"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": false,
+      "limit": {
+        "context": 53248,
+        "output": 4096
+      },
+      "cost": {
+        "input": 0.035,
+        "output": 0.035
+      }
+    },
+    "qwen3.6-flash": {
+      "id": "qwen3.6-flash",
+      "name": "Qwen3.6 Flash",
+      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
+      "family": "qwen3.6",
+      "attachment": true,
       "reasoning": true,
       "reasoning_options": [
         {
@@ -713,13 +1578,15 @@
         }
       ],
       "tool_call": true,
+      "structured_output": true,
       "temperature": true,
-      "knowledge": "2024-04",
-      "release_date": "2024-01-25",
-      "last_updated": "2025-09-11",
+      "release_date": "2026-04-27",
+      "last_updated": "2026-04-27",
       "modalities": {
         "input": [
-          "text"
+          "text",
+          "image",
+          "video"
         ],
         "output": [
           "text"
@@ -728,12 +1595,71 @@
       "open_weights": false,
       "limit": {
         "context": 1000000,
-        "output": 32768
+        "output": 65536
       },
       "cost": {
-        "input": 0.4,
-        "output": 1.2,
-        "reasoning": 4
+        "input": 0.25,
+        "output": 1.5,
+        "cache_read": 0.025,
+        "cache_write": 0.3125,
+        "tiers": [
+          {
+            "input": 1,
+            "output": 4,
+            "cache_read": 0.1,
+            "cache_write": 1.25,
+            "tier": {
+              "type": "context",
+              "size": 256000
+            }
+          }
+        ],
+        "context_over_200k": {
+          "input": 1,
+          "output": 4,
+          "cache_read": 0.1,
+          "cache_write": 1.25
+        }
+      }
+    },
+    "qwen3.5-397b-a17b": {
+      "id": "qwen3.5-397b-a17b",
+      "name": "Qwen3.5 397B-A17B",
+      "description": "Large open Qwen multimodal MoE for visual agents and long technical tasks",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        },
+        {
+          "type": "budget_tokens"
+        }
+      ],
+      "tool_call": true,
+      "structured_output": true,
+      "temperature": true,
+      "release_date": "2026-02-15",
+      "last_updated": "2026-02-15",
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "video"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 262144,
+        "output": 65536
+      },
+      "cost": {
+        "input": 0.6,
+        "output": 3.6
       }
     },
     "qwen3.7-flash": {
@@ -806,269 +1732,85 @@
       },
       "canonical_model_id": "alibaba/qwen3.7-flash"
     },
-    "qwen3-max": {
-      "id": "qwen3-max",
-      "name": "Qwen3 Max",
-      "description": "Flagship Qwen3 model for coding agents, complex reasoning, and tool use",
+    "qwen3.5-plus": {
+      "id": "qwen3.5-plus",
+      "name": "Qwen3.5 Plus",
+      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
       "family": "qwen",
-      "attachment": false,
-      "reasoning": false,
+      "attachment": true,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        },
+        {
+          "type": "budget_tokens"
+        }
+      ],
       "tool_call": true,
+      "structured_output": true,
+      "temperature": true,
+      "knowledge": "2025-04",
+      "release_date": "2026-02-16",
+      "last_updated": "2026-02-16",
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "video"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": false,
+      "limit": {
+        "context": 1000000,
+        "output": 65536
+      },
+      "cost": {
+        "input": 0.4,
+        "output": 2.4,
+        "reasoning": 2.4,
+        "tiers": [
+          {
+            "input": 0.5,
+            "output": 3,
+            "tier": {
+              "type": "context",
+              "size": 256000
+            }
+          }
+        ],
+        "context_over_200k": {
+          "input": 0.5,
+          "output": 3
+        }
+      }
+    },
+    "qwen3-vl-plus": {
+      "id": "qwen3-vl-plus",
+      "name": "Qwen3-VL Plus",
+      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        },
+        {
+          "type": "budget_tokens"
+        }
+      ],
+      "tool_call": true,
+      "structured_output": true,
       "temperature": true,
       "knowledge": "2025-04",
       "release_date": "2025-09-23",
       "last_updated": "2025-09-23",
       "modalities": {
         "input": [
-          "text"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": false,
-      "limit": {
-        "context": 262144,
-        "output": 65536
-      },
-      "cost": {
-        "input": 1.2,
-        "output": 6
-      }
-    },
-    "qwen-omni-turbo-realtime": {
-      "id": "qwen-omni-turbo-realtime",
-      "name": "Qwen-Omni Turbo Realtime",
-      "description": "Qwen omni model for text, vision, audio, and multimodal agent tasks",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": false,
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2024-04",
-      "release_date": "2025-05-08",
-      "last_updated": "2025-05-08",
-      "modalities": {
-        "input": [
-          "text",
-          "image",
-          "audio"
-        ],
-        "output": [
-          "text",
-          "audio"
-        ]
-      },
-      "open_weights": false,
-      "limit": {
-        "context": 32768,
-        "output": 2048
-      },
-      "cost": {
-        "input": 0.27,
-        "output": 1.07,
-        "input_audio": 4.44,
-        "output_audio": 8.89
-      }
-    },
-    "qwen3-coder-480b-a35b-instruct": {
-      "id": "qwen3-coder-480b-a35b-instruct",
-      "name": "Qwen3-Coder 480B-A35B Instruct",
-      "description": "Open Qwen coding heavyweight for repository reasoning and agentic engineering",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": false,
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2025-04",
-      "release_date": "2025-04",
-      "last_updated": "2025-04",
-      "modalities": {
-        "input": [
-          "text"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 262144,
-        "output": 65536
-      },
-      "cost": {
-        "input": 1.5,
-        "output": 7.5,
-        "tiers": [
-          {
-            "input": 2.7,
-            "output": 13.5,
-            "tier": {
-              "type": "context",
-              "size": 32000
-            }
-          },
-          {
-            "input": 4.5,
-            "output": 22.5,
-            "tier": {
-              "type": "context",
-              "size": 128000
-            }
-          }
-        ]
-      }
-    },
-    "qwen-turbo": {
-      "id": "qwen-turbo",
-      "name": "Qwen Turbo",
-      "description": "Efficient Qwen model for fast chat, extraction, and high-volume workloads",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "toggle"
-        },
-        {
-          "type": "budget_tokens"
-        }
-      ],
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2024-04",
-      "release_date": "2024-11-01",
-      "last_updated": "2025-04-28",
-      "modalities": {
-        "input": [
-          "text"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": false,
-      "limit": {
-        "context": 1000000,
-        "output": 16384
-      },
-      "cost": {
-        "input": 0.05,
-        "output": 0.2,
-        "reasoning": 0.5
-      }
-    },
-    "qwen3-coder-30b-a3b-instruct": {
-      "id": "qwen3-coder-30b-a3b-instruct",
-      "name": "Qwen3-Coder 30B-A3B Instruct",
-      "description": "Smaller Qwen coder for efficient local agents and repo-level fixes",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": false,
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2025-04",
-      "release_date": "2025-04",
-      "last_updated": "2025-04",
-      "modalities": {
-        "input": [
-          "text"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 262144,
-        "output": 65536
-      },
-      "cost": {
-        "input": 0.45,
-        "output": 2.25,
-        "tiers": [
-          {
-            "input": 0.75,
-            "output": 3.75,
-            "tier": {
-              "type": "context",
-              "size": 32000
-            }
-          },
-          {
-            "input": 1.2,
-            "output": 6,
-            "tier": {
-              "type": "context",
-              "size": 128000
-            }
-          }
-        ]
-      }
-    },
-    "qwen3.8-omni-flash": {
-      "id": "qwen3.8-omni-flash",
-      "name": "Qwen3.8 Omni Flash",
-      "description": "Qwen omni model for text, vision, audio, and multimodal agent tasks",
-      "family": "qwen",
-      "attachment": true,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "effort",
-          "values": [
-            "none",
-            "low",
-            "medium",
-            "xhigh"
-          ]
-        }
-      ],
-      "tool_call": true,
-      "interleaved": {
-        "field": "reasoning_content"
-      },
-      "structured_output": true,
-      "release_date": "2026-09-17",
-      "last_updated": "2026-09-17",
-      "modalities": {
-        "input": [
-          "text",
-          "image",
-          "audio",
-          "video"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": false,
-      "limit": {
-        "context": 1000000,
-        "output": 131072
-      },
-      "cost": {
-        "input": 0.15,
-        "output": 0.47,
-        "cache_read": 0.016
-      },
-      "canonical_model_id": "alibaba/qwen3.8-omni-flash"
-    },
-    "qvq-max": {
-      "id": "qvq-max",
-      "name": "QVQ Max",
-      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
-      "family": "qvq",
-      "attachment": false,
-      "reasoning": true,
-      "reasoning_options": [],
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2024-04",
-      "release_date": "2025-03-25",
-      "last_updated": "2025-03-25",
-      "modalities": {
-        "input": [
           "text",
           "image"
         ],
@@ -1078,1035 +1820,61 @@
       },
       "open_weights": false,
       "limit": {
-        "context": 131072,
-        "output": 8192
-      },
-      "cost": {
-        "input": 1.2,
-        "output": 4.8
-      }
-    },
-    "qwen2-5-7b-instruct": {
-      "id": "qwen2-5-7b-instruct",
-      "name": "Qwen2.5 7B Instruct",
-      "description": "Qwen instruction model for multilingual chat, reasoning, and tool use",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": false,
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2024-04",
-      "release_date": "2024-09",
-      "last_updated": "2024-09",
-      "modalities": {
-        "input": [
-          "text"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 131072,
-        "output": 8192
-      },
-      "cost": {
-        "input": 0.175,
-        "output": 0.7
-      }
-    },
-    "qwen3-omni-flash": {
-      "id": "qwen3-omni-flash",
-      "name": "Qwen3-Omni Flash",
-      "description": "Qwen omni model for text, vision, audio, and multimodal agent tasks",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "toggle"
-        }
-      ],
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2024-04",
-      "release_date": "2025-09-15",
-      "last_updated": "2025-09-15",
-      "modalities": {
-        "input": [
-          "text",
-          "image",
-          "audio",
-          "video"
-        ],
-        "output": [
-          "text",
-          "audio"
-        ]
-      },
-      "open_weights": false,
-      "limit": {
-        "context": 65536,
-        "output": 16384
-      },
-      "cost": {
-        "input": 0.43,
-        "output": 1.66,
-        "input_audio": 3.81,
-        "output_audio": 15.11
-      }
-    },
-    "qwen-vl-max": {
-      "id": "qwen-vl-max",
-      "name": "Qwen-VL Max",
-      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": false,
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2024-04",
-      "release_date": "2024-04-08",
-      "last_updated": "2025-08-13",
-      "modalities": {
-        "input": [
-          "text",
-          "image"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": false,
-      "limit": {
-        "context": 131072,
-        "output": 8192
-      },
-      "cost": {
-        "input": 0.8,
-        "output": 3.2
-      }
-    },
-    "qwen3-235b-a22b": {
-      "id": "qwen3-235b-a22b",
-      "name": "Qwen3 235B-A22B",
-      "description": "Large open Qwen MoE for multilingual reasoning, coding, and tool use",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "toggle"
-        },
-        {
-          "type": "budget_tokens"
-        }
-      ],
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2025-04",
-      "release_date": "2025-04",
-      "last_updated": "2025-04",
-      "modalities": {
-        "input": [
-          "text"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 131072,
-        "output": 16384
-      },
-      "cost": {
-        "input": 0.7,
-        "output": 2.8,
-        "reasoning": 8.4
-      }
-    },
-    "qwen3-vl-30b-a3b": {
-      "id": "qwen3-vl-30b-a3b",
-      "name": "Qwen3-VL 30B-A3B",
-      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "budget_tokens"
-        }
-      ],
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2025-04",
-      "release_date": "2025-04",
-      "last_updated": "2025-04",
-      "modalities": {
-        "input": [
-          "text",
-          "image"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 131072,
+        "context": 262144,
         "output": 32768
       },
       "cost": {
         "input": 0.2,
-        "output": 0.8,
-        "reasoning": 2.4
+        "output": 1.6,
+        "tiers": [
+          {
+            "input": 0.3,
+            "output": 2.4,
+            "tier": {
+              "type": "context",
+              "size": 32000
+            }
+          },
+          {
+            "input": 0.6,
+            "output": 4.8,
+            "tier": {
+              "type": "context",
+              "size": 128000
+            }
+          }
+        ]
       }
     },
-    "qwen3.5-122b-a10b": {
-      "id": "qwen3.5-122b-a10b",
-      "name": "Qwen3.5 122B-A10B",
-      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
-      "family": "qwen",
-      "attachment": true,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "toggle"
-        },
-        {
-          "type": "budget_tokens"
-        }
-      ],
-      "tool_call": true,
-      "structured_output": true,
-      "temperature": true,
-      "release_date": "2026-02-23",
-      "last_updated": "2026-02-23",
-      "modalities": {
-        "input": [
-          "text",
-          "image",
-          "video",
-          "audio"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 262144,
-        "output": 65536
-      },
-      "cost": {
-        "input": 0.4,
-        "output": 3.2
-      }
-    },
-    "qwen3.6-35b-a3b": {
-      "id": "qwen3.6-35b-a3b",
-      "name": "Qwen3.6 35B-A3B",
-      "description": "Open multimodal Qwen MoE for local agents that need vision, audio, and code",
-      "family": "qwen",
-      "attachment": true,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "toggle"
-        },
-        {
-          "type": "budget_tokens"
-        }
-      ],
-      "tool_call": true,
-      "structured_output": true,
-      "temperature": true,
-      "release_date": "2026-04-17",
-      "last_updated": "2026-04-17",
-      "modalities": {
-        "input": [
-          "text",
-          "image",
-          "video",
-          "audio"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 262144,
-        "output": 65536
-      },
-      "cost": {
-        "input": 0.248,
-        "output": 1.485
-      }
-    },
-    "qwen3-next-80b-a3b-instruct": {
-      "id": "qwen3-next-80b-a3b-instruct",
-      "name": "Qwen3-Next 80B-A3B Instruct",
-      "description": "Qwen instruction model for multilingual chat, reasoning, and tool use",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": false,
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2025-04",
-      "release_date": "2025-09",
-      "last_updated": "2025-09",
-      "modalities": {
-        "input": [
-          "text"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 131072,
-        "output": 32768
-      },
-      "cost": {
-        "input": 0.5,
-        "output": 2
-      }
-    },
-    "qwen-vl-plus": {
-      "id": "qwen-vl-plus",
-      "name": "Qwen-VL Plus",
-      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": false,
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2024-04",
-      "release_date": "2024-01-25",
-      "last_updated": "2025-08-15",
-      "modalities": {
-        "input": [
-          "text",
-          "image"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": false,
-      "limit": {
-        "context": 131072,
-        "output": 8192
-      },
-      "cost": {
-        "input": 0.21,
-        "output": 0.63
-      }
-    },
-    "qwen3.6-flash": {
-      "id": "qwen3.6-flash",
-      "name": "Qwen3.6 Flash",
-      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
-      "family": "qwen3.6",
-      "attachment": true,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "toggle"
-        },
-        {
-          "type": "budget_tokens"
-        }
-      ],
-      "tool_call": true,
-      "structured_output": true,
-      "temperature": true,
-      "release_date": "2026-04-27",
-      "last_updated": "2026-04-27",
-      "modalities": {
-        "input": [
-          "text",
-          "image",
-          "video"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": false,
-      "limit": {
-        "context": 1000000,
-        "output": 65536
-      },
-      "cost": {
-        "input": 0.1875,
-        "output": 1.125,
-        "cache_write": 0.234375
-      }
-    },
-    "qwen3-coder-flash": {
-      "id": "qwen3-coder-flash",
-      "name": "Qwen3 Coder Flash",
-      "description": "Qwen coding model for software agents, repository edits, and code reasoning",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": false,
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2025-04",
-      "release_date": "2025-07-28",
-      "last_updated": "2025-07-28",
-      "modalities": {
-        "input": [
-          "text"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": false,
-      "limit": {
-        "context": 1000000,
-        "output": 65536
-      },
-      "cost": {
-        "input": 0.3,
-        "output": 1.5
-      }
-    },
-    "qwen2-5-omni-7b": {
-      "id": "qwen2-5-omni-7b",
-      "name": "Qwen2.5-Omni 7B",
-      "description": "Qwen omni model for text, vision, audio, and multimodal agent tasks",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": false,
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2024-04",
-      "release_date": "2024-12",
-      "last_updated": "2024-12",
-      "modalities": {
-        "input": [
-          "text",
-          "image",
-          "audio",
-          "video"
-        ],
-        "output": [
-          "text",
-          "audio"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 32768,
-        "output": 2048
-      },
-      "cost": {
-        "input": 0.1,
-        "output": 0.4,
-        "input_audio": 6.76
-      }
-    },
-    "qwen-mt-plus": {
-      "id": "qwen-mt-plus",
-      "name": "Qwen-MT Plus",
-      "description": "Translation model for multilingual conversion, localization, and cross-language workflows",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": false,
-      "tool_call": false,
-      "temperature": true,
-      "knowledge": "2024-04",
-      "release_date": "2025-01",
-      "last_updated": "2025-01",
-      "modalities": {
-        "input": [
-          "text"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": false,
-      "limit": {
-        "context": 16384,
-        "output": 8192
-      },
-      "cost": {
-        "input": 2.46,
-        "output": 7.37
-      }
-    },
-    "qwen3-vl-235b-a22b": {
-      "id": "qwen3-vl-235b-a22b",
-      "name": "Qwen3-VL 235B-A22B",
-      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "budget_tokens"
-        }
-      ],
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2025-04",
-      "release_date": "2025-04",
-      "last_updated": "2025-04",
-      "modalities": {
-        "input": [
-          "text",
-          "image"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 131072,
-        "output": 32768
-      },
-      "cost": {
-        "input": 0.7,
-        "output": 2.8,
-        "reasoning": 8.4
-      }
-    },
-    "qwen3-coder-plus": {
-      "id": "qwen3-coder-plus",
-      "name": "Qwen3 Coder Plus",
-      "description": "Hosted Qwen coder for software agents, repo edits, and long-context code",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": false,
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2025-04",
-      "release_date": "2025-07-23",
-      "last_updated": "2025-07-23",
-      "modalities": {
-        "input": [
-          "text"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 1048576,
-        "output": 65536
-      },
-      "cost": {
-        "input": 1,
-        "output": 5
-      }
-    },
-    "qwen2-5-14b-instruct": {
-      "id": "qwen2-5-14b-instruct",
-      "name": "Qwen2.5 14B Instruct",
-      "description": "Qwen instruction model for multilingual chat, reasoning, and tool use",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": false,
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2024-04",
-      "release_date": "2024-09",
-      "last_updated": "2024-09",
-      "modalities": {
-        "input": [
-          "text"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 131072,
-        "output": 8192
-      },
-      "cost": {
-        "input": 0.35,
-        "output": 1.4
-      }
-    },
-    "qwen3.8-flash": {
-      "id": "qwen3.8-flash",
-      "name": "Qwen3.8 Flash",
-      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
-      "family": "qwen",
-      "attachment": true,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "toggle"
-        },
-        {
-          "type": "effort",
-          "values": [
-            "low",
-            "medium",
-            "xhigh"
-          ]
-        },
-        {
-          "type": "budget_tokens",
-          "max": 262144
-        }
-      ],
-      "tool_call": true,
-      "interleaved": {
-        "field": "reasoning_content"
-      },
-      "structured_output": true,
-      "release_date": "2026-08-26",
-      "last_updated": "2026-08-26",
-      "modalities": {
-        "input": [
-          "text",
-          "image",
-          "video"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": false,
-      "limit": {
-        "context": 1000000,
-        "output": 131072
-      },
-      "cost": {
-        "input": 0.15,
-        "output": 0.47,
-        "cache_read": 0.016,
-        "cache_write": 0.2
-      },
-      "canonical_model_id": "alibaba/qwen3.8-flash"
-    },
-    "qwen2-5-vl-7b-instruct": {
-      "id": "qwen2-5-vl-7b-instruct",
-      "name": "Qwen2.5-VL 7B Instruct",
-      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": false,
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2024-04",
-      "release_date": "2024-09",
-      "last_updated": "2024-09",
-      "modalities": {
-        "input": [
-          "text",
-          "image"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 131072,
-        "output": 8192
-      },
-      "cost": {
-        "input": 0.35,
-        "output": 1.05
-      }
-    },
-    "qwen3.5-35b-a3b": {
-      "id": "qwen3.5-35b-a3b",
-      "name": "Qwen3.5 35B-A3B",
-      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
-      "family": "qwen",
-      "attachment": true,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "toggle"
-        },
-        {
-          "type": "budget_tokens"
-        }
-      ],
-      "tool_call": true,
-      "structured_output": true,
-      "temperature": true,
-      "release_date": "2026-02-23",
-      "last_updated": "2026-02-23",
-      "modalities": {
-        "input": [
-          "text",
-          "image",
-          "video",
-          "audio"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 262144,
-        "output": 65536
-      },
-      "cost": {
-        "input": 0.25,
-        "output": 2
-      }
-    },
-    "qwen3.6-max-preview": {
-      "id": "qwen3.6-max-preview",
-      "name": "Qwen3.6 Max Preview",
+    "qwen-max": {
+      "id": "qwen-max",
+      "name": "Qwen Max",
       "description": "Flagship Qwen model for complex reasoning, coding, and agentic workflows",
       "family": "qwen",
       "attachment": false,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "toggle"
-        },
-        {
-          "type": "budget_tokens"
-        }
-      ],
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2025-04",
-      "release_date": "2026-04-20",
-      "last_updated": "2026-04-20",
-      "modalities": {
-        "input": [
-          "text"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": false,
-      "limit": {
-        "context": 262144,
-        "output": 65536
-      },
-      "cost": {
-        "input": 1.3,
-        "output": 7.8,
-        "cache_read": 0.13,
-        "cache_write": 1.625
-      }
-    },
-    "qwen-mt-turbo": {
-      "id": "qwen-mt-turbo",
-      "name": "Qwen-MT Turbo",
-      "description": "Translation model for multilingual conversion, localization, and cross-language workflows",
-      "family": "qwen",
-      "attachment": false,
       "reasoning": false,
-      "tool_call": false,
-      "temperature": true,
-      "knowledge": "2024-04",
-      "release_date": "2025-01",
-      "last_updated": "2025-01",
-      "modalities": {
-        "input": [
-          "text"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": false,
-      "limit": {
-        "context": 16384,
-        "output": 8192
-      },
-      "cost": {
-        "input": 0.16,
-        "output": 0.49
-      }
-    },
-    "qwen3.5-397b-a17b": {
-      "id": "qwen3.5-397b-a17b",
-      "name": "Qwen3.5 397B-A17B",
-      "description": "Large open Qwen multimodal MoE for visual agents and long technical tasks",
-      "family": "qwen",
-      "attachment": true,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "toggle"
-        },
-        {
-          "type": "budget_tokens"
-        }
-      ],
       "tool_call": true,
       "structured_output": true,
       "temperature": true,
-      "release_date": "2026-02-15",
-      "last_updated": "2026-02-15",
-      "modalities": {
-        "input": [
-          "text",
-          "image",
-          "video",
-          "audio"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 262144,
-        "output": 65536
-      },
-      "cost": {
-        "input": 0.6,
-        "output": 3.6
-      }
-    },
-    "qwen3-8b": {
-      "id": "qwen3-8b",
-      "name": "Qwen3 8B",
-      "description": "Qwen instruction model for multilingual chat, reasoning, and tool use",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "toggle"
-        },
-        {
-          "type": "budget_tokens"
-        }
-      ],
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2025-04",
-      "release_date": "2025-04",
-      "last_updated": "2025-04",
-      "modalities": {
-        "input": [
-          "text"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 131072,
-        "output": 8192
-      },
-      "cost": {
-        "input": 0.18,
-        "output": 0.7,
-        "reasoning": 2.1
-      }
-    },
-    "glm-5.2": {
-      "id": "glm-5.2",
-      "name": "GLM-5.2",
-      "description": "Open flagship GLM for long-horizon coding agents and million-token context work",
-      "family": "glm",
-      "attachment": false,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "effort",
-          "values": [
-            "none",
-            "minimal",
-            "low",
-            "medium",
-            "high",
-            "xhigh",
-            "max"
-          ]
-        }
-      ],
-      "tool_call": true,
-      "interleaved": {
-        "field": "reasoning_content"
-      },
-      "structured_output": true,
-      "temperature": true,
-      "release_date": "2026-06-13",
-      "last_updated": "2026-06-13",
-      "modalities": {
-        "input": [
-          "text"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 1000000,
-        "output": 131072
-      },
-      "cost": {
-        "input": 1.4,
-        "output": 4.4,
-        "cache_read": 0.28,
-        "cache_write": 0
-      },
-      "canonical_model_id": "zhipuai/glm-5.2"
-    },
-    "qwen-omni-turbo": {
-      "id": "qwen-omni-turbo",
-      "name": "Qwen-Omni Turbo",
-      "description": "Qwen omni model for text, vision, audio, and multimodal agent tasks",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": false,
-      "tool_call": true,
-      "temperature": true,
       "knowledge": "2024-04",
-      "release_date": "2025-01-19",
-      "last_updated": "2025-03-26",
+      "release_date": "2024-04-03",
+      "last_updated": "2025-01-25",
       "modalities": {
         "input": [
-          "text",
-          "image",
-          "audio",
-          "video"
+          "text"
         ],
         "output": [
-          "text",
-          "audio"
+          "text"
         ]
       },
       "open_weights": false,
       "limit": {
         "context": 32768,
-        "output": 2048
+        "output": 8192
       },
       "cost": {
-        "input": 0.07,
-        "output": 0.27,
-        "input_audio": 4.44,
-        "output_audio": 8.89
-      }
-    },
-    "qwen3-omni-flash-realtime": {
-      "id": "qwen3-omni-flash-realtime",
-      "name": "Qwen3-Omni Flash Realtime",
-      "description": "Qwen omni model for text, vision, audio, and multimodal agent tasks",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": false,
-      "tool_call": true,
-      "temperature": true,
-      "knowledge": "2024-04",
-      "release_date": "2025-09-15",
-      "last_updated": "2025-09-15",
-      "modalities": {
-        "input": [
-          "text",
-          "image",
-          "audio",
-          "video"
-        ],
-        "output": [
-          "text",
-          "audio"
-        ]
-      },
-      "open_weights": false,
-      "limit": {
-        "context": 65536,
-        "output": 16384
-      },
-      "cost": {
-        "input": 0.52,
-        "output": 1.99,
-        "input_audio": 4.57,
-        "output_audio": 18.13
-      }
-    },
-    "qwen3-asr-flash": {
-      "id": "qwen3-asr-flash",
-      "name": "Qwen3-ASR Flash",
-      "description": "Speech transcription model for accurate audio-to-text and captioning workflows",
-      "family": "qwen",
-      "attachment": false,
-      "reasoning": false,
-      "tool_call": false,
-      "temperature": false,
-      "knowledge": "2024-04",
-      "release_date": "2025-09-08",
-      "last_updated": "2025-09-08",
-      "modalities": {
-        "input": [
-          "audio"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": false,
-      "limit": {
-        "context": 53248,
-        "output": 4096
-      },
-      "cost": {
-        "input": 0.035,
-        "output": 0.035
-      }
-    },
-    "qwen3.6-27b": {
-      "id": "qwen3.6-27b",
-      "name": "Qwen3.6 27B",
-      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
-      "family": "qwen",
-      "attachment": true,
-      "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "toggle"
-        },
-        {
-          "type": "budget_tokens"
-        }
-      ],
-      "tool_call": true,
-      "structured_output": true,
-      "temperature": true,
-      "release_date": "2026-04-22",
-      "last_updated": "2026-04-22",
-      "modalities": {
-        "input": [
-          "text",
-          "image",
-          "video",
-          "audio"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 262144,
-        "output": 65536
-      },
-      "cost": {
-        "input": 0.6,
-        "output": 3.6
+        "input": 1.6,
+        "output": 6.4
       }
     },
     "qwen3.6-plus": {
@@ -2114,7 +1882,7 @@
       "name": "Qwen3.6 Plus",
       "description": "Earlier Qwen multimodal workhorse for million-token agent and document tasks",
       "family": "qwen",
-      "attachment": false,
+      "attachment": true,
       "reasoning": true,
       "reasoning_options": [
         {
@@ -2125,6 +1893,7 @@
         }
       ],
       "tool_call": true,
+      "structured_output": true,
       "temperature": true,
       "knowledge": "2025-04",
       "release_date": "2026-04-02",
@@ -2169,6 +1938,38 @@
         }
       }
     },
+    "qwen-vl-plus": {
+      "id": "qwen-vl-plus",
+      "name": "Qwen-VL Plus",
+      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": false,
+      "tool_call": true,
+      "temperature": true,
+      "knowledge": "2024-04",
+      "release_date": "2024-01-25",
+      "last_updated": "2025-08-15",
+      "modalities": {
+        "input": [
+          "text",
+          "image"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": false,
+      "limit": {
+        "context": 131072,
+        "output": 8192
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 0.21,
+        "output": 0.63
+      }
+    },
     "qwen3-14b": {
       "id": "qwen3-14b",
       "name": "Qwen3 14B",
@@ -2202,16 +2003,55 @@
         "context": 131072,
         "output": 8192
       },
+      "status": "deprecated",
       "cost": {
         "input": 0.35,
         "output": 1.4,
         "reasoning": 4.2
       }
     },
-    "qwen3.7-plus": {
-      "id": "qwen3.7-plus",
-      "name": "Qwen3.7 Plus",
-      "description": "Multimodal Qwen workhorse for long-context agents, visual inputs, and coding",
+    "qwen3-omni-flash-realtime": {
+      "id": "qwen3-omni-flash-realtime",
+      "type": "realtime",
+      "name": "Qwen3-Omni Flash Realtime",
+      "description": "Qwen omni model for text, vision, audio, and multimodal agent tasks",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": false,
+      "tool_call": true,
+      "temperature": true,
+      "knowledge": "2024-04",
+      "release_date": "2025-09-15",
+      "last_updated": "2025-09-15",
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "audio",
+          "video"
+        ],
+        "output": [
+          "text",
+          "audio"
+        ]
+      },
+      "open_weights": false,
+      "limit": {
+        "context": 65536,
+        "output": 16384
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 0.52,
+        "output": 1.99,
+        "input_audio": 4.57,
+        "output_audio": 18.13
+      }
+    },
+    "qwen3.6-27b": {
+      "id": "qwen3.6-27b",
+      "name": "Qwen3.6 27B",
+      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
       "family": "qwen",
       "attachment": true,
       "reasoning": true,
@@ -2224,14 +2064,62 @@
         }
       ],
       "tool_call": true,
+      "structured_output": true,
+      "temperature": true,
+      "release_date": "2026-04-22",
+      "last_updated": "2026-04-22",
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "video"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 262144,
+        "output": 65536
+      },
+      "cost": {
+        "input": 0.6,
+        "output": 3.6
+      }
+    },
+    "qwen3.8-flash": {
+      "id": "qwen3.8-flash",
+      "name": "Qwen3.8 Flash",
+      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        },
+        {
+          "type": "effort",
+          "values": [
+            "low",
+            "medium",
+            "xhigh"
+          ]
+        },
+        {
+          "type": "budget_tokens",
+          "max": 262144
+        }
+      ],
+      "tool_call": true,
       "interleaved": {
         "field": "reasoning_content"
       },
       "structured_output": true,
       "temperature": true,
-      "knowledge": "2025-04",
-      "release_date": "2026-06-02",
-      "last_updated": "2026-06-04",
+      "release_date": "2026-08-26",
+      "last_updated": "2026-08-26",
       "modalities": {
         "input": [
           "text",
@@ -2248,42 +2136,57 @@
         "output": 131072
       },
       "cost": {
-        "input": 0.4,
-        "output": 1.6,
-        "cache_read": 0.04,
-        "cache_write": 0.5,
-        "tiers": [
-          {
-            "input": 1.2,
-            "output": 4.8,
-            "cache_read": 0.12,
-            "cache_write": 1.5,
-            "tier": {
-              "type": "context",
-              "size": 256000
-            }
-          }
-        ],
-        "context_over_200k": {
-          "input": 1.2,
-          "output": 4.8,
-          "cache_read": 0.12,
-          "cache_write": 1.5
-        }
-      }
+        "input": 0.15,
+        "output": 0.47,
+        "cache_read": 0.016,
+        "cache_write": 0.2
+      },
+      "canonical_model_id": "alibaba/qwen3.8-flash"
     },
-    "qwen-vl-ocr": {
-      "id": "qwen-vl-ocr",
-      "name": "Qwen-VL OCR",
-      "description": "OCR model for extracting structured text from documents and screenshots",
+    "qwen-mt-turbo": {
+      "id": "qwen-mt-turbo",
+      "name": "Qwen-MT Turbo",
+      "description": "Translation model for multilingual conversion, localization, and cross-language workflows",
       "family": "qwen",
       "attachment": false,
       "reasoning": false,
       "tool_call": false,
       "temperature": true,
       "knowledge": "2024-04",
-      "release_date": "2024-10-28",
-      "last_updated": "2025-04-13",
+      "release_date": "2025-01",
+      "last_updated": "2025-01",
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": false,
+      "limit": {
+        "context": 16384,
+        "output": 8192
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 0.16,
+        "output": 0.49
+      }
+    },
+    "qvq-max": {
+      "id": "qvq-max",
+      "name": "QVQ Max",
+      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
+      "family": "qvq",
+      "attachment": true,
+      "reasoning": true,
+      "reasoning_options": [],
+      "tool_call": true,
+      "temperature": true,
+      "knowledge": "2024-04",
+      "release_date": "2025-03-25",
+      "last_updated": "2025-03-25",
       "modalities": {
         "input": [
           "text",
@@ -2295,13 +2198,258 @@
       },
       "open_weights": false,
       "limit": {
-        "context": 34096,
-        "output": 4096
+        "context": 131072,
+        "output": 8192
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 1.2,
+        "output": 4.8
+      }
+    },
+    "qwen3.6-35b-a3b": {
+      "id": "qwen3.6-35b-a3b",
+      "name": "Qwen3.6 35B-A3B",
+      "description": "Open multimodal Qwen MoE for local agents that need vision, audio, and code",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        },
+        {
+          "type": "budget_tokens"
+        }
+      ],
+      "tool_call": true,
+      "structured_output": true,
+      "temperature": true,
+      "release_date": "2026-04-17",
+      "last_updated": "2026-04-17",
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "video"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 262144,
+        "output": 65536
       },
       "cost": {
-        "input": 0.07,
-        "output": 0.16
+        "input": 0.375,
+        "output": 2.25
       }
+    },
+    "qwen3.5-122b-a10b": {
+      "id": "qwen3.5-122b-a10b",
+      "name": "Qwen3.5 122B-A10B",
+      "description": "Qwen vision-language model for visual reasoning, documents, and agent tasks",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        },
+        {
+          "type": "budget_tokens"
+        }
+      ],
+      "tool_call": true,
+      "structured_output": true,
+      "temperature": true,
+      "release_date": "2026-02-23",
+      "last_updated": "2026-02-23",
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "video"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 262144,
+        "output": 65536
+      },
+      "cost": {
+        "input": 0.4,
+        "output": 3.2
+      }
+    },
+    "qwen3.8-omni-flash": {
+      "id": "qwen3.8-omni-flash",
+      "name": "Qwen3.8 Omni Flash",
+      "description": "Qwen omni model for text, vision, audio, and multimodal agent tasks",
+      "family": "qwen",
+      "attachment": true,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "effort",
+          "values": [
+            "none",
+            "low",
+            "medium",
+            "xhigh"
+          ]
+        }
+      ],
+      "tool_call": true,
+      "interleaved": {
+        "field": "reasoning_content"
+      },
+      "structured_output": true,
+      "temperature": true,
+      "release_date": "2026-09-17",
+      "last_updated": "2026-09-17",
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "audio",
+          "video"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": false,
+      "limit": {
+        "context": 1000000,
+        "output": 131072
+      },
+      "cost": {
+        "input": 0.15,
+        "output": 0.47,
+        "cache_read": 0.016
+      },
+      "canonical_model_id": "alibaba/qwen3.8-omni-flash"
+    },
+    "qwen3-next-80b-a3b-thinking": {
+      "id": "qwen3-next-80b-a3b-thinking",
+      "name": "Qwen3-Next 80B-A3B (Thinking)",
+      "description": "Efficient Qwen thinking model for local reasoning, math, and coding agents",
+      "family": "qwen",
+      "attachment": false,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "budget_tokens"
+        }
+      ],
+      "tool_call": true,
+      "temperature": true,
+      "knowledge": "2025-04",
+      "release_date": "2025-09",
+      "last_updated": "2025-09",
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 131072,
+        "output": 32768
+      },
+      "status": "deprecated",
+      "cost": {
+        "input": 0.5,
+        "output": 6
+      }
+    },
+    "qwen-mt-plus": {
+      "id": "qwen-mt-plus",
+      "name": "Qwen-MT Plus",
+      "description": "Translation model for multilingual conversion, localization, and cross-language workflows",
+      "family": "qwen",
+      "attachment": false,
+      "reasoning": false,
+      "tool_call": false,
+      "temperature": true,
+      "knowledge": "2024-04",
+      "release_date": "2025-01",
+      "last_updated": "2025-01",
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": false,
+      "limit": {
+        "context": 16384,
+        "output": 8192
+      },
+      "cost": {
+        "input": 2.46,
+        "output": 7.37
+      }
+    },
+    "deepseek-v4-flash-0731": {
+      "id": "deepseek-v4-flash-0731",
+      "name": "DeepSeek V4 Flash 0731",
+      "description": "Official DeepSeek V4 Flash release with enhanced agentic capabilities and integrated DSpark speculative decoding",
+      "family": "deepseek-flash",
+      "attachment": false,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        },
+        {
+          "type": "effort",
+          "values": [
+            "low",
+            "high",
+            "max"
+          ]
+        }
+      ],
+      "tool_call": true,
+      "interleaved": {
+        "field": "reasoning_content"
+      },
+      "structured_output": true,
+      "temperature": true,
+      "knowledge": "2025-05",
+      "release_date": "2026-07-31",
+      "last_updated": "2026-07-31",
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 1000000,
+        "output": 384000
+      },
+      "cost": {
+        "input": 0.44,
+        "output": 1.32,
+        "cache_read": 0.088
+      },
+      "canonical_model_id": "deepseek/deepseek-v4-flash-0731"
     }
   }
 }
