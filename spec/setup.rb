@@ -53,6 +53,7 @@ VCR.configure do |config|
 
   ##
   # scrub
+  config.filter_sensitive_data("TOKEN") { ENV["MISTRAL_SECRET"]}
   config.filter_sensitive_data("TOKEN") { ENV["ANTHROPIC_SECRET"] }
   config.filter_sensitive_data("TOKEN") { ENV["GOOGLE_SECRET"] }
   config.filter_sensitive_data("TOKEN") { ENV["OPENAI_SECRET"] }
