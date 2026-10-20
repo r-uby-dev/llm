@@ -66,7 +66,7 @@ class LLM::Tool
       while command.running? || status_unavailable?(command)
         if now - start > timeout
           command.kill!
-          raise "command timed out after #{timeout}s"
+          throw(:kill, true)
         end
         sleep 0.01
       end

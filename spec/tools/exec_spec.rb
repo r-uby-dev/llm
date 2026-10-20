@@ -26,11 +26,10 @@ RSpec.describe LLM::Tool::Exec do
   end
 
   describe "#call" do
-    it "raises when the command exceeds the timeout" do
-      expect { tool.call(arguments: [RbConfig.ruby, "-e", "sleep 10"], timeout: 0.1) }.to raise_error(
-        RuntimeError,
-        "command timed out after 0.1s"
-      )
+    it "enforces a timeout" do
+      now = Time.now
+      tool.call(arguments: [RbConfig.ruby, "-e", "sleep 10"], timeout: 0.1)
+      expect((Time.now - now) < 1).to be(true)
     end
 
     context "when given arguments" do
