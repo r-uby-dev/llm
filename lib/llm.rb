@@ -188,6 +188,21 @@ module LLM
 
   ##
   # @param key (see LLM::Provider#initialize)
+  # @return (see LLM::Hanzo#initialize)
+  def hanzo(key: UNDEFINED, **)
+    lock(:require) { require_relative "llm/providers/hanzo" unless defined?(LLM::Hanzo) }
+    if key == UNDEFINED and ENV.key?("HANZO_API_KEY")
+      LLM::Hanzo.new(key: ENV["HANZO_API_KEY"], **)
+    elsif key == UNDEFINED
+      raise ArgumentError, "an api key is required - " \
+                           "did you forget to set $HANZO_API_KEY?"
+    else
+      LLM::Hanzo.new(key:, **)
+    end
+  end
+
+  ##
+  # @param key (see LLM::Provider#initialize)
   # @return (see LLM::OpenAI#initialize)
   def openai(key: UNDEFINED, **)
     lock(:require) { require_relative "llm/providers/openai" unless defined?(LLM::OpenAI) }
@@ -399,7 +414,9 @@ module LLM
   # @param [Symbol] name The name of the lock
   # @param [Proc] block The block to execute within the lock
   # @return [void]
-  def lock(name, &block) = @monitors[name].synchronize(&block)
+  def lock(name, &block)
+    @monitors[name].synchronize(&block)
+  end
 
   private
 
@@ -414,7 +431,8 @@ module LLM
     registry = LLM::Registry.for(name)
     keyname  = registry.env.find { ENV.key?(_1) }
     if keyname.nil?
-      raise ArgumentError, "you must provide an api key"
+      raise ArgumentError, "an api key is required - " \
+                           "did you forget to set $#{keyname}?"
     end
     ENV[keyname]
   end
