@@ -26,10 +26,31 @@ RSpec.describe LLM::Tool::Exec do
   end
 
   describe "#call" do
-    it "enforces a timeout" do
-      now = Time.now
-      tool.call(arguments: [RbConfig.ruby, "-e", "sleep 10"], timeout: 0.1)
-      expect((Time.now - now) < 1).to be(true)
+    context "when the timeout expires" do
+      it "kills the command" do
+        now = Time.now
+        tool.call(arguments: [RbConfig.ruby, "-e", "sleep 10"], timeout: 0.1)
+        expect((Time.now - now) < 1).to be(true)
+      end
+
+      it "includes a note" do
+        res = tool.call(arguments: [RbConfig.ruby, "-e", "sleep 10"], timeout: 0.1)
+        expect(res[:note]).to include("The command was killed after")
+      end
+
+      it "is not ok" do
+        res = tool.call(arguments: [RbConfig.ruby, "-e", "sleep 10"], timeout: 0.1)
+        expect(res[:ok]).not_to be_truthy
+      end
+
+      it "includes partial output" do
+        res = tool.call(arguments: [
+          RbConfig.ruby,
+          "-e",
+          "[$stdout.write('wakawaka'), $stdout.flush, sleep(10)]"
+        ], timeout: 0.5)
+        expect(res[:stdout]).to eq("wakawaka")
+      end
     end
 
     context "when given arguments" do
