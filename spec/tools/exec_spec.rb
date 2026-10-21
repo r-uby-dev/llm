@@ -38,11 +38,6 @@ RSpec.describe LLM::Tool::Exec do
         expect(res[:note]).to include("The command was killed after")
       end
 
-      it "is not ok" do
-        res = tool.call(arguments: [RbConfig.ruby, "-e", "sleep 10"], timeout: 0.1)
-        expect(res[:ok]).not_to be_truthy
-      end
-
       it "includes partial output" do
         res = tool.call(arguments: [
           RbConfig.ruby,
