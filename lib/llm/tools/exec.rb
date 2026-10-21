@@ -57,7 +57,7 @@ class LLM::Tool
       startat = now
       name    = arguments[0]
       command = spawn(name:, arguments: arguments[1..], env:, max_bytes:)
-      killed = catch(:kill) { wait(command:, timeout:) }
+      killed = catch(:kill) { [wait(command:, timeout:), nil].last }
       if command.not_found?
         {ok: false, error: "command '#{name}' was not found on this system"}
       else
