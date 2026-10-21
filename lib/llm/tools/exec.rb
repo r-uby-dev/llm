@@ -65,11 +65,11 @@ class LLM::Tool
         stdout: truncate(command.stdout, max_bytes:),
         stderr: truncate(command.stderr, max_bytes:),
         duration: "#{(now - startat).round(1)} seconds",
-        note: killed ? "This command was killed because "  \
-                       "it ran longer than the timeout "   \
-                       "allows. The available output is "  \
-                       "what the command produced before " \
-                       "it was stopped with force." : nil
+        note: killed ? "The command was killed after "            \
+                       "exceeding the #{timeout}s timeout. "      \
+                       "stdout and stderr are what it produced "  \
+                       "before it was killed and both streams "   \
+                       "are probably incomplete." : nil
         }.compact
       end
     rescue LLM::Interrupt
