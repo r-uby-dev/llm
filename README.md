@@ -17,7 +17,7 @@ Welcome to the canonical llm.rb repository.
 llm.rb is a runtime for building agentic AI applications
 on CRuby. It has zero runtime dependencies by default, supports
 concurrent and parallel tool execution and has a single coherent API
-that spans 14+ providers.
+that spans 15+ providers.
 The README covers a lot of ground and the
 [changelog](CHANGELOG.md)
 tracks what has changed between releases.
@@ -61,7 +61,7 @@ A classic "hello world" example. <br> The environment variable
 `$DEEPSEEK_API_KEY` is assumed to have been set and reference
 a valid DeepSeek API key, otherwise you can provide a key explicitly
 (eg: `LLM.deepseek(key: ENV["MYKEY"])`) and you could swap
-deepseek for any of the other 13 providers as well
+deepseek for any of the other 14 providers as well
 (eg: `llm = LLM.openai`):
 
 ```ruby
@@ -1208,6 +1208,7 @@ every other provider defaults to chat completions.
 * **xAI** (`LLM.xai`)
 * **Z.ai** (`LLM.zai`)
 * **Moonshot (Kimi)** (`LLM.moonshot`)
+* **Hanzo** (`LLM.hanzo`)
 * **OpenRouter** (`LLM.openrouter`)
 * **Alibaba (Qwen3)** (`LLM.alibaba`, also `LLM.aliyun`)
 * **Mistral** (`LLM.mistral`)
@@ -1229,6 +1230,7 @@ llm = LLM.openai
 llm = LLM.anthropic
 llm = LLM.google
 llm = LLM.deepseek
+llm = LLM.hanzo
 llm = LLM.deepinfra
 llm = LLM.xai
 llm = LLM.zai
@@ -1252,6 +1254,7 @@ llm = LLM.openai(key: ENV["OPENAI_API_KEY"])
 llm = LLM.anthropic(key: ENV["ANTHROPIC_API_KEY"])
 llm = LLM.google(key: ENV["GOOGLE_API_KEY"])
 llm = LLM.deepseek(key: ENV["DEEPSEEK_API_KEY"])
+llm = LLM.hanzo(key: ENV["HANZO_API_KEY"])
 llm = LLM.deepinfra(key: ENV["DEEPINFRA_API_KEY"])
 llm = LLM.xai(key: ENV["XAI_API_KEY"])
 llm = LLM.zai(key: ENV["ZHIPU_API_KEY"])

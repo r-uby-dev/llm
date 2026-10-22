@@ -25,7 +25,7 @@ llm.rb is an agentic runtime for CRuby.
 It has zero runtime dependencies by default,
 supports concurrent and parallel tool execution
 and has a single coherent API that spans
-14+ providers.
+15+ providers.
 DESCRIPTION
 
   spec.license = "MIT"
