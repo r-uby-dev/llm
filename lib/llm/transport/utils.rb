@@ -28,8 +28,8 @@ class LLM::Transport
     # @param [Boolean] ssl
     # @param [Boolean] persistent
     # @param [LLM::Transport, Class, Symbol, nil] transport
-    # @raise [ArgumentError]
-    #  When a symbol does not name a transport that exists
+    # @raise [LLM::Error]
+    #  When given an unknown transport
     # @return [LLM::Transport]
     def resolve_transport(host:, port:, timeout:, ssl:, persistent:, transport:, connect_timeout: 5)
       if transport.nil?
