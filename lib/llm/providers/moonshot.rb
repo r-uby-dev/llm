@@ -12,9 +12,9 @@ module LLM
   #   #!/usr/bin/env ruby
   #   require "llm"
   #
-  #   llm = LLM.moonshot(key: ENV["KEY"])
-  #   ctx = LLM::Context.new(llm)
-  #   ctx.talk "Hello"
+  #   llm = LLM.moonshot
+  #   agent = LLM::Agent.new(llm)
+  #   agent.talk "hello world", stream: $stdout
   class Moonshot < OpenAI
     HOST = "api.moonshot.ai"
     BASE_PATH = "/v1"

@@ -5,9 +5,26 @@ require_relative "openai" unless defined?(LLM::OpenAI)
 module LLM
   ##
   # The Hanzo class implements a provider for
-  # [hanzo.ai](https://hanzo.ai).
+  # [hanzo.ai](https://hanzo.ai) through its
+  # OpenAI-compatible chat completions API.
+  #
+  # @example
+  #   #!/usr/bin/env ruby
+  #   require "llm"
+  #
+  #   llm   = LLM.hanzo
+  #   agent = LLM::Agent.new(llm)
+  #   agent.talk "hello world", stream: $stdout
   class Hanzo < OpenAI
-    def initialize(host: "api.hanzo.ai", port: 443, ssl: true, **)
+    HOST = "api.hanzo.ai"
+    BASE_PATH = "/v1"
+
+    ##
+    # @param key (see LLM::Provider#initialize)
+    # @param host (see LLM::Provider#initialize)
+    # @param base_path (see LLM::Provider#initialize)
+    # @return [LLM::Hanzo]
+    def initialize(host: HOST, base_path: BASE_PATH, port: 443, ssl: true, **)
       super
     end
 
@@ -56,7 +73,10 @@ module LLM
 
     ##
     # Returns the default model for chat completions
-    # @see https://api-docs.deepseek.com/quick_start/pricing deepseek-v4-flash
+    # @note
+    #  The default is routed automatically by Hanzo.
+    #  Without a paid plan, it defaults to enso-free.
+    # @see https://platform.hanzo.ai/models enso-auto
     # @return [String]
     def default_model
       "enso-auto"
