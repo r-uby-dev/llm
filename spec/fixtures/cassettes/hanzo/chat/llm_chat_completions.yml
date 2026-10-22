@@ -1,0 +1,91 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.hanzo.ai/v1/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"Keep
+        your answers short and concise, and provide three answers to the three questionsThere
+        should be one answer per lineAn answer should be a number, for example: 5Nothing
+        else"}]},{"role":"user","content":[{"type":"text","text":"What is 3+2 ?"}]},{"role":"user","content":[{"type":"text","text":"What
+        is 5+5 ?"}]},{"role":"user","content":[{"type":"text","text":"What is 5+7
+        ?"}]}],"model":"enso-auto","stream":false}'
+    headers:
+      User-Agent:
+      - llm.rb v18.0.0.beta1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Allow:
+      - POST
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 22 Oct 2026 07:43:19 GMT
+      Link:
+      - </.well-known/openapi.json>; rel="service-desc"
+      - </docs>; rel="service-doc"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat>; rel="up"
+      - </v1/openapi.json>; rel="describedby"
+      - </v1>; rel="index"
+      Server:
+      - hanzo
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept
+      X-Api-Version:
+      - v8.5.866
+      X-Content-Type-Options:
+      - nosniff
+      X-Hanzo-Fallback:
+      - enso-free
+      X-Hanzo-Lane:
+      - free
+      X-Hanzo-Served:
+      - enso-free
+      X-Hanzo-Topup-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Upgrade-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Usage:
+      - limited
+      X-Hanzo-Usage-Reason:
+      - paid_plan_required
+      X-Ratelimit-Limit:
+      - '50'
+      X-Ratelimit-Remaining:
+      - '32'
+      X-Ratelimit-Reset:
+      - '1792713600'
+      X-Request-Id:
+      - baa33b69a36bb54d2a3f77cf570b85b3
+      X-Routed-Model:
+      - enso-free
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: ASCII-8BIT
+      string: '{"choices":[{"finish_reason":"stop","index":0,"message":{"content":"5\n10\n12","reasoning_content":"The
+        user wants three answers, one per line, just numbers. They asked three questions:\n1.
+        What is 3+2? -\u003e 5\n2. What is 5+5? -\u003e 10\n3. What is 5+7? -\u003e
+        12\n\nI need to output just the numbers, one per line.","role":"assistant"}}],"created":1792654998,"id":"chatcmpl-c7d6482f-f2a8-4c42-99e5-ca10c07d31b8","model":"enso-free","object":"chat.completion","provider":"hanzo","routing":{"router":"enso","chosen":"enso-free","candidates":[{"model":"enso-flash","depths":["off","none","minimal","low","default"]},{"model":"enso-pro","depths":["medium","high"]},{"model":"enso-ultra","depths":["xhigh","max"]}],"inputs":{"depth":"default","key":"default","policy":"unfunded"},"reason":"default
+        reasoning names enso-flash, but nothing pays for it (paid_plan_required),
+        so enso-free serves at no charge."},"usage":{"completion_tokens":80,"completion_tokens_details":{"reasoning_tokens":52},"prompt_tokens":240,"prompt_tokens_details":{"cache_write_tokens":0,"cached_tokens":0},"total_tokens":320}}'
+  recorded_at: Thu, 22 Oct 2026 07:43:11 GMT
+recorded_with: VCR 6.4.0

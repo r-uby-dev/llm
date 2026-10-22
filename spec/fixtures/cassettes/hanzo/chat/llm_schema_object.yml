@@ -1,0 +1,88 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.hanzo.ai/v1/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"Return
+        probability 1 for true and 0 for false. Does the earth orbit the sun?"}]}],"model":"enso-auto","response_format":{"type":"json_schema","json_schema":{"name":"JSONSchema","schema":{"type":"object","properties":{"probability":{"description":"The
+        answer''s probability","type":"integer"}},"required":["probability"],"additionalProperties":false}}},"stream":false}'
+    headers:
+      User-Agent:
+      - llm.rb v18.0.0.beta1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Allow:
+      - POST
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 22 Oct 2026 07:43:56 GMT
+      Link:
+      - </.well-known/openapi.json>; rel="service-desc"
+      - </docs>; rel="service-doc"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat>; rel="up"
+      - </v1/openapi.json>; rel="describedby"
+      - </v1>; rel="index"
+      Server:
+      - hanzo
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept
+      X-Api-Version:
+      - v8.5.866
+      X-Content-Type-Options:
+      - nosniff
+      X-Hanzo-Fallback:
+      - enso-free
+      X-Hanzo-Lane:
+      - free
+      X-Hanzo-Served:
+      - enso-free
+      X-Hanzo-Topup-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Upgrade-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Usage:
+      - limited
+      X-Hanzo-Usage-Reason:
+      - paid_plan_required
+      X-Ratelimit-Limit:
+      - '50'
+      X-Ratelimit-Remaining:
+      - '19'
+      X-Ratelimit-Reset:
+      - '1792713600'
+      X-Request-Id:
+      - a48e29ec028d1b5ca9fe7a1e0f60c29c
+      X-Routed-Model:
+      - enso-free
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: ASCII-8BIT
+      string: '{"choices":[{"finish_reason":"stop","index":0,"message":{"content":"{\n  \"probability\":
+        1\n}","reasoning_content":"The user is asking for a probability value: 1 for
+        true, 0 for false, regarding whether the Earth orbits the Sun. This is a well-established
+        scientific fact. The Earth does orbit the Sun. So the answer should be 1.","role":"assistant"}}],"created":1792655036,"id":"chatcmpl-adbbfac0-e612-4c48-b85f-97ada660897a","model":"enso-free","object":"chat.completion","provider":"hanzo","routing":{"router":"enso","chosen":"enso-free","candidates":[{"model":"enso-flash","depths":["off","none","minimal","low","default"]},{"model":"enso-pro","depths":["medium","high"]},{"model":"enso-ultra","depths":["xhigh","max"]}],"inputs":{"depth":"default","key":"default","policy":"unfunded"},"reason":"default
+        reasoning names enso-flash, but nothing pays for it (paid_plan_required),
+        so enso-free serves at no charge."},"usage":{"completion_tokens":66,"completion_tokens_details":{"reasoning_tokens":54},"prompt_tokens":187,"prompt_tokens_details":{"cache_write_tokens":0,"cached_tokens":0},"total_tokens":253}}'
+  recorded_at: Thu, 22 Oct 2026 07:43:50 GMT
+recorded_with: VCR 6.4.0

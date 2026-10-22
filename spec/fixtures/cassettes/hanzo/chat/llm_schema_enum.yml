@@ -1,0 +1,91 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.hanzo.ai/v1/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"Your
+        favorite fruit is pineapple"}]},{"role":"user","content":[{"type":"text","text":"What
+        fruit is your favorite?"}]}],"model":"enso-auto","response_format":{"type":"json_schema","json_schema":{"name":"JSONSchema","schema":{"type":"object","properties":{"fruit":{"description":"The
+        favorite fruit","enum":["apple","pineapple","orange"],"type":"string"}},"required":["fruit"],"additionalProperties":false}}},"stream":false}'
+    headers:
+      User-Agent:
+      - llm.rb v18.0.0.beta1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Allow:
+      - POST
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 22 Oct 2026 07:43:58 GMT
+      Link:
+      - </.well-known/openapi.json>; rel="service-desc"
+      - </docs>; rel="service-doc"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat>; rel="up"
+      - </v1/openapi.json>; rel="describedby"
+      - </v1>; rel="index"
+      Server:
+      - hanzo
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept
+      X-Api-Version:
+      - v8.5.866
+      X-Content-Type-Options:
+      - nosniff
+      X-Hanzo-Fallback:
+      - enso-free
+      X-Hanzo-Lane:
+      - free
+      X-Hanzo-Served:
+      - enso-free
+      X-Hanzo-Topup-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Upgrade-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Usage:
+      - limited
+      X-Hanzo-Usage-Reason:
+      - paid_plan_required
+      X-Ratelimit-Limit:
+      - '50'
+      X-Ratelimit-Remaining:
+      - '18'
+      X-Ratelimit-Reset:
+      - '1792713600'
+      X-Request-Id:
+      - c2caee064828b4390f585d01e578eb5d
+      X-Routed-Model:
+      - enso-free
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: ASCII-8BIT
+      string: '{"choices":[{"finish_reason":"stop","index":0,"message":{"content":"{\n\"fruit\":
+        \"pineapple\"\n}","reasoning_content":"The user is asking me what my favorite
+        fruit is. They previously stated \"Your favorite fruit is pineapple\" but
+        that was just them stating it, not me confirming it.\n\nAs an AI, I don''t
+        actually have personal preferences or the ability to taste fruit. I should
+        be honest about this while being friendly.","role":"assistant"}}],"created":1792655038,"id":"chatcmpl-ff95442f-ed93-411e-84b6-9dd61e0bede8","model":"enso-free","object":"chat.completion","provider":"hanzo","routing":{"router":"enso","chosen":"enso-free","candidates":[{"model":"enso-flash","depths":["off","none","minimal","low","default"]},{"model":"enso-pro","depths":["medium","high"]},{"model":"enso-ultra","depths":["xhigh","max"]}],"inputs":{"depth":"default","key":"default","policy":"unfunded"},"reason":"default
+        reasoning names enso-flash, but nothing pays for it (paid_plan_required),
+        so enso-free serves at no charge."},"usage":{"completion_tokens":75,"completion_tokens_details":{"reasoning_tokens":75},"prompt_tokens":185,"prompt_tokens_details":{"cache_write_tokens":0,"cached_tokens":0},"total_tokens":260}}'
+  recorded_at: Thu, 22 Oct 2026 07:43:51 GMT
+recorded_with: VCR 6.4.0

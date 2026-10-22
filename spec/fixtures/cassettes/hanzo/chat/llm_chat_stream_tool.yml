@@ -1,0 +1,190 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.hanzo.ai/v1/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
+        a bot that can run UNIX system commands"}]},{"role":"user","content":[{"type":"text","text":"Hey,
+        run the ''date'' command"}]}],"model":"enso-auto","tools":[{"type":"function","function":{"name":"system","description":"Runs
+        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"],"additionalProperties":false},"strict":false}}],"stream_options":{"include_usage":true},"stream":true}'
+    headers:
+      User-Agent:
+      - llm.rb v18.0.0.beta1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Allow:
+      - POST
+      Cache-Control:
+      - no-cache
+      Content-Type:
+      - text/event-stream
+      Date:
+      - Thu, 22 Oct 2026 07:47:10 GMT
+      Link:
+      - </.well-known/openapi.json>; rel="service-desc"
+      - </docs>; rel="service-doc"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat>; rel="up"
+      - </v1/openapi.json>; rel="describedby"
+      - </v1>; rel="index"
+      Server:
+      - hanzo
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept
+      X-Api-Version:
+      - v8.5.866
+      X-Content-Type-Options:
+      - nosniff
+      X-Hanzo-Fallback:
+      - enso-free
+      X-Hanzo-Lane:
+      - free
+      X-Hanzo-Served:
+      - enso-free
+      X-Hanzo-Topup-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Upgrade-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Usage:
+      - limited
+      X-Hanzo-Usage-Reason:
+      - paid_plan_required
+      X-Ratelimit-Limit:
+      - '50'
+      X-Ratelimit-Remaining:
+      - '15'
+      X-Ratelimit-Reset:
+      - '1792713600'
+      X-Request-Id:
+      - 6211ccfaec7a3c05fbef5e416ec26110
+      X-Routed-Model:
+      - enso-free
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: |+
+        data: {"choices":[{"delta":{"reasoning_content":"The user wants me to run the 'date' command using the system tool. Let me do that.","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655231,"id":"chatcmpl-8671804d-4ca9-4a89-b2e9-71aeb4f5c466","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo","routing":{"router":"enso","chosen":"enso-free","candidates":[{"model":"enso-flash","depths":["off","none","minimal","low","default"]},{"model":"enso-pro","depths":["medium","high"]},{"model":"enso-ultra","depths":["xhigh","max"]}],"inputs":{"depth":"default","key":"default","policy":"unfunded"},"reason":"default reasoning names enso-flash, but nothing pays for it (paid_plan_required), so enso-free serves at no charge."}}
+
+        data: {"choices":[{"delta":{"content":"","role":"assistant","tool_calls":[{"function":{"arguments":"{\"command\":\"date\"}","name":"system"},"id":"call-be39b09e-e781-422e-859b-36be1814c88a","type":"function"}]},"finish_reason":null,"index":0}],"created":1792655231,"id":"chatcmpl-8671804d-4ca9-4a89-b2e9-71aeb4f5c466","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{},"finish_reason":"tool_calls","index":0}],"created":1792655231,"id":"chatcmpl-8671804d-4ca9-4a89-b2e9-71aeb4f5c466","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[],"created":1792655231,"id":"chatcmpl-8671804d-4ca9-4a89-b2e9-71aeb4f5c466","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo","usage":{"completion_tokens":46,"completion_tokens_details":{"reasoning_tokens":21},"prompt_tokens":453,"prompt_tokens_details":{"cache_write_tokens":0,"cached_tokens":0},"total_tokens":499}}
+
+        data: [DONE]
+
+  recorded_at: Thu, 22 Oct 2026 07:47:03 GMT
+- request:
+    method: post
+    uri: https://api.hanzo.ai/v1/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
+        a bot that can run UNIX system commands"}]},{"role":"user","content":[{"type":"text","text":"Hey,
+        run the ''date'' command"}]},{"role":"assistant","content":null,"tool_calls":[{"function":{"arguments":"{\"command\":\"date\"}","name":"system"},"id":"call-be39b09e-e781-422e-859b-36be1814c88a","type":"function"}]},{"role":"tool","tool_call_id":"call-be39b09e-e781-422e-859b-36be1814c88a","content":"{\"success\":\"2022-01-01\"}"}],"model":"enso-auto","tools":[{"type":"function","function":{"name":"system","description":"Runs
+        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"],"additionalProperties":false},"strict":false}}],"stream_options":{"include_usage":true},"stream":true}'
+    headers:
+      User-Agent:
+      - llm.rb v18.0.0.beta1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Allow:
+      - POST
+      Cache-Control:
+      - no-cache
+      Content-Type:
+      - text/event-stream
+      Date:
+      - Thu, 22 Oct 2026 07:47:13 GMT
+      Link:
+      - </.well-known/openapi.json>; rel="service-desc"
+      - </docs>; rel="service-doc"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat>; rel="up"
+      - </v1/openapi.json>; rel="describedby"
+      - </v1>; rel="index"
+      Server:
+      - hanzo
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept
+      X-Api-Version:
+      - v8.5.866
+      X-Content-Type-Options:
+      - nosniff
+      X-Hanzo-Fallback:
+      - enso-free
+      X-Hanzo-Lane:
+      - free
+      X-Hanzo-Served:
+      - enso-free
+      X-Hanzo-Topup-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Upgrade-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Usage:
+      - limited
+      X-Hanzo-Usage-Reason:
+      - paid_plan_required
+      X-Ratelimit-Limit:
+      - '50'
+      X-Ratelimit-Remaining:
+      - '14'
+      X-Ratelimit-Reset:
+      - '1792713600'
+      X-Request-Id:
+      - f2f04f2f22701040001e3e7aaf6cfecd
+      X-Routed-Model:
+      - enso-free
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: |+
+        data: {"choices":[{"delta":{"reasoning_content":"The system command returned a result showing the date as \"2022-01-01\". I'll report this back to the user.","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655233,"id":"chatcmpl-82b195a6-7b28-4a60-8ca5-1ec02b6210d6","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo","routing":{"router":"enso","chosen":"enso-free","candidates":[{"model":"enso-flash","depths":["off","none","minimal","low","default"]},{"model":"enso-pro","depths":["medium","high"]},{"model":"enso-ultra","depths":["xhigh","max"]}],"inputs":{"depth":"default","key":"default","policy":"unfunded"},"reason":"default reasoning names enso-flash, but nothing pays for it (paid_plan_required), so enso-free serves at no charge."}}
+
+        data: {"choices":[{"delta":{"content":"The current date is **2022-01-01**.","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655233,"id":"chatcmpl-82b195a6-7b28-4a60-8ca5-1ec02b6210d6","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{},"finish_reason":"stop","index":0}],"created":1792655233,"id":"chatcmpl-82b195a6-7b28-4a60-8ca5-1ec02b6210d6","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[],"created":1792655233,"id":"chatcmpl-82b195a6-7b28-4a60-8ca5-1ec02b6210d6","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo","usage":{"completion_tokens":49,"completion_tokens_details":{"reasoning_tokens":27},"prompt_tokens":507,"prompt_tokens_details":{"cache_write_tokens":0,"cached_tokens":0},"total_tokens":556}}
+
+        data: [DONE]
+
+  recorded_at: Thu, 22 Oct 2026 07:47:05 GMT
+recorded_with: VCR 6.4.0
+...

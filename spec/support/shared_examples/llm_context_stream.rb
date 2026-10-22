@@ -68,7 +68,7 @@ RSpec.shared_examples "LLM::Context: tool stream" do |dirname, options = {}|
     before { ctx.talk(prompt) }
 
     it "calls the function(s)" do
-      expect(Kernel).to receive(:system).with("date").and_return(true)
+      expect(Kernel).to receive(:system).with("date").and_return("2022-01-01")
       ctx.talk ctx.pending_functions.map(&:call)
       expect(ctx.pending_functions).to be_empty
     end

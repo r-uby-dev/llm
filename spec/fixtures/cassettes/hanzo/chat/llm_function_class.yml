@@ -1,0 +1,174 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.hanzo.ai/v1/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
+        a bot that can run UNIX commands"}]},{"role":"user","content":[{"type":"text","text":"What
+        is the date?"}]}],"model":"enso-auto","tools":[{"type":"function","function":{"name":"system","description":"Runs
+        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"],"additionalProperties":false},"strict":false}}],"stream":false}'
+    headers:
+      User-Agent:
+      - llm.rb v18.0.0.beta1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Allow:
+      - POST
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 22 Oct 2026 07:43:46 GMT
+      Link:
+      - </.well-known/openapi.json>; rel="service-desc"
+      - </docs>; rel="service-doc"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat>; rel="up"
+      - </v1/openapi.json>; rel="describedby"
+      - </v1>; rel="index"
+      Server:
+      - hanzo
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept
+      X-Api-Version:
+      - v8.5.866
+      X-Content-Type-Options:
+      - nosniff
+      X-Hanzo-Fallback:
+      - enso-free
+      X-Hanzo-Lane:
+      - free
+      X-Hanzo-Served:
+      - enso-free
+      X-Hanzo-Topup-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Upgrade-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Usage:
+      - limited
+      X-Hanzo-Usage-Reason:
+      - paid_plan_required
+      X-Ratelimit-Limit:
+      - '50'
+      X-Ratelimit-Remaining:
+      - '24'
+      X-Ratelimit-Reset:
+      - '1792713600'
+      X-Request-Id:
+      - c1ca40a8b4a3aadf774f2990d5962b7f
+      X-Routed-Model:
+      - enso-free
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: ASCII-8BIT
+      string: '{"choices":[{"finish_reason":"tool_calls","index":0,"message":{"content":null,"reasoning_content":"The
+        user is asking for the current date. I can use the system tool to run the
+        `date` command to get this information.","role":"assistant","tool_calls":[{"id":"call-0ebff845-2481-47ce-a9ea-7647c4cb5b10","type":"function","function":{"name":"system","arguments":"{\"command\":\"date\"}"}}]}}],"created":0,"id":"chatcmpl-0ede3f3c-307e-4ea8-974b-6afa17cb7866","model":"enso-free","object":"chat.completion","provider":"hanzo","routing":{"router":"enso","chosen":"enso-free","candidates":[{"model":"enso-flash","depths":["off","none","minimal","low","default"]},{"model":"enso-pro","depths":["medium","high"]},{"model":"enso-ultra","depths":["xhigh","max"]}],"inputs":{"depth":"default","key":"default","policy":"unfunded"},"reason":"default
+        reasoning names enso-flash, but nothing pays for it (paid_plan_required),
+        so enso-free serves at no charge."},"usage":{"completion_tokens":52,"completion_tokens_details":{"reasoning_tokens":30},"prompt_tokens":449,"prompt_tokens_details":{"cache_write_tokens":0,"cached_tokens":0},"total_tokens":501}}'
+  recorded_at: Thu, 22 Oct 2026 07:43:39 GMT
+- request:
+    method: post
+    uri: https://api.hanzo.ai/v1/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
+        a bot that can run UNIX commands"}]},{"role":"user","content":[{"type":"text","text":"What
+        is the date?"}]},{"role":"assistant","content":null,"tool_calls":[{"id":"call-0ebff845-2481-47ce-a9ea-7647c4cb5b10","type":"function","function":{"name":"system","arguments":"{\"command\":\"date\"}"}}]},{"role":"tool","tool_call_id":"call-0ebff845-2481-47ce-a9ea-7647c4cb5b10","content":"{\"success\":\"2025-08-24\"}"}],"model":"enso-auto","tools":[{"type":"function","function":{"name":"system","description":"Runs
+        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"],"additionalProperties":false},"strict":false}}],"stream":false}'
+    headers:
+      User-Agent:
+      - llm.rb v18.0.0.beta1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Allow:
+      - POST
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 22 Oct 2026 07:43:48 GMT
+      Link:
+      - </.well-known/openapi.json>; rel="service-desc"
+      - </docs>; rel="service-doc"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat>; rel="up"
+      - </v1/openapi.json>; rel="describedby"
+      - </v1>; rel="index"
+      Server:
+      - hanzo
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept
+      X-Api-Version:
+      - v8.5.866
+      X-Content-Type-Options:
+      - nosniff
+      X-Hanzo-Fallback:
+      - enso-free
+      X-Hanzo-Lane:
+      - free
+      X-Hanzo-Served:
+      - enso-free
+      X-Hanzo-Topup-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Upgrade-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Usage:
+      - limited
+      X-Hanzo-Usage-Reason:
+      - paid_plan_required
+      X-Ratelimit-Limit:
+      - '50'
+      X-Ratelimit-Remaining:
+      - '23'
+      X-Ratelimit-Reset:
+      - '1792713600'
+      X-Request-Id:
+      - f0f1bf534ca4f6176a4341afee716ec3
+      X-Routed-Model:
+      - enso-free
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: ASCII-8BIT
+      string: '{"choices":[{"finish_reason":"stop","index":0,"message":{"content":"The
+        current date is **2025-08-24**.","reasoning_content":"The user asked for the
+        date, and I ran the `date` command. The result shows \"2025-08-24\". I''ll
+        provide this to the user.","role":"assistant"}}],"created":0,"id":"chatcmpl-4fd899c4-a275-4873-a993-02453a09a0aa","model":"enso-free","object":"chat.completion","provider":"hanzo","routing":{"router":"enso","chosen":"enso-free","candidates":[{"model":"enso-flash","depths":["off","none","minimal","low","default"]},{"model":"enso-pro","depths":["medium","high"]},{"model":"enso-ultra","depths":["xhigh","max"]}],"inputs":{"depth":"default","key":"default","policy":"unfunded"},"reason":"default
+        reasoning names enso-flash, but nothing pays for it (paid_plan_required),
+        so enso-free serves at no charge."},"usage":{"completion_tokens":57,"completion_tokens_details":{"reasoning_tokens":30},"prompt_tokens":503,"prompt_tokens_details":{"cache_write_tokens":0,"cached_tokens":0},"total_tokens":560}}'
+  recorded_at: Thu, 22 Oct 2026 07:43:41 GMT
+recorded_with: VCR 6.4.0

@@ -1,0 +1,139 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.hanzo.ai/v1/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"Keep
+        your answers short and concise, and provide three answers to the three questions.
+        There should be one answer per line. An answer should be a number, for example:
+        5. Nothing else"}]},{"role":"user","content":[{"type":"text","text":"What
+        is 3+2 ?"}]},{"role":"user","content":[{"type":"text","text":"What is 5+5
+        ?"}]},{"role":"user","content":[{"type":"text","text":"What is 5+7 ?"}]}],"model":"enso-auto","stream_options":{"include_usage":true},"stream":true}'
+    headers:
+      User-Agent:
+      - llm.rb v18.0.0.beta1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Allow:
+      - POST
+      Cache-Control:
+      - no-cache
+      Content-Type:
+      - text/event-stream
+      Date:
+      - Thu, 22 Oct 2026 07:43:20 GMT
+      Link:
+      - </.well-known/openapi.json>; rel="service-desc"
+      - </docs>; rel="service-doc"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat>; rel="up"
+      - </v1/openapi.json>; rel="describedby"
+      - </v1>; rel="index"
+      Server:
+      - hanzo
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept
+      X-Api-Version:
+      - v8.5.866
+      X-Content-Type-Options:
+      - nosniff
+      X-Hanzo-Fallback:
+      - enso-free
+      X-Hanzo-Lane:
+      - free
+      X-Hanzo-Served:
+      - enso-free
+      X-Hanzo-Topup-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Upgrade-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Usage:
+      - limited
+      X-Hanzo-Usage-Reason:
+      - paid_plan_required
+      X-Ratelimit-Limit:
+      - '50'
+      X-Ratelimit-Remaining:
+      - '31'
+      X-Ratelimit-Reset:
+      - '1792713600'
+      X-Request-Id:
+      - a7c3d9592d93cef3e228ce6b3fb75988
+      X-Routed-Model:
+      - enso-free
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: |+
+        data: {"choices":[{"delta":{"content":"","reasoning_content":"The","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo","routing":{"router":"enso","chosen":"enso-free","candidates":[{"model":"enso-flash","depths":["off","none","minimal","low","default"]},{"model":"enso-pro","depths":["medium","high"]},{"model":"enso-ultra","depths":["xhigh","max"]}],"inputs":{"depth":"default","key":"default","policy":"unfunded"},"reason":"default reasoning names enso-flash, but nothing pays for it (paid_plan_required), so enso-free serves at no charge."}}
+
+        data: {"choices":[{"delta":{"content":"","reasoning_content":" user wants three","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"","reasoning_content":" answers, one","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"","reasoning_content":" per line, each","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"","reasoning_content":" being","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"","reasoning_content":" just","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"","reasoning_content":" a number. They","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"","reasoning_content":" asked three questions:\n","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"","reasoning_content":"1. What","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"","reasoning_content":" is 3+","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"","reasoning_content":"2?","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"","reasoning_content":" = 5\n","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"","reasoning_content":"2. What is","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"","reasoning_content":" 5+5","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"","reasoning_content":"? = 1","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"","reasoning_content":"0\n3.","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"","reasoning_content":" What is 5","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"","reasoning_content":"+7? =","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"","reasoning_content":" 12","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"5\n","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"10\n1","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"2","role":"assistant"},"finish_reason":null,"index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"","role":"assistant"},"finish_reason":"stop","index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo"}
+
+        data: {"choices":[{"delta":{"content":"","role":"assistant"},"finish_reason":"stop","index":0}],"created":1792655000,"id":"chatcmpl-4c7849b0-7922-417d-967d-2284a1ecd99b","model":"enso-free","object":"chat.completion.chunk","provider":"hanzo","usage":{"completion_tokens":70,"completion_tokens_details":{"reasoning_tokens":41},"prompt_tokens":243,"prompt_tokens_details":{"cache_write_tokens":0,"cached_tokens":0},"total_tokens":313}}
+
+        data: [DONE]
+
+  recorded_at: Thu, 22 Oct 2026 07:43:13 GMT
+recorded_with: VCR 6.4.0
+...

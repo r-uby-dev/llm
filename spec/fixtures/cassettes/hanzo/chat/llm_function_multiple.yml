@@ -1,0 +1,264 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.hanzo.ai/v1/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
+        a bot that can run UNIX commands"}]},{"role":"user","content":[{"type":"text","text":"Can
+        you run the date command ? Can you run the pwd command ? Can you run the whoami
+        command ?"}]}],"model":"enso-auto","tools":[{"type":"function","function":{"name":"system","description":"Run
+        a shell command","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"],"additionalProperties":false},"strict":false}}],"stream":false}'
+    headers:
+      User-Agent:
+      - llm.rb v18.0.0.beta1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Allow:
+      - POST
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 22 Oct 2026 07:43:51 GMT
+      Link:
+      - </.well-known/openapi.json>; rel="service-desc"
+      - </docs>; rel="service-doc"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat>; rel="up"
+      - </v1/openapi.json>; rel="describedby"
+      - </v1>; rel="index"
+      Server:
+      - hanzo
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept
+      X-Api-Version:
+      - v8.5.866
+      X-Content-Type-Options:
+      - nosniff
+      X-Hanzo-Fallback:
+      - enso-free
+      X-Hanzo-Lane:
+      - free
+      X-Hanzo-Served:
+      - enso-free
+      X-Hanzo-Topup-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Upgrade-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Usage:
+      - limited
+      X-Hanzo-Usage-Reason:
+      - paid_plan_required
+      X-Ratelimit-Limit:
+      - '50'
+      X-Ratelimit-Remaining:
+      - '22'
+      X-Ratelimit-Reset:
+      - '1792713600'
+      X-Request-Id:
+      - 41c35af471f0c662c610c1dcd0d97f21
+      X-Routed-Model:
+      - enso-free
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: ASCII-8BIT
+      string: '{"choices":[{"finish_reason":"tool_calls","index":0,"message":{"content":null,"reasoning_content":"The
+        user wants me to run three UNIX commands: date, pwd, and whoami. I''ll run
+        them one by one.","role":"assistant","tool_calls":[{"id":"call-d23068e8-801e-404f-847d-21ee90c1366d","type":"function","function":{"name":"systemsystemsystem","arguments":"{\"command\":\"date\"}{\"command\":\"pwd\"}{\"command\":\"whoami\"}"}}]}}],"created":0,"id":"chatcmpl-785637c3-215a-4cc7-8ad7-6fa7ad3239ac","model":"enso-free","object":"chat.completion","provider":"hanzo","routing":{"router":"enso","chosen":"enso-free","candidates":[{"model":"enso-flash","depths":["off","none","minimal","low","default"]},{"model":"enso-pro","depths":["medium","high"]},{"model":"enso-ultra","depths":["xhigh","max"]}],"inputs":{"depth":"default","key":"default","policy":"unfunded"},"reason":"default
+        reasoning names enso-flash, but nothing pays for it (paid_plan_required),
+        so enso-free serves at no charge."},"usage":{"completion_tokens":96,"completion_tokens_details":{"reasoning_tokens":24},"prompt_tokens":466,"prompt_tokens_details":{"cache_write_tokens":0,"cached_tokens":0},"total_tokens":562}}'
+  recorded_at: Thu, 22 Oct 2026 07:43:43 GMT
+- request:
+    method: post
+    uri: https://api.hanzo.ai/v1/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
+        a bot that can run UNIX commands"}]},{"role":"user","content":[{"type":"text","text":"Can
+        you run the date command ? Can you run the pwd command ? Can you run the whoami
+        command ?"}]},{"role":"assistant","content":null,"tool_calls":[{"id":"call-d23068e8-801e-404f-847d-21ee90c1366d","type":"function","function":{"name":"systemsystemsystem","arguments":"{\"command\":\"date\"}{\"command\":\"pwd\"}{\"command\":\"whoami\"}"}}]},{"role":"tool","tool_call_id":"call-d23068e8-801e-404f-847d-21ee90c1366d","content":"{\"error\":true,\"type\":\"LLM::NoSuchToolError\",\"message\":\"tool
+        ''systemsystemsystem'' not found\"}"}],"model":"enso-auto","tools":[{"type":"function","function":{"name":"system","description":"Run
+        a shell command","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"],"additionalProperties":false},"strict":false}}],"stream":false}'
+    headers:
+      User-Agent:
+      - llm.rb v18.0.0.beta1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Allow:
+      - POST
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 22 Oct 2026 07:43:53 GMT
+      Link:
+      - </.well-known/openapi.json>; rel="service-desc"
+      - </docs>; rel="service-doc"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat>; rel="up"
+      - </v1/openapi.json>; rel="describedby"
+      - </v1>; rel="index"
+      Server:
+      - hanzo
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept
+      X-Api-Version:
+      - v8.5.866
+      X-Content-Type-Options:
+      - nosniff
+      X-Hanzo-Fallback:
+      - enso-free
+      X-Hanzo-Lane:
+      - free
+      X-Hanzo-Served:
+      - enso-free
+      X-Hanzo-Topup-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Upgrade-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Usage:
+      - limited
+      X-Hanzo-Usage-Reason:
+      - paid_plan_required
+      X-Ratelimit-Limit:
+      - '50'
+      X-Ratelimit-Remaining:
+      - '21'
+      X-Ratelimit-Reset:
+      - '1792713600'
+      X-Request-Id:
+      - c0c92c194d81169fcd899106f3247930
+      X-Routed-Model:
+      - enso-free
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: ASCII-8BIT
+      string: '{"choices":[{"finish_reason":"tool_calls","index":0,"message":{"content":null,"role":"assistant","tool_calls":[{"id":"call_function_k0gw0ir8cm89_1","type":"function","function":{"name":"system","arguments":"{\"command\":
+        \"date; pwd; whoami\"}"}}]}}],"created":0,"id":"chatcmpl-4526d948-33e7-4123-8dad-2eb4a7ea4a52","model":"enso-free","object":"chat.completion","provider":"hanzo","routing":{"router":"enso","chosen":"enso-free","candidates":[{"model":"enso-flash","depths":["off","none","minimal","low","default"]},{"model":"enso-pro","depths":["medium","high"]},{"model":"enso-ultra","depths":["xhigh","max"]}],"inputs":{"depth":"default","key":"default","policy":"unfunded"},"reason":"default
+        reasoning names enso-flash, but nothing pays for it (paid_plan_required),
+        so enso-free serves at no charge."},"usage":{"completion_tokens":32,"prompt_tokens":679,"prompt_tokens_details":{"cache_write_tokens":0,"cached_tokens":186},"total_tokens":711}}'
+  recorded_at: Thu, 22 Oct 2026 07:43:45 GMT
+- request:
+    method: post
+    uri: https://api.hanzo.ai/v1/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
+        a bot that can run UNIX commands"}]},{"role":"user","content":[{"type":"text","text":"Can
+        you run the date command ? Can you run the pwd command ? Can you run the whoami
+        command ?"}]},{"role":"assistant","content":null,"tool_calls":[{"id":"call-d23068e8-801e-404f-847d-21ee90c1366d","type":"function","function":{"name":"systemsystemsystem","arguments":"{\"command\":\"date\"}{\"command\":\"pwd\"}{\"command\":\"whoami\"}"}}]},{"role":"tool","tool_call_id":"call-d23068e8-801e-404f-847d-21ee90c1366d","content":"{\"error\":true,\"type\":\"LLM::NoSuchToolError\",\"message\":\"tool
+        ''systemsystemsystem'' not found\"}"},{"role":"assistant","content":null,"tool_calls":[{"id":"call_function_k0gw0ir8cm89_1","type":"function","function":{"name":"system","arguments":"{\"command\":
+        \"date; pwd; whoami\"}"}}]},{"role":"tool","tool_call_id":"call_function_k0gw0ir8cm89_1","content":"{\"stderr\":\"\",\"stdout\":\"Thu
+        Oct 22 04:43:45 -03 2026\\n/home/robert/projects/llm.rb/\\nrobert\\n\"}"}],"model":"enso-auto","tools":[{"type":"function","function":{"name":"system","description":"Run
+        a shell command","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"],"additionalProperties":false},"strict":false}}],"stream":false}'
+    headers:
+      User-Agent:
+      - llm.rb v18.0.0.beta1
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer TOKEN
+      Transfer-Encoding:
+      - chunked
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Allow:
+      - POST
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 22 Oct 2026 07:43:55 GMT
+      Link:
+      - </.well-known/openapi.json>; rel="service-desc"
+      - </docs>; rel="service-doc"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat/completions>; rel="self"
+      - </v1/chat>; rel="up"
+      - </v1/openapi.json>; rel="describedby"
+      - </v1>; rel="index"
+      Server:
+      - hanzo
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept
+      X-Api-Version:
+      - v8.5.866
+      X-Content-Type-Options:
+      - nosniff
+      X-Hanzo-Fallback:
+      - enso-free
+      X-Hanzo-Lane:
+      - free
+      X-Hanzo-Served:
+      - enso-free
+      X-Hanzo-Topup-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Upgrade-Url:
+      - https://hanzo.ai/pay
+      X-Hanzo-Usage:
+      - limited
+      X-Hanzo-Usage-Reason:
+      - paid_plan_required
+      X-Ratelimit-Limit:
+      - '50'
+      X-Ratelimit-Remaining:
+      - '20'
+      X-Ratelimit-Reset:
+      - '1792713600'
+      X-Request-Id:
+      - bae649f82f4f4ef8b196ca478f56df5a
+      X-Routed-Model:
+      - enso-free
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: ASCII-8BIT
+      string: '{"choices":[{"finish_reason":"stop","index":0,"message":{"content":"Here
+        are the results:\n\n- **date**: `Thu Oct 22 04:43:45 -03 2026`\n- **pwd**:
+        `/home/robert/projects/llm.rb/`\n- **whoami**: `robert`","role":"assistant"}}],"created":0,"id":"chatcmpl-d98f77d4-3345-4aa9-b2e3-1fe126654bae","model":"enso-free","object":"chat.completion","provider":"hanzo","routing":{"router":"enso","chosen":"enso-free","candidates":[{"model":"enso-flash","depths":["off","none","minimal","low","default"]},{"model":"enso-pro","depths":["medium","high"]},{"model":"enso-ultra","depths":["xhigh","max"]}],"inputs":{"depth":"default","key":"default","policy":"unfunded"},"reason":"default
+        reasoning names enso-flash, but nothing pays for it (paid_plan_required),
+        so enso-free serves at no charge."},"usage":{"completion_tokens":53,"prompt_tokens":759,"prompt_tokens_details":{"cache_write_tokens":0,"cached_tokens":128},"total_tokens":812}}'
+  recorded_at: Thu, 22 Oct 2026 07:43:47 GMT
+recorded_with: VCR 6.4.0
