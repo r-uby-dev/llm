@@ -55,7 +55,7 @@ def help
   warn "  -p PROVIDER    Choose a provider"
   warn "  -m MODEL       Choose a model"
   warn "  -c STRATEGY    Concurrency strategy for tool calls (eg thread, async, fork)"
-  warn "  -n TRANSPORT   HTTP transports - net-http (default), net-http-persistent, and curb"
+  warn "  -n TRANSPORT   HTTP transports - net-http (default), and net-http-persistent"
   warn "  -x TIMEOUT     The default read timeout (in seconds)"
   warn "  -t             Temporary session that doesn't persist to disk"
   warn "  -v             Print version information"
@@ -65,7 +65,7 @@ def help
   warn "  #{prog}                     # auto-detect provider from $PROVIDER_API_KEY"
   warn "  #{prog} -p openai           # use OpenAI"
   warn "  #{prog} -m gpt-5.6          # use a model other than the provider default"
-  warn "  #{prog} -n curb             # use libcurl"
+  warn "  #{prog} -n net-http-persistent # pool HTTP connections"
   warn "  #{prog} -c thread           # run tool calls on a separate thread"
   warn "  #{prog} -x 900              # read timeout of 15mins"
   warn "  #{prog} -h                  # this help"
@@ -162,6 +162,11 @@ def main(argv)
           exit 1
         else
           transport = transport.gsub("-", "_").to_sym
+          unless LLM::Transport::Utils::NAMES.include?(transport)
+            warn "llm.rb: unknown transport (#{transport})"
+            help
+            exit 1
+          end
         end
       when '-p'
         provider = argv.shift

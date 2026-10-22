@@ -99,7 +99,7 @@ llm.rb                     # auto-detect from $PROVIDER_API_KEY
 llm.rb -p openai           # use OpenAI explicitly
 llm.rb -m gpt-5.6          # use a model other than the provider default
 llm.rb -c thread           # run tool calls on a separate thread
-llm.rb -n curb             # use libcurl as the HTTP transport
+llm.rb -n net-http-persistent # pool HTTP connections
 llm.rb -x 900              # read timeout of 15 minutes
 llm.rb -t                  # temporary session, no persistence
 llm.rb -v                  # print the version
