@@ -38,6 +38,130 @@
         "input": 0,
         "output": 0
       }
+    },
+    "enso-pro": {
+      "id": "enso-pro",
+      "name": "Enso Pro",
+      "description": "Paid model from Hanzo's Enso family, with a million-token context window and vision",
+      "family": "enso",
+      "attachment": true,
+      "reasoning": true,
+      "interleaved": {
+        "field": "reasoning_content"
+      },
+      "tool_call": true,
+      "temperature": true,
+      "release_date": "2026-10-22",
+      "last_updated": "2026-10-22",
+      "modalities": {
+        "input": [
+          "text",
+          "image"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 1000000
+      },
+      "cost": {
+        "input": 4.4,
+        "output": 22.0
+      }
+    },
+    "enso-ultra": {
+      "id": "enso-ultra",
+      "name": "Enso Ultra",
+      "description": "Highest-tier model in Hanzo's Enso family, with a million-token context window and vision",
+      "family": "enso",
+      "attachment": true,
+      "reasoning": true,
+      "interleaved": {
+        "field": "reasoning_content"
+      },
+      "tool_call": true,
+      "temperature": true,
+      "release_date": "2026-10-22",
+      "last_updated": "2026-10-22",
+      "modalities": {
+        "input": [
+          "text",
+          "image"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 1000000
+      },
+      "cost": {
+        "input": 5.5,
+        "output": 27.5
+      }
+    },
+    "zen6": {
+      "id": "zen6",
+      "name": "Zen 6",
+      "description": "Zen 6 from Zen LM, served through Hanzo's single endpoint, with a million-token context window and vision",
+      "family": "zen",
+      "attachment": true,
+      "reasoning": true,
+      "interleaved": {
+        "field": "reasoning_content"
+      },
+      "tool_call": true,
+      "temperature": true,
+      "release_date": "2026-10-22",
+      "last_updated": "2026-10-22",
+      "modalities": {
+        "input": [
+          "text",
+          "image"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 1000000
+      },
+      "cost": {
+        "input": 0.6,
+        "output": 2.4
+      }
+    },
+    "zen6-flash": {
+      "id": "zen6-flash",
+      "name": "Zen 6 Flash",
+      "description": "Faster Zen 6 variant from Zen LM, served through Hanzo's single endpoint, with a million-token context window and vision",
+      "family": "zen",
+      "attachment": true,
+      "reasoning": true,
+      "interleaved": {
+        "field": "reasoning_content"
+      },
+      "tool_call": true,
+      "temperature": true,
+      "release_date": "2026-10-22",
+      "last_updated": "2026-10-22",
+      "modalities": {
+        "input": [
+          "text",
+          "image"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 1000000
+      },
+      "cost": {
+        "input": 0.6,
+        "output": 2.4
+      }
     }
   }
 }
