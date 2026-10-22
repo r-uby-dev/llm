@@ -17,5 +17,4 @@ gem "oj", require: false
 # is required for the console, and
 # it _might_ work if you are able to
 # compile the curses gem on Windows.
-gem "curb", "~> 1.3", install_if: -> { !Gem.win_platform? }
 gem "curses", "~> 1.6", install_if: -> { !Gem.win_platform? }

@@ -34,8 +34,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Install libcurl (libcurl4-openssl-dev) and PostgreSQL headers
-      run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev libpq-dev
+    - name: Install PostgreSQL headers
+      run: sudo apt-get update && sudo apt-get install -y libpq-dev
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
@@ -43,8 +43,6 @@ jobs:
         bundler-cache: true
     - name: Verify pg loads
       run: bundle exec ruby -e 'require "pg"'
-    - name: Verify libcurl loads
-      run: bundle exec ruby -e 'require "curb"'
     - name: Run tests (ubuntu)
       env:
         DASHSCOPE_API_HOST: token-plan.ap-southeast-1.maas.aliyuncs.com
@@ -70,8 +68,6 @@ jobs:
         bundler-cache: true
     - name: Verify pg loads
       run: bundle exec ruby -e 'require "pg"'
-    - name: Verify libcurl loads
-      run: bundle exec ruby -e 'require "curb"'
     - name: Verify curses loads
       run: bundle exec ruby -e 'require "curses"'
     - name: Run tests (macos)
@@ -103,4 +99,3 @@ jobs:
         DASHSCOPE_API_HOST: token-plan.ap-southeast-1.maas.aliyuncs.com
         JSON_PARSER: ${{ matrix.json-parser }}
       run: bundle exec rake spec
-

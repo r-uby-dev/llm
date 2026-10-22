@@ -17,7 +17,6 @@ class LLM::Transport
   # how the request was actually performed.
   class Response
     require_relative "response/http"
-    require_relative "response/curb"
 
     ##
     # @param [Object] res

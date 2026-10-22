@@ -33,7 +33,6 @@ module LLM
     require_relative "transport/net_http_adapter"
     require_relative "transport/http"
     require_relative "transport/persistent_http"
-    require_relative "transport/curb"
     require_relative "transport/execution"
 
     ##
@@ -48,14 +47,6 @@ module LLM
     # @return [Class]
     def self.net_http_persistent
       PersistentHTTP
-    end
-
-    ##
-    # Returns the optional libcurl (curb) transport class.
-    # Requires the `curb` gem.
-    # @return [Class]
-    def self.curb
-      Curb
     end
 
     ##
