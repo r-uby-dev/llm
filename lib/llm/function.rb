@@ -109,7 +109,7 @@ class LLM::Function
     # Returns true when the return value represents an error.
     # @return [Boolean]
     def error?
-      Hash === value && value[:error] == true
+      Hash === value and value[:error] == true
     end
 
     ##

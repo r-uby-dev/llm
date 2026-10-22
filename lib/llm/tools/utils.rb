@@ -45,19 +45,16 @@ class LLM::Tool
     end
 
     ##
-    # Wait for a command to finish, or abort
-    # with an error when it exceeds the
-    # specified timeout.
-    #
-    # **A command is waited on until its status is decided, not only until it
-    # has stopped running.** `running?` answers whether the process is there,
-    # and `success?` answers `nil` until the command has been reaped - so a
-    # loop that trusts `running?` alone can leave before the status exists, and
-    # the caller reads `ok: nil` beside an output the read had waited for.
-    #
-    # **`running?` is what decides it.** The command reaps the process as it
-    # answers, so every turn of this loop is what makes a status exist - which
-    # is why the condition is asked again on each turn rather than read once.
+    # This method waits for a command to finish
+    # but within timeout. A timeout that expires
+    # will throw back to the caller.
+    # @note
+    #  When the timeout expires this method
+    #  will throw `:kill` rather than raise
+    #  an exception.
+    # @raise [UncaughtThrowError]
+    #  When the throw does not have a catch.
+    # @throw [:kill, true]
     # @param [Test::Command] command
     # @param [Integer] timeout
     # @return [void]
@@ -66,7 +63,7 @@ class LLM::Tool
       while command.running? || status_unavailable?(command)
         if now - start > timeout
           command.kill!
-          raise "command timed out after #{timeout}s"
+          throw(:kill, true)
         end
         sleep 0.01
       end

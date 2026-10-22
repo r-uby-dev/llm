@@ -57,14 +57,20 @@ class LLM::Tool
       startat = now
       name    = arguments[0]
       command = spawn(name:, arguments: arguments[1..], env:, max_bytes:)
-      wait(command:, timeout:)
+      killed = catch(:kill) { [wait(command:, timeout:), nil].last }
       if command.not_found?
         {ok: false, error: "command '#{name}' was not found on this system"}
       else
         {ok: command.success?,
         stdout: truncate(command.stdout, max_bytes:),
         stderr: truncate(command.stderr, max_bytes:),
-        duration: "#{(now - startat).round(1)} seconds"}
+        duration: "#{(now - startat).round(1)} seconds",
+        note: killed ? "The command was killed after "            \
+                       "exceeding the #{timeout}s timeout. "      \
+                       "stdout and stderr are what it produced "  \
+                       "before it was killed and both streams "   \
+                       "are probably incomplete." : nil
+        }.compact
       end
     rescue LLM::Interrupt
       command.kill! if command&.running?

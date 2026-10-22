@@ -160,6 +160,13 @@ module LLM
     end
 
     ##
+    # Returns the options given to the context compactor
+    # @return [Hash]
+    def compactor_options
+      @compactor[:options].dup
+    end
+
+    ##
     # Returns whether the context has been compacted and no later model
     # response has cleared that state.
     # @return [Boolean]

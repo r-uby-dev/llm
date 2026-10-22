@@ -1,8 +1,8 @@
 > Changelog <br>
 > [r.uby.dev](https://r.uby.dev) project
 
-This file covers the v17 series and the previous
-v16 series. <br> Previous releases (v15 and
+This file covers the upcoming v18 series, and
+the previous v17 and v16 series. <br> Older releases (v15 and
 before) can be seen in [changelog/old.md](changelog/old.md).
 
 ## What's next
@@ -15,6 +15,7 @@ before) can be seen in [changelog/old.md](changelog/old.md).
 |-----|-----|
 | Ruby 3.4 or later | Ruby 4.0 or later |
 | `LLM.json = :yajl` | `LLM.json = :oj` |
+| `LLM::Tool::Utils#wait` raises on a timeout | it throws `:kill` on a timeout |
 
 ### Ruby
 
@@ -23,30 +24,114 @@ before) can be seen in [changelog/old.md](changelog/old.md).
   series requires Ruby 3.4 or later. The v18 series
   focuses on Ractor, and it drops the incompatibilities
   between the 3.x and 4.x series: `Ractor#take` is gone
-  in Ruby 4.0.0, and `Ractor#value` replaces it (in
-  llm.rb - `Ractor#take` and `Ractor#value` are not
-  equivalent)
+  in Ruby 4.0.0, and `Ractor#value` replaces it in
+  llm.rb, though the two are not equivalent.
 
 ### Agent
 
+* **agent: add class-level compactor configuration** <br>
+  The [LLM::Agent](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html)
+  class can assign a compactor and
+  its options. <br> Three methods exist
+  to assign the compactor, and its options:
+  * [LLM::Agent.compactor](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#compactor-class_method)
+  * [LLM::Agent.compactor_options](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#compactor_options-class_method)
+  * [LLM::Agent.set](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#set-class_method) (can set both)
+
+* **agent: add `LLM::Agent#compactor` and `LLM::Agent#compactor_options`** <br>
+  [`LLM::Agent#compactor`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#compactor-instance_method)
+  returns the compactor class the agent's context runs
+  ([`LLM::Compactor::Null`](https://r.uby.dev/api-docs/llm.rb/LLM/Compactor/Null.html)
+  when none was given), and
+  [`LLM::Agent#compactor_options`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#compactor_options-instance_method)
+  returns the options it was given (`{}` by default), so
+  an agent no longer reads `params[:compactor]` to find
+  its strategy. Both delegate to the context, which gains
+  [`LLM::Context#compactor_options`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html#compactor_options-instance_method).
+
 * **agent: `LLM.interrupt` returns the agent it interrupted** <br>
+  The
   [`LLM.interrupt`](https://r.uby.dev/api-docs/llm.rb/LLM.html#interrupt-class_method)
-  returns the agent it found and interrupted
-  instead of `true`, so a caller can read its `id`,
-  its `record` or its messages without a second
-  lookup. It still returns `false` when nothing was
-  registered.
+  method returns the agent that was interrupted. <br>
+  Before it would return `true` instead, and that's
+  not as useful as the agent that was interrupted.
+  Still returns `false` for a miss. The agent that
+  is returned can access the model instance associated
+  with it via the `record` method.
+
+### JSON
+
+* **json: remove the Yajl adapter** <br>
+  The Yajl adapter has been removed due to a
+  lack of Ruby4 support. <br>
+  There is also not much upstream
+  activity (last release was in 2022).
+  Both
+  [`LLM::JSONAdapter::JSON (default)`](https://r.uby.dev/api-docs/llm.rb/LLM/JSONAdapter/JSON.html)
+  and
+  [`LLM::JSONAdapter::Oj`](https://r.uby.dev/api-docs/llm.rb/LLM/JSONAdapter/Oj.html)
+  still work, though.
 
 ### ORM
 
 * **orm: add `unwrap!` to the ActiveRecord and Sequel wrappers** <br>
-  `#unwrap!` returns the runtime a record wraps: an
+  The `#unwrap!` method returns the runtime a record wraps: an
   [`LLM::Context`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html)
-  for `acts_as_llm` and `plugin :llm`, and an
-  [`LLM::Agent`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html)
-  for `acts_as_agent` and `plugin :agent`, so a caller
-  no longer has to reach for `send(:ctx)`. The runtime
-  is memoized, so every call returns the same object.
+  or an
+  [`LLM::Agent`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html).
+  This means a caller no longer has to reach for `send(:ctx)` but
+  can use this new method instead. The runtime is memoized and every
+  call returns the same object.
+
+### Tools
+
+* **tools: a timed out command doesn't lose its streams** <br>
+  The
+  [`LLM::Tool::Exec`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Exec.html)
+  tool no longer discards what
+  was written to `$stdout` and
+  `$stderr` when the tool call
+  times out. We also include a
+  `note` field that tells the
+  model the tool call timed out,
+  and that its streams (`$stdout`
+  and `$stderr`) are probably
+  incomplete.
+
+* **tools: wait throws** <br>
+  The
+  [`LLM::Tool::Utils#wait`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Utils.html#wait-instance_method)
+  method now uses the `Kernel.throw`
+  method instead of `Kernel.raise`
+  when a command times out. The
+  "wait" method is used internally
+  by the
+  [`LLM::Tool::Exec`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Exec.html)
+  tool and it can be used by your
+  own tools as well. Tools that
+  depended on the old behavior
+  will require an update (although
+  I'd be surprised if any Utils
+  method was used directly).
+
+### Registry
+
+* **refresh model metadata** <br>
+  Update `data/` with current listings, limits,
+  and pricing. OpenRouter adds Glimpse,
+  Pareto 26.10, Mercury 3, DeepSeek V4.1 Flash
+  1017, and a free MiniMax M3.1 Flash, and it
+  drops DeepSeek-R1, Llama 3.3 Euryale 70B,
+  and WizardLM-2 8x22B. Mistral drops its three
+  open-weights models, OpenAI drops the GPT-5.2
+  and GPT-5.3 chat aliases, and DeepInfra adds
+  DeepSeek V4.1 Flash 1017. DeepSeek raises the
+  context window of four models to 1,048,576
+  tokens, Alibaba adds context tiers to six
+  Qwen models and re-prices two others, Z.AI
+  adds cache pricing to GLM-4.5V and GLM-4.6V,
+  and OpenRouter corrects prices and limits
+  across its listings.
 
 ## v17.0.1
 
