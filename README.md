@@ -973,7 +973,6 @@ method is optimized for: a single process with each agent
 running in its own thread.
 
 The
-
 [`LLM.interrupt`](https://r.uby.dev/api-docs/llm.rb/LLM.html#interrupt-class_method)
 method has access to a process-wide
 registry that contains every active instance of
