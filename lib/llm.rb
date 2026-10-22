@@ -191,11 +191,8 @@ module LLM
   # @return (see LLM::Hanzo#initialize)
   def hanzo(key: UNDEFINED, **)
     lock(:require) { require_relative "llm/providers/hanzo" unless defined?(LLM::Hanzo) }
-    if key == UNDEFINED and ENV.key?("HANZO_API_KEY")
-      LLM::Hanzo.new(key: ENV["HANZO_API_KEY"], **)
-    elsif key == UNDEFINED
-      raise ArgumentError, "an api key is required - " \
-                           "did you forget to set $HANZO_API_KEY?"
+    if key == UNDEFINED
+      LLM::Hanzo.new(key: key(name: __method__), **)
     else
       LLM::Hanzo.new(key:, **)
     end
