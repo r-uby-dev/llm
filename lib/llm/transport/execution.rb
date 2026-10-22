@@ -39,11 +39,6 @@ class LLM::Transport
       res = LLM::Transport::Response.from(res)
       [handle_response(res, tracer, span, request_id), span, tracer, request_id]
     rescue LLM::Interrupt
-      ##
-      # A transport can raise this itself, from inside the response
-      # body it is reading. An interrupt is not a failure, so it is
-      # not reported as one - `on_interrupt` is the hook for it - and
-      # it is called before the caller is given the exception.
       tracer.on_interrupt(scope: :request, span:, request_id:)
       raise
     rescue *transport.interrupt_errors => ex
