@@ -973,6 +973,7 @@ method is optimized for: a single process with each agent
 running in its own thread.
 
 The
+
 [`LLM.interrupt`](https://r.uby.dev/api-docs/llm.rb/LLM.html#interrupt-class_method)
 method has access to a process-wide
 registry that contains every active instance of
@@ -1299,10 +1300,10 @@ cheapest.structured_output?            # => false
 <br>
 
 The `transport:` option selects which HTTP library a provider uses for
-network communication. Three backends ship out of the box: `net/http`
-is always available and the default, `net/http/persistent` pools
-connections for many requests to the same host, and `curb` wraps
-libcurl. They share one interface, so switching is a one-word change.
+network communication. Two backends ship out of the box: `net/http`
+is always available and the default, and `net/http/persistent` pools
+connections for many requests to the same host. They share one
+interface, so switching is a one-word change.
 
 ```ruby
 llm = LLM.deepseek(
