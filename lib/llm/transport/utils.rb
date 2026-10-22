@@ -13,16 +13,6 @@ class LLM::Transport
     extend self
 
     ##
-    # The transports a symbol can name.
-    #
-    # A name outside this list is refused rather than handed to
-    # `LLM::Transport.public_send`, so a transport that was removed
-    # (`:curb`) reads like one that never existed, and neither reads
-    # as a `NoMethodError` from somewhere else in the runtime.
-    # @return [Array<Symbol>]
-    NAMES = %i[net_http net_http_persistent].freeze
-
-    ##
     # Resolves a transport configuration into a transport instance.
     #
     # Nil values use the default Net::HTTP transport, or the persistent
@@ -56,17 +46,16 @@ class LLM::Transport
     private
 
     ##
-    # Resolves a transport name to the class that implements it.
+    # Resolves a transport name to the class
+    # that implements it.
     # @param [Symbol] name
+    # @raise [LLM::Error]
+    #  When given an unknown transport
     # @return [Class]
-    # @raise [ArgumentError]
-    #  When the name is not among {NAMES}
     def transport_class(name)
-      unless NAMES.include?(name)
-        raise ArgumentError, "unknown transport: #{name.inspect} " \
-                             "(supported: #{NAMES.map(&:inspect).join(", ")})"
-      end
       LLM::Transport.public_send(name)
+    rescue NoMethodError
+      raise LLM::Error, ":#{name} is not a recognized transport"
     end
 
     ##

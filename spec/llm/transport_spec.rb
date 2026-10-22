@@ -27,12 +27,8 @@ RSpec.describe LLM::Transport::Utils do
     context "with a transport that no longer exists" do
       subject(:transport) { described_class.resolve_transport(transport: :curb, **options) }
 
-      it "raises an ArgumentError" do
-        expect { transport }.to raise_error(ArgumentError, /unknown transport: :curb/)
-      end
-
-      it "names the transports that do exist" do
-        expect { transport }.to raise_error(ArgumentError, /:net_http, :net_http_persistent/)
+      it "raises an LLM::Error naming the transport" do
+        expect { transport }.to raise_error(LLM::Error, ":curb is not a recognized transport")
       end
     end
   end

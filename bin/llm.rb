@@ -62,13 +62,13 @@ def help
   warn "  -h             Show this help"
   warn ""
   warn "Examples:"
-  warn "  #{prog}                     # auto-detect provider from $PROVIDER_API_KEY"
-  warn "  #{prog} -p openai           # use OpenAI"
-  warn "  #{prog} -m gpt-5.6          # use a model other than the provider default"
-  warn "  #{prog} -n net-http-persistent # pool HTTP connections"
-  warn "  #{prog} -c thread           # run tool calls on a separate thread"
-  warn "  #{prog} -x 900              # read timeout of 15mins"
-  warn "  #{prog} -h                  # this help"
+  warn "  #{prog}                         # auto-detect provider from $PROVIDER_API_KEY"
+  warn "  #{prog} -p openai               # use OpenAI"
+  warn "  #{prog} -m gpt-5.6              # use a model other than the provider default"
+  warn "  #{prog} -n net-http-persistent  # pool HTTP connections"
+  warn "  #{prog} -c thread               # run tool calls on a separate thread"
+  warn "  #{prog} -x 900                  # read timeout of 15mins"
+  warn "  #{prog} -h                      # this help"
   warn ""
 end
 
@@ -162,11 +162,6 @@ def main(argv)
           exit 1
         else
           transport = transport.gsub("-", "_").to_sym
-          unless LLM::Transport::Utils::NAMES.include?(transport)
-            warn "llm.rb: unknown transport (#{transport})"
-            help
-            exit 1
-          end
         end
       when '-p'
         provider = argv.shift
