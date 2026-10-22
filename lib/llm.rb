@@ -428,6 +428,7 @@ module LLM
     registry = LLM::Registry.for(name)
     keyname  = registry.env.find { ENV.key?(_1) }
     if keyname.nil?
+      keyname = registry.env.first
       raise ArgumentError, "an api key is required - " \
                            "did you forget to set $#{keyname}?"
     end
