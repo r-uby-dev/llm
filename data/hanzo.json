@@ -1,0 +1,43 @@
+{
+  "id": "hanzo",
+  "env": [
+    "HANZO_API_KEY"
+  ],
+  "npm": "@ai-sdk/openai-compatible",
+  "api": "https://api.hanzo.ai/v1",
+  "name": "Hanzo",
+  "doc": "https://docs.hanzo.ai",
+  "models": {
+    "enso-free": {
+      "id": "enso-free",
+      "name": "Enso Free",
+      "description": "Free model from Hanzo's Enso family, with a million-token context window and vision",
+      "family": "enso",
+      "attachment": true,
+      "reasoning": true,
+      "interleaved": {
+        "field": "reasoning_content"
+      },
+      "tool_call": true,
+      "temperature": true,
+      "release_date": "2026-10-22",
+      "last_updated": "2026-10-22",
+      "modalities": {
+        "input": [
+          "text",
+          "image"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 1000000
+      },
+      "cost": {
+        "input": 0,
+        "output": 0
+      }
+    }
+  }
+}
