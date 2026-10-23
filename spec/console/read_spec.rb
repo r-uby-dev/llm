@@ -16,18 +16,11 @@ RSpec.describe LLM::Console do
 
   before do
     @redraws = 0
-    ##
-    # Keep the test off the terminal: no curses redraw, fixed width,
-    # cheap markdown for the stream body.
     allow(console.window).to receive(:redraw) { @redraws += 1 }
     allow(console.buffer).to receive(:width).and_return(80)
     allow(console).to receive(:markdown).and_return([LLM::Console::Node.new("x")])
   end
 
-  ##
-  # read! drains stream chunks a few at a time so a fast model
-  # cannot leave the key loop unresponsive while it re-renders
-  # each queued chunk. The remaining chunks stay queued.
   describe "#read!" do
     def enqueue(*messages)
       queue << [:start]

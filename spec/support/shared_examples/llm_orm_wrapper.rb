@@ -11,13 +11,6 @@ RSpec.shared_examples "a persisted llm record" do
     expect(record.usage.total_tokens).to eq(0)
   end
 
-  ##
-  # The turn is run for real, against a recorded provider interaction,
-  # because the conversation is saved by {LLM::Step LLM::Step}: the runtime
-  # prepends it onto the stream and it writes through the record the context
-  # is bound to. A turn that is answered by a fake runtime never reaches that
-  # code, so it cannot say whether a call to `#talk` persists anything - which
-  # is the one thing these examples are here to say.
   it "persists through #talk",
      vcr: {cassette_name: "openai/chat/completion_contract"} do
     expect(record.talk("Hello, world!")).to be_a(LLM::Response)
@@ -68,3 +61,4 @@ RSpec.shared_examples "a persisted agent record" do
     expect(record.send(:ctx).description).to eq("described by the model")
   end
 end
+

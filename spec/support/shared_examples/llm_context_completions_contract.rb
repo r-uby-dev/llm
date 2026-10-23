@@ -22,3 +22,4 @@ RSpec.shared_examples "LLM::Context: completions contract" do |provider, options
     end
   end
 end
+

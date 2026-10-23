@@ -56,3 +56,4 @@ RSpec.shared_examples "LLM::Context: completions" do |dirname, options = {}|
     end
   end
 end
+

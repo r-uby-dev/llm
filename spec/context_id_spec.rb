@@ -69,10 +69,6 @@ RSpec.describe "a context's id" do
     end
   end
 
-  ##
-  # Through JSON, which is what a serialized payload is: `to_h` writes
-  # symbol keys, and what a deserializer reads is a parsed payload, whose
-  # keys are strings like the payload a record's column holds.
   context "when the context is restored" do
     let(:restored) { LLM::Context.new(llm).deserialize(string: ctx.to_json) }
 

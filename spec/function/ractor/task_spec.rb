@@ -2,72 +2,19 @@
 
 require "setup"
 
-##
-# Where a wait's answer comes from.
-#
-# A ractor answers one round trip and goes with the answering of it, so a
-# port is what the result arrives on instead. The ractor a task spawns
-# hands the result to a `Ractor::Port` of the task's own before that
-# ractor ends, and the wait takes it from there, whether it arrives
-# before or after the ractor has gone. A wait after the first is answered
-# from memory, the way `LLM::Function::Thread::Task#wait` answers from the
-# thread's value.
-#
-# **One ractor, not two.** The ractor runs the tool itself; a watcher
-# thread inside it services interrupts, and the port is the one place a
-# result leaves by.
-#
-# **A cancel that arrives while the tool is running is held, not dropped**:
-# the job's watcher waits on the window the job opens immediately before the
-# call, so a cancel that arrives first is delivered inside the call and the
-# tool's own `rescue` sees it. The record of what reached the tool is the
-# value the job sends back, because a ractor's copy of a tool is not the
-# object the caller holds.
-#
-# **And a cancel made before `spawn` is held too.** The ractor is built in
-# `spawn`, so there was nothing to send a cancel to and the task answered `nil`
-# for one that had not run yet - a cancel that said nothing. It is remembered
-# and delivered by `spawn`, which is where `:fork`'s task takes one too.
-#
-# **What the caller is given is what every strategy gives**: a cancel that
-# escapes the tool is raised out of `#wait` as `LLM::Interrupt`, on the
-# caller's thread. An exception cannot cross a ractor boundary, so the job
-# answers with a note that says the call was interrupted, and the task
-# raises it where the caller is waiting - and a note is only answered when
-# it names the task it was written for, so a cancel meant for another call
-# is not mistaken for this one.
-#
-# **Every wait has a deadline.** A raise cannot be relied on to interrupt
-# a wait on a ractor, so each of them runs on a thread of its own and is
-# joined with a timeout: a round trip that does not come back is what
-# this is about, and an example for it has to fail rather than hang.
 RSpec.describe LLM::Function::Ractor::Task do
-  ##
-  # The ractor's examples are not supported by oj, and the matrix
-  # spells the cell that supports them `JSON`, so the parser is compared
-  # as it is written.
   before do
     skip "not supported by oj" unless ENV.fetch("JSON_PARSER", "json").downcase == "json"
   end
 
-  ##
-  # Runs the block on a thread of its own and joins it, so a wait that
-  # never comes back is a failure that names the wait rather than a hang.
   def within(seconds = 5, &block)
     thread = Thread.new do
-      ##
-      # The block is expected to raise: a cancelled call is raised on the
-      # caller now, rather than answered with it, so a thread's own report
-      # of the exception would be noise.
       Thread.current.report_on_exception = false
       block.call
     end
     thread.join(seconds) ? thread.value : raise("timed out after #{seconds} seconds")
   end
 
-  ##
-  # A tool that returns at once, so that the task has a result and then a
-  # reason to go.
   let(:task) do
     Class.new(LLM::Tool) do
       name "quick"
@@ -101,13 +48,6 @@ RSpec.describe LLM::Function::Ractor::Task do
   describe "a wait that arrives after the result is in" do
     it "is answered by the port the result was delivered to" do
       task.spawn
-      ##
-      # The tool is quick and the wait is late: by the time it comes, the
-      # task's ractor has delivered its result and gone. Before this
-      # change the wait went to that ractor, and what came back was the
-      # refusal `Ractor#send` gives a ractor that has closed - or, the
-      # race's other outcome, a wait that never came back at all.
-      # back at all.
       sleep 0.05
       expect(within { task.wait }.to_h).to eq(
         id: "call_1", name: "quick", value: {ok: true}
@@ -115,10 +55,6 @@ RSpec.describe LLM::Function::Ractor::Task do
     end
   end
 
-  ##
-  # The task's ractor has gone by the time the cancel comes, which is
-  # what a caller finds after a result has been delivered: the cancel is a
-  # no-op rather than a `::Ractor::ClosedError` on its thread.
   describe "a task that has returned" do
     it "answers a cancel with nil rather than a raise" do
       within { task.wait }
@@ -126,12 +62,6 @@ RSpec.describe LLM::Function::Ractor::Task do
     end
   end
 
-  ##
-  # A tool that records what reached it. The hook writes a flag and the rescue
-  # reads it back, so one value says both that the rescue ran and that the hook
-  # was written first - which is the order the job's watcher promises, and the
-  # reason a tool that releases a resource has released it by the time the
-  # raise lands.
   let(:recording_tool) do
     Class.new(LLM::Tool) do
       name "recording"
@@ -150,9 +80,6 @@ RSpec.describe LLM::Function::Ractor::Task do
     end
   end
 
-  ##
-  # A tool that holds and does not rescue, so the interrupt escapes it and the
-  # job answers the cancel its own way.
   let(:holding_tool) do
     Class.new(LLM::Tool) do
       name "holding"
@@ -164,10 +91,6 @@ RSpec.describe LLM::Function::Ractor::Task do
     end
   end
 
-  ##
-  # The cancel follows `spawn` by as little as the file can say, so the ractor
-  # is still starting when the message is written: the watcher waits on a
-  # window that is still idle, and the tool is entered before the raise lands.
   describe "a call that was cancelled while the tool was starting" do
     let(:task) do
       recording_tool.function.dup.tap do |fn|
@@ -196,11 +119,6 @@ RSpec.describe LLM::Function::Ractor::Task do
     end
   end
 
-  ##
-  # And the same cancel on a call that does not rescue: the interrupt escapes
-  # the tool, the job answers with a note that says so, and the task raises
-  # `LLM::Interrupt` out of `#wait` - what the caller of any other strategy
-  # is given.
   describe "a call cancelled while the tool was starting that does not rescue" do
     let(:task) do
       holding_tool.function.dup.tap do |fn|
@@ -220,11 +138,6 @@ RSpec.describe LLM::Function::Ractor::Task do
     end
   end
 
-  ##
-  # The cancel precedes `spawn`, so there is no ractor to send it to yet: the
-  # task remembers it and delivers it as soon as there is one. The tool holds,
-  # so a cancel that was dropped is a wait with nothing to answer it rather
-  # than a cancel that arrived too late to matter.
   describe "a call cancelled before it was spawned" do
     let(:task) do
       holding_tool.function.dup.tap do |fn|

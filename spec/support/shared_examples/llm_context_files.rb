@@ -31,3 +31,4 @@ RSpec.shared_examples "LLM::Context: files" do |dirname, options = {}|
     end
   end
 end
+

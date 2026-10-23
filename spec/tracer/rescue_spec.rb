@@ -28,9 +28,6 @@ RSpec.describe LLM::Tracer::Rescue do
   describe "a hook of the tracer's own that raises" do
     let(:klass) do
       Class.new(LLM::Tracer) do
-        ##
-        # @param [Symbol] scope
-        # @return [void]
         def on_interrupt(**)
           raise "boom"
         end

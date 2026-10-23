@@ -2,18 +2,6 @@
 
 require "setup"
 
-##
-# `LLM.interrupt`, and the shape of a wait.
-#
-# The registry is local to a process - that is the premise of the wait, not a
-# limitation of it - and what is worth pinning is the count of looks and the
-# count of sleeps. A loop like this one goes wrong in the check, and there are
-# two ways: looking once and giving up, or sleeping after the last look.
-#
-# The agent and the registry are both real. An agent entered into the registry
-# with no turn running is the case `LLM::Context#interrupt!` already covers -
-# no caller was recorded, so nothing is raised into the canceller - and it is
-# the case this method meets when the turn it was waiting for is gone.
 RSpec.describe LLM do
   describe ".interrupt" do
     let(:llm) { LLM.openai(key: "test") }

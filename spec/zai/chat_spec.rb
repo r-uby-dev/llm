@@ -15,6 +15,5 @@ RSpec.describe "LLM::Context: zai" do
   end
 
   context LLM::Function do
-    # include_examples "LLM::Context: functions", :zai
   end
 end

@@ -59,16 +59,12 @@ RSpec.describe LLM::Tool::Git do
     end
   end
 
-  ##
-  # True when the given executable is present on the PATH.
   def command_available?(name)
     (ENV["PATH"] || "").split(File::PATH_SEPARATOR).any? do |dir|
       File.executable?(File.join(dir, name))
     end
   end
 
-  ##
-  # Create a dummy test repository
   def make_repo!
     system("git", "init", "-b", "main", out: File::NULL, err: File::NULL)
     system("git", "config", "user.email", "spec@example.com", out: File::NULL, err: File::NULL)

@@ -2,30 +2,6 @@
 
 require "setup"
 
-##
-# The window's three cases, and the one ask it refuses.
-#
-# A raise cannot be aimed at a region of code, only permitted for one, so
-# these examples are about when it is permitted: while the tool runs it is
-# raised, before the tool runs it is held, and once the tool has returned
-# it is not raised at all.
-#
-# **The window names the thread it raises on, and every example here names
-# one of its own.** A thread stands in for the tool, builds the window
-# (because the window has to name it and it does not exist until the block
-# is running), and is joined at the end for the value it returned. Nothing
-# waits on a clock, and no example arranges for a raise to land on the
-# thread RSpec is running on.
-#
-# **The held case is checked by an order rather than by a return value.**
-# `:interrupted` comes back whether the window held the interrupt until the
-# tool ran or answered it the moment it arrived - the difference is whether
-# the tool got to open the window first, and only a log says which.
-#
-# `gate` is how an example says "now": the tool blocks on it, so the window
-# is open for as long as the example wants and closes when the example says
-# so. Where an example does not push it a second time, the thread is left
-# blocked at a check point, which is where an arriving raise lands.
 RSpec.describe LLM::Function::Window do
   describe "an interrupt while the tool is running" do
     it "raises on the thread the tool is running on" do
@@ -33,9 +9,6 @@ RSpec.describe LLM::Function::Window do
       thread = Thread.new do
         window = described_class.new(thread: Thread.current)
         window.running!
-        ##
-        # Handed over after `running!`, so an example that pops it knows
-        # the window is open rather than waiting to find out.
         handover << window
         gate.pop
         :returned
@@ -65,10 +38,6 @@ RSpec.describe LLM::Function::Window do
       end
 
       window = handover.pop
-      ##
-      # Delivered while the window is idle, so it waits rather than
-      # raising - and it cannot return before the tool opens the window,
-      # whatever order the two threads reach their next instruction in.
       interrupter = Thread.new { window.interrupt! }
       gate << true
       expect(log.pop).to eq(:opened)
@@ -98,14 +67,6 @@ RSpec.describe LLM::Function::Window do
     end
   end
 
-  ##
-  # A deferred ask is issued from the call's own fiber at `running!`, which
-  # only an asker that schedules its raise can do. The fallback for a
-  # scheduler without `fiber_interrupt` raises on the fiber that asks - so it
-  # would deliver before the call and skip the tool, and the window refuses
-  # rather than quietly doing the thing the hold exists to prevent. The
-  # message names the method that is missing, since that is what a caller
-  # has to do something about.
   describe "a deferred ask when the asker cannot hold one" do
     it "is refused" do
       window = described_class.new(scheduler: Object.new, fiber: Fiber.current)

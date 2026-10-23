@@ -4,17 +4,6 @@ require "setup"
 require "fileutils"
 require "tmpdir"
 
-##
-# The instructions an agent injects are its own message in a
-# conversation the caller may also have written to, so the two have to be
-# told apart. A role is not enough: a provider decides what role the
-# instructions are given, and Google's is `:user`, which is also the role
-# a caller's own message has.
-#
-# These examples pin the rule that replaces none of the wrong message, the
-# role that has to survive a replacement, the call that joins the rule to a
-# turn, and the round trip that makes the rule work on a restored
-# conversation - the only conversation it exists for.
 RSpec.describe LLM::Agent, "instructions" do
   let(:provider) { LLM.openai(key: "test") }
   let(:tmpdir) { Dir.mktmpdir("llmrb-instructions") }
@@ -25,12 +14,6 @@ RSpec.describe LLM::Agent, "instructions" do
     described_class.new(provider, instructions:, **params)
   end
 
-  ##
-  # @param [String] content
-  # @param [Boolean] marked
-  # @param [String] role
-  #  The role the provider gives instructions. Google's is "user".
-  # @return [LLM::Message]
   def message(content, marked: true, role: "system")
     LLM::Message.new(role, content, marked ? {instructions: true} : {})
   end
@@ -73,10 +56,6 @@ RSpec.describe LLM::Agent, "instructions" do
     end
   end
 
-  ##
-  # The call is what joins the rule to a turn, and nothing above it would
-  # notice if it stopped being made. This is the seam, one level below
-  # `talk`.
   describe "#apply_instructions" do
     it "refreshes the stored instructions on the way through" do
       a = agent(instructions: "Say more")
@@ -85,9 +64,6 @@ RSpec.describe LLM::Agent, "instructions" do
       expect(a.messages.first.content).to eq("Say more")
     end
 
-    ##
-    # The same path, and the caller's own system message is left alone
-    # rather than refreshed on the way past it.
     it "leaves a prompt's own system message alone" do
       a = agent(instructions: "Say more")
       a.messages.concat [message("Say less")]
@@ -126,10 +102,6 @@ RSpec.describe LLM::Agent, "instructions" do
       expect(a.messages.first.content).to eq("Say more")
     end
 
-    ##
-    # The role is the provider's, and rebuilding it from `system_role`
-    # rather than keeping what the message already had is what makes a
-    # replacement destructive here rather than correct.
     it "keeps the role the message already had" do
       a = agent(instructions: "Say more")
       a.messages.concat [message("Say less", role: "user")]

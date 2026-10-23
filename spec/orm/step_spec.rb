@@ -7,11 +7,6 @@ require "sqlite3"
 require "llm/active_record"
 require "sequel/plugins/agent"
 
-##
-# {LLM::Step LLM::Step} saves the conversation through the record a context is
-# bound to. Each example builds a context against a real model in the harness's
-# database and calls the module the way a completed request does, so the two
-# ORM branches are exercised against a table rather than against a double.
 RSpec.describe LLM::Step do
   let(:stream) { LLM::Stream.try(LLM::Stream.new) }
   let(:provider) { LLM.openai(key: "secret") }

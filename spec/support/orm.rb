@@ -29,10 +29,6 @@ module LLM::Test
       @ask_result
     end
 
-    ##
-    # The runtime as a saved payload. A record stores what a
-    # context writes, so a stand-in has to write the same shape.
-    # @return [Hash]
     def to_h
       {
         schema_version: LLM::Context.schema_version,
@@ -40,16 +36,11 @@ module LLM::Test
       }
     end
 
-    ##
-    # @return [String]
     def to_json(...)
       LLM.json.dump(to_h, ...)
     end
   end
 
-  ##
-  # A record, as far as a context is concerned: a bound object is asked
-  # for an id, and nothing else about it is a context's business.
   Record = Struct.new(:id)
 
   module Harness
@@ -154,3 +145,4 @@ module LLM::Test
     end
   end
 end
+

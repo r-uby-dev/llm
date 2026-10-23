@@ -107,10 +107,6 @@ RSpec.describe LLM::Tracer::Telemetry do
       expect(tracer.spans.last.attributes["error.type"]).to eq("RuntimeError")
     end
 
-    ##
-    # The failure is read from the return, and a read that raised would
-    # take the span with it: the callback finishes a span it never
-    # finished before.
     it "finishes the span" do
       expect(tracer.spans.last.name).to eq("execute_tool tool")
     end
@@ -175,12 +171,6 @@ RSpec.describe LLM::Tracer::Telemetry do
       end
     end
 
-    ##
-    # The refusal is a raise, and the raise is not what a caller sees:
-    # every subclass is prepended with `LLM::Tracer::Rescue`, which
-    # reports an error a hook raises rather than letting it travel. So
-    # the assertion is about where the refusal lands, which is the only
-    # part of it anybody meets.
     context "when the scope is not one of the three" do
       it "reports the refusal rather than raising it" do
         expect($stderr).to receive(:puts).with(

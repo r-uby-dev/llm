@@ -9,10 +9,6 @@ RSpec.describe LLM::ActiveRecord::Message do
   before do
     reason = LLM::Test::Harness.postgres_unavailable_reason
     skip reason if reason
-    ##
-    # The view shares the connection of the superclass, the way it
-    # does in a Rails app. The harness connects an abstract class
-    # instead, so connect the superclass here too.
     ActiveRecord::Base.establish_connection(LLM::Test::Harness.postgres_url)
   end
 
@@ -64,9 +60,6 @@ RSpec.describe LLM::ActiveRecord::Message do
     [{id: SecureRandom.uuid_v7, role: "user", content: "other"}]
   end
 
-  ##
-  # The row as the record stores it: a context writes a payload
-  # stamped with its schema version, and restore reads that.
   def saved(messages)
     {schema_version: LLM::Context.schema_version, messages:}
   end

@@ -2,13 +2,6 @@
 
 require "setup"
 
-##
-# A tool and a schema whose parameter types are written the way an
-# author writes them: a proc that is resolved when the schema is
-# rendered, with `Enum` resolved in the scope of the class body.
-# They are declared rather than built with `Class.new` because a
-# proc resolves its constants where it is written, and `Class.new`
-# does not put its block in the scope of the class it builds.
 class DeferredSpecTool < LLM::Tool
   name "fruit"
   parameter :fruit, proc { Enum["apple", "orange", "pineapple"] }, "A fruit"

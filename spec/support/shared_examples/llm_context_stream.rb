@@ -74,3 +74,4 @@ RSpec.shared_examples "LLM::Context: tool stream" do |dirname, options = {}|
     end
   end
 end
+

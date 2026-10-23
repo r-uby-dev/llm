@@ -2,15 +2,6 @@
 
 require "setup"
 
-##
-# An interrupt is a request to stop rather than a failure to handle, so it
-# sits outside `StandardError`. The two rescue forms that catch nearly
-# everything must not be able to swallow it: a turn whose cancel was eaten
-# looks like a turn that ignored one.
-#
-# It is deliberately not a signal, either: a signal is a framework's own
-# condition - RSpec re-raises one that escapes an example, and an async
-# reactor ends its thread - and an interrupt has to be catchable.
 RSpec.describe LLM::Interrupt do
   let(:interrupt) { described_class.new("agent interrupted") }
 
@@ -37,11 +28,6 @@ RSpec.describe LLM::Interrupt do
   end
 
   describe "a rescue that catches everything" do
-    ##
-    # Two shapes, and an interrupt has to come out of both: a bare rescue,
-    # and the one that catches an error so it can carry on. Each is asked
-    # for an ordinary error first, so that the examples below cannot pass
-    # because the rescue was never a rescue.
     let(:barely) do
       proc do |&block|
         block.call
@@ -70,9 +56,6 @@ RSpec.describe LLM::Interrupt do
       expect(broadly.call { raise "boom" }).to eq(:caught)
     end
 
-    ##
-    # The claim itself: the rescue did not catch it, and the caller is
-    # given it - which is the whole of what the class is for.
     it "does not catch an interrupt" do
       expect { barely.call { raise LLM::Interrupt } }
         .to raise_error(described_class)

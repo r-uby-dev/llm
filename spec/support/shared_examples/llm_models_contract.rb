@@ -23,3 +23,4 @@ RSpec.shared_examples "LLM::Models contract" do
     expect([true, false]).to include(model.chat?)
   end
 end
+

@@ -37,10 +37,6 @@ RSpec.describe LLM::Tracer::Logger do
 
     it { is_expected.to include("tool.start") }
 
-    ##
-    # The return value is what the endings are handed, so a
-    # tracer that gives back the logger's own value instead
-    # gives them nothing to name the call by.
     it "returns a span the endings can name the call with" do
       expect(span.to_h).to eq({id: "call_1", name: "tool"})
     end
@@ -68,9 +64,6 @@ RSpec.describe LLM::Tracer::Logger do
 
     it { is_expected.to include("tool.interrupt") }
 
-    ##
-    # The span hands the call over, and a call that was cut
-    # has no result to be named by instead.
     it { is_expected.to include("call_1") }
 
     it { is_expected.to include("LLM::Interrupt") }

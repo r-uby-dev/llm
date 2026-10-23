@@ -19,9 +19,6 @@ RSpec.describe LLM::Intercept::Multi do
   let(:multi) { LLM::Intercept.multi(provider, *intercepts) }
   let(:result) { multi.call(function:, context: ctx) }
 
-  ##
-  # Each intercept records that it ran, so an example can say what the chain
-  # did rather than what it returned alone.
   let(:passing) do
     order = self.order
     Class.new(LLM::Intercept) do

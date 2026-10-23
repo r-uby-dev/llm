@@ -9,9 +9,6 @@ RSpec.describe LLM::Console::Buffer do
   let(:console) { LLM::Console.new(agent:) }
   let(:buffer) { described_class.new(console) }
 
-  ##
-  # Curses.cols of 149 gives a content width of 89
-  # ((149 * 0.6).floor).
   before { allow(Curses).to receive(:cols).and_return(149) }
 
   describe "when given word wrap" do
@@ -66,9 +63,6 @@ RSpec.describe LLM::Console::Buffer do
     end
   end
 
-  ##
-  # Renders all rows as plain strings.
-  # @return [Array<String>]
   def rendered
     buffer.visible(100).map { |row| row.map { |chunk| chunk[:text] }.join }.reject(&:empty?)
   end

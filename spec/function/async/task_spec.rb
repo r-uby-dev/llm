@@ -3,21 +3,6 @@
 require "setup"
 require "timeout"
 
-##
-# What a cancel does to a running `:async` tool.
-#
-# The task is told, and the reactor is stopped by whoever waits - which is
-# the only point at which it is known to be idle, and the point a group
-# already stopped it from.
-#
-# Neither example waits on a clock to find out what happened: the tool says
-# when it has started, so an example knows the cancel landed on a running
-# tool rather than racing its start, and says when it has finished, so an
-# example knows the interrupt ended it rather than leaving it to run on.
-#
-# Every wait has a deadline. A cancel that silently fails to deliver would
-# otherwise be a cell that hangs rather than a failure that names itself,
-# and this repository has already spent cells on hangs.
 RSpec.describe LLM::Function::Async::Task do
   let(:started) { Queue.new }
   let(:finished) { Queue.new }
@@ -26,11 +11,6 @@ RSpec.describe LLM::Function::Async::Task do
   let(:reactor) { LLM::Function::Async::Reactor.new }
   after { reactor.stop }
 
-  ##
-  # A tool that runs until something stops it, saying so at both ends.
-  #
-  # `sleep` is the scheduler's, so it is a point at which the interrupt can
-  # arrive.
   let(:counting) do
     started, finished = self.started, self.finished
     Class.new(LLM::Tool) do
@@ -44,13 +24,6 @@ RSpec.describe LLM::Function::Async::Task do
     end
   end
 
-  ##
-  # And one that handles the interrupt rather than letting it raise.
-  #
-  # It yields twice: once before the interrupt can arrive, and again after
-  # it has been told, before it returns. The second yield is the point - a
-  # tool that answers slowly is the one a teardown can take away from, and
-  # the answer has to be pushed before that can happen.
   let(:rescuing) do
     started = self.started
     Class.new(LLM::Tool) do
@@ -66,9 +39,6 @@ RSpec.describe LLM::Function::Async::Task do
     end
   end
 
-  ##
-  # And one that cleans up in its own rescue and raises on, which is what a
-  # held cancel has to reach: the tool's rescue, and the caller's exception.
   let(:cleaning) do
     started, cleaned = self.started, self.cleaned
     Class.new(LLM::Tool) do
@@ -83,8 +53,6 @@ RSpec.describe LLM::Function::Async::Task do
     end
   end
 
-  ##
-  # And one whose only notification is the hook under its other name.
   let(:cancelling) do
     started, told = self.started, self.told
     Class.new(LLM::Tool) do
@@ -99,9 +67,6 @@ RSpec.describe LLM::Function::Async::Task do
     end
   end
 
-  ##
-  # And one that answers before anything can reach it: no yield, so no point
-  # at which the raise could arrive.
   let(:quick) do
     started, told = self.started, self.told
     Class.new(LLM::Tool) do
@@ -133,19 +98,9 @@ RSpec.describe LLM::Function::Async::Task do
     Timeout.timeout(timeout, &block)
   end
 
-  ##
-  # The cancel precedes `spawn`, so it provably precedes the block: there is
-  # nothing to ask the scheduler for yet, and the block is where it is taken
-  # up. It is spent inside the call now, which is the whole of what this
-  # strategy was missing - the block used to raise before `defer_cancel`,
-  # which is where the tool is called, so the tool was never entered.
   describe "a cancel that arrives before the call runs" do
     before do
       task.interrupt!
-      ##
-      # The spawn is here rather than in an example because it is setup:
-      # the interrupt above is the thing under test, and every example below
-      # states one thing about what became of it.
       task.spawn
     end
 
@@ -177,13 +132,6 @@ RSpec.describe LLM::Function::Async::Task do
       end
     end
 
-    ##
-    # A tool that never suspends is one the raise cannot land inside, so the
-    # caller is given the result the tool returned. The ask is still an ask
-    # - the window issues a deferred one when the call opens - so the tool
-    # is told, and it is asked about rather than interrupted. It is also the
-    # semantic this change introduces: a cancel before `spawn` is no longer
-    # a promise that the call never runs.
     context "when the tool answers before anything can reach it" do
       let(:tool) { quick }
 
@@ -195,15 +143,6 @@ RSpec.describe LLM::Function::Async::Task do
         expect(settle(told)).to eq(:interrupted)
       end
 
-      ##
-      # And a probe for what became of the raise a scheduler cannot land
-      # inside a call that never suspends: it is scheduled into the tool's
-      # fiber, whose next suspension is after the block's `ensure` - outside
-      # the `rescue` that wraps the call - and `LLM::Interrupt` is not a
-      # `StandardError`, so one left to raise ends the reactor's thread and
-      # takes the tasks on it with it. A task that starts after this one is
-      # where that would show: the assertion is that it runs at all, which
-      # it cannot on a reactor that is gone.
       context "when another task is on the same reactor" do
         let(:sibling) do
           quick.function.dup.tap do |fn|
@@ -225,13 +164,6 @@ RSpec.describe LLM::Function::Async::Task do
     end
   end
 
-  ##
-  # The moment between the block's check and the call: the window exists, the
-  # state is idle, and the task is asked with `wait: false` - which records
-  # the ask and issues it when the call opens. On `:thread` the same moment
-  # waits and delivers, so the two strategies now agree about it, and the
-  # outcome is the same whichever way the interleaving falls, which is what
-  # makes this an example rather than a race.
   describe "a cancel that arrives after the block has started" do
     before do
       task.spawn
@@ -247,9 +179,6 @@ RSpec.describe LLM::Function::Async::Task do
     end
   end
 
-  ##
-  # There is no block to hold it and nothing to ask for, so the record is
-  # the whole of the answer.
   describe "a cancel for a task that never spawned" do
     it "is a no-op" do
       expect(task.interrupt!).to be_nil
@@ -259,9 +188,6 @@ RSpec.describe LLM::Function::Async::Task do
   describe "a cancel that arrives while the call runs" do
     before do
       task.spawn
-      ##
-      # The tool says when it is live, so the cancel is raised at a call
-      # rather than at its edge.
       settle(started)
       task.interrupt!
     end
@@ -301,9 +227,6 @@ RSpec.describe LLM::Function::Async::Task do
     end
   end
 
-  ##
-  # A cancel after the call has returned has nothing to interrupt, and the
-  # fiber a task ran in has gone with it.
   describe "a cancel that arrives after the call has returned" do
     let(:tool) { rescuing }
 
@@ -314,10 +237,6 @@ RSpec.describe LLM::Function::Async::Task do
     end
   end
 
-  ##
-  # A task that has answered has answered for good, which is what `Thread#value`
-  # does for the other in-process strategy and what the ractor's task is
-  # asserted to do. The queue is popped once, and what it held is kept.
   describe "a task that has been waited on" do
     let(:tool) { rescuing }
     let(:first) { within { task.wait } }
@@ -333,13 +252,7 @@ RSpec.describe LLM::Function::Async::Task do
     end
   end
 
-  ##
-  # The exception case is the one that used to block: the first wait raised,
-  # and the second waited on a queue that would never fill again.
   describe "a task whose call was interrupted" do
-    ##
-    # The exception the first wait raised, which a second one has to raise
-    # again rather than waiting on an empty queue.
     let(:interrupted) do
       task.spawn
       settle(started)

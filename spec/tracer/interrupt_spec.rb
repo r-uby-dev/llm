@@ -2,25 +2,6 @@
 
 require "setup"
 
-##
-# The tracer's interrupt hooks, at the tool end.
-#
-# A request interrupt is announced by the transport, once. A tool is a
-# different shape: a cancel reaches every tool that is running and the
-# caller hears one exception, so the phase announcement belongs to the
-# phase rather than to a tool - and `Context#wait` is where it is made,
-# because that is the one frame every strategy's interrupt unwinds through.
-#
-# **And the call is announced as itself.** The same cancel interrupts the
-# phase and its calls, and a tracer that pairs a start with an ending needs
-# the call's own: `on_tool_interrupt` is that ending, reached from
-# `LLM::Function::Tracing`, which is the module above the strategy - so the
-# tracer is told wherever the raise was issued from.
-#
-# The tool sleeps, so the interrupt lands while it is running and the caller
-# is inside `wait`. That is the same arrangement the interrupt examples in
-# `spec/context_spec.rb` and `spec/function/thread/task_spec.rb` use, with a
-# tracer watching the call rather than the tool.
 RSpec.describe "the tracer's interrupt hook" do
   let(:provider) { LLM.openai(key: "test") }
   let(:model) { "gpt-5.4" }
@@ -100,10 +81,6 @@ RSpec.describe "the tracer's interrupt hook" do
       expect(tracer.calls).to eq([[:interrupt, :tool]])
     end
 
-    ##
-    # The order is the point: the tracer has to be told while the tools
-    # are still the work in flight, and what it had seen at the moment
-    # the caller's rescue ran is the evidence of that.
     it "announces it before the caller is given the interrupt" do
       seen = nil
       thread = Thread.new do

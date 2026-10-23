@@ -10,10 +10,6 @@ RSpec.describe "LLM::Stream#on_step" do
     LLM::Context.new(provider, mode: :completions, model: "deepseek-chat", stream: stream)
   end
 
-  ##
-  # The request is stubbed, so this is the response the runtime would have
-  # appended to `@messages` by the time it emits the callback. The first
-  # element is what a real request returns as its new messages.
   before do
     allow(ctx).to receive(:complete) { |prompt, params| [[], params, response] }
   end

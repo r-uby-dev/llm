@@ -6,8 +6,6 @@ RSpec.describe LLM::Tracer::Multi do
   let(:provider) { LLM.openai(key: "test") }
   let(:request_id) { SecureRandom.uuid_v7 }
 
-  # A tracer that records every callback it receives and answers
-  # start callbacks with a sentinel span.
   let(:recording_tracer_class) do
     Class.new(LLM::Tracer::Null) do
       attr_reader :calls
@@ -256,9 +254,6 @@ RSpec.describe LLM::Tracer::Multi do
 
   describe "a crashing tracer" do
     it "does not take the other tracers down with it" do
-      # NB: defined on a subclass (not a singleton method) so the
-      # inherited LLM::Tracer::Rescue wrapper applies, like it does
-      # for every real tracer under Multi's supervision.
       crashing_class = Class.new(recording_tracer_class) do
         def on_request_start(**)
           raise "tracer exploded"
@@ -271,7 +266,6 @@ RSpec.describe LLM::Tracer::Multi do
       expect {
         spans = multi.on_request_start(operation: "chat", request_id:)
       }.not_to raise_error
-      # The crashed tracer contributes nil, in its position
       expect(spans).to eq([nil, "b:request"])
       expect(tracer_b.calls.map(&:first)).to include(:on_request_start)
     end

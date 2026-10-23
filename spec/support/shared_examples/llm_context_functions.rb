@@ -106,3 +106,4 @@ RSpec.shared_examples "LLM::Context: functions" do |dirname, options = {}|
                      "Can you run the whoami command ?"
   end
 end
+

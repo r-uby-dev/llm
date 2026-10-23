@@ -267,12 +267,6 @@ RSpec.describe "acts_as_agent" do
     let(:ctx) { LLM::Context.new(LLM.openai(key: "secret")) }
     let(:data) { LLM::ActiveRecord::Utils.serialize_context(ctx, :jsonb) }
     let(:message) do
-      ##
-      # ActiveRecord encodes jsonb columns with
-      # ActiveSupport::JSON.encode, which must not
-      # see LLM::Object values becuz it would encode
-      # them as arrays of [key, value] pairs instead
-      # of JSON objects.
       JSON.parse(ActiveSupport::JSON.encode(data)).fetch("messages").fetch(0)
     end
 

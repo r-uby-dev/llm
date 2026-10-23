@@ -3,13 +3,6 @@
 require "setup"
 require "stringio"
 
-##
-# What the pretty logger writes, and what it hands back.
-#
-# The return value matters as much as the line: it is the span
-# every ending is given, and a tracer that answers with the
-# writer's own value leaves an interrupt with nothing to name
-# the call it ended.
 RSpec.describe LLM::Tracer::PrettyLogger do
   let(:provider) { LLM.openai(key: "test") }
   let(:io) { StringIO.new }
@@ -41,9 +34,6 @@ RSpec.describe LLM::Tracer::PrettyLogger do
       expect(io.string).to include("tool slow")
     end
 
-    ##
-    # An id is a long string that reads as gibberish, so the line
-    # keeps the part that tells two of them apart.
     it "keeps ten characters of the call's id" do
       expect(io.string).to include("(call_abcde...)")
     end

@@ -80,11 +80,6 @@ RSpec.describe LLM::Tool::Exec do
       end
     end
 
-    ##
-    # The race a real `echo` lost: `running?` is false before the command has
-    # been reaped, so a wait that trusts it alone leaves, and `ok` is read from
-    # a status that does not exist yet. The double answers nil once, which is
-    # what the second question is for.
     context "when the command has not been reaped yet" do
       let(:result) { tool.call(arguments: ["echo", "hi"]) }
 

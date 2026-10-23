@@ -125,12 +125,6 @@ RSpec.describe LLM::Agent do
         _tool = tool
         Class.new(described_class) do
           set tools: :tools
-          ##
-          # `:tools` resolves by calling the DSL
-          # accessor on the instance. `LLM::Agent`
-          # exposes `self.tools` (class DSL), so we
-          # provide an instance `#tools` method
-          # returning the tool list.
           define_method(:tools) { [_tool] }
         end.new(provider)
       end
@@ -1008,11 +1002,6 @@ RSpec.describe LLM::Agent do
     let(:agent) { described_class.new(provider, mode: :responses, tools: [tool], stream:) }
     let(:ctx) { agent.instance_variable_get(:@ctx) }
     let(:stream) do
-      ##
-      # A stream that records when tools return so
-      # a tool call that is refused can be checked for
-      # having come back rather than being left in a
-      # 'call' state.
       recorder = returned
       LLM::Stream.new.tap do |stream|
         stream.define_singleton_method(:on_tool_return) { |_tool, result| recorder << result }
@@ -1269,19 +1258,10 @@ RSpec.describe LLM::Agent do
     end
   end
 
-  ##
-  # Runs the agent's tool loop for the seeded pending function.
-  # @return [Array<LLM::Function::Return>]
   def call_functions
     agent.send(:call_functions)
   end
 
-  ##
-  # A provider response that asks the model to call the echo tool.
-  # Each response uses a distinct call id so the loop keeps seeing
-  # unresolved tool work.
-  # @param [String] id
-  # @return [LLM::Response]
   def tool_call_response(id)
     response!(choices: [
       LLM::Message.new("assistant", nil, {
@@ -1291,11 +1271,6 @@ RSpec.describe LLM::Agent do
     ])
   end
 
-  ##
-  # A provider response that asks the model to call the echo tool
-  # several times in one message.
-  # @param [Array<String>] ids
-  # @return [LLM::Response]
   def batch_tool_call_response(ids)
     response!(choices: [
       LLM::Message.new("assistant", nil, {
@@ -1307,10 +1282,6 @@ RSpec.describe LLM::Agent do
     ])
   end
 
-  ##
-  # Returns the real context the agent wraps.
-  # @param [LLM::Agent] agent
-  # @return [LLM::Context]
   def wrapped_context(agent)
     agent.instance_variable_get(:@ctx)
   end
@@ -1319,11 +1290,6 @@ end
 RSpec.describe LLM::Agent, "class-level configuration" do
   let(:provider) { LLM.openai(key: "test") }
 
-  ##
-  # The class-level reader is the declaration accessor. It returns
-  # what was configured, Symbol and Proc included, because that is
-  # what an instance resolves - resolving or raising there would
-  # break the hand-off that initialize performs.
   let(:klass) do
     Class.new(LLM::Agent) do
       description :described_here

@@ -142,10 +142,6 @@ RSpec.describe LLM::Function do
       before do
         tool.tracer = tracer
         tool.model = "gpt-4.1"
-        ##
-        # The group is what reports the call: a task answers with its
-        # outcome, and the frame that knows the call was interrupted is
-        # the frame that tells the tracer.
         task.group_class.new([task]).wait
       end
 
@@ -222,9 +218,6 @@ RSpec.describe LLM::Function do
         before do
           tool.tracer = tracer
           tool.model = "gpt-4.1"
-          ##
-          # The group is what reports a fork's call, because a fork's
-          # task answers from the parent rather than the child.
           task.group_class.new([task]).wait
         end
 
@@ -428,11 +421,6 @@ RSpec.describe LLM::Function do
       end
 
       it "tells the tool on the thread that runs the call" do
-        ##
-        # The interrupt is the caller's to catch, and a modifier rescue -
-        # `task.wait rescue LLM::Interrupt` - is not a rescue at all: it
-        # catches a `StandardError` and answers with the constant. It is the
-        # interrupt that is named here, and only that.
         begin
           task.wait
         rescue LLM::Interrupt
@@ -631,9 +619,6 @@ RSpec.describe LLM::Function do
 
       context "when wait runs on another thread" do
         let(:thread) do
-          ##
-          # The interrupt is caught by name rather than by a modifier
-          # rescue, which reaches only `StandardError`.
           Thread.new do
             group.wait
           rescue LLM::Interrupt

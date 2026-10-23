@@ -22,10 +22,6 @@ RSpec.describe LLM::Intercept do
       expect(result).to be_nil
     end
 
-    ##
-    # An intercept is built with a provider and the context is attached to
-    # it by the context that wired it, so what `#intercept` returns is an
-    # instance rather than the class it was configured with.
     it "is the default intercept" do
       expect(ctx.intercept).to be_a(LLM::Intercept::Null)
     end

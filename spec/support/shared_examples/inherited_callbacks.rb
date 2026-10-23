@@ -54,3 +54,4 @@ RSpec.shared_examples "inherited wrapper callbacks" do
     end
   end
 end
+

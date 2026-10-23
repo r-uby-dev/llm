@@ -19,11 +19,6 @@ RSpec.describe "LLM::Context: alibaba" do
     include_examples "LLM::Agent: skill", :alibaba
   end
 
-  ##
-  # Alibaba's `qwen-flash` model keeps re-invoking a tool when the tool
-  # only reports `{success: true}` without the actual output. To avoid an
-  # open-ended tool loop in the recorded cassette, the tool returns a
-  # fictional date so the model is satisfied after a single call.
   context "when given a tool call", vcr: {cassette_name: "alibaba/chat/llm_chat_stream_tool"} do
     let(:params) { {stream: true, tools: [tool]} }
     let(:tool) do

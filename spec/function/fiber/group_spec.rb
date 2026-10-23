@@ -3,21 +3,10 @@
 require "setup"
 require "async"
 
-##
-# A group of fiber calls, and what a cancel does to one.
-#
-# The group spawns its tasks in turn and waits on each, so a cancel has to
-# reach a task that has not been spawned and keep walking past one that has
-# already returned. The examples run inside a reactor because Ruby ships no
-# default `Fiber.scheduler`, and `Async` installs the only kind there is.
 RSpec.describe LLM::Function::Fiber::Group do
   let(:log) { Queue.new }
   let(:notification) { Async::Notification.new }
 
-  ##
-  # A tool that holds at a notification the example never sends, and counts
-  # the interrupt it was told about - so a parked call is something a cancel
-  # can reach, and something the example can see it reached.
   let(:holding) do
     notification, log = self.notification, self.log
     Class.new(LLM::Tool) do
@@ -32,9 +21,6 @@ RSpec.describe LLM::Function::Fiber::Group do
     end
   end
 
-  ##
-  # And one that answers at once, so a group can hold a call that has already
-  # returned beside one that has not.
   let(:quick) do
     Class.new(LLM::Tool) do
       name "quick"
@@ -51,15 +37,6 @@ RSpec.describe LLM::Function::Fiber::Group do
     end.task(:fiber)
   end
 
-  ##
-  # Runs the block inside a reactor and answers with the exception it ended
-  # with. Expectations are made on what this returns rather than inside the
-  # block, because a raise under `Async` is logged and never reaches RSpec.
-  #
-  # The interrupt is named rather than left to `rescue => ex`, which reaches
-  # only `StandardError`: an interrupt is outside it, and one that is not
-  # captured here is not measured by the example but fails it from outside
-  # the reactor.
   def react(timeout = 5, &block)
     error = nil
     Async do |root|
@@ -72,9 +49,6 @@ RSpec.describe LLM::Function::Fiber::Group do
     error
   end
 
-  ##
-  # The happy path, which is what a group is for: every task spawned, and a
-  # return for each of them in the order they were given.
   describe "a group of calls that answer" do
     it "answers with a return for each of them" do
       group = described_class.new([task_for(quick, "call_1"), task_for(quick, "call_2")])
@@ -84,9 +58,6 @@ RSpec.describe LLM::Function::Fiber::Group do
     end
   end
 
-  ##
-  # A cancel before the group is spawned reaches the tasks anyway, because
-  # the record is per task and the group's `interrupt!` is a map over them.
   describe "a cancel before the group is spawned" do
     it "reaches a task that has not started" do
       group = described_class.new([task_for(holding, "call_1")])
@@ -96,10 +67,6 @@ RSpec.describe LLM::Function::Fiber::Group do
     end
   end
 
-  ##
-  # The returned call is first, because the cancel is what used to stop at it:
-  # the calls after it are the ones the map has to keep reaching. What is
-  # asserted is the hook, not a return - the parked call stays parked here.
   describe "a cancel for a group with a returned call in it" do
     it "reaches the calls after the one that has returned" do
       finished = task_for(quick, "call_1")
@@ -107,12 +74,8 @@ RSpec.describe LLM::Function::Fiber::Group do
       group = described_class.new([finished, parked])
       error = react do
         group.spawn
-        ##
-        # A read, not a wait: the block already filled the queue.
         finished.wait
         group.interrupt!
-        ##
-        # The reactor's turn, so the scheduler can deliver the raise.
         sleep 0.1
       end
       expect([error, log.size]).to eq([nil, 1])

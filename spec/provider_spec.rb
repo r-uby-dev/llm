@@ -278,9 +278,6 @@ RSpec.describe LLM::Provider do
       before do
         thread = Thread.new do
           provider.with_tracer(tracer) do
-            ##
-            # The scope is open before the thread holds it: the outer
-            # scope below must be the one that ends it, or neither.
             opened << :open
             gate.pop
             events << :other_thread

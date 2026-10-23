@@ -7,10 +7,6 @@ require "llm/tools/exec"
 
 RSpec.describe LLM::Tool::Bundle do
   let(:tool) { described_class.new }
-  ##
-  # macOS keeps TMPDIR under /var, a symlink
-  # to /private/var, and a command reports the
-  # resolved path as its cwd.
   let(:dir) { File.realpath(Dir.mktmpdir("bundle-spec")) }
   let(:gemfile) { File.join(dir, "Gemfile") }
 
@@ -78,8 +74,6 @@ RSpec.describe LLM::Tool::Bundle do
     end
   end
 
-  ##
-  # True when the given executable is present on the PATH.
   def command_available?(name)
     (ENV["PATH"] || "").split(File::PATH_SEPARATOR).any? do |dir|
       File.executable?(File.join(dir, name))

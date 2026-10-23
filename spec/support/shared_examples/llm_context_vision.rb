@@ -63,3 +63,4 @@ RSpec.shared_examples "LLM::Context: vision" do |dirname, options = {}|
     end
   end if formats.include?(:png)
 end
+

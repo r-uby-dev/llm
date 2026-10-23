@@ -152,11 +152,6 @@ RSpec.describe LLM::Console::Input do
   describe "#on_char backspace" do
     before { allow(Curses).to receive(:cols).and_return(149) }
 
-    ##
-    # The backspace key does not arrive as one code everywhere. A
-    # terminal that follows the Linux convention sends DEL, the
-    # OpenBSD console sends ^H, and curses sends its own
-    # KEY_BACKSPACE for a terminal whose terminfo describes the key.
     [8, 127, Curses::KEY_BACKSPACE].each do |code|
       it "erases the character before the cursor (code #{code})" do
         set_buffer("hello")
@@ -231,16 +226,10 @@ RSpec.describe LLM::Console::Input do
       end
     end
 
-    ##
-    # Simulates ctrl+p
-    # @return [void]
     def ctrl_p
       input.on_char(nil, Curses::KEY_CTRL_P, 0)
     end
 
-    ##
-    # Simulates ctrl+n
-    # @return [void]
     def ctrl_n
       input.on_char(nil, Curses::KEY_CTRL_N, 0)
     end
@@ -255,10 +244,6 @@ RSpec.describe LLM::Console::Input do
                 "aliqua."
       message.each_char { |char| input.on_char(nil, char, 0) }
       text = input.take
-      ##
-      # The input may only replace spaces with newlines to wrap.
-      # Restoring those newlines back to spaces must reproduce the
-      # original message, which fails if a word was cut in half.
       expect(text.gsub("\n", " ")).to eq(message)
     end
 
@@ -277,10 +262,6 @@ RSpec.describe LLM::Console::Input do
     end
   end
 
-  ##
-  # Sets the input rows to a single row containing the given text.
-  # @param [String] string
-  # @return [void]
   def set_buffer(string)
     row = LLM::Console::Input::Row.new
     string.each_char { |char| row.chars << LLM::Console::Input::Char.new(char) }

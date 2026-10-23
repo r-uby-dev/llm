@@ -1005,7 +1005,7 @@ RSpec.describe LLM::Context do
         task = tool.function.tap { it.arguments = {value: "hello"} }.task(:thread)
         task.spawn
         stream.queue << task
-        sleep 0.05 # let the thread enter the tool's call method
+        sleep 0.05
         expect(provider).to receive(:interrupt!).with(nil).ordered.and_return(nil)
         expect(ctx.interrupt!).to be_nil
         expect(task.wait.value).to eq({value: "hello", interrupted: true})

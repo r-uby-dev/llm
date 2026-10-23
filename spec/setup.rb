@@ -5,8 +5,6 @@ require "webmock/rspec"
 require "vcr"
 require "dotenv"
 
-# A run's output is a pipe in CI, and a pipe is block-buffered: an example
-# that hangs leaves a log that says nothing about which one it was.
 STDOUT.sync = true
 
 Dir[File.join(__dir__, "support/**/*.rb")].sort.each { require(_1) }
@@ -51,8 +49,6 @@ VCR.configure do |config|
   config.hook_into :webmock
   config.configure_rspec_metadata!
 
-  ##
-  # scrub
   config.filter_sensitive_data("TOKEN") { ENV["MISTRAL_SECRET"]}
   config.filter_sensitive_data("TOKEN") { ENV["ANTHROPIC_SECRET"] }
   config.filter_sensitive_data("TOKEN") { ENV["GOOGLE_SECRET"] }
@@ -84,3 +80,4 @@ def cassette_recorded?(example)
   return false unless name
   File.exist?(File.join(VCR.configuration.cassette_library_dir, "#{name}.yml"))
 end
+

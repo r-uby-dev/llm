@@ -115,10 +115,6 @@ RSpec.describe LLM::Console::Markdown do
     end
   end
 
-  ##
-  # Returns the concatenated text of the rendered AST.
-  # @param [String] text
-  # @return [String]
   def rendered(text)
     described_class.new(text, 80).ast.map { it[:text] }.join
   end
