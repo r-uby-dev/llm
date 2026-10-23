@@ -4,15 +4,22 @@ class LLM::Function
   ##
   # Wraps a ractor-backed function call.
   #
-  # One ractor runs the tool and hands its result
-  # to a {Ractor::Port} the task reads. A thread
-  # inside the ractor services interrupts, and the
-  # port is the only way a result leaves.
+  # One ractor runs the tool and hands its result to a
+  # {Ractor::Port} the task reads. A thread inside the
+  # ractor services interrupts, and the port is the only
+  # way a result leaves.
   class Ractor::Task < LLM::Function::Task
     ##
     # @api private
     Ractor = ::Ractor
     private_constant :Ractor
+
+    ##
+    # Forwarded into the result port when the ractor ends,
+    # so {#wait} reads one port rather than two.
+    # @return [Symbol]
+    EXITED = :__ractor_exited__
+    private_constant :EXITED
 
     ##
     # @return [Ractor::Port]
@@ -73,13 +80,6 @@ class LLM::Function
     end
 
     ##
-    # A task that has been waited on is not alive, and it answers that
-    # from the result it holds rather than by asking a ractor that has
-    # gone with the answering of the wait.
-    #
-    # Before then it is alive for as long as its ractor is, which is
-    # what the monitor port says: it sends `:exited` when the ractor ends,
-    # and the ractor ends only after the result has been handed over.
     # @return [Boolean]
     def alive?
       return false if @result
@@ -89,9 +89,8 @@ class LLM::Function
     ##
     # Tells the tool to stop.
     #
-    # A cancel that arrives before `spawn` is remembered, not lost: the ractor
-    # does not exist yet, so there is nothing to send it to. `spawn` delivers
-    # it, which is the first moment there is somewhere to deliver it.
+    # A cancel that arrives before `spawn` is remembered and
+    # delivered by it.
     # @return [nil]
     def interrupt!
       if @ractor
@@ -106,27 +105,24 @@ class LLM::Function
     alias_method :cancel!, :interrupt!
 
     ##
-    # The first wait reads the port the ractor delivered to,
-    # which holds the result whether or not that ractor is
-    # still there. Later waits answer from memory.
-    #
-    # If the ractor ends without sending a result, the wait
-    # returns an error rather than blocking forever.
-    #
+    # Reads the result port, which holds the ractor's
+    # result or the ending the exit watcher forwarded.
+    # Later waits answer from memory.
     # @return [LLM::Function::Return]
     def wait
       return @intercepted if intercepted?
       @result ||= begin
         spawn unless @port
-        port, ready = Ractor.select(@port, @exits)
-        if port.equal?(@exits)
-          return Return.new(id, name, {error: true, type: "ractor ended without result"})
-        end
-        _, id, name, value, @finished_at = ready
-        if Hash === value and value[:interrupt] and value[:cookie] == @cookie
-          LLM::Interrupt.new
+        _, ready = Ractor.select(@port)
+        if ready == EXITED
+          Return.new(id, name, {error: true, type: "ractor ended without result"})
         else
-          Return.new(id, name, value)
+          _, id, name, value, @finished_at = ready
+          if Hash === value and value[:interrupt] and value[:cookie] == @cookie
+            LLM::Interrupt.new
+          else
+            Return.new(id, name, value)
+          end
         end
       end
     end
@@ -141,12 +137,6 @@ class LLM::Function
     private
 
     ##
-    # Builds the one ractor a task spawns: it runs the tool, and it is
-    # the only thing that writes to the port.
-    #
-    # The ractor also sends `:exited` on its monitor port when it ends,
-    # so the task knows whether the result arrived or the ractor died.
-    #
     # @param [Ractor::Port] port
     # @return [Ractor]
     def build_task(port)
@@ -158,19 +148,25 @@ class LLM::Function
     end
 
     ##
-    # Reads the monitor port, so the ractor ending is
-    # something this object knows rather than asks about.
-    #
-    # The reader is a thread of the ractor the task lives
-    # in, since a port can only be read by the ractor that
-    # made it.
-    #
+    # The monitor port's only reader: `Ractor#monitor`
+    # sends `:exited` once, so a second reader is a
+    # message one of them never hears. The ending goes
+    # on to the result port, where {#wait} reads it.
     # @return [Thread]
     def watch_exit
       ::Thread.new do
-        @exits.receive
+        ractor_rescue { @exits.receive }
+        ractor_rescue { @port.send(EXITED) }
         @exited = true
       end
+    end
+
+    ##
+    # @api private
+    def ractor_rescue
+      yield
+    rescue ::RactorError
+      nil
     end
   end
 end

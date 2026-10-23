@@ -68,7 +68,7 @@ RSpec.describe LLM::Function::Ractor::Task do
 
       def call
         @entered = true
-        sleep 5
+        sleep 2
         {ok: true}
       rescue LLM::Interrupt
         {entered: @entered, told: @told, rescued: true}
@@ -85,7 +85,7 @@ RSpec.describe LLM::Function::Ractor::Task do
       name "holding"
 
       def call
-        sleep 5
+        sleep 2
         {ok: true}
       end
     end

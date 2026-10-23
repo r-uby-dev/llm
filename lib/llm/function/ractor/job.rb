@@ -29,14 +29,6 @@ class LLM::Function
     end
 
     ##
-    # Runs the call and answers with one message: the
-    # result, or a note that the call was interrupted or
-    # raised.
-    #
-    # The watcher is stopped before this ractor ends. A
-    # ractor does not end while a thread it made is still
-    # running, and the watcher would sit blocked on a
-    # message that never comes.
     # @return [void]
     def call
       finished_at = -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) }
@@ -59,28 +51,26 @@ class LLM::Function
     private
 
     ##
-    # Tells the watcher the call is over, and waits for it to
-    # go.
-    #
-    # The `:stop` message is what ends it. Killing it would
-    # leave the ractor holding a thread that has gone, and a
-    # ractor waits on threads that have gone.
+    # Tells the watcher the call is over, the way an interrupt is told:
+    # through the ractor's own inbox. A watcher inside a hook, or inside
+    # `Window#interrupt!`, is not parked in `Ractor.receive` to take it, so
+    # the join is bounded and one that misses it is named rather than
+    # killed - a killed thread is what a ractor cannot always end around.
     # @param [Thread, nil] watcher
     # @return [void]
     def watch_stop(watcher)
-      return unless watcher
-      ::Ractor.current.send(:stop)
-      watcher.join(1)
-      watcher.kill if watcher.alive?
+      if watcher
+        ::Ractor.current.send(:stop)
+        watcher.join(1) or watcher.kill
+      end
+      nil
+    rescue ::Ractor::Error
       nil
     end
 
     ##
-    # Watches for an interrupt on a thread of the ractor's
-    # own, so the main thread can stay inside the tool.
-    #
-    # It forwards in the order the window promises: the tool
-    # is told first, and the raise is issued after.
+    # Watches for an interrupt on a thread of the ractor's own, so the main
+    # thread can stay inside the tool.
     # @param [LLM::Tool] runner
     # @param [LLM::Function::Window] window
     # @return [Thread]

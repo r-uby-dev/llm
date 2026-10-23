@@ -5,6 +5,14 @@ require "timeout"
 require "tmpdir"
 
 RSpec.describe LLM::Function do
+  def within(seconds = 5, &block)
+    thread = Thread.new do
+      Thread.current.report_on_exception = false
+      block.call
+    end
+    thread.join(seconds) ? thread.value : raise("timed out after #{seconds} seconds")
+  end
+
   let(:tool_class) do
     Class.new(LLM::Tool) do
       name "system"
@@ -46,9 +54,11 @@ RSpec.describe LLM::Function do
     end
 
     describe "when calling #value", :ractor do
-      subject(:value) { task.value.to_h }
-
-      it { is_expected.to eq(id: "call_1", name: "system", value: {"ok" => true}) }
+      it "returns the tool's result" do
+        expect(within { task.value.to_h }).to eq(
+          id: "call_1", name: "system", value: {"ok" => true}
+        )
+      end
     end
 
     describe "when checking #alive?", :ractor do
@@ -68,7 +78,7 @@ RSpec.describe LLM::Function do
 
       before do
         slow_task.spawn
-        sleep 0.01 until slow_task.alive?
+        within { sleep 0.01 until slow_task.alive? }
       end
 
       it "reports true while the task is alive" do
@@ -76,7 +86,7 @@ RSpec.describe LLM::Function do
       end
 
       it "reports false after the task has been waited on" do
-        slow_task.wait
+        within { slow_task.wait }
         expect(slow_task.alive?).to be(false)
       end
     end
@@ -106,12 +116,12 @@ RSpec.describe LLM::Function do
       context "when the task is running" do
         before do
           slow_task.spawn
-          sleep 0.05 until slow_task.alive?
+          within { sleep 0.05 until slow_task.alive? }
         end
 
         it "interrupts the tool execution" do
           slow_task.interrupt!
-          expect { slow_task.wait }.to raise_error(LLM::Interrupt)
+          expect { within { slow_task.wait } }.to raise_error(LLM::Interrupt)
         end
       end
 
@@ -142,7 +152,7 @@ RSpec.describe LLM::Function do
       before do
         tool.tracer = tracer
         tool.model = "gpt-4.1"
-        task.group_class.new([task]).wait
+        within { task.group_class.new([task]).wait }
       end
 
       it "traces the tool start" do
@@ -537,12 +547,12 @@ RSpec.describe LLM::Function do
 
       before do
         task.spawn
-        sleep 0.05 until task.alive?
+        within { sleep 0.05 until task.alive? }
         task.interrupt!
       end
 
       it "tells the tool" do
-        expect(task.wait.value).to include("told" => true)
+        expect(within { task.wait.value }).to include("told" => true)
       end
     end
 
