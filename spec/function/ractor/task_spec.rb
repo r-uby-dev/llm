@@ -5,13 +5,17 @@ require "setup"
 ##
 # Where a wait's answer comes from.
 #
-# A ractor answers one round trip and goes with the answering of it, so
-# `Mailbox#wait` is not a request a terminated ractor can be asked. The
-# task's own ractor is not asked for the result at all: the job hands the
-# result to a ractor of the task's own before that ractor ends, and the
-# wait takes it from there, whether it arrives before or after the task's
-# ractor has gone. A wait after the first is answered from memory, the way
-# `LLM::Function::Thread::Task#wait` answers from the thread's value.
+# A ractor answers one round trip and goes with the answering of it, so a
+# port is what the result arrives on instead. The ractor a task spawns
+# hands the result to a `Ractor::Port` of the task's own before that
+# ractor ends, and the wait takes it from there, whether it arrives
+# before or after the ractor has gone. A wait after the first is answered
+# from memory, the way `LLM::Function::Thread::Task#wait` answers from the
+# thread's value.
+#
+# **One ractor, not two.** The ractor runs the tool itself; a watcher
+# thread inside it services interrupts, and the port is the one place a
+# result leaves by.
 #
 # **A cancel that arrives while the tool is running is held, not dropped**:
 # the job's watcher waits on the window the job opens immediately before the
@@ -20,7 +24,7 @@ require "setup"
 # value the job sends back, because a ractor's copy of a tool is not the
 # object the caller holds.
 #
-# **And a cancel made before `spawn` is held too.** The mailbox is built in
+# **And a cancel made before `spawn` is held too.** The ractor is built in
 # `spawn`, so there was nothing to send a cancel to and the task answered `nil`
 # for one that had not run yet - a cancel that said nothing. It is remembered
 # and delivered by `spawn`, which is where `:fork`'s task takes one too.
@@ -95,14 +99,14 @@ RSpec.describe LLM::Function::Ractor::Task do
   end
 
   describe "a wait that arrives after the result is in" do
-    it "is answered by the ractor the result was delivered to" do
+    it "is answered by the port the result was delivered to" do
       task.spawn
       ##
       # The tool is quick and the wait is late: by the time it comes, the
-      # task's own ractor has answered the round trip it was there for
-      # and gone with it. Before this change the wait went to that ractor,
-      # and what came back was the refusal `Ractor#send` gives a port that
-      # has closed - or, the race's other outcome, a wait that never came
+      # task's ractor has delivered its result and gone. Before this
+      # change the wait went to that ractor, and what came back was the
+      # refusal `Ractor#send` gives a ractor that has closed - or, the
+      # race's other outcome, a wait that never came back at all.
       # back at all.
       sleep 0.05
       expect(within { task.wait }.to_h).to eq(
@@ -112,7 +116,7 @@ RSpec.describe LLM::Function::Ractor::Task do
   end
 
   ##
-  # The task's own ractor has gone by the time the cancel comes, which is
+  # The task's ractor has gone by the time the cancel comes, which is
   # what a caller finds after a result has been delivered: the cancel is a
   # no-op rather than a `::Ractor::ClosedError` on its thread.
   describe "a task that has returned" do
@@ -217,7 +221,7 @@ RSpec.describe LLM::Function::Ractor::Task do
   end
 
   ##
-  # The cancel precedes `spawn`, so there is no mailbox to send it to yet: the
+  # The cancel precedes `spawn`, so there is no ractor to send it to yet: the
   # task remembers it and delivers it as soon as there is one. The tool holds,
   # so a cancel that was dropped is a wait with nothing to answer it rather
   # than a cancel that arrived too late to matter.

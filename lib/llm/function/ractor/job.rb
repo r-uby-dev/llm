@@ -2,9 +2,9 @@
 
 class LLM::Function
   ##
-  # The {LLM::Function::Ractor::Job} class has a reference
-  # to two ractors: a supervisor, and another Ractor that
-  # runs the tool call.
+  # The {LLM::Function::Ractor::Job} class runs a tool call inside
+  # the one ractor a task spawns, and delivers its result to the
+  # port the task holds.
   class Ractor::Job
     ##
     # @api private
@@ -12,16 +12,16 @@ class LLM::Function
     private_constant :Ractor
 
     ##
-    # @param [Ractor] supervisor
-    # @param [Ractor] result
+    # @param [Ractor::Port] port
+    #  The port the task reads the result from
     # @param [Class] runner_class
     # @param [String, nil] id
     # @param [String] name
     # @param [Hash, Array, nil] arguments
+    # @param [String] cookie
     # @return [LLM::Function::Ractor::Job]
-    def initialize(supervisor, result, runner_class, id, name, arguments, cookie)
-      @supervisor = supervisor
-      @result = result
+    def initialize(port, runner_class, id, name, arguments, cookie)
+      @port = port
       @runner_class = runner_class
       @id = id
       @name = name
@@ -30,65 +30,79 @@ class LLM::Function
     end
 
     ##
+    # Runs the call, and answers with exactly one message: the result,
+    # or a note that says the call was interrupted or raised.
+    #
+    # **The watcher is stopped before this ractor ends.** A ractor does
+    # not end while a thread it made is still running, and the watcher is
+    # a thread blocked on a message that will never come once the call is
+    # done - so it is sent one, and joined, rather than left to hold the
+    # ractor open for the rest of the process's life.
     # @return [void]
     def call
-      spawn
-      wait
+      finished_at = -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) }
+      window = LLM::Function::Window.new(thread: ::Thread.current)
+      runner = @runner_class.new
+      watcher = watch(runner, window)
+      kwargs = Hash === @arguments ? @arguments.transform_keys(&:to_sym) : @arguments
+      window.running!
+      result = runner.call(**kwargs)
+      window.finished!
+      @port.send([:done, @id, @name, result, finished_at.()])
+    rescue LLM::Interrupt
+      @port.send([:done, @id, @name, {interrupt: true, cookie: @cookie}, finished_at.()])
+    rescue => ex
+      @port.send([:done, @id, @name, {error: true, type: ex.class.name, message: ex.message}, finished_at.()])
+    ensure
+      watch_stop(watcher)
     end
 
     private
 
     ##
-    # The loop owes one thing: the result, handed to the ractor the task
-    # holds it in before this one ends. It answers `alive?` while the tool
-    # runs, forwards interrupts to the tool, hands the result over, and
-    # goes - so a wait cannot arrive at a ractor that is on its way out,
-    # which is what asking this one for a result used to do.
-    # @return [void]
-    def wait
-      loop do
-        case ::Ractor.receive
-        in [:done, *data]
-          @result.send(data)
-          break
-        in [:alive?, reply]
-          reply.send(true)
-        in [:interrupt]
-          interrupt_tool
-        end
-      end
-    end
-
-    ##
-    # Forwards an interrupt to the tool's ractor.
+    # Tells the watcher that the call is over and waits for it to go.
     #
-    # A tool whose ractor has gone has nothing left to interrupt, and this
-    # loop is the thing that owes the result to the ractor the task waits
-    # on. A raise here takes the loop with it before the result has been
-    # handed over, so that a forward to a ractor that has gone turns the
-    # failure that used to name it into a wait that never comes back.
-    # @return [nil]
-    def interrupt_tool
-      @tool&.send(:interrupt)
-      nil
-    rescue ::Ractor::ClosedError
+    # A watcher that never started has nothing to stop. One that is
+    # blocked on `Ractor.receive` is released by the `:stop` message,
+    # which is the only thing that ends it: killing it would leave the
+    # ractor holding a thread that has gone, and a thread that has gone
+    # is not what a ractor waits for before it ends.
+    # @param [Thread, nil] watcher
+    # @return [void]
+    def watch_stop(watcher)
+      return unless watcher
+      ::Ractor.current.send(:stop)
+      watcher.join(1)
+      watcher.kill if watcher.alive?
       nil
     end
 
+    private
+
     ##
-    # @return [void]
-    def spawn
-      vars  = [@supervisor, @runner_class, @id, @name, @arguments, @cookie]
-      @tool = Ractor.new(*vars) do |supervisor, runner_class, id, name, arguments, cookie|
-        finished_at = -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) }
-        window = LLM::Function::Window.new(thread: ::Thread.current)
-        runner = runner_class.new
-        ::Thread.new do
+    # Watches for an interrupt on a thread of the ractor's own, so the
+    # ractor's main thread can stay inside the tool.
+    #
+    # The watcher is what an interrupt reaches, and it forwards in the
+    # order the window promises: the tool is told first, and the raise
+    # is issued after - so a tool that releases a resource has released
+    # it by the time the raise lands.
+    #
+    # A watcher is ended by the `:stop` message `watch_stop` sends once
+    # the call is over, rather than by the ractor ending underneath it:
+    # a ractor does not end while a thread it made is still blocked.
+    # @param [LLM::Tool] runner
+    # @param [LLM::Function::Window] window
+    # @return [Thread]
+    def watch(runner, window)
+      ::Thread.new do
+        loop do
           kind = begin
             ::Ractor.receive
           rescue ::Ractor::Error
-            next
+            break
           end
+          break if kind == :stop
           next unless kind == :interrupt
           begin
             LLM::Function.interrupt(runner)
@@ -96,15 +110,6 @@ class LLM::Function
             window.interrupt!
           end
         end
-        kwargs = Hash === arguments ? arguments.transform_keys(&:to_sym) : arguments
-        window.running!
-        result = runner.call(**kwargs)
-        window.finished!
-        supervisor.send([:done, id, name, result, finished_at.()])
-      rescue LLM::Interrupt
-        supervisor.send([:done, id, name, {interrupt: true, cookie:}, finished_at.()])
-      rescue => ex
-        supervisor.send([:done, id, name, {error: true, type: ex.class.name, message: ex.message}, finished_at.()])
       end
     end
   end

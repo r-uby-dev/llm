@@ -6,10 +6,10 @@ require "setup"
 # A cancel for a group of calls, one of which has already returned.
 #
 # `Group#interrupt!` maps over its tasks in order, and a task whose ractor
-# has gone raises `::Ractor::ClosedError` from the mailbox it cancels
-# through. One finished call therefore stopped the cancel at that call,
-# and every call after it kept running - which is the opposite of what a
-# group interrupt is for.
+# has gone raises `::Ractor::ClosedError` from the send it cancels through.
+# One finished call therefore stopped the cancel at that call, and every
+# call after it kept running - which is the opposite of what a group
+# interrupt is for.
 #
 # **Every wait has a deadline.** A raise cannot be relied on to interrupt
 # a wait on a ractor, so each of them runs on a thread of its own and is

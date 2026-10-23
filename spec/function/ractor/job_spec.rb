@@ -32,7 +32,7 @@ require "setup"
 # example made. Here the tool runs in another ractor, so the handover is
 # a ractor as well: the examples that need one make a gate, hand it to
 # the tool on the tool's own class, and wait for the message the way the
-# mailbox waits for a reply. A constant rather than an argument, so the
+# example waits for a reply. A constant rather than an argument, so the
 # gate is something the tool reads where it runs rather than something
 # the call carries with it. No example sleeps to find out where the call
 # has got to.
@@ -77,7 +77,7 @@ RSpec.describe LLM::Function::Ractor::Job do
   end
 
   ##
-  # The gate's message, waited for the way the mailbox waits for a reply:
+  # The gate's message, waited for the way the example waits for a reply:
   # `take` where the runtime has it, `Ractor.select` where it does not.
   def signal
     gate.respond_to?(:take) ? gate.take : Ractor.select(gate).last
