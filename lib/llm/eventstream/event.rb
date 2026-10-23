@@ -4,7 +4,7 @@ module LLM::EventStream
   ##
   # @private
   class Event
-    UNSET = Object.new.freeze
+    UNSET = ::Object.new.freeze
 
     def self.parse(chunk)
       newline = chunk.end_with?("\n") ? chunk.bytesize - 1 : chunk.bytesize

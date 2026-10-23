@@ -36,7 +36,7 @@
 class LLM::Tool
   ##
   # @api private
-  UNDEFINED = Object.new.freeze
+  UNDEFINED = ::Object.new.freeze
   private_constant :UNDEFINED
 
   require_relative "tool/param"

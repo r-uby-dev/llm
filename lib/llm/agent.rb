@@ -38,7 +38,7 @@ module LLM
 
     ##
     # @api private
-    UNDEFINED = Object.new.freeze
+    UNDEFINED = ::Object.new.freeze
     private_constant :UNDEFINED
 
     ##

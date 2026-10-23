@@ -7,7 +7,7 @@ class LLM::Console
   # description. This basic version does not implement parameters. A
   # command is accessible via the `/` prefix: eg `/exit`.
   class Command
-    UNDEFINED = Object.new.freeze
+    UNDEFINED = ::Object.new.freeze
     SINGLETON = self
     private_constant :UNDEFINED, :SINGLETON
 
