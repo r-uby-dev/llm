@@ -43,7 +43,7 @@ class LLM::DeepSeek
     # while the rest of its OpenAI-compatible API lives under `/v1`
     # @see https://api-docs.deepseek.com/guides/files_api DeepSeek docs
     def path(suffix, **)
-      @provider.send(:path, suffix, base_path: false)
+      @llm.send(:path, suffix, base_path: false)
     end
   end
 end

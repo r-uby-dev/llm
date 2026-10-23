@@ -21,10 +21,10 @@ class LLM::Bedrock
   #   llm.models.all.each { |m| puts m.id }
   class Models
     ##
-    # @param [LLM::Bedrock] provider
+    # @param [LLM::Bedrock] llm
     # @return [LLM::Bedrock::Models]
-    def initialize(provider)
-      @provider = provider
+    def initialize(llm)
+      @llm = llm
     end
 
     ##
@@ -99,13 +99,13 @@ class LLM::Bedrock
     ##
     # @return [LLM::Object]
     def credentials
-      LLM::Object.from(@provider.send(:credentials).to_h).tap do
+      LLM::Object.from(@llm.send(:credentials).to_h).tap do
         _1.host = "bedrock.#{_1.aws_region}.amazonaws.com"
       end
     end
 
     [:timeout, :connect_timeout, :tracer, :transport].each do |m|
-      define_method(m) { @provider.send(m) }
+      define_method(m) { @llm.send(m) }
     end
   end
 end

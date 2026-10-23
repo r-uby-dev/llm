@@ -19,10 +19,10 @@ class LLM::Ollama
   class Models
     ##
     # Returns a new Models object
-    # @param provider [LLM::Provider]
+    # @param llm [LLM::Provider]
     # @return [LLM::Ollama::Models]
-    def initialize(provider)
-      @provider = provider
+    def initialize(llm)
+      @llm = llm
     end
 
     ##
@@ -50,7 +50,7 @@ class LLM::Ollama
     private
 
     [:headers, :execute].each do |m|
-      define_method(m) { |*args, **kwargs, &b| @provider.send(m, *args, **kwargs, &b) }
+      define_method(m) { |*args, **kwargs, &b| @llm.send(m, *args, **kwargs, &b) }
     end
   end
 end

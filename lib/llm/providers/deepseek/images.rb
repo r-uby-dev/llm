@@ -14,10 +14,10 @@ class LLM::DeepSeek
   # with tools like rsvg-convert.
   class Images
     ##
-    # @param [LLM::DeepSeek] provider
+    # @param [LLM::DeepSeek] llm
     # @return [LLM::DeepSeek::Images]
-    def initialize(provider)
-      @provider = provider
+    def initialize(llm)
+      @llm = llm
     end
 
     ##
@@ -42,8 +42,8 @@ class LLM::DeepSeek
     #  Exists for compatibility with other providers.
     # @return [LLM::Response<LLM::DeepSeek::ResponseAdapter::Image>]
     #  Returns a response
-    def create(prompt:, model: @provider.default_model, agent: nil, size: nil, n: nil, response_format: nil, quality: nil, style: nil)
-      agent ||= LLM::Agent.new(@provider, model:, instructions: create_instructions, response_format: {type: "json_object"})
+    def create(prompt:, model: @llm.default_model, agent: nil, size: nil, n: nil, response_format: nil, quality: nil, style: nil)
+      agent ||= LLM::Agent.new(@llm, model:, instructions: create_instructions, response_format: {type: "json_object"})
       res = agent.talk(prompt)
       res = LLM::DeepSeek::ResponseAdapter.adapt(res, type: :image)
       res.define_singleton_method(:agent) { agent }
@@ -74,9 +74,9 @@ class LLM::DeepSeek
     #  Exists for compatibility with other providers.
     # @return [LLM::Response<LLM::DeepSeek::ResponseAdapter::Image>]
     #  Returns a response
-    def edit(prompt:, image:, model: @provider.default_model, agent: nil, size: nil, n: nil, response_format: nil, quality: nil, style: nil)
+    def edit(prompt:, image:, model: @llm.default_model, agent: nil, size: nil, n: nil, response_format: nil, quality: nil, style: nil)
       file = LLM.File(image)
-      agent ||= LLM::Agent.new(@provider, model:, instructions: edit_instructions(file), response_format: {type: "json_object"})
+      agent ||= LLM::Agent.new(@llm, model:, instructions: edit_instructions(file), response_format: {type: "json_object"})
       res = agent.talk(prompt)
       res = LLM::DeepSeek::ResponseAdapter.adapt(res, type: :image)
       res.define_singleton_method(:agent) { agent }
@@ -103,7 +103,7 @@ class LLM::DeepSeek
     end
 
     [:path, :headers, :execute, :transport].each do |m|
-      define_method(m) { |*args, **kwargs, &b| @provider.send(m, *args, **kwargs, &b) }
+      define_method(m) { |*args, **kwargs, &b| @llm.send(m, *args, **kwargs, &b) }
     end
   end
 end

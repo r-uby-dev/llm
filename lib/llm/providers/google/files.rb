@@ -25,10 +25,10 @@ class LLM::Google
   class Files
     ##
     # Returns a new Files object
-    # @param provider [LLM::Provider]
+    # @param llm [LLM::Provider]
     # @return [LLM::Google::Files]
-    def initialize(provider)
-      @provider = provider
+    def initialize(llm)
+      @llm = llm
     end
 
     ##
@@ -141,11 +141,11 @@ class LLM::Google
     end
 
     def key
-      @provider.instance_variable_get(:@key)
+      @llm.instance_variable_get(:@key)
     end
 
     [:headers, :execute, :transport].each do |m|
-      define_method(m) { |*args, **kwargs, &b| @provider.send(m, *args, **kwargs, &b) }
+      define_method(m) { |*args, **kwargs, &b| @llm.send(m, *args, **kwargs, &b) }
     end
   end
 end

@@ -115,12 +115,12 @@ module LLM
     attr_reader :llm
 
     ##
-    # @param [LLM::Provider] provider
+    # @param [LLM::Provider] llm
     #  A provider
     # @param [Hash] options
     #  A hash of options
-    def initialize(provider, options = {})
-      @llm = provider
+    def initialize(llm, options = {})
+      @llm = llm
       @options = {}
     end
 
@@ -335,7 +335,7 @@ module LLM
     ##
     # @return [String]
     def inspect
-      "#<#{LLM::Utils.object_id(self)} @provider=#{@llm.class} @tracer=#{@tracer.inspect}>"
+      "#<#{LLM::Utils.object_id(self)} @llm=#{@llm.class} @tracer=#{@tracer.inspect}>"
     end
 
     ##

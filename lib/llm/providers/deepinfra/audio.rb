@@ -3,11 +3,11 @@
 class LLM::DeepInfra
   class Audio
     ##
-    # @param [LLM::Provider] provider
+    # @param [LLM::Provider] llm
     #  A provider
     # @return [LLM::DeepInfra::Audio]
-    def initialize(provider)
-      @provider = provider
+    def initialize(llm)
+      @llm = llm
     end
 
     ##
@@ -60,7 +60,7 @@ class LLM::DeepInfra
     private
 
     [:path, :headers, :execute, :transport].each do |m|
-      define_method(m) { |*args, **kwargs, &b| @provider.send(m, *args, **kwargs, &b) }
+      define_method(m) { |*args, **kwargs, &b| @llm.send(m, *args, **kwargs, &b) }
     end
   end
 end

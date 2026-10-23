@@ -71,7 +71,7 @@ class LLM::Console
       @repl = repl
       @name = repl.name
       @agent = repl.agent
-      @provider = @agent.llm.name
+      @llm = @agent.llm.name
       @rows = [Row.new]
       @cursor = [0, 0]
       @scroll = 0
@@ -431,7 +431,7 @@ class LLM::Console
     end
 
     def prompt
-      "#{@provider}(#{@name})> "
+      "#{@llm}(#{@name})> "
     end
 
     ##

@@ -21,14 +21,14 @@
 #   res = ctx.talk(prompt)
 class LLM::Prompt
   ##
-  # @param [LLM::Provider] provider
+  # @param [LLM::Provider] llm
   #  A provider used to resolve provider-specific role names.
   # @param [Proc] b
   #  A block that composes messages. If the block takes one argument,
   #  it receives the prompt object. Otherwise the block runs in the
   #  prompt context via `instance_eval`.
-  def initialize(provider, &b)
-    @provider = provider
+  def initialize(llm, &b)
+    @llm = llm
     @buffer = []
     unless b.nil?
       (b.arity == 1) ? b.call(self) : instance_eval(&b)
@@ -45,11 +45,11 @@ class LLM::Prompt
   #  message of its own can mark it here, and the runtime reads the
   #  mark back rather than inferring it from the role.
   # @return [void]
-  def talk(content, role: @provider.user_role, extra: nil)
+  def talk(content, role: @llm.user_role, extra: nil)
     role = case role.to_sym
-    when :system then @provider.system_role
-    when :user then @provider.user_role
-    when :developer then @provider.developer_role
+    when :system then @llm.system_role
+    when :user then @llm.user_role
+    when :developer then @llm.developer_role
     else role
     end
     message = extra ? LLM::Message.new(role, content, extra) : LLM::Message.new(role, content)
@@ -64,7 +64,7 @@ class LLM::Prompt
   #  Fields carried alongside the message
   # @return [void]
   def user(content, extra: nil)
-    talk(content, role: @provider.user_role, extra:)
+    talk(content, role: @llm.user_role, extra:)
   end
 
   ##
@@ -74,7 +74,7 @@ class LLM::Prompt
   #  Fields carried alongside the message
   # @return [void]
   def system(content, extra: nil)
-    talk(content, role: @provider.system_role, extra:)
+    talk(content, role: @llm.system_role, extra:)
   end
 
   ##
@@ -84,7 +84,7 @@ class LLM::Prompt
   #  Fields carried alongside the message
   # @return [void]
   def developer(content, extra: nil)
-    talk(content, role: @provider.developer_role, extra:)
+    talk(content, role: @llm.developer_role, extra:)
   end
 
   ##

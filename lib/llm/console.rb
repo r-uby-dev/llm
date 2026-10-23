@@ -49,7 +49,7 @@ module LLM
       @name = name || "agent"
       @sender = "You"
       @agent = configure(agent:, path:)
-      @provider = agent.llm.name
+      @llm = agent.llm.name
       @model = agent.model
       @input = Input.new(self, height: 3)
       @buffer = Buffer.new(self)

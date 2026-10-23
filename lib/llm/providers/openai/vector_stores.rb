@@ -19,10 +19,10 @@ class LLM::OpenAI
     private_constant :INTERVAL
 
     ##
-    # @param [LLM::Provider] provider
+    # @param [LLM::Provider] llm
     #  An OpenAI provider
-    def initialize(provider)
-      @provider = provider
+    def initialize(llm)
+      @llm = llm
     end
 
     ##
@@ -260,7 +260,7 @@ class LLM::OpenAI
     private
 
     [:path, :headers, :execute].each do |m|
-      define_method(m) { |*args, **kwargs, &b| @provider.send(m, *args, **kwargs, &b) }
+      define_method(m) { |*args, **kwargs, &b| @llm.send(m, *args, **kwargs, &b) }
     end
   end
 end

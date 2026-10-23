@@ -20,10 +20,10 @@ class LLM::OpenAI
   class Files
     ##
     # Returns a new Files object
-    # @param provider [LLM::Provider]
+    # @param llm [LLM::Provider]
     # @return [LLM::OpenAI::Files]
-    def initialize(provider)
-      @provider = provider
+    def initialize(llm)
+      @llm = llm
     end
 
     ##
@@ -135,7 +135,7 @@ class LLM::OpenAI
     private
 
     [:path, :headers, :execute, :transport].each do |m|
-      define_method(m) { |*args, **kwargs, &b| @provider.send(m, *args, **kwargs, &b) }
+      define_method(m) { |*args, **kwargs, &b| @llm.send(m, *args, **kwargs, &b) }
     end
   end
 end

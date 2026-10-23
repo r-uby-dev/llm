@@ -33,10 +33,10 @@ class LLM::OpenAI
   class Moderations
     ##
     # Returns a new Moderations object
-    # @param [LLM::Provider] provider
+    # @param [LLM::Provider] llm
     # @return [LLM::OpenAI::Moderations]
-    def initialize(provider)
-      @provider = provider
+    def initialize(llm)
+      @llm = llm
     end
 
     ##
@@ -59,7 +59,7 @@ class LLM::OpenAI
     private
 
     [:path, :headers, :execute].each do |m|
-      define_method(m) { |*args, **kwargs, &b| @provider.send(m, *args, **kwargs, &b) }
+      define_method(m) { |*args, **kwargs, &b| @llm.send(m, *args, **kwargs, &b) }
     end
   end
 end

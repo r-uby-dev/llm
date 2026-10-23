@@ -22,10 +22,10 @@ module LLM
     private_constant :UNDEFINED
 
     ##
-    # @param [LLM::Provider] provider
+    # @param [LLM::Provider] llm
     # @return [LLM::Buffer]
-    def initialize(provider)
-      @provider = provider
+    def initialize(llm)
+      @llm = llm
       @messages = []
     end
 

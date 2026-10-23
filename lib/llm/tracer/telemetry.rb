@@ -43,7 +43,7 @@ module LLM
     # param [LLM::Provider] provider
     #  An LLM provider
     # @return [LLM::Tracer::Telemetry]
-    def initialize(provider, options = {})
+    def initialize(llm, options = {})
       super
       @exporter = options.delete(:exporter)
       setup!

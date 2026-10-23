@@ -17,7 +17,7 @@ class LLM::Console
     def initialize(repl)
       @repl = repl
       @agent = repl.agent
-      @provider = @agent.llm.name
+      @llm = @agent.llm.name
       @nodes = [Node.new("idle")]
     end
 

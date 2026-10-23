@@ -15,7 +15,7 @@ module LLM
   class Tracer::Logger < Tracer
     ##
     # @param (see LLM::Tracer#initialize)
-    def initialize(provider, options = {})
+    def initialize(llm, options = {})
       super
       setup!(**options)
     end
