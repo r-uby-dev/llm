@@ -56,4 +56,22 @@ RSpec.describe LLM::Google::StreamParser do
       expect(parts.first["functionCall"]["name"]).to eq("system")
     end
   end
+
+  describe "a signature sent beside other content" do
+    let(:inline) { {"mimeType" => "image/png", "data" => "AAAA"} }
+
+    before { parse!({"inlineData" => inline, "thoughtSignature" => "abc123"}) }
+
+    it "is appended as one part" do
+      expect(parts.size).to eq(1)
+    end
+
+    it "keeps the content it was sent with" do
+      expect(parts.first["inlineData"]).to eq(inline)
+    end
+
+    it "keeps the signature" do
+      expect(parts.first["thoughtSignature"]).to eq("abc123")
+    end
+  end
 end
