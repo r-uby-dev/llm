@@ -17,8 +17,10 @@ class LLM::OpenAI
     def adapt(messages, mode: :complete)
       messages.filter_map do |message|
         if mode == :complete
+          message.extra.merge!(llm: self)
           Completion.new(message).adapt
         else
+          message.extra.merge!(llm: @llm)
           Respond.new(message).adapt
         end
       end

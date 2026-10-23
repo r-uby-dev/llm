@@ -4,6 +4,8 @@ module LLM::Mistral::RequestAdapter
   ##
   # @private
   class Completion
+    include LLM::RequestAdapter::Role
+
     ##
     # @param [LLM::Message, Hash] message
     #  The message to format
@@ -17,9 +19,9 @@ module LLM::Mistral::RequestAdapter
     def adapt
       catch(:abort) do
         if Hash === message
-          {role: message[:role], content: adapt_content(message[:content])}
+          {role: adapt_message_role(message), content: adapt_content(message[:content])}
         elsif message.tool_call?
-          {role: message.role, content: nil, tool_calls: message.extra[:original_tool_calls]}
+          {role: adapt_message_role(message), content: nil, tool_calls: message.extra[:original_tool_calls]}
         else
           adapt_message
         end
@@ -33,7 +35,7 @@ module LLM::Mistral::RequestAdapter
       when Array
         adapt_array
       else
-        {role: message.role, content: adapt_content(content)}
+        {role: adapt_message_role(message), content: adapt_content(content)}
       end
     end
 
@@ -41,17 +43,22 @@ module LLM::Mistral::RequestAdapter
       if content.empty?
         nil
       elsif returns.any?
-        returns.map do
-          {
-            role: "tool",
-            name: _1.name,
-            tool_call_id: _1.id,
-            content: LLM.json.dump(_1.value)
-          }
-        end
+        returns.map { adapt_return(_1) }
       else
-        {role: message.role, content: content.flat_map { adapt_content(_1) }}
+        {role: adapt_message_role(message), content: content.flat_map { adapt_content(_1) }}
       end
+    end
+
+    ##
+    # @param [LLM::Function::Return] result
+    # @return [Hash]
+    def adapt_return(result)
+      {
+        role: adapt_role(:tool),
+        name: result.name,
+        tool_call_id: result.id,
+        content: LLM.json.dump(result.value)
+      }
     end
 
     def adapt_content(content)
@@ -65,12 +72,7 @@ module LLM::Mistral::RequestAdapter
       when LLM::Message
         adapt_content(content.content)
       when LLM::Function::Return
-        throw(:abort, {
-          role: "tool",
-          name: content.name,
-          tool_call_id: content.id,
-          content: LLM.json.dump(content.value)
-        })
+        throw(:abort, adapt_return(content))
       else
         prompt_error!(content)
       end

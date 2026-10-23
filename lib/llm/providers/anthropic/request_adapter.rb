@@ -13,6 +13,7 @@ class LLM::Anthropic
     def adapt(messages, mode: nil)
       payload = {messages: [], system: []}
       messages.each do |message|
+        message.extra.merge!(llm: self)
         adapted = Completion.new(message).adapt
         next if adapted.nil?
         if system?(message)

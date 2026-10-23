@@ -4,6 +4,8 @@ module LLM::Anthropic::RequestAdapter
   ##
   # @private
   class Completion
+    include LLM::RequestAdapter::Role
+
     ##
     # @param [LLM::Message, Hash] message
     #  The message to format
@@ -17,7 +19,7 @@ module LLM::Anthropic::RequestAdapter
     def adapt
       catch(:abort) do
         if Hash === message
-          {role: message[:role], content: adapt_content(message[:content])}
+          {role: adapt_message_role(message), content: adapt_content(message[:content])}
         else
           adapt_message
         end
@@ -28,9 +30,9 @@ module LLM::Anthropic::RequestAdapter
 
     def adapt_message
       if message.tool_call?
-        {role: message.role, content: adapt_tool_calls}
+        {role: adapt_message_role(message), content: adapt_tool_calls}
       else
-        {role: message.role, content: adapt_content(content)}
+        {role: adapt_message_role(message), content: adapt_content(content)}
       end
     end
 

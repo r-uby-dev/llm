@@ -172,7 +172,13 @@ module LLM
     ##
     # @return (see LLM::Provider#assistant_role)
     def assistant_role
-      "model"
+      :model
+    end
+
+    ##
+    # @return (see LLM::Provider#tool_role)
+    def tool_role
+      :user
     end
 
     ##

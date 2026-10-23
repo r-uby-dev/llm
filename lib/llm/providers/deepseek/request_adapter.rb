@@ -14,6 +14,7 @@ class LLM::DeepSeek
     # @return [Array<Hash>]
     def adapt(messages, mode: nil)
       messages.filter_map do |message|
+        message.extra.merge!(llm: self)
         Completion.new(message).adapt
       end
     end

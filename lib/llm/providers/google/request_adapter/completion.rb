@@ -4,6 +4,8 @@ module LLM::Google::RequestAdapter
   ##
   # @private
   class Completion
+    include LLM::RequestAdapter::Role
+
     ##
     # @param [LLM::Message, Hash] message
     #  The message to format
@@ -17,11 +19,11 @@ module LLM::Google::RequestAdapter
     def adapt
       catch(:abort) do
         if Hash === message
-          {role: message[:role], parts: adapt_content(message[:content])}
+          {role: adapt_message_role(message), parts: adapt_content(message[:content])}
         elsif message.tool_call?
-          {role: message.role, parts: message.extra.original_tool_calls}
+          {role: adapt_message_role(message), parts: message.extra.original_tool_calls}
         else
-          {role: message.role, parts: adapt_content(message.content)}
+          {role: adapt_message_role(message), parts: adapt_content(message.content)}
         end
       end
     end

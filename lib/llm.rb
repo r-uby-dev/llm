@@ -35,6 +35,7 @@ module LLM
   require_relative "llm/model"
   require_relative "llm/version"
   require_relative "llm/message"
+  require_relative "llm/request_adapter"
   require_relative "llm/transport"
   require_relative "llm/response"
   require_relative "llm/mime"

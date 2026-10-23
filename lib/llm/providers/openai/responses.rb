@@ -19,10 +19,10 @@ class LLM::OpenAI
 
     ##
     # Returns a new Responses object
-    # @param provider [LLM::Provider]
+    # @param [LLM::Provider] llm
     # @return [LLM::OpenAI::Responses]
-    def initialize(provider)
-      @provider = provider
+    def initialize(llm)
+      @llm = llm
     end
 
     ##
@@ -36,7 +36,7 @@ class LLM::OpenAI
     # @return [LLM::Response]
     def create(prompt, params = {})
       params = {}.merge!(params)
-      params = {role: :user, model: params.delete(:model) || @provider.default_model}.merge!(params)
+      params = {role: :user, model: params.delete(:model) || @llm.default_model}.merge!(params)
       role, stream = params.delete(:role), LLM::Stream.try(params.delete(:stream))
       tools  = resolve_tools(params.delete(:tools))
       params = [
@@ -45,8 +45,8 @@ class LLM::OpenAI
         adapt_tools(tools)
       ].inject({}, &:merge!).compact
       req = LLM::Transport::Request.post(path("/responses"), headers)
-      messages = @provider.build_messages(prompt, params, role, key: :input)
-      @provider.tracer.set_request_metadata(user_input: extract_user_input(messages, fallback: prompt))
+      messages = @llm.build_messages(prompt, params, role, key: :input)
+      @llm.tracer.set_request_metadata(user_input: extract_user_input(messages, fallback: prompt))
       ##
       # The input is derived from `prompt`/`messages` above; a
       # stale `:input` passed in params (eg by LLM::Context) must
@@ -105,7 +105,7 @@ class LLM::OpenAI
     private
 
     [:path, :headers, :execute, :transport, :resolve_tools].each do |m|
-      define_method(m) { |*args, **kwargs, &b| @provider.send(m, *args, **kwargs, &b) }
+      define_method(m) { |*args, **kwargs, &b| @llm.send(m, *args, **kwargs, &b) }
     end
 
     def adapt_schema(params)

@@ -30,7 +30,7 @@ module LLM
     # @param [Hash] extra
     # @return [LLM::Message]
     def initialize(role, content, extra = {})
-      @role = role.to_s
+      @role = normalize_role(role, content)
       @content = content
       @extra = LLM::Object.from(extra)
       @id = extra[:id] || SecureRandom.uuid_v7
@@ -228,6 +228,12 @@ module LLM
     end
 
     ##
+    # @return [LLM::Provider, nil]
+    def llm
+      extra[:llm]
+    end
+
+    ##
     # Returns a string representation of the message
     # @return [String]
     def inspect
@@ -238,15 +244,50 @@ module LLM
 
     private
 
+    ##
+    # Normalizes a role to the abstract role the runtime
+    # stores: `assistant` for a model reply, `tool` for a
+    # tool return. The provider's spelling is produced
+    # again at assembly time by
+    # {LLM::RequestAdapter::Role#adapt_role}.
+    #
+    # Content is consulted as well as the role, because
+    # an Anthropic or Bedrock tool return arrives under
+    # `user`.
+    # @param [Symbol, String] role
+    # @param [Object] content
+    # @return [String]
+    def normalize_role(role, content)
+      case role.to_s
+      when "assistant", "model" then "assistant"
+      when "tool" then "tool"
+      else holds_tool_return?(content) ? "tool" : role.to_s
+      end
+    end
+
+    ##
+    # @param [Object] content
+    # @return [Boolean]
+    #  Returns true when content holds a tool return
+    def holds_tool_return?(content)
+      LLM::Function::Return === content || [*content].any? { LLM::Function::Return === it }
+    end
+
+    ##
+    # @return [Hash]
     def preserve_nil_content(hash)
       hash[:content] = content if content.nil?
       hash
     end
 
+    ##
+    # @return [LLM::Object]
     def tool_calls
       @tool_calls ||= LLM::Object.from(extra.tool_calls || [])
     end
 
+    ##
+    # @return [Array<LLM::Function>]
     def available_tools
       tools = extra.tools || []
       tools = nil if tools.empty?
@@ -254,12 +295,16 @@ module LLM
       tools.map { _1.respond_to?(:function) ? _1.function : _1 }
     end
 
+    ##
+    # @return [LLM::Function]
     def function_missing(name)
       LLM.function(name) do |fn|
         fn.define { raise LLM::NoSuchToolError, "tool '#{name}' not found" }
       end
     end
 
+    ##
+    # retrurn [Array]
     def content_items
       Array(content)
     end
