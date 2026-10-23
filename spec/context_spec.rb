@@ -119,6 +119,52 @@ RSpec.describe LLM::Context do
     end
   end
 
+  describe "#deserialize" do
+    let(:provider) { LLM.deepseek(key: "test") }
+    let(:model) { "deepseek-v4-flash" }
+    let(:restored) { LLM::Context.new(provider, model:).deserialize(string: payload) }
+    let(:payload) { LLM.json.dump(document) }
+    let(:document) { {schema_version: version, messages: []} }
+    let(:version) { 2 }
+
+    context "when the payload is newer than the runtime" do
+      let(:version) { LLM::Context::Deserializer::SCHEMA_VERSION + 1 }
+
+      it "refuses it" do
+        expect { restored }.to raise_error(LLM::Error, /newer version of llm\.rb/)
+      end
+    end
+
+    context "when the payload is version 1" do
+      let(:version) { 1 }
+      let(:messages) do
+        [{id: "call_1", name: "system", arguments: {"command" => "date"}}]
+      end
+      let(:document) do
+        {
+          schema_version: version,
+          messages: [{
+            "role" => "assistant",
+            "content" => nil,
+            "tools" => messages
+          }]
+        }
+      end
+
+      it "restores the abstract tool calls it wrote" do
+        expect(restored.messages.first.extra[:tool_calls]).to eq(messages)
+      end
+    end
+
+    context "when the payload carries no version" do
+      let(:document) { {messages: []} }
+
+      it "treats it as version 1" do
+        expect(restored.messages).to be_empty
+      end
+    end
+  end
+
   context "when given openai" do
     let(:provider) { LLM.openai(key: "test") }
     let(:model) { "gpt-5.4" }
