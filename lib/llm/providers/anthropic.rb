@@ -76,12 +76,6 @@ module LLM
     end
 
     ##
-    # @return (see LLM::Provider#assistant_role)
-    def assistant_role
-      "assistant"
-    end
-
-    ##
     # @param [LLM::Function] fn
     # @return [Hash]
     def adapt_function(fn)

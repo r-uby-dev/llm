@@ -139,12 +139,6 @@ module LLM
     end
 
     ##
-    # @return (see LLM::Provider#assistant_role)
-    def assistant_role
-      "assistant"
-    end
-
-    ##
     # Returns the default model for chat completions
     # @see https://platform.openai.com/docs/models/gpt-5.6-luna gpt-5.6-luna
     # @return [String]
