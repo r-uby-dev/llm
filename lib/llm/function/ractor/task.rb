@@ -2,14 +2,12 @@
 
 class LLM::Function
   ##
-  # The {LLM::Function::Ractor::Task} class wraps a ractor-backed
-  # function call.
+  # Wraps a ractor-backed function call.
   #
-  # **One ractor, not two.** The ractor a task spawns runs the tool
-  # itself and hands its result to a {Ractor::Port} the task reads.
-  # There is no second ractor to supervise the first: a watcher thread
-  # inside the ractor services interrupts, and the port is the one
-  # place a result leaves by.
+  # One ractor runs the tool and hands its result to a
+  # {Ractor::Port} the task reads. A thread inside the
+  # ractor services interrupts; the port is the only way
+  # a result leaves.
   class Ractor::Task < LLM::Function::Task
     ##
     # @api private
@@ -75,13 +73,13 @@ class LLM::Function
     end
 
     ##
-    # A task that has been waited on is not alive, and it answers that
-    # from the result it holds rather than by asking a ractor that has
-    # gone with the answering of the wait.
+    # A waited-on task answers false from its result, rather
+    # than asking a ractor that has gone.
     #
-    # Before then it is alive for as long as its ractor is, which is
-    # what the monitor port says: the ractor sends `:exited` when it
-    # ends, and it ends only after the result has been handed over.
+    # Before that it is alive for as long as its ractor is,
+    # which is what the monitor port says: it sends
+    # `:exited` when the ractor ends, and the ractor ends
+    # only after the result has been handed over.
     # @return [Boolean]
     def alive?
       return false if @result
@@ -91,12 +89,10 @@ class LLM::Function
     ##
     # Tells the tool to stop.
     #
-    # **A cancel that arrives before `spawn` is remembered, not lost.**
-    # The ractor is built in `spawn`, and there is no safe navigation to
-    # a message that has not been sent: a cancel that answered `nil` here
-    # was a cancel that said nothing, and the call ran as if nobody had
-    # asked it to stop. It is delivered by `spawn` instead, which is the
-    # first moment there is anything to deliver it to.
+    # A cancel that arrives before `spawn` is remembered,
+    # not lost: the ractor does not exist yet, so there is
+    # nothing to send it to. `spawn` delivers it, which is
+    # the first moment there is somewhere to deliver it.
     # @return [nil]
     def interrupt!
       if @ractor
@@ -111,10 +107,9 @@ class LLM::Function
     alias_method :cancel!, :interrupt!
 
     ##
-    # The first wait is answered by the port the ractor delivered its
-    # result to, which holds it whether or not the ractor is still
-    # there. Every wait after that is answered from memory, the way
-    # {LLM::Function::Thread::Task#wait} answers from the thread's value.
+    # The first wait reads the port the ractor delivered to,
+    # which holds the result whether or not that ractor is
+    # still there. Later waits answer from memory.
     # @return [LLM::Function::Return]
     def wait
       return @intercepted if intercepted?
@@ -139,8 +134,8 @@ class LLM::Function
     private
 
     ##
-    # Builds the one ractor a task spawns: it runs the tool, and it is
-    # the only thing that writes to the port.
+    # Builds the one ractor a task spawns: it runs the tool,
+    # and it is the only thing that writes to the port.
     # @param [Ractor::Port] port
     # @return [Ractor]
     def build_task(port)
@@ -152,12 +147,12 @@ class LLM::Function
     end
 
     ##
-    # Reads the monitor port, so that the ractor ending is something this
-    # object knows rather than something it has to ask about.
+    # Reads the monitor port, so the ractor ending is
+    # something this object knows rather than asks about.
     #
-    # It is a thread of the caller's ractor rather than anything the
-    # tool ractor runs, because a port can only be read from the ractor
-    # that made it - and this is the ractor the task lives in.
+    # The reader is a thread of the ractor the task lives
+    # in, since a port can only be read by the ractor that
+    # made it.
     # @return [Thread]
     def watch_exit
       exits = @exits
