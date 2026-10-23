@@ -41,35 +41,35 @@ module LLM
     include Deserializer
 
     ##
-    # Returns the payload version this runtime writes and
-    # restores.
+    # Returns the newest payload version this runtime can
+    # restore, and the version it writes.
     #
-    # The payload is not backwards compatible, so a payload
-    # written by any other version is refused rather than
-    # read on a best-effort basis - a field this runtime does
-    # not know about would otherwise be dropped silently.
+    # A payload written by a newer runtime is refused, because
+    # a field this runtime does not know about would be
+    # dropped silently.
     # @return [Integer]
     def self.schema_version
       2
     end
 
     ##
-    # Asserts that a payload was written by this version.
+    # Asserts that a payload can be restored by this runtime.
     #
-    # The payload is not backwards compatible, so a payload
-    # written by any other version is refused rather than
-    # read on a best-effort basis - a field this runtime does
-    # not know about would otherwise be dropped silently.
+    # A payload is readable when it carries a version no newer
+    # than this runtime writes, so a payload from version 1 is
+    # still readable. A payload written by a newer runtime is
+    # refused, and one that carries no version at all is
+    # refused too.
     # @param [Integer, nil] version
     #  The version a payload carries
     # @raise [LLM::Error]
-    #  When the version is not the one this runtime writes
+    #  When the payload cannot be restored
     # @return [void]
     def self.validate_schema!(version:)
-      return if version == schema_version
+      return if version and version <= schema_version
       raise LLM::Error, "the payload was written by another version of " \
                         "llm.rb (schema_version #{version.inspect}, this " \
-                        "runtime reads and writes #{schema_version})"
+                        "runtime reads up to #{schema_version})"
     end
 
     ##

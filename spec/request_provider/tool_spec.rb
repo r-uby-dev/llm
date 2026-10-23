@@ -101,4 +101,34 @@ RSpec.describe LLM::RequestAdapter::Tool do
       end
     end
   end
+
+  describe "a version 1 Google tool call" do
+    let(:document) do
+      {
+        schema_version: 1,
+        messages: [
+          {"role" => "user", "content" => "what is the date?"},
+          {
+            "role" => "assistant",
+            "content" => nil,
+            "tools" => [{id: "google_abc123", name: "system", arguments: {command: "date"}}]
+          }
+        ]
+      }
+    end
+
+    let(:restored) do
+      LLM::Context.new(google).deserialize(string: LLM.json.dump(document))
+    end
+
+    let(:payload) { google.send(:adapt, restored.messages) }
+
+    it "recovers the signature its id carries" do
+      expect(payload[1][:parts].first[:thoughtSignature]).to eq("abc123")
+    end
+
+    it "keeps the call itself" do
+      expect(payload[1][:parts].first[:functionCall][:name]).to eq("system")
+    end
+  end
 end

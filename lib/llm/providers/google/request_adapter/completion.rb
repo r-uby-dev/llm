@@ -37,14 +37,34 @@ module LLM::Google::RequestAdapter
     # @note
     #  Gemini replays a call with the `thoughtSignature`
     #  it was issued with, so it is carried alongside the
-    #  call and put back here.
+    #  call and put back here. Version 1 of the payload
+    #  had no field for it and encoded it in the call's
+    #  id instead, so that is read as well.
     def adapt_tool_calls
       tool_calls.filter_map do |call|
         next unless call[:name]
         part = {functionCall: {name: call[:name], args: tool_call_arguments(call)}}
-        signature = call[:signature]
+        signature = call[:signature] || legacy_signature(call[:id])
         signature ? part.merge(thoughtSignature: signature) : part
       end
+    end
+
+    ##
+    # @note
+    #  This reads what a version 1 payload wrote, so that a
+    #  conversation saved by version 1 still replays a call
+    #  with the signature it was issued with.
+    #
+    # FIXME: remove in v19, when a version 1 payload is no
+    # longer in circulation.
+    # @param [String, nil] id
+    # @return [String, nil]
+    #  The signature a version 1 id carries
+    def legacy_signature(id)
+      id = id.to_s
+      return nil unless id.start_with?("google_")
+      return nil if id.start_with?("google_call_")
+      id.delete_prefix("google_")
     end
 
     def adapt_content(content)

@@ -138,9 +138,8 @@ RSpec.describe LLM::Context do
     context "when the version is older" do
       let(:version) { LLM::Context.schema_version - 1 }
 
-      it "refuses it" do
-        expect { LLM::Context.validate_schema!(version:) }
-          .to raise_error(LLM::Error, /another version of llm\.rb/)
+      it "accepts it" do
+        expect { LLM::Context.validate_schema!(version:) }.not_to raise_error
       end
     end
 
@@ -166,8 +165,16 @@ RSpec.describe LLM::Context do
       expect(restored.messages.first.content).to eq("hello")
     end
 
-    context "when the payload was written by another version" do
-      let(:document) { {schema_version: LLM::Context.schema_version - 1, messages:} }
+    context "when the payload was written by version 1" do
+      let(:document) { {schema_version: 1, messages:} }
+
+      it "restores it" do
+        expect(restored.messages.first.content).to eq("hello")
+      end
+    end
+
+    context "when the payload was written by a newer version" do
+      let(:document) { {schema_version: LLM::Context.schema_version + 1, messages:} }
 
       it "refuses it" do
         expect { restored }.to raise_error(LLM::Error, /another version of llm\.rb/)
