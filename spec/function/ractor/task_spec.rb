@@ -236,7 +236,7 @@ RSpec.describe LLM::Function::Ractor::Task do
     end
 
     it "raises LLM::Interrupt" do
-      expect { within { group.wait }}.to raise_error(LLM::Interrupt)
+      expect { within { group.wait } }.to raise_error(LLM::Interrupt)
     end
   end
 end

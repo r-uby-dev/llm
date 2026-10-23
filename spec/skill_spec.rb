@@ -274,7 +274,7 @@ RSpec.describe LLM::Skill do
       it "uses an internal agent and returns tool-shaped output" do
         allow(provider).to receive(:responses).and_return(responses)
         expect(responses).to receive(:create) do |prompt, params|
-          expect(prompt.to_a.any? { _1.content == "Solve the user's query." }).to eq(true)
+          expect(prompt.to_a.any? { it.content == "Solve the user's query." }).to eq(true)
           res
         end
         expect(call_skill).to eq({content: "It is raining"})
@@ -312,7 +312,7 @@ RSpec.describe LLM::Skill do
           end
         end
       end
-      let(:stream) { LLM::Stream.new.tap { _1.extra[:concurrency] = :thread } }
+      let(:stream) { LLM::Stream.new.tap { it.extra[:concurrency] = :thread } }
       let(:ctx) { LLM::Context.new(provider, model: "gpt-5.4-mini", stream:) }
       let(:call) do
         LLM::Message.new("assistant", nil, {
@@ -350,7 +350,7 @@ RSpec.describe LLM::Skill do
       it "does not pass the schema into the nested agent request" do
         allow(provider).to receive(:responses).and_return(responses)
         expect(responses).to receive(:create) do |prompt, params|
-          expect(prompt.to_a.any? { _1.content == "Solve the user's query." }).to eq(true)
+          expect(prompt.to_a.any? { it.content == "Solve the user's query." }).to eq(true)
           expect(params).not_to have_key(:schema)
           res
         end
@@ -370,7 +370,7 @@ RSpec.describe LLM::Skill do
       it "inherits a curated slice of parent messages" do
         allow(provider).to receive(:responses).and_return(responses)
         expect(responses).to receive(:create) do |prompt, params|
-          expect(prompt.to_a.any? { _1.content == "Solve the user's query." }).to eq(true)
+          expect(prompt.to_a.any? { it.content == "Solve the user's query." }).to eq(true)
           expect(params[:input].map(&:content)).to eq(["Recent context:", "What is today's date?", "Let me check."])
           res
         end

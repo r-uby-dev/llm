@@ -31,9 +31,9 @@ RSpec.describe LLM::Schema do
     end
 
     it "sets properties" do
-      all_properties.each { expect(schema.object[_1].description).to eq("#{_1} description") }
-      required_properties.each { expect(schema.object[_1]).to be_required }
-      unrequired_properties.each { expect(schema.object[_1]).to_not be_required }
+      all_properties.each { expect(schema.object[it].description).to eq("#{it} description") }
+      required_properties.each { expect(schema.object[it]).to be_required }
+      unrequired_properties.each { expect(schema.object[it]).to_not be_required }
     end
 
     it "configures an array" do

@@ -179,7 +179,7 @@ RSpec.describe LLM::Console::Input do
 
     let(:history) { %w[hello world] }
 
-    before { history.each { agent.messages << LLM::Message.new("user", _1) } }
+    before { history.each { agent.messages << LLM::Message.new("user", it) } }
 
     describe "ctrl+p" do
       it "recalls the most recent turn first" do

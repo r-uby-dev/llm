@@ -55,12 +55,12 @@ RSpec.describe "LLM::Google::Files" do
     let(:ctx) { LLM::Context.new(provider) }
     let(:prompt) do
       ctx.build_prompt do
-        _1.talk "Hello"
-        _1.talk "I want to ask you a question"
-        _1.talk "Can the following audio file be translated as:"
-        _1.talk "In the name of Allah, The Most Compassionate, The Most Merciful"
-        _1.talk "Answer with yes or no. Nothing else. Thank you."
-        _1.talk file
+        it.talk "Hello"
+        it.talk "I want to ask you a question"
+        it.talk "Can the following audio file be translated as:"
+        it.talk "In the name of Allah, The Most Compassionate, The Most Merciful"
+        it.talk "Answer with yes or no. Nothing else. Thank you."
+        it.talk file
       end
     end
 

@@ -35,9 +35,9 @@ RSpec.describe "request id" do
     double("transport", request_owner: :owner, interrupt_errors: [], interrupted?: false)
   end
 
-  let(:start_id) { tracer.calls.find { _1.first == :start }&.last }
-  let(:finish_id) { tracer.calls.find { _1.first == :finish }&.last }
-  let(:error_id) { tracer.calls.find { _1.first == :error }&.last }
+  let(:start_id) { tracer.calls.find { it.first == :start }&.last }
+  let(:finish_id) { tracer.calls.find { it.first == :finish }&.last }
+  let(:error_id) { tracer.calls.find { it.first == :error }&.last }
   let(:ids) { tracer.calls.map(&:last) }
 
   before do

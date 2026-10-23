@@ -32,12 +32,12 @@ RSpec.describe LLM::A2A do
 
       def get_stream(path)
         @streams << [:get, path]
-        @responses.fetch([:get_stream, path], []).each { yield _1 }
+        @responses.fetch([:get_stream, path], []).each { yield it }
       end
 
       def post_stream(path, body)
         @streams << [:post, path, body]
-        @responses.fetch([:post_stream, path], []).each { yield _1 }
+        @responses.fetch([:post_stream, path], []).each { yield it }
       end
     end
   end
@@ -215,7 +215,7 @@ RSpec.describe LLM::A2A do
         def post_stream(path, body)
           @streams << [path, body]
           case body[:method]
-          when "SendStreamingMessage" then stream_events.each { yield(_1) }
+          when "SendStreamingMessage" then stream_events.each { yield(it) }
           else raise KeyError, body[:method]
           end
         end
@@ -315,7 +315,7 @@ RSpec.describe LLM::A2A do
       let(:events) { [] }
 
       before do
-        a2a.send_streaming_message("hi") { events << _1 }
+        a2a.send_streaming_message("hi") { events << it }
       end
 
       it "yields the hello world stream events" do

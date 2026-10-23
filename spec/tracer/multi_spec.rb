@@ -18,12 +18,12 @@ RSpec.describe LLM::Tracer::Multi do
         @calls = []
       end
 
-      def on_request_start(operation:, model: nil, inputs: nil, request_id:)
+      def on_request_start(operation:, request_id:, model: nil, inputs: nil)
         @calls << [:on_request_start, {operation:, model:, inputs:, request_id:}]
         "#{@span_prefix}:request"
       end
 
-      def on_request_finish(operation:, res:, model: nil, span: nil, outputs: nil, metadata: nil, request_id:)
+      def on_request_finish(operation:, res:, request_id:, model: nil, span: nil, outputs: nil, metadata: nil)
         @calls << [:on_request_finish, {operation:, model:, span:, outputs:, metadata:, request_id:}]
         nil
       end
@@ -115,11 +115,11 @@ RSpec.describe LLM::Tracer::Multi do
         attr_reader :calls
 
         def initialize(llm)
-          super(llm)
+          super
           @calls = []
         end
 
-        def on_request_start(operation:, model: nil, inputs: nil, request_id:)
+        def on_request_start(operation:, request_id:, model: nil, inputs: nil)
           @calls << :on_request_start
           self
         end

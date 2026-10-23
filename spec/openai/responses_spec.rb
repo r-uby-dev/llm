@@ -81,14 +81,14 @@ RSpec.describe "LLM::OpenAI::Responses" do
     let(:tool) do
       LLM.function(:system) do |fn|
         fn.description "Runs system commands"
-        fn.params { _1.object(command: _1.string.description("The command to run").required) }
+        fn.params { it.object(command: it.string.description("The command to run").required) }
         fn.define { |command:| {success: Kernel.system(command)} }
       end
     end
     let(:prompt) do
       ctx.build_prompt do
-        _1.system "You are a bot that can run UNIX commands"
-        _1.user "What is the date?"
+        it.system "You are a bot that can run UNIX commands"
+        it.user "What is the date?"
       end
     end
 
@@ -145,10 +145,10 @@ RSpec.describe "LLM::OpenAI::Responses" do
     end
     let(:prompt) do
       ctx.build_prompt do
-        _1.user system_prompt
-        _1.user "What is 3+2 ?"
-        _1.user "What is 5+5 ?"
-        _1.user "What is 5+7 ?"
+        it.user system_prompt
+        it.user "What is 3+2 ?"
+        it.user "What is 5+5 ?"
+        it.user "What is 5+7 ?"
       end
     end
 
@@ -172,14 +172,14 @@ RSpec.describe "LLM::OpenAI::Responses" do
     let(:tool) do
       LLM.function(:system) do |fn|
         fn.description "Runs system commands"
-        fn.params { _1.object(command: _1.string.required) }
+        fn.params { it.object(command: it.string.required) }
         fn.define { |command:| {success: Kernel.system(command)} }
       end
     end
     let(:prompt) do
       ctx.build_prompt do
-        _1.system "You are a bot that can run UNIX commands"
-        _1.user "What is the date?"
+        it.system "You are a bot that can run UNIX commands"
+        it.user "What is the date?"
       end
     end
 

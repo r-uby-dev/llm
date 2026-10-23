@@ -37,7 +37,7 @@ RSpec.describe "a request that ends without answering" do
 
       def on_request_start(operation:, model: nil, inputs: nil, request_id: nil)
         @calls << [:start, request_id]
-        self.span
+        span
       end
 
       def on_request_finish(operation:, res:, model: nil, span: nil, outputs: nil, metadata: nil, request_id: nil)
@@ -67,11 +67,11 @@ RSpec.describe "a request that ends without answering" do
       interrupted?: interrupted)
   end
 
-  let(:start_id) { tracer.calls.find { _1.first == :start }&.at(1) }
-  let(:errors) { tracer.calls.select { _1.first == :error } }
+  let(:start_id) { tracer.calls.find { it.first == :start }&.at(1) }
+  let(:errors) { tracer.calls.select { it.first == :error } }
   let(:reported) { errors.last&.at(2) }
   let(:endings) { tracer.calls.map(&:first) }
-  let(:hooks) { tracer.calls.select { _1.first == :interrupt } }
+  let(:hooks) { tracer.calls.select { it.first == :interrupt } }
   let(:hooked) { hooks.last }
   let(:request) do
     provider.complete([LLM::Message.new("user", "hi")], {model: "gpt-5.4"})

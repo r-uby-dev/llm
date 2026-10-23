@@ -167,9 +167,9 @@ RSpec.describe "LLM::Anthropic::Files" do
     let(:file) { provider.files.create(file: "spec/fixtures/documents/freebsd.sysctl.pdf") }
     let(:prompt) do
       ctx.build_prompt do
-        _1.user(file)
-        _1.user("Is this PDF document about FreeBSD?")
-        _1.user("Answer with yes or no. Nothing else.")
+        it.user(file)
+        it.user("Is this PDF document about FreeBSD?")
+        it.user("Answer with yes or no. Nothing else.")
       end
     end
 

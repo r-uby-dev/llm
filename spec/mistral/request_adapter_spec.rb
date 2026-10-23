@@ -9,7 +9,7 @@ RSpec.describe "LLM::Mistral tool adaptation" do
   let(:tool) do
     LLM.function(:system) do |fn|
       fn.description "Runs system commands"
-      fn.params { _1.object(command: _1.string.required) }
+      fn.params { it.object(command: it.string.required) }
       fn.define { |command:| {success: Kernel.system(command)} }
     end
   end

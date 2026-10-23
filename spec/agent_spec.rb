@@ -1032,9 +1032,9 @@ RSpec.describe LLM::Agent do
     end
     let(:advisories) do
       ctx.messages.map(&:content).flatten.select do
-        _1.respond_to?(:value) && _1.value.is_a?(Hash) &&
-          _1.value[:cancelled] == true &&
-          _1.value[:reason].to_s.include?("too many tool calls")
+        it.respond_to?(:value) && it.value.is_a?(Hash) &&
+          it.value[:cancelled] == true &&
+          it.value[:reason].to_s.include?("too many tool calls")
       end
     end
     let(:tool_budget) { nil }
@@ -1093,7 +1093,7 @@ RSpec.describe LLM::Agent do
       end
 
       it "returns each refused call as an advisory" do
-        expect(returned.count { _1.value[:cancelled] }).to eq(3)
+        expect(returned.count { it.value[:cancelled] }).to eq(3)
       end
     end
 
@@ -1301,7 +1301,7 @@ RSpec.describe LLM::Agent do
       LLM::Message.new("assistant", nil, {
         tools: [tool],
         tool_calls: ids.map do
-          {id: _1, name: "echo", arguments: {"value" => "hello"}}
+          {id: it, name: "echo", arguments: {"value" => "hello"}}
         end
       })
     ])

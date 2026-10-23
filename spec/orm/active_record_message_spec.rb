@@ -40,9 +40,9 @@ RSpec.describe LLM::ActiveRecord::Message do
     end
   end
 
-  let(:agent) { model.create!(data: {messages:}) }
-  let(:provider_record) { provider_model.create!(data: {messages:}) }
-  let(:other_agent) { model.create!(data: {messages: other_messages}) }
+  let(:agent) { model.create!(data: saved(messages)) }
+  let(:provider_record) { provider_model.create!(data: saved(messages)) }
+  let(:other_agent) { model.create!(data: saved(other_messages)) }
   let(:assistant_id) { messages.last[:id] }
   let(:relation) { described_class.for(agent:) }
 
@@ -62,6 +62,13 @@ RSpec.describe LLM::ActiveRecord::Message do
 
   let(:other_messages) do
     [{id: SecureRandom.uuid_v7, role: "user", content: "other"}]
+  end
+
+  ##
+  # The row as the record stores it: a context writes a payload
+  # stamped with its schema version, and restore reads that.
+  def saved(messages)
+    {schema_version: LLM::Context.schema_version, messages:}
   end
 
   describe ".for" do

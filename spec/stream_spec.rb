@@ -329,7 +329,7 @@ RSpec.describe LLM::Stream do
           end
 
           it "emits tool return callbacks in enqueue order" do
-            expect(stream.events).to eq(expected_ids.map { [_1, _1] })
+            expect(stream.events).to eq(expected_ids.map { [it, it] })
           end
         end
       end

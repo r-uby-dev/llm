@@ -25,7 +25,7 @@ RSpec.describe "LLM::Context: google" do
         Class.new(LLM::Tool) do
           name "system"
           description "Runs system commands"
-          params { _1.object(command: _1.string.required) }
+          params { it.object(command: it.string.required) }
           def call(command:)
             {success: Kernel.system(command)}
           end
@@ -58,14 +58,14 @@ RSpec.describe "LLM::Context: google" do
       let(:tool) do
         LLM.function(:system) do |fn|
           fn.description "Runs system commands"
-          fn.params { _1.object(command: _1.string.required) }
+          fn.params { it.object(command: it.string.required) }
           fn.define { |command:| {success: Kernel.system(command)} }
         end
       end
       let(:prompt) do
         ctx.build_prompt do
-          _1.user "You are a bot that can run UNIX system commands"
-          _1.user "Hey, run the 'date' command"
+          it.user "You are a bot that can run UNIX system commands"
+          it.user "Hey, run the 'date' command"
         end
       end
 

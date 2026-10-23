@@ -7,7 +7,7 @@ RSpec.describe "LLM::Skill: openai",
   class SystemTool < LLM::Tool
     name "system"
     description "Runs system commands"
-    params { _1.object(command: _1.string.required) }
+    params { it.object(command: it.string.required) }
     def call(command:)
       {success: true, output: "2025-08-24"}
     end

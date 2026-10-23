@@ -129,7 +129,7 @@ RSpec.describe LLM::Registry do
   end
 
   describe LLM::Registry::Model do
-    subject(:model) { LLM::Registry.for(:openai).models.find { _1.id == "gpt-4.1" } }
+    subject(:model) { LLM::Registry.for(:openai).models.find { it.id == "gpt-4.1" } }
 
     it "exposes a display name" do
       expect(model.name).to be_a(String)
@@ -149,35 +149,35 @@ RSpec.describe LLM::Registry do
     end
 
     it "orders cheaper models before expensive ones" do
-      cheap = LLM::Registry.for(:openai).models.find { _1.id == "gpt-4o-mini" }
-      expensive = LLM::Registry.for(:openai).models.find { _1.id == "o1-pro" }
+      cheap = LLM::Registry.for(:openai).models.find { it.id == "gpt-4o-mini" }
+      expensive = LLM::Registry.for(:openai).models.find { it.id == "o1-pro" }
       expect(cheap).to be < expensive
     end
 
     it "sorts unpriced models after priced ones" do
       registry = LLM::Registry.for(:openai)
-      priced = registry.models.find { !_1.input_cost.nil? }
-      unpriced = registry.models.find { _1.input_cost.nil? }
+      priced = registry.models.find { !it.input_cost.nil? }
+      unpriced = registry.models.find { it.input_cost.nil? }
       expect(priced).to be < unpriced
     end
 
     it "identifies a text LLM from both directions" do
-      model = LLM::Registry.for(:openai).models.find { _1.id == "gpt-4.1" }
+      model = LLM::Registry.for(:openai).models.find { it.id == "gpt-4.1" }
       expect(model.text?).to be(true)
     end
 
     it "excludes generation models from text?" do
-      model = LLM::Registry.for(:google).models.find { _1.id == "gemini-3.1-flash-tts-preview" }
+      model = LLM::Registry.for(:google).models.find { it.id == "gemini-3.1-flash-tts-preview" }
       expect(model.text?).to be(false)
     end
 
     it "reports a modality supported on either side" do
-      model = LLM::Registry.for(:alibaba).models.find { _1.id == "qwen3.8-max" }
+      model = LLM::Registry.for(:alibaba).models.find { it.id == "qwen3.8-max" }
       expect(model.pdf?).to be(true)
     end
 
     it "distinguishes input from output support" do
-      model = LLM::Registry.for(:openai).models.find { _1.id == "gpt-4.1" }
+      model = LLM::Registry.for(:openai).models.find { it.id == "gpt-4.1" }
       expect(model.input?("pdf")).to be(true)
       expect(model.output?("image")).to be(false)
     end

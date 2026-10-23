@@ -31,15 +31,15 @@ RSpec.describe LLM::Console::Markdown do
     let(:text) { "```ruby\nputs 1\n```" }
 
     it "does not render the backtick fence" do
-      expect(nodes.map { _1[:text] }.join).not_to include("```")
+      expect(nodes.map { it[:text] }.join).not_to include("```")
     end
 
     it "renders the language label" do
-      expect(nodes.map { _1[:text] }.join).to include("ruby")
+      expect(nodes.map { it[:text] }.join).to include("ruby")
     end
 
     it "renders the code in green" do
-      node = nodes.find { _1[:text] == "puts 1\n" }
+      node = nodes.find { it[:text] == "puts 1\n" }
       expect(node[:attrs]).to eq(LLM::Console::Color.green)
     end
   end
@@ -58,17 +58,17 @@ RSpec.describe LLM::Console::Markdown do
     end
 
     it "preserves tag attributes" do
-      input = %q(<a href="x">link</a>)
+      input = '<a href="x">link</a>'
       expect(rendered(input)).to eq(input)
     end
 
     it "preserves boolean and data attributes" do
-      input = %q(<div class="box" data-id="7" hidden>content</div>)
+      input = '<div class="box" data-id="7" hidden>content</div>'
       expect(rendered(input)).to eq(input)
     end
 
     it "preserves an img with a source and alt" do
-      input = %q(<img src="a.png" alt="an image">)
+      input = '<img src="a.png" alt="an image">'
       expect(rendered(input)).to eq(input)
     end
 
@@ -120,6 +120,6 @@ RSpec.describe LLM::Console::Markdown do
   # @param [String] text
   # @return [String]
   def rendered(text)
-    described_class.new(text, 80).ast.map { _1[:text] }.join
+    described_class.new(text, 80).ast.map { it[:text] }.join
   end
 end

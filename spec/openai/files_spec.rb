@@ -150,9 +150,9 @@ RSpec.describe "LLM::OpenAI::Files" do
     let(:file) { provider.files.create(file: "spec/fixtures/documents/freebsd.sysctl.pdf") }
     let(:prompt) do
       ctx.build_prompt do
-        _1.user(file)
-        _1.user("Is this PDF document about FreeBSD?")
-        _1.user("Answer with yes or no. Nothing else.")
+        it.user(file)
+        it.user("Is this PDF document about FreeBSD?")
+        it.user("Answer with yes or no. Nothing else.")
       end
     end
 
@@ -193,9 +193,9 @@ RSpec.describe "LLM::OpenAI::Files" do
     let(:file) { provider.files.create(file: "spec/fixtures/documents/freebsd.sysctl.pdf") }
     let(:prompt) do
       ctx.build_prompt do
-        _1.talk(ctx.remote_file(file))
-        _1.talk("Is this PDF document about FreeBSD?")
-        _1.talk("Answer with yes or no. Nothing else.")
+        it.talk(ctx.remote_file(file))
+        it.talk("Is this PDF document about FreeBSD?")
+        it.talk("Answer with yes or no. Nothing else.")
       end
     end
 

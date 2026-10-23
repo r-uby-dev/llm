@@ -68,7 +68,7 @@ RSpec.describe LLM::Intercept do
     end
     let(:ctx) { LLM::Context.new(provider, intercept:, intercept_options: {threshold: 5}) }
 
-    before { function.tap { _1.intercept = ctx.intercept }.task(:sequential) }
+    before { function.tap { it.intercept = ctx.intercept }.task(:sequential) }
 
     it "passes intercept_options to the intercept" do
       expect(seen).to eq([5])

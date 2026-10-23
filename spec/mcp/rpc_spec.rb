@@ -107,7 +107,7 @@ RSpec.describe LLM::MCP::RPC do
       it "assigns sequential request ids" do
         threads
         wait_until { transport.writes.size == 2 }
-        expect(transport.writes.map { _1[:id] }).to eq([0, 1])
+        expect(transport.writes.map { it[:id] }).to eq([0, 1])
         threads.each(&:value)
       end
     end

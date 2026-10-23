@@ -28,6 +28,23 @@ module LLM::Test
     def ask_result
       @ask_result
     end
+
+    ##
+    # The runtime as a saved payload. A record stores what a
+    # context writes, so a stand-in has to write the same shape.
+    # @return [Hash]
+    def to_h
+      {
+        schema_version: LLM::Context.schema_version,
+        messages: @messages.map(&:to_h)
+      }
+    end
+
+    ##
+    # @return [String]
+    def to_json(...)
+      LLM.json.dump(to_h, ...)
+    end
   end
 
   ##

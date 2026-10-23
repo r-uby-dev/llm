@@ -17,7 +17,7 @@ RSpec.describe "LLM::XAI::Models" do
     include_examples "LLM::Models contract"
 
     it "marks image-only models as not supporting chat" do
-      image_models = response.models.select { _1.id == "grok-2-image-1212" }
+      image_models = response.models.select { it.id == "grok-2-image-1212" }
       expect(image_models.size).to eq(1)
       expect(image_models.none?(&:chat?)).to be(true)
     end

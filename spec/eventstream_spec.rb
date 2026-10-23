@@ -389,7 +389,7 @@ RSpec.describe LLM::EventStream::Parser do
     let(:events) { [] }
     subject(:parser) do
       described_class.new.tap do |instance|
-        instance.on(:data) { events << _1 }
+        instance.on(:data) { events << it }
       end
     end
 

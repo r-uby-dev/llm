@@ -7,7 +7,7 @@ RSpec.describe "LLM::Context: llamacpp" do
   let(:host) { ENV["LLAMACPP_HOST"] || "localhost" }
   let(:ctx) { LLM::Context.new(provider, params.merge(model: "qwen3")) }
   let(:params) { {} }
-  vcr = lambda { {vcr: {cassette_name: "llamacpp/chat/#{_1}"}} }
+  vcr = lambda { {vcr: {cassette_name: "llamacpp/chat/#{it}"}} }
 
   context LLM::Context do
     include_examples "LLM::Context: completions", :llamacpp

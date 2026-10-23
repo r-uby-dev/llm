@@ -63,7 +63,7 @@ RSpec.describe LLM::Transport::StreamDecoder do
 
   context "when initialized with a block" do
     let(:chunks) { [] }
-    subject(:decoder) { described_class.new { chunks << _1 } }
+    subject(:decoder) { described_class.new { chunks << it } }
 
     it "yields decoded sse payloads to the block" do
       decoder << %(data: {"ok":true}\n\n)

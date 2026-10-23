@@ -91,7 +91,7 @@ RSpec.describe LLM::Agent, "instructions" do
     it "leaves a prompt's own system message alone" do
       a = agent(instructions: "Say more")
       a.messages.concat [message("Say less")]
-      a.send(:apply_instructions, a.prompt { _1.system("The caller's rule") })
+      a.send(:apply_instructions, a.prompt { it.system("The caller's rule") })
       expect(a.messages.first.content).to eq("Say less")
     end
   end

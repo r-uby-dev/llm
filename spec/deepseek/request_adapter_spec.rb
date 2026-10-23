@@ -61,8 +61,8 @@ RSpec.describe "LLM::DeepSeek::RequestAdapter::Completion" do
     context "with local file content" do
       let(:tempfile) do
         Tempfile.create(["example", ".pdf"]).tap {
-          _1.write("%PDF-1.4\n")
-          _1.rewind
+          it.write("%PDF-1.4\n")
+          it.rewind
         }
       end
 

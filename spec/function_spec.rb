@@ -449,7 +449,7 @@ RSpec.describe LLM::Function do
       end
 
       let(:reactor) { LLM::Function::Async::Reactor.new }
-      let(:task) { function.task(:async).tap { _1.reactor = reactor } }
+      let(:task) { function.task(:async).tap { it.reactor = reactor } }
 
       before do
         task.spawn
@@ -671,7 +671,7 @@ RSpec.describe LLM::Function do
   describe LLM::Function::Task do
     describe "when interrupting a task" do
       let(:fn) do
-        LLM::Function.new("test") { _1.define { {ok: true} } }.tap do |f|
+        LLM::Function.new("test") { it.define { {ok: true} } }.tap do |f|
           f.id = "call_1"
           f.arguments = {}
         end
@@ -679,7 +679,7 @@ RSpec.describe LLM::Function do
 
       context "when wrapping a Thread" do
         let(:slow_fn) do
-          LLM::Function.new("slow") { _1.define { sleep 10; {ok: true} } }.tap do |f|
+          LLM::Function.new("slow") { it.define { sleep 10; {ok: true} } }.tap do |f|
             f.id = "call_1"
             f.arguments = {}
           end
@@ -715,7 +715,7 @@ RSpec.describe LLM::Function do
 
         context "when the task is running" do
           let(:slow_fn) do
-            LLM::Function.new("slow") { _1.define { sleep 10; {ok: true} } }.tap do |f|
+            LLM::Function.new("slow") { it.define { sleep 10; {ok: true} } }.tap do |f|
               f.id = "call_1"
               f.arguments = {}
             end

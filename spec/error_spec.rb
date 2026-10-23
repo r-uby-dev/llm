@@ -55,7 +55,7 @@ RSpec.describe LLM::Interrupt do
     let(:broadly) do
       proc do |&block|
         block.call
-      rescue StandardError
+      rescue
         :caught
       else
         :passed

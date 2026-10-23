@@ -29,14 +29,14 @@ RSpec.describe "LLM::Context: alibaba" do
     let(:tool) do
       LLM.function(:system) do |fn|
         fn.description "Runs system commands"
-        fn.params { _1.object(command: _1.string.required) }
+        fn.params { it.object(command: it.string.required) }
         fn.define { |command:| {success: true, output: "Mon Jul 10 12:34:56 UTC 2026"} }
       end
     end
     let(:prompt) do
       ctx.build_prompt do
-        _1.user "You are a bot that can run UNIX system commands"
-        _1.user "Hey, run the 'date' command"
+        it.user "You are a bot that can run UNIX system commands"
+        it.user "Hey, run the 'date' command"
       end
     end
 

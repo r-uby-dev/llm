@@ -6,7 +6,7 @@ require "llm/tools/exec"
 RSpec.describe LLM::Tool::Exec do
   let(:tool) { described_class.new }
   let(:command) do
-    instance_double(Test::Command, running?: false, success?: true, stdout: "hi\n", stderr: "", :not_found? => false)
+    instance_double(Test::Command, running?: false, success?: true, stdout: "hi\n", stderr: "", not_found?: false)
   end
 
   describe ".function" do

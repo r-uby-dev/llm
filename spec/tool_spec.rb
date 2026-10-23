@@ -193,7 +193,7 @@ RSpec.describe LLM::Tool do
     let(:tool) { tool_class.new(prefix: "stateful") }
 
     it "returns a function bound to the tool instance" do
-      result = tool.function.tap { _1.arguments = {"value" => "hello"} }.call
+      result = tool.function.tap { it.arguments = {"value" => "hello"} }.call
       expect(result.to_h).to eq(
         id: nil,
         name: "echo",
