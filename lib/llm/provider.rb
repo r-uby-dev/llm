@@ -10,13 +10,6 @@ class LLM::Provider
   include LLM::Transport::Execution
 
   ##
-  # @api private
-  # @return [LLM::Provider]
-  def self.null
-    new(key: nil, host: nil)
-  end
-
-  ##
   # @param [String, nil] key
   #  The secret key for authentication
   # @param [String] host
