@@ -5,11 +5,6 @@ class LLM::Context
   # @api private
   module Deserializer
     ##
-    # The newest payload version this runtime can restore.
-    # @return [Integer]
-    SCHEMA_VERSION = 2
-
-    ##
     # Restore a saved context state.
     #
     # The `context_used` and `context_window` keys carried by a payload
@@ -17,10 +12,10 @@ class LLM::Context
     # here: the runtime derives both from the messages and the
     # registry, so a payload can never seed them.
     #
-    # A payload written by a newer runtime is refused, because a field
-    # this runtime does not know about would be dropped silently. An
-    # older payload is accepted: version 1 wrote the abstract tool
-    # calls too, so what it carried still restores.
+    # The payload has to have been written by this version. The
+    # payload is not backwards compatible, so a payload from any
+    # other version - older, newer, or carrying no version at
+    # all - is refused rather than read on a best-effort basis.
     # @param [String, nil] path
     #  The path to a JSON file
     # @param [String, nil] string
@@ -28,7 +23,7 @@ class LLM::Context
     # @param [Hash, nil] data
     #  A parsed context payload
     # @raise [LLM::Error]
-    #  When the payload was written by a newer runtime
+    #  When the payload was written by another version
     # @raise [SystemCallError]
     #  Might raise a number of SystemCallError subclasses
     # @return [LLM::Context]
@@ -56,14 +51,14 @@ class LLM::Context
     ##
     # @param [Hash] ctx
     # @raise [LLM::Error]
-    #  When the payload is newer than this runtime
+    #  When the payload was written by another version
     # @return [void]
     def check_schema_version!(ctx)
-      version = ctx["schema_version"] || 1
-      return if version <= SCHEMA_VERSION
-      raise LLM::Error, "the payload was written by a newer version of " \
-                        "llm.rb (schema_version #{version}, this runtime " \
-                        "supports #{SCHEMA_VERSION})"
+      version = ctx["schema_version"]
+      return if version == LLM::Context.schema_version
+      raise LLM::Error, "the payload was written by another version of " \
+                        "llm.rb (schema_version #{version.inspect}, this " \
+                        "runtime reads and writes #{LLM::Context.schema_version})"
     end
 
     ##

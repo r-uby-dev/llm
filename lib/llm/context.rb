@@ -36,8 +36,22 @@ module LLM
   class Context
     require_relative "context/serializer"
     require_relative "context/deserializer"
+
     include Serializer
     include Deserializer
+
+    ##
+    # Returns the payload version this runtime writes and
+    # restores.
+    #
+    # The payload is not backwards compatible, so a payload
+    # written by any other version is refused rather than
+    # read on a best-effort basis - a field this runtime does
+    # not know about would otherwise be dropped silently.
+    # @return [Integer]
+    def self.schema_version
+      2
+    end
 
     ##
     # Returns the set of runtime parameters that
@@ -544,7 +558,7 @@ module LLM
     # @return [Hash]
     def to_h
       {
-        schema_version: 2,
+        schema_version: LLM::Context.schema_version,
         id: @id,
         model:,
         compacted:,
