@@ -3,27 +3,24 @@
 class LLM::Google
   module Utils
     ##
-    # Returns a stable internal tool-call ID for Gemini function calls.
+    # Returns a stable internal tool-call ID for a call.
     #
-    # Gemini responses may omit a direct tool-call ID, but llm.rb expects one
-    # for matching pending tool calls with tool returns across streaming and
-    # normal completion flows.
-    #
-    # When Gemini provides a `thoughtSignature`, that value is used as the
-    # basis for the ID. Otherwise the ID falls back to the candidate and part
-    # indexes, which are stable within the response.
+    # Gemini responses may omit a direct tool-call ID, but
+    # llm.rb expects one for matching a pending call with
+    # its return. The call's own ID is preferred, then the
+    # candidate and part indexes, which are stable within
+    # a response.
     #
     # @param part [Hash]
-    #   A Gemini content part containing a `functionCall`.
+    #  A content part that holds a `functionCall`
     # @param cindex [Integer]
-    #   The candidate index for the tool call.
+    #  The candidate index
     # @param pindex [Integer]
-    #   The part index for the tool call within the candidate.
+    #  The part index within the candidate
     # @return [String]
-    #   Returns a stable internal tool-call ID.
     def tool_id(part:, cindex:, pindex:)
-      signature = part["thoughtSignature"].to_s
-      return "google_#{signature}" unless signature.empty?
+      id = part.dig("functionCall", "id").to_s
+      return "google_#{id}" unless id.empty?
       "google_call_#{cindex}_#{pindex}"
     end
   end

@@ -56,7 +56,6 @@ class LLM::Context
     def deserialize_message(payload)
       tool_calls = deserialize_tool_calls(payload["tools"])
       returns = deserialize_returns(payload["content"]) if returns.nil?
-      original_tool_calls = payload["original_tool_calls"]
       usage = payload["usage"]
       reasoning_content = payload["reasoning_content"]
       compaction = payload["compaction"]
@@ -64,7 +63,6 @@ class LLM::Context
       id = payload["id"]
       extra = {
         tool_calls:,
-        original_tool_calls:,
         tools: @params[:tools],
         usage:,
         reasoning_content:,

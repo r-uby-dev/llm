@@ -52,6 +52,12 @@ module LLM
     # reads them back from the same list. A field that is not named
     # here does not survive a save, so a field the runtime relies on
     # after a restore has to be named.
+    #
+    # Tool calls are stored in the abstract form the runtime reasons
+    # about - `{id, name, arguments}` - and never in a provider's wire
+    # form. Each request adapter builds its own blocks from that form,
+    # which is what lets a conversation saved under one provider be
+    # restored under another.
     # @return [Hash]
     def to_h
       {
@@ -62,8 +68,7 @@ module LLM
         compaction: extra.compaction,
         instructions: extra.instructions,
         tools: extra.tool_calls&.map { LLM::Object === _1 ? _1.to_h : _1 },
-        usage:,
-        original_tool_calls: extra.original_tool_calls
+        usage:
       }.compact.then { preserve_nil_content(_1) }
     end
 

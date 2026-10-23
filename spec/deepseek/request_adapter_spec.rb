@@ -118,7 +118,6 @@ RSpec.describe "LLM::DeepSeek::RequestAdapter::Completion" do
       let(:message) do
         LLM::Message.new("assistant", nil, {
           reasoning_content: "thought",
-          original_tool_calls: [{"id" => "call_1"}],
           tool_calls: [{id: "call_1", name: "system", arguments: {command: "date"}}]
         })
       end
@@ -127,8 +126,12 @@ RSpec.describe "LLM::DeepSeek::RequestAdapter::Completion" do
         expect(payload[:content]).to be_nil
       end
 
-      it "normalizes tool calls" do
-        expect(payload[:tool_calls]).to eq([{"id" => "call_1"}])
+      it "adapts the tool calls" do
+        expect(payload[:tool_calls]).to eq([{
+          id: "call_1",
+          type: "function",
+          function: {name: "system", arguments: "{\"command\":\"date\"}"}
+        }])
       end
 
       it "preserves reasoning content" do

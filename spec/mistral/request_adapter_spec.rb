@@ -38,12 +38,7 @@ RSpec.describe "LLM::Mistral tool adaptation" do
   describe "#adapt" do
     let(:assistant) do
       LLM::Message.new("assistant", nil, {
-        tool_calls: [{id: "call_1", name: "system", arguments: {command: "date"}}],
-        original_tool_calls: [{
-          "id" => "call_1",
-          "type" => "function",
-          "function" => {"name" => "system", "arguments" => "{\"command\":\"date\"}"}
-        }]
+        tool_calls: [{id: "call_1", name: "system", arguments: {command: "date"}}]
       })
     end
 

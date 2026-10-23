@@ -107,8 +107,11 @@ module LLM::Google::ResponseAdapter
         role = content.role || "model"
         parts = content.parts || [{"text" => choice.finishReason}]
         text = parts.filter_map { _1["text"] }.join
-        tools = parts.select { _1["functionCall"] }
-        extra = {index: cindex, response: self, tool_calls: adapt_tool_calls(parts, cindex), original_tool_calls: tools}
+        extra = {
+          index: cindex,
+          response: self,
+          tool_calls: adapt_tool_calls(parts, cindex)
+        }
         LLM::Message.new(role, text, extra)
       end
     end
@@ -117,7 +120,8 @@ module LLM::Google::ResponseAdapter
       (parts || []).each_with_index.filter_map do |part, pindex|
         tool = part["functionCall"]
         next unless tool
-        {id: LLM::Google.tool_id(part:, cindex:, pindex:), name: tool.name, arguments: tool.args}
+        call = {id: LLM::Google.tool_id(part:, cindex:, pindex:), name: tool.name, arguments: tool.args}
+        (signature = part["thoughtSignature"]) ? call.merge(signature:) : call
       end
     end
 

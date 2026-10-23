@@ -41,8 +41,8 @@ RSpec.describe "LLM::Context: google" do
     end
 
     describe ".tool_id" do
-      it "uses thoughtSignature when given" do
-        part = {"functionCall" => {"name" => "system"}, "thoughtSignature" => "abc123"}
+      it "uses the function call id when given" do
+        part = {"functionCall" => {"name" => "system", "id" => "abc123"}}
         expect(LLM::Google.tool_id(part:, cindex: 0, pindex: 0)).to eq("google_abc123")
       end
 

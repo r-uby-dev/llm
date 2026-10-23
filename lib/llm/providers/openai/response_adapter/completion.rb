@@ -11,8 +11,7 @@ module LLM::OpenAI::ResponseAdapter
           index:, response: self,
           logprobs: choice.logprobs,
           reasoning_content: message.reasoning_content,
-          tool_calls: adapt_tool_calls(message.tool_calls),
-          original_tool_calls: message.tool_calls
+          tool_calls: adapt_tool_calls(message.tool_calls)
         }
         LLM::Message.new(message.role, message.content, extra)
       end

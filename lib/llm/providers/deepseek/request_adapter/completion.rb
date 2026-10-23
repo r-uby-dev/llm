@@ -5,6 +5,7 @@ module LLM::DeepSeek::RequestAdapter
   # @private
   class Completion
     include LLM::RequestAdapter::Role
+    include LLM::RequestAdapter::Tool
 
     ##
     # @param [LLM::Provider] llm
@@ -23,7 +24,7 @@ module LLM::DeepSeek::RequestAdapter
         if Hash === message
           {role: adapt_message_role(message), content: adapt_content(message[:content])}
         elsif message.tool_call?
-          wrap(content: nil, tool_calls: message.extra[:original_tool_calls])
+          wrap(content: nil, tool_calls: adapt_tool_calls)
         else
           adapt_message
         end
@@ -31,6 +32,16 @@ module LLM::DeepSeek::RequestAdapter
     end
 
     private
+
+    ##
+    # @return [Array<Hash>]
+    #  The tool calls a message carries, in completions form
+    def adapt_tool_calls
+      tool_calls.filter_map do |call|
+        next unless call[:id] and call[:name]
+        {id: call[:id], type: "function", function: {name: call[:name], arguments: tool_call_arguments_json(call)}}
+      end
+    end
 
     def adapt_content(content)
       case content

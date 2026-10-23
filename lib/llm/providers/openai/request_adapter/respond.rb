@@ -5,6 +5,7 @@ module LLM::OpenAI::RequestAdapter
   # @private
   class Respond
     include LLM::RequestAdapter::Role
+    include LLM::RequestAdapter::Tool
 
     ##
     # @param [LLM::Provider] llm
@@ -20,7 +21,7 @@ module LLM::OpenAI::RequestAdapter
         if Hash === message
           {role: adapt_message_role(message), content: adapt_content(message[:content])}
         elsif message.tool_call?
-          adapt_tool_calls(message.extra[:original_tool_calls])
+          adapt_tool_calls
         else
           adapt_message
         end
@@ -28,6 +29,21 @@ module LLM::OpenAI::RequestAdapter
     end
 
     private
+
+    ##
+    # @return [Array<Hash>]
+    #  The tool calls a message carries, in Responses form
+    def adapt_tool_calls
+      tool_calls.filter_map do |call|
+        next unless call[:id] and call[:name]
+        {
+          type: "function_call",
+          call_id: call[:id],
+          name: call[:name],
+          arguments: tool_call_arguments_json(call)
+        }
+      end
+    end
 
     def adapt_content(content, role: message.role)
       case content
@@ -71,25 +87,6 @@ module LLM::OpenAI::RequestAdapter
 
     def adapt_returns(returns)
       returns.map { {type: "function_call_output", call_id: _1.id, output: LLM.json.dump(_1.value)} }
-    end
-
-    def adapt_tool_calls(tools)
-      [*tools].map do |tool|
-        h = LLM::Object.from(tool.to_h)
-        # Backward compatibility for conversations that
-        # started under the chat completions API and are
-        # later continued through Responses.
-        if h.type.to_s == "function"
-          {
-            type: "function_call",
-            call_id: h.id,
-            name: h.function.name,
-            arguments: h.function.arguments || "{}"
-          }
-        else
-          tool
-        end
-      end
     end
 
     def adapt_remote_file(content)

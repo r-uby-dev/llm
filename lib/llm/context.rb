@@ -536,10 +536,15 @@ module LLM
     # queryability, so that saved state can be inspected at rest
     # without loading it. They are never read back; the runtime
     # always derives them from the messages and the registry.
+    #
+    # Version 2 saves tool calls in the abstract form only. A
+    # version 1 payload carried the provider's wire form beside
+    # it, and that field is dropped on the way in - an adapter
+    # rebuilds its own blocks from the abstract form anyway.
     # @return [Hash]
     def to_h
       {
-        schema_version: 1,
+        schema_version: 2,
         id: @id,
         model:,
         compacted:,

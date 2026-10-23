@@ -6,5 +6,6 @@ module LLM
   # @api private
   module RequestAdapter
     require_relative "request_adapter/role"
+    require_relative "request_adapter/tool"
   end
 end

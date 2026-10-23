@@ -5,6 +5,7 @@ module LLM::Google::RequestAdapter
   # @private
   class Completion
     include LLM::RequestAdapter::Role
+    include LLM::RequestAdapter::Tool
 
     ##
     # @param [LLM::Provider] llm
@@ -22,10 +23,27 @@ module LLM::Google::RequestAdapter
         if Hash === message
           {role: adapt_message_role(message), parts: adapt_content(message[:content])}
         elsif message.tool_call?
-          {role: adapt_message_role(message), parts: message.extra.original_tool_calls}
+          {role: adapt_message_role(message), parts: adapt_tool_calls}
         else
           {role: adapt_message_role(message), parts: adapt_content(message.content)}
         end
+      end
+    end
+
+    ##
+    # @return [Array<Hash>]
+    #  The tool calls a message carries, as parts
+    #
+    # @note
+    #  Gemini replays a call with the `thoughtSignature`
+    #  it was issued with, so it is carried alongside the
+    #  call and put back here.
+    def adapt_tool_calls
+      tool_calls.filter_map do |call|
+        next unless call[:name]
+        part = {functionCall: {name: call[:name], args: tool_call_arguments(call)}}
+        signature = call[:signature]
+        signature ? part.merge(thoughtSignature: signature) : part
       end
     end
 

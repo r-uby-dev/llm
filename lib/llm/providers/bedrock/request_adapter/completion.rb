@@ -14,6 +14,7 @@ module LLM::Bedrock::RequestAdapter
   # @api private
   class Completion
     include LLM::RequestAdapter::Role
+    include LLM::RequestAdapter::Tool
 
     ##
     # @param [LLM::Provider] llm
@@ -48,14 +49,17 @@ module LLM::Bedrock::RequestAdapter
       end
     end
 
+    ##
+    # @return [Array<Hash>]
+    #  The tool calls a message carries, as toolUse blocks
     def adapt_tool_calls
-      message.extra[:tool_calls].filter_map do |tool|
-        next unless tool[:id] && tool[:name]
+      tool_calls.filter_map do |call|
+        next unless call[:id] and call[:name]
         {
           toolUse: {
-            toolUseId: tool[:id],
-            name: tool[:name],
-            input: parse_tool_input(tool[:arguments])
+            toolUseId: call[:id],
+            name: call[:name],
+            input: tool_call_arguments(call)
           }
         }
       end

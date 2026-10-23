@@ -263,19 +263,6 @@ RSpec.describe "acts_as_agent" do
   end
 
   context "with jsonb serialization" do
-    let(:original_tool_calls) do
-      LLM::Object.from([
-        {
-          "index" => 0,
-          "id" => "call_00_x",
-          "type" => "function",
-          "function" => {
-            "name" => "echo",
-            "arguments" => "{\"value\": \"hi\"}"
-          }
-        }
-      ])
-    end
     let(:tool_calls) { [{id: "call_00_x", name: "echo", arguments: {"value" => "hi"}}] }
     let(:ctx) { LLM::Context.new(LLM.openai(key: "secret")) }
     let(:data) { LLM::ActiveRecord::Utils.serialize_context(ctx, :jsonb) }
@@ -293,21 +280,20 @@ RSpec.describe "acts_as_agent" do
       ctx.messages << LLM::Message.new(
         "assistant",
         nil,
-        tool_calls:,
-        original_tool_calls:
+        tool_calls:
       )
     end
 
-    it "stores original_tool_calls as an object" do
-      expect(message.dig("original_tool_calls", 0)).to be_a(Hash)
-    end
-
-    it "stores the tool call function as an object" do
-      expect(message.dig("original_tool_calls", 0, "function")).to be_a(Hash)
+    it "stores tool calls as objects" do
+      expect(message.dig("tools", 0)).to be_a(Hash)
     end
 
     it "stores tool call arguments as an object" do
       expect(message.dig("tools", 0, "arguments")).to be_a(Hash)
+    end
+
+    it "stores no wire-format tool calls" do
+      expect(message).not_to have_key("original_tool_calls")
     end
   end
 end

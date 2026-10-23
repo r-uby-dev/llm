@@ -79,6 +79,10 @@ RSpec.describe LLM::Context do
     let(:context) { LLM::Context.new(provider, model:) }
     let(:fresh) { LLM::Context.new(provider, model:) }
 
+    it "records the schema version" do
+      expect(context.to_h[:schema_version]).to eq(2)
+    end
+
     context "when the context has state" do
       before do
         allow(context).to receive(:context_used).and_return(512)
@@ -418,9 +422,6 @@ RSpec.describe LLM::Context do
           LLM::Message.new("assistant", nil, {
             tool_calls: [
               {id: "call_1", name: "system", arguments: {command: "date"}}
-            ],
-            original_tool_calls: [
-              {"id" => "call_1", "type" => "function", "function" => {"name" => "system", "arguments" => "{\"command\":\"date\"}"}}
             ]
           })
         end
@@ -432,11 +433,6 @@ RSpec.describe LLM::Context do
         let(:tool_calls) do
           restored_message.extra[:tool_calls].map do |tool|
             tool.to_h.merge("arguments" => tool.arguments.to_h)
-          end
-        end
-        let(:original_tool_calls) do
-          restored_message.extra[:original_tool_calls].map do |tool|
-            tool.to_h.merge("function" => tool.function.to_h)
           end
         end
 
@@ -456,10 +452,8 @@ RSpec.describe LLM::Context do
           ])
         end
 
-        it "round-trips original tool calls" do
-          expect(original_tool_calls).to eq([
-            {"id" => "call_1", "type" => "function", "function" => {"name" => "system", "arguments" => "{\"command\":\"date\"}"}}
-          ])
+        it "stores no wire-format tool calls" do
+          expect(serialized_message).not_to have_key("original_tool_calls")
         end
       end
     end
@@ -1002,7 +996,6 @@ RSpec.describe LLM::Context do
           "assistant",
           nil,
           tool_calls: [LLM::Object.from(id: fn.id, name: fn.name, arguments: LLM.json.dump(fn.arguments))],
-          original_tool_calls: [{id: fn.id, type: "function", function: {name: fn.name, arguments: LLM.json.dump(fn.arguments)}}],
           tools: [tool]
         )
       end

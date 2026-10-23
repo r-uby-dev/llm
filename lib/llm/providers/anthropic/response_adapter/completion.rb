@@ -100,7 +100,7 @@ module LLM::Anthropic::ResponseAdapter
       source.map.with_index do |choice, index|
         extra = {
           index:, response: self,
-          tool_calls: adapt_tool_calls(tools), original_tool_calls: tools
+          tool_calls: adapt_tool_calls(tools)
         }
         LLM::Message.new(role, choice["text"], extra)
       end

@@ -23,8 +23,7 @@ module LLM::Bedrock::ResponseAdapter
         extra = {
           index:, response: self,
           reasoning_content:,
-          tool_calls: adapt_tool_calls(tools),
-          original_tool_calls: tools
+          tool_calls: adapt_tool_calls(tools)
         }
         LLM::Message.new(role, choice["text"], extra)
       end

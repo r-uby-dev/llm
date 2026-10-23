@@ -5,6 +5,7 @@ module LLM::Anthropic::RequestAdapter
   # @private
   class Completion
     include LLM::RequestAdapter::Role
+    include LLM::RequestAdapter::Tool
 
     ##
     # @param [LLM::Provider] llm
@@ -38,10 +39,13 @@ module LLM::Anthropic::RequestAdapter
       end
     end
 
+    ##
+    # @return [Array<Hash>]
+    #  The tool calls a message carries, as tool_use blocks
     def adapt_tool_calls
-      message.extra[:tool_calls].filter_map do |tool|
-        next unless tool[:id] && tool[:name]
-        {type: "tool_use", id: tool[:id], name: tool[:name], input: LLM::Anthropic.parse_tool_input(tool[:arguments])}
+      tool_calls.filter_map do |call|
+        next unless call[:id] and call[:name]
+        {type: "tool_use", id: call[:id], name: call[:name], input: tool_call_arguments(call)}
       end
     end
 
