@@ -137,19 +137,6 @@ module LLM::Bedrock::RequestAdapter
       name.to_s.gsub(/[^a-zA-Z0-9_-]/, "_")
     end
 
-    def parse_tool_input(input)
-      case input
-      when Hash then input
-      when String
-        parsed = LLM.json.load(input)
-        Hash === parsed ? parsed : {}
-      when nil then {}
-      else input.respond_to?(:to_h) ? input.to_h : {}
-      end
-    rescue *LLM.json.parser_error
-      {}
-    end
-
     def prompt_error!(content)
       raise LLM::PromptError,
             "#{content.class} is not supported by the Bedrock API"
