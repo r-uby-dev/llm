@@ -134,6 +134,18 @@ RSpec.describe LLM::Provider do
         subject { LLM.openai(key: "sk-12345").key? }
         it { is_expected.to be(true) }
       end
+
+      context "when given an explicit nil key" do
+        around do |example|
+          key = ENV.delete("OPENAI_API_KEY")
+          example.run
+        ensure
+          key ? (ENV["OPENAI_API_KEY"] = key) : ENV.delete("OPENAI_API_KEY")
+        end
+
+        subject { LLM.openai(key: nil).key? }
+        it { is_expected.to be(false) }
+      end
     end
   end
 

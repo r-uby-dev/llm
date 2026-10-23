@@ -47,6 +47,20 @@ class LLM::Object
       ::Kernel.instance_method(:class).bind(self).call
     end
 
+    ##
+    # @return [LLM::Object]
+    def freeze
+      return self if frozen?
+      ::Kernel.instance_method(:freeze).bind(self).call
+      ::Ractor.make_shareable(self)
+    end
+
+    ##
+    # @return [Boolean]
+    def frozen?
+      ::Kernel.instance_method(:frozen?).bind(self).call
+    end
+
     def inspect
       "#<#{LLM::Utils.object_id(self)} properties=#{to_h.inspect}>"
     end

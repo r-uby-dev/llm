@@ -80,7 +80,11 @@ class LLM::Object < BasicObject
   # @param [Object] v
   # @return [void]
   def []=(k, v)
-    @h[k.to_s] = v
+    if frozen?
+      raise ::FrozenError, "can't modify frozen object"
+    else
+      @h[k.to_s] = v
+    end
   end
 
   ##
@@ -155,11 +159,15 @@ class LLM::Object < BasicObject
   # @return [LLM::Object]
   #  Returns self
   def merge!(other = UNDEFINED)
-    return SINGLETON.get(@h, :merge!) if other.equal?(UNDEFINED)
-    other = ::Hash.try_convert(other)
-    raise TypeError, "#{other} cannot be coerced into a Hash" unless other
-    @h.merge!(other)
-    self
+    if frozen?
+      raise ::FrozenError, "can't modify frozen object"
+    else
+      return SINGLETON.get(@h, :merge!) if other.equal?(UNDEFINED)
+      other = ::Hash.try_convert(other)
+      raise TypeError, "#{other} cannot be coerced into a Hash" unless other
+      @h.merge!(other)
+      self
+    end
   end
 
   ##
@@ -167,8 +175,12 @@ class LLM::Object < BasicObject
   #  The key name
   # @return [void]
   def delete(k = UNDEFINED)
-    return SINGLETON.get(@h, :delete) if k.equal?(UNDEFINED)
-    @h.delete(SINGLETON.key(@h, k))
+    if frozen?
+      raise ::FrozenError, "can't modify frozen object"
+    else
+      return SINGLETON.get(@h, :delete) if k.equal?(UNDEFINED)
+      @h.delete(SINGLETON.key(@h, k))
+    end
   end
 
   ##

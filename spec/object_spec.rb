@@ -87,6 +87,50 @@ RSpec.describe LLM::Object do
     end
   end
 
+  describe "#freeze" do
+    let(:obj) { described_class.from("foo" => {"bar" => ["baz"]}) }
+
+    it "freezes the object and reports it" do
+      expect(obj.freeze).to be(obj)
+      expect(obj.frozen?).to be(true)
+    end
+
+    it "does not freeze an object that was never frozen" do
+      expect(obj.frozen?).to be(false)
+    end
+
+    it "is ractor-shareable" do
+      expect(Ractor.shareable?(obj.freeze)).to be(true)
+    end
+
+    it "freezes nested objects, hashes, arrays and strings" do
+      obj.freeze
+      expect(obj["foo"].frozen?).to be(true)
+      expect(obj["foo"]["bar"].frozen?).to be(true)
+      expect(obj["foo"]["bar"].first.frozen?).to be(true)
+    end
+
+    it "is idempotent" do
+      expect(obj.freeze.freeze).to be(obj)
+    end
+  end
+
+  describe "when frozen" do
+    let(:obj) { described_class.from("foo" => "bar").freeze }
+
+    it "raises FrozenError from #[]=" do
+      expect { obj[:foo] = "baz" }.to raise_error(FrozenError)
+    end
+
+    it "raises FrozenError from #merge!" do
+      expect { obj.merge!("baz" => "qux") }.to raise_error(FrozenError)
+    end
+
+    it "raises FrozenError from #delete" do
+      expect { obj.delete(:foo) }.to raise_error(FrozenError)
+    end
+  end
+
   describe "#respond_to?" do
     let(:obj) { described_class.from("foo" => "bar") }
 
