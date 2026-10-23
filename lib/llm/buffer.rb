@@ -18,7 +18,7 @@ module LLM
   class Buffer
     include Enumerable
 
-    UNDEFINED = Object.new
+    UNDEFINED = Object.new.freeze
     private_constant :UNDEFINED
 
     ##

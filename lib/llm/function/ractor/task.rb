@@ -118,11 +118,11 @@ class LLM::Function
       return @intercepted if intercepted?
       @result ||= begin
         spawn unless @port
-        ready, = Ractor.select([@port, @exits], nil, nil, 5)
-        if @exits.include?(ready.first)
+        port, ready = Ractor.select(@port, @exits)
+        if port.equal?(@exits)
           return Return.new(id, name, {error: true, type: "ractor ended without result"})
         end
-        _, id, name, value, @finished_at = ready.first(5)
+        _, id, name, value, @finished_at = ready
         if Hash === value and value[:interrupt] and value[:cookie] == @cookie
           LLM::Interrupt.new
         else
@@ -167,7 +167,7 @@ class LLM::Function
     #
     # @return [Thread]
     def watch_exit
-      Thread.new do
+      ::Thread.new do
         @exits.receive
         @exited = true
       end

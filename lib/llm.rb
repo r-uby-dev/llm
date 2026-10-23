@@ -60,7 +60,7 @@ module LLM
 
   ##
   # @api private
-  UNDEFINED = Object.new
+  UNDEFINED = Object.new.freeze
 
   ##
   # Thread-safe monitors for different contexts
