@@ -40,8 +40,8 @@ class LLM::Google
         if k == "candidates"
           merge_candidates!(value)
         elsif k == "usageMetadata" &&
-            @body["usageMetadata"].is_a?(Hash) &&
-            value.is_a?(Hash)
+            Hash === @body["usageMetadata"] &&
+            Hash === value
           @body["usageMetadata"] = @body["usageMetadata"].merge(value)
         else
           @body[k] = value
@@ -109,7 +109,7 @@ class LLM::Google
     #  content it was sent with.
     def merge_signature!(parts, delta)
       last_existing_part = parts.last
-      if last_existing_part.is_a?(Hash)
+      if Hash === last_existing_part
         last_existing_part["thoughtSignature"] = delta["thoughtSignature"]
       else
         parts << delta
@@ -119,7 +119,7 @@ class LLM::Google
     def merge_text!(parts, delta)
       last_existing_part = parts.last
       text = delta["text"]
-      if last_existing_part.is_a?(Hash) && last_existing_part["text"]
+      if Hash === last_existing_part && last_existing_part["text"]
         last_existing_part["text"] ||= +""
         last_existing_part["text"] << text
         merge_extra_keys!(last_existing_part, delta, "text")
@@ -149,9 +149,9 @@ class LLM::Google
 
     def merge_function_call!(parts, delta, cindex)
       last_existing_part = parts.last
-      last_call = last_existing_part.is_a?(Hash) ? last_existing_part["functionCall"] : nil
+      last_call = Hash === last_existing_part ? last_existing_part["functionCall"] : nil
       delta_call = delta["functionCall"]
-      if last_call.is_a?(Hash) && delta_call.is_a?(Hash)
+      if Hash === last_call && Hash === delta_call
         last_existing_part["functionCall"] = last_call.merge(delta_call)
         merge_extra_keys!(last_existing_part, delta, "functionCall")
       else
