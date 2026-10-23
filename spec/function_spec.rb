@@ -5,14 +5,6 @@ require "timeout"
 require "tmpdir"
 
 RSpec.describe LLM::Function do
-  def within(seconds = 5, &block)
-    thread = Thread.new do
-      Thread.current.report_on_exception = false
-      block.call
-    end
-    thread.join(seconds) ? thread.value : raise("timed out after #{seconds} seconds")
-  end
-
   let(:tool_class) do
     Class.new(LLM::Tool) do
       name "system"
@@ -764,5 +756,13 @@ RSpec.describe LLM::Function do
         expect(spawned_thread_task.interrupt!).to be_nil
       end
     end
+  end
+
+  def within(seconds = 5, &block)
+    thread = Thread.new do
+      Thread.current.report_on_exception = false
+      block.call
+    end
+    thread.join(seconds) ? thread.value : raise("timed out after #{seconds} seconds")
   end
 end
