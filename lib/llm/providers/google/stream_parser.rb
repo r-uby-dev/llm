@@ -83,6 +83,8 @@ class LLM::Google
           merge_text!(parts, delta)
         elsif delta["functionCall"]
           merge_function_call!(parts, delta, cindex)
+        elsif delta["thoughtSignature"]
+          merge_signature!(parts, delta)
         elsif delta["inlineData"]
           parts << delta
         elsif delta["functionResponse"]
@@ -92,6 +94,21 @@ class LLM::Google
         else
           parts << delta
         end
+      end
+    end
+
+    ##
+    # @note
+    #  Gemini can send a signature in a chunk of its own, after
+    #  the part it belongs to. It is folded into that part so a
+    #  streamed reply carries the same shape as a whole one, and
+    #  a function call keeps the signature it needs on replay.
+    def merge_signature!(parts, delta)
+      last_existing_part = parts.last
+      if last_existing_part.is_a?(Hash)
+        last_existing_part["thoughtSignature"] = delta["thoughtSignature"]
+      else
+        parts << delta
       end
     end
 
