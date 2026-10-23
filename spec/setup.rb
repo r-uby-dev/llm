@@ -23,17 +23,11 @@ RSpec.configure do |config|
     description = "#{meta[:full_description]}#{meta[:description]}"
     path = meta[:file_path].to_s
     meta[:fork] = true if path.include?("/function/fork/") || description.match?(/fork/i)
-    meta[:ractor] = true if path.include?("/function/ractor/") || description.match?(/ractor/i)
   end
 
   config.before(:each) do |example|
     next unless example.metadata[:fork]
     Process.respond_to?(:fork) ? nil : skip("fork is not available on this platform")
-  end
-
-  config.before(:each) do |example|
-    next unless example.metadata[:ractor]
-    Gem.win_platform? ? skip("ractor known to hang on Windows") : nil
   end
 
   config.around(:each, :interval) do |example|
