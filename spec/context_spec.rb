@@ -119,37 +119,55 @@ RSpec.describe LLM::Context do
     end
   end
 
+  describe ".validate_schema!" do
+    let(:version) { LLM::Context.schema_version }
+
+    it "accepts the version this runtime writes" do
+      expect { LLM::Context.validate_schema!(version:) }.not_to raise_error
+    end
+
+    context "when the version is newer" do
+      let(:version) { LLM::Context.schema_version + 1 }
+
+      it "refuses it" do
+        expect { LLM::Context.validate_schema!(version:) }
+          .to raise_error(LLM::Error, /another version of llm\.rb/)
+      end
+    end
+
+    context "when the version is older" do
+      let(:version) { LLM::Context.schema_version - 1 }
+
+      it "refuses it" do
+        expect { LLM::Context.validate_schema!(version:) }
+          .to raise_error(LLM::Error, /another version of llm\.rb/)
+      end
+    end
+
+    context "when there is no version" do
+      let(:version) { nil }
+
+      it "refuses it" do
+        expect { LLM::Context.validate_schema!(version:) }
+          .to raise_error(LLM::Error, /schema_version nil/)
+      end
+    end
+  end
+
   describe "#deserialize" do
     let(:provider) { LLM.deepseek(key: "test") }
     let(:model) { "deepseek-v4-flash" }
     let(:restored) { LLM::Context.new(provider, model:).deserialize(string: payload) }
     let(:payload) { LLM.json.dump(document) }
     let(:messages) { [{"role" => "user", "content" => "hello"}] }
-    let(:document) { {schema_version: version, messages:} }
-    let(:version) { LLM::Context.schema_version }
+    let(:document) { {schema_version: LLM::Context.schema_version, messages:} }
 
     it "restores a payload written by this version" do
       expect(restored.messages.first.content).to eq("hello")
     end
 
-    context "when the payload is newer than the runtime" do
-      let(:version) { LLM::Context.schema_version + 1 }
-
-      it "refuses it" do
-        expect { restored }.to raise_error(LLM::Error, /another version of llm\.rb/)
-      end
-    end
-
-    context "when the payload is older than the runtime" do
-      let(:version) { LLM::Context.schema_version - 1 }
-
-      it "refuses it" do
-        expect { restored }.to raise_error(LLM::Error, /another version of llm\.rb/)
-      end
-    end
-
-    context "when the payload carries no version" do
-      let(:document) { {messages:} }
+    context "when the payload was written by another version" do
+      let(:document) { {schema_version: LLM::Context.schema_version - 1, messages:} }
 
       it "refuses it" do
         expect { restored }.to raise_error(LLM::Error, /another version of llm\.rb/)

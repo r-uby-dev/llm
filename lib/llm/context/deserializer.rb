@@ -12,10 +12,11 @@ class LLM::Context
     # here: the runtime derives both from the messages and the
     # registry, so a payload can never seed them.
     #
-    # The payload has to have been written by this version. The
-    # payload is not backwards compatible, so a payload from any
-    # other version - older, newer, or carrying no version at
-    # all - is refused rather than read on a best-effort basis.
+    # The payload has to have been written by this version, which
+    # {LLM::Context.validate_schema!} asserts: the payload is not
+    # backwards compatible, so a payload from any other version -
+    # older, newer, or carrying no version at all - is refused
+    # rather than read on a best-effort basis.
     # @param [String, nil] path
     #  The path to a JSON file
     # @param [String, nil] string
@@ -37,7 +38,7 @@ class LLM::Context
       else
         LLM.json.load(string)
       end
-      check_schema_version!(ctx)
+      LLM::Context.validate_schema!(version: ctx["schema_version"])
       @id = ctx["id"] || @id
       @created_at = nil
       @messages.concat [*ctx["messages"]].map { deserialize_message(_1) }
@@ -47,19 +48,6 @@ class LLM::Context
     alias_method :restore, :deserialize
 
     private
-
-    ##
-    # @param [Hash] ctx
-    # @raise [LLM::Error]
-    #  When the payload was written by another version
-    # @return [void]
-    def check_schema_version!(ctx)
-      version = ctx["schema_version"]
-      return if version == LLM::Context.schema_version
-      raise LLM::Error, "the payload was written by another version of " \
-                        "llm.rb (schema_version #{version.inspect}, this " \
-                        "runtime reads and writes #{LLM::Context.schema_version})"
-    end
 
     ##
     # Rebuilds one message from a payload.

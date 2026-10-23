@@ -54,6 +54,25 @@ module LLM
     end
 
     ##
+    # Asserts that a payload was written by this version.
+    #
+    # The payload is not backwards compatible, so a payload
+    # written by any other version is refused rather than
+    # read on a best-effort basis - a field this runtime does
+    # not know about would otherwise be dropped silently.
+    # @param [Integer, nil] version
+    #  The version a payload carries
+    # @raise [LLM::Error]
+    #  When the version is not the one this runtime writes
+    # @return [void]
+    def self.validate_schema!(version:)
+      return if version == schema_version
+      raise LLM::Error, "the payload was written by another version of " \
+                        "llm.rb (schema_version #{version.inspect}, this " \
+                        "runtime reads and writes #{schema_version})"
+    end
+
+    ##
     # Returns the set of runtime parameters that
     # configure this context and must never be forwarded
     # to a provider request body.
