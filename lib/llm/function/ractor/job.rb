@@ -54,8 +54,7 @@ class LLM::Function
     # Tells the watcher the call is over, the way an interrupt is told:
     # through the ractor's own inbox. A watcher inside a hook, or inside
     # `Window#interrupt!`, is not parked in `Ractor.receive` to take it, so
-    # the join is bounded and one that misses it is named rather than
-    # killed - a killed thread is what a ractor cannot always end around.
+    # the join is bounded and one that misses it is killed.
     # @param [Thread, nil] watcher
     # @return [void]
     def watch_stop(watcher)

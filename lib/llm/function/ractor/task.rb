@@ -156,16 +156,21 @@ class LLM::Function
     def watch_exit
       ::Thread.new do
         ractor_rescue { @exits.receive }
-        ractor_rescue { @port.send(EXITED) }
         @exited = true
+        ractor_rescue { @port.send(EXITED) }
       end
     end
 
     ##
-    # @api private
-    def ractor_rescue
-      yield
-    rescue ::RactorError
+    # Runs a block that talks to a port, and answers nil
+    # when the ractor it belongs to has gone - which is
+    # what receiving from a closed port and sending to a
+    # dead ractor both raise.
+    # @yield
+    # @return [Object, nil]
+    def ractor_rescue(&block)
+      block.call
+    rescue ::Ractor::Error
       nil
     end
   end
