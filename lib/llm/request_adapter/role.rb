@@ -10,10 +10,6 @@ module LLM::RequestAdapter
   # time, and is never stored. Google writes `model`,
   # Anthropic wants tool returns under `user`.
   #
-  # The provider is carried on the message, in
-  # `extra[:llm]`, so an adapter isn't passed one. The
-  # mark is not persisted.
-  #
   # @see LLM::Provider#assistant_role
   # @see LLM::Provider#tool_role
   module Role
@@ -49,10 +45,9 @@ module LLM::RequestAdapter
     private
 
     ##
-    # @return [LLM::Provider, nil]
-    #  The provider attached to the message
+    # @return [LLM::Provider]
     def llm
-      message.llm || LLM::Provider.null
+      @llm
     end
   end
 end

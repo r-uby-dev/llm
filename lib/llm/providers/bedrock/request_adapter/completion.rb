@@ -16,8 +16,10 @@ module LLM::Bedrock::RequestAdapter
     include LLM::RequestAdapter::Role
 
     ##
+    # @param [LLM::Provider] llm
     # @param [LLM::Message, Hash] message
-    def initialize(message)
+    def initialize(llm, message)
+      @llm = llm
       @message = message
     end
 

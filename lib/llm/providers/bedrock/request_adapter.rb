@@ -18,8 +18,7 @@ class LLM::Bedrock
     def adapt(messages, mode: nil)
       payload = {messages: [], system: []}
       messages.each do |message|
-        message.extra.merge!(llm: self)
-        adapted = Completion.new(message).adapt
+        adapted = Completion.new(self, message).adapt
         next if adapted.nil?
         if system?(message)
           payload[:system].concat Array(adapted[:content])

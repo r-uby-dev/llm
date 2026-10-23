@@ -7,9 +7,11 @@ module LLM::OpenAI::RequestAdapter
     include LLM::RequestAdapter::Role
 
     ##
+    # @param [LLM::Provider] llm
     # @param [LLM::Message, Hash] message
     #  The message to format
-    def initialize(message)
+    def initialize(llm, message)
+      @llm = llm
       @message = message
     end
 

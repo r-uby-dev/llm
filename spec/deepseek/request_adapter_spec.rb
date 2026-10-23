@@ -6,7 +6,7 @@ require "llm/providers/deepseek"
 
 RSpec.describe "LLM::DeepSeek::RequestAdapter::Completion" do
   describe "#adapt" do
-    subject(:payload) { LLM::DeepSeek::RequestAdapter::Completion.new(message).adapt }
+    subject(:payload) { LLM::DeepSeek::RequestAdapter::Completion.new(provider, message).adapt }
 
     let(:provider) { LLM.deepseek(key: "test") }
 

@@ -228,12 +228,6 @@ module LLM
     end
 
     ##
-    # @return [LLM::Provider, nil]
-    def llm
-      extra[:llm]
-    end
-
-    ##
     # Returns a string representation of the message
     # @return [String]
     def inspect

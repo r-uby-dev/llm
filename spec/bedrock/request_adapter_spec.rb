@@ -37,7 +37,7 @@ RSpec.describe "LLM::Bedrock" do
     end
 
     it "omits blank text content blocks" do
-      expect(LLM::Bedrock::RequestAdapter::Completion.new(message).adapt).to eq(
+      expect(LLM::Bedrock::RequestAdapter::Completion.new(provider, message).adapt).to eq(
         role: "assistant",
         content: [
           {

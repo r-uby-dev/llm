@@ -17,16 +17,21 @@ class LLM::OpenAI
     def adapt(messages, mode: :complete)
       messages.filter_map do |message|
         if mode == :complete
-          message.extra.merge!(llm: self)
-          Completion.new(message).adapt
+          Completion.new(llm, message).adapt
         else
-          message.extra.merge!(llm: @llm)
-          Respond.new(message).adapt
+          Respond.new(llm, message).adapt
         end
       end
     end
 
     private
+
+    ##
+    # @return [LLM::Provider]
+    #  The provider messages are adapted for
+    def llm
+      @llm || self
+    end
 
     ##
     # @param [Hash] params
