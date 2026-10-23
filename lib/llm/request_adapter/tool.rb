@@ -20,6 +20,21 @@ module LLM::RequestAdapter
     end
 
     ##
+    # @return [Array<Hash>]
+    #  The tool calls a message carries, in the shape the
+    #  OpenAI-compatible chat completions APIs share
+    def adapt_tool_calls
+      tool_calls.filter_map do |call|
+        next unless call[:id] and call[:name]
+        {
+          id: call[:id],
+          type: "function",
+          function: {name: call[:name], arguments: tool_call_arguments_json(call)}
+        }
+      end
+    end
+
+    ##
     # @param [LLM::Object, Hash] call
     # @return [Hash]
     #  The parsed arguments of a tool call

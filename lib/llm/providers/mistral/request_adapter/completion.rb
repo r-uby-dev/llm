@@ -33,16 +33,6 @@ module LLM::Mistral::RequestAdapter
 
     private
 
-    ##
-    # @return [Array<Hash>]
-    #  The tool calls a message carries, in completions form
-    def adapt_tool_calls
-      tool_calls.filter_map do |call|
-        next unless call[:id] and call[:name]
-        {id: call[:id], type: "function", function: {name: call[:name], arguments: tool_call_arguments_json(call)}}
-      end
-    end
-
     def adapt_message
       case content
       when Array
