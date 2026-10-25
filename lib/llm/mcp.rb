@@ -186,10 +186,12 @@ class LLM::MCP
     adapt_tool_result(res)
   end
 
+  ##
+  # @return [Hash]
   def to_h
     {timeout:, stdio: @stdio, http: @http}.compact
   end
-  
+
   private
 
   attr_reader :command, :transport, :timeout
