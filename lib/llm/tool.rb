@@ -61,24 +61,28 @@ class LLM::Tool
   # @return [Class<LLM::Tool>]
   #  Returns a subclass of LLM::Tool
   def self.mcp(mcp, tool)
-    Class.new(LLM::Tool) do
-      name tool["name"]
-      description tool["description"]
-      params { tool["inputSchema"] || {type: "object", properties: {}} }
+    k = Class.new(LLM::Tool)
+    Ractor.make_shareable JSON.dump_default_options
+    k.class_eval <<~STR
+      name #{tool["name"].inspect}
+      description #{tool["description"].inspect}
 
-      define_singleton_method(:inspect) do
+      def inspect
         "<#{LLM::Utils.object_id(self)} name=#{tool["name"]} (mcp)>"
       end
       singleton_class.alias_method :to_s, :inspect
 
-      define_singleton_method(:mcp?) do
+      def mcp?
         true
       end
 
-      define_method(:call) do |**args|
-        mcp.call_tool(tool["name"], args)
+      def call(**args)
+        mcp = LLM::MCP.new(**#{mcp.to_h})
+        mcp.call_tool(#{tool["name"].inspect}, args)
       end
-    end
+    STR
+    k.params { tool["inputSchema"] || {type: "object", properties: {}} }
+    k
   end
 
   ##

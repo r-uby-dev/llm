@@ -93,9 +93,11 @@ class LLM::MCP
     if stdio and http
       raise ArgumentError, "stdio and http are mutually exclusive"
     elsif stdio
+      @stdio   = stdio
       @command = Command.new(**stdio)
       @transport = Transport::Stdio.new(command:)
     elsif http
+      @http = http
       @transport = Transport::HTTP.new(**http, timeout:)
     else
       raise ArgumentError, "stdio or http is required"
@@ -184,6 +186,10 @@ class LLM::MCP
     adapt_tool_result(res)
   end
 
+  def to_h
+    {timeout:, stdio: @stdio, http: @http}.compact
+  end
+  
   private
 
   attr_reader :command, :transport, :timeout
