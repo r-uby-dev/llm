@@ -205,7 +205,7 @@ RSpec.describe LLM::Function do
         end
 
         it "returns tool errors without hanging" do
-          result = Timeout.timeout(1) { error_tool.task(:fork).wait.to_h }
+          result = within { error_tool.task(:fork).wait.to_h }
           expect(result).to match(
             id: "call_4",
             name: "system",
