@@ -14,8 +14,25 @@ module LLM
   # A transformer may mutate the message in place or return a new
   # one. Either way, the returned message is what gets sent.
   class Transformer
+    require_relative "transformer/multi"
     require_relative "transformer/null"
     require_relative "transformer/delete_backtrace"
+
+    ##
+    # @param [LLM::Provider] llm
+    # @param [Array<LLM::Transformer>] transformers
+    # @return [LLM::Transformer::Multi]
+    def self.multi(llm, *transformers)
+       Multi.new(
+        *tracers.map do |tracer|
+          if Class === tracer
+            tracer.new(llm)
+          else
+            tracer
+          end
+        end
+      )
+    end
 
     ##
     # @return [LLM::Context]
