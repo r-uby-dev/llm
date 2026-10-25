@@ -13,7 +13,7 @@ class LLM::Transformer
     # @param (see LLM::Transformer#call)
     # @return (see LLM::Transformer#call)
     def call(message:, **opts)
-      returns = [message.content].grep(LLM::Function::Return)
+      returns = [*message.content].flatten.grep(LLM::Function::Return)
       returns.each do
         next unless it.error?
         it.value.delete(:backtrace)
