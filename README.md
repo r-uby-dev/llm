@@ -15,10 +15,10 @@
 Welcome to the canonical llm.rb repository.
 
 llm.rb is a runtime for building agentic AI applications
-on CRuby. It has zero runtime dependencies by default, supports
-concurrent and parallel tool execution and has a single coherent API
-that spans 15+ providers.
-The README covers a lot of ground and the
+on CRuby. It runs on Ruby's standard library and nothing
+else by default, it supports concurrent and parallel tool
+execution and has a single coherent API that spans 15+
+providers. The README covers a lot of ground and the
 [changelog](CHANGELOG.md)
 tracks what has changed between releases.
 
