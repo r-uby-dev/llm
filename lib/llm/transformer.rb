@@ -25,7 +25,7 @@ module LLM
     def self.multi(llm, *transformers)
        Multi.new(
         *transformers.map do
-          Class === tracer ? it.new(llm) : it
+          Class === it ? it.new(llm) : it
         end
       )
     end
