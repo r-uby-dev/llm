@@ -2,7 +2,7 @@
 
 class LLM::Transformer
   ##
-  # The {LLM::Intercept::DeleteBacktrace} class
+  # The {LLM::Transformer::DeleteBacktrace} class
   # removes the backtrace that the runtime includes
   # with a {LLM::Function::Return} that represents
   # an error.
@@ -10,8 +10,8 @@ class LLM::Transformer
   # @see LLM::Transformer
   class DeleteBacktrace < self
     ##
-    # @param (see LLM::Intercept#call)
-    # @return (see LLM::Intercept#call)
+    # @param (see LLM::Transformer#call)
+    # @return (see LLM::Transformer#call)
     def call(message:, **opts)
       case message
       when LLM::Function::Return
