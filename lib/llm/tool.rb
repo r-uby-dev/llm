@@ -62,10 +62,7 @@ class LLM::Tool
   #  Returns a subclass of LLM::Tool
   def self.mcp(mcp, tool)
     klass = Class.new(LLM::Tool)
-    klass.class_eval <<~STR
-      name #{tool["name"].inspect}
-      description #{tool["description"].inspect}
-
+    klass.class_eval <<~STR, __FILE__, 1
       def inspect
         "<#{LLM::Utils.object_id(self)} name=#{tool["name"]} (mcp)>"
       end
@@ -75,7 +72,7 @@ class LLM::Tool
         true
       end
     STR
-    __mcp(
+    ractorize(
       Ractor.make_shareable(klass),
       Ractor.make_shareable(mcp.to_h),
       Ractor.make_shareable(tool)
@@ -87,7 +84,7 @@ class LLM::Tool
   # scope (three locals) that are all
   # Ractor-shareable.
   # @api private
-  def self.__mcp(klass, mcp, tool)
+  def self.ractorize(klass, mcp, tool)
     call = Ractor.shareable_proc do |**args|
        LLM::MCP.new(**mcp)
                .call_tool(tool["name"], args)
@@ -99,9 +96,11 @@ class LLM::Tool
       define_method(:call, &call)
       instance_eval(&params)
     end
+    klass.name tool["name"]
+    klass.description tool["description"]
     klass.class_eval(&body)
   end
-  private_class_method :__mcp
+  private_class_method :ractorize
 
   ##
   # @param [LLM::A2A] a2a
