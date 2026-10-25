@@ -62,7 +62,6 @@ class LLM::Tool
   #  Returns a subclass of LLM::Tool
   def self.mcp(mcp, tool)
     k = Class.new(LLM::Tool)
-    Ractor.make_shareable JSON.dump_default_options
     k.class_eval <<~STR
       name #{tool["name"].inspect}
       description #{tool["description"].inspect}
