@@ -63,12 +63,12 @@ class LLM::Tool
   def self.mcp(mcp, tool)
     klass = Class.new(LLM::Tool)
     klass.class_eval <<~STR, __FILE__, 1
-      def inspect
+      def self.inspect
         "<#{LLM::Utils.object_id(self)} name=#{tool["name"]} (mcp)>"
       end
       singleton_class.alias_method :to_s, :inspect
 
-      def mcp?
+      def self.mcp?
         true
       end
     STR
