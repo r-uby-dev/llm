@@ -32,8 +32,7 @@ class LLM::Transformer
     # @param (see LLM::Transformer#call)
     # @return (see LLM::Transformer#call)
     def call(message:, **opts)
-      @transformers.each { _1.call(message:, **opts) }
-      message
+      @transformers.map { _1.call(message:, **opts) }.last
     end
   end
 end

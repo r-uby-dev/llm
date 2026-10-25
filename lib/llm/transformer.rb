@@ -23,11 +23,8 @@ module LLM
     # @param [Array<LLM::Transformer>] transformers
     # @return [LLM::Transformer::Multi]
     def self.multi(llm, *transformers)
-       Multi.new(
-        *transformers.map do
-          Class === it ? it.new(llm) : it
-        end
-      )
+      transformers = [LLM::Transformer::DeleteBacktrace, *transformers].uniq
+       Multi.new(*transformers.map { Class === it ? it.new(llm) : it })
     end
 
     ##

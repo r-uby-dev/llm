@@ -725,7 +725,7 @@ RSpec.describe LLM::Context do
       allow(responses).to receive(:create).and_return(response)
       ctx.talk("hello", stream:)
       expect(stream.events.first.first).to eq(:start)
-      expect(stream.events.first.last).to be_an_instance_of(transformer_class)
+      expect(stream.events.first.last.transformers).to include(an_instance_of(transformer_class))
     end
 
     it "notifies the stream when transform finishes" do
@@ -733,7 +733,7 @@ RSpec.describe LLM::Context do
       allow(responses).to receive(:create).and_return(response)
       ctx.talk("hello", stream:)
       expect(stream.events.last.first).to eq(:finish)
-      expect(stream.events.last.last).to be_an_instance_of(transformer_class)
+      expect(stream.events.last.last.transformers).to include(an_instance_of(transformer_class))
     end
   end
 

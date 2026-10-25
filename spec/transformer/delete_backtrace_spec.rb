@@ -45,8 +45,8 @@ RSpec.describe LLM::Transformer::DeleteBacktrace,
   context "with the no-op transformer" do
     let(:transformer) { LLM::Transformer::Null }
 
-    it "keeps the backtrace" do
-      expect(error.value).to have_key(:backtrace)
+    it "strips the backtrace anyway" do
+      expect(error.value).not_to have_key(:backtrace)
     end
   end
 end
