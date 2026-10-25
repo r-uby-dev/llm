@@ -56,18 +56,19 @@ RSpec.describe LLM::Tool do
     end
 
     context "when given an MCP tool" do
-      let(:mcp) do
-        described_class.mcp(Object.new, {
+      let(:definition) do
+        {
           "name" => "list_directory",
           "description" => "list a directory",
           "inputSchema" => {type: "object", properties: {}}
-        })
+        }
       end
-
+      let(:mcp_tool) { double("mcp tool", to_h: definition) }
+      let(:mcp) { described_class.mcp(mcp_tool, definition) }
       before { mcp }
 
       it "includes it in the registry" do
-        is_expected.to eq([mcp])
+        expect(subject.map(&:name)).to eq(["list_directory"])
       end
     end
   end
