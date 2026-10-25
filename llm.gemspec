@@ -47,6 +47,13 @@ DESCRIPTION
   ]
   spec.executables = ["llm.rb"]
   spec.require_paths = ["lib"]
+
+  ##
+  # Nothing outside Ruby's standard library
+  spec.add_runtime_dependency "~> 3.1"
+
+  ##
+  # Optional dependencies
   spec.add_development_dependency "webmock", "~> 3.24.0"
   spec.add_development_dependency "yard", "~> 0.9.37"
   spec.add_development_dependency "redcarpet", "~> 3.6"
@@ -54,8 +61,6 @@ DESCRIPTION
   spec.add_development_dependency "test-cmd.rb", "~> 2.7.3"
   spec.add_development_dependency "rake", "~> 13.0"
   spec.add_development_dependency "rspec", "~> 3.0"
- # spec.add_development_dependency "standard", "= 1.54.0"
- # spec.add_development_dependency "rubocop", "= 1.84.2"
   spec.add_development_dependency "vcr", "~> 6.0"
   spec.add_development_dependency "dotenv", "~> 2.8"
   spec.add_development_dependency "net-http-persistent", "~> 4.0"
@@ -70,5 +75,9 @@ DESCRIPTION
   spec.add_development_dependency "kramdown", "~> 2.5"
   spec.add_development_dependency "unicode-display_width", "~> 3.2"
   spec.add_development_dependency "async", "~> 2.45"
-  spec.add_development_dependency "json", "~> 3.1"
+
+  ##
+  # Not worth the hassle rn
+  # spec.add_development_dependency "standard", "= 1.54.0"
+  # spec.add_development_dependency "rubocop", "= 1.84.2"
 end
