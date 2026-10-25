@@ -61,8 +61,8 @@ class LLM::Tool
   # @return [Class<LLM::Tool>]
   #  Returns a subclass of LLM::Tool
   def self.mcp(mcp, tool)
-    k = Class.new(LLM::Tool)
-    k.class_eval <<~STR
+    klass = Class.new(LLM::Tool)
+    klass.class_eval <<~STR
       name #{tool["name"].inspect}
       description #{tool["description"].inspect}
 
@@ -74,15 +74,34 @@ class LLM::Tool
       def mcp?
         true
       end
-
-      def call(**args)
-        mcp = LLM::MCP.new(**#{mcp.to_h})
-        mcp.call_tool(#{tool["name"].inspect}, args)
-      end
     STR
-    k.params { tool["inputSchema"] || {type: "object", properties: {}} }
-    k
+    __mcp(
+      Ractor.make_shareable(klass),
+      Ractor.make_shareable(mcp.to_h),
+      Ractor.make_shareable(tool)
+    )
   end
+
+  ##
+  # This method closes over a limited
+  # scope (three locals) that are all
+  # Ractor-shareable.
+  # @api private
+  def self.__mcp(klass, mcp, tool)
+    call = Ractor.shareable_proc do |**args|
+       LLM::MCP.new(**mcp)
+               .call_tool(tool["name"], args)
+    end
+    params = Ractor.shareable_proc do
+      params { tool["inputSchema"] || {type: "object", properties: {}} }
+    end
+    body = Ractor.shareable_proc do
+      define_method(:call, &call)
+      instance_eval(&params)
+    end
+    klass.class_eval(&body)
+  end
+  private_class_method :__mcp
 
   ##
   # @param [LLM::A2A] a2a
