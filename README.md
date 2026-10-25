@@ -156,16 +156,20 @@ require "llm"
 llm = LLM.deepseek
 mcp = LLM::MCP.http(
   url: "https://api.githubcopilot.com/mcp/",
-  headers: {"Authorization" => "Bearer #{ENV['GITHUB_PAT']}"},
-  transport: :net_http_persistent
+  headers: {"Authorization" => "Bearer #{ENV['GITHUB_PAT']}"}
 )
 
 ##
 # Roll the dice
-concurrency = %i[sequential async fork fiber thread ractor].sample
+concurrency = [
+  :sequential, :async,
+  :thread    , :ractor,
+  Gem.win_platform? ? nil : :fork
+].compact.sample
 
 ##
 # Let's go
+warn "concurrency=#{concurrency}"
 agent = LLM::Agent.new(llm, stream: $stdout, concurrency:)
 agent.talk "Find me an interesting Ruby project on GitHub", tools: mcp.tools
 ```
