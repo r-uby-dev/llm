@@ -13,13 +13,12 @@ class LLM::Transformer
     # @param (see LLM::Transformer#call)
     # @return (see LLM::Transformer#call)
     def call(message:, **opts)
-      case message
-      when LLM::Function::Return
-        message.value.delete(:backtrace) if message.error?
-        message
-      else
-        message
+      returns = [message.content].grep(LLM::Function::Return)
+      returns.each do
+        next unless it.error?
+        it.value.delete(:backtrace)
       end
+      message
     end
   end
 end

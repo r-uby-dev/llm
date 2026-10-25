@@ -161,7 +161,7 @@ module LLM
         options: params.delete(:compactor_options) || {}
       }
       @transformer = {
-        klass: params.delete(:transformer) || LLM::Transformer::Null,
+        klass: params.delete(:transformer) || LLM::Transformer::DeleteBacktrace,
         options: params.delete(:transformer_options) || {}
       }
       @intercept = {

@@ -15,6 +15,7 @@ module LLM
   # one. Either way, the returned message is what gets sent.
   class Transformer
     require_relative "transformer/null"
+    require_relative "transformer/delete_backtrace"
 
     ##
     # @return [LLM::Context]
