@@ -24,12 +24,8 @@ module LLM
     # @return [LLM::Transformer::Multi]
     def self.multi(llm, *transformers)
        Multi.new(
-        *tracers.map do |tracer|
-          if Class === tracer
-            tracer.new(llm)
-          else
-            tracer
-          end
+        *transformers.map do
+          Class === tracer ? it.new(llm) : it
         end
       )
     end
