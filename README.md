@@ -522,12 +522,22 @@ require "llm"
 llm = LLM.deepseek
 mcp = LLM::MCP.http(
   url: "https://api.githubcopilot.com/mcp/",
-  headers: {"Authorization" => "Bearer #{ENV['GITHUB_PAT']}"},
-  transport: :net_http_persistent
+  headers: {"Authorization" => "Bearer #{ENV['GITHUB_PAT']}"}
 )
 
-agent = LLM::Agent.new(llm, stream: $stdout, tools: mcp.tools)
-agent.talk "Find me an interesting Ruby project on GitHub"
+##
+# Roll the dice
+concurrency = [
+  :sequential, :async,
+  :thread    , :ractor,
+  Gem.win_platform? ? nil : :fork
+].compact.sample
+
+##
+# Let's go
+warn "concurrency=#{concurrency}"
+agent = LLM::Agent.new(llm, stream: $stdout, concurrency:)
+agent.talk "Find me an interesting Ruby project on GitHub", tools: mcp.tools
 ```
 
 The second example focuses on the second transport.
@@ -774,6 +784,7 @@ class Agent < ActiveRecord::Base
               description: "a GitHub expert",
               instructions: proc { File.read("instructions.md") },
               tools: :toolset,
+              concurrency: :ractor,
               tracer: proc { LLM::Tracer.pretty(llm) }
   end
 
@@ -790,8 +801,7 @@ class Agent < ActiveRecord::Base
   def github
     @github ||= LLM::MCP.http(
       url: "https://api.githubcopilot.com/mcp/",
-      headers: {"Authorization" => "Bearer #{ENV['GITHUB_PAT']}"},
-      transport: :net_http_persistent
+      headers: {"Authorization" => "Bearer #{ENV['GITHUB_PAT']}"}
     )
   end
 
