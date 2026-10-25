@@ -5,7 +5,7 @@ class LLM::Transformer
   # The {LLM::Transformer::DeleteBacktrace} class
   # removes the backtrace that the runtime includes
   # with a {LLM::Function::Return} that represents
-  # an error.
+  # an urescued exception raised by a tool.
   #
   # @see LLM::Transformer
   class DeleteBacktrace < self
