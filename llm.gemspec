@@ -67,8 +67,8 @@ DESCRIPTION
   spec.add_development_dependency "net-http-persistent", "~> 4.0"
   spec.add_development_dependency "opentelemetry-sdk", "~> 1.10"
   spec.add_development_dependency "logger", "~> 1.7"
-  spec.add_development_dependency "activerecord", "~> 8.0"
-  spec.add_development_dependency "sequel", "~> 5.0"
+  spec.add_development_dependency "activerecord", "~> 8.1"
+  spec.add_development_dependency "sequel", "~> 5.105"
   spec.add_development_dependency "sqlite3", "~> 2.0"
   spec.add_development_dependency "xchan.rb", "~> 0.24"
   spec.add_development_dependency "pg", "~> 1.5"
@@ -76,6 +76,7 @@ DESCRIPTION
   spec.add_development_dependency "kramdown", "~> 2.5"
   spec.add_development_dependency "unicode-display_width", "~> 3.2"
   spec.add_development_dependency "async", "~> 2.45"
+  spec.add_development_dependency "fiber_scheduler", "~> 0.10"
 
   ##
   # Not worth the hassle rn
