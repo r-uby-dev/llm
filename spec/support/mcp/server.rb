@@ -5,7 +5,7 @@ require "json"
 require "socket"
 
 module LLM::MCPServer
-  DEFINITION = {
+  ECHO_TOOL = {
     "name" => "echo",
     "description" => "Echoes text",
     "inputSchema" => {
@@ -27,7 +27,7 @@ module LLM::MCPServer
         "serverInfo" => {"name" => "mcp-stub", "version" => "1.0"}
       }
     when "tools/list"
-      result = {"tools" => [DEFINITION]}
+      result = {"tools" => [ECHO_TOOL]}
     when "tools/call"
       text = message.dig("params", "arguments", "text")
       result = {"structuredContent" => {"message" => "echo: #{text}"}}
