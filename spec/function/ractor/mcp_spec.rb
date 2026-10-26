@@ -56,13 +56,18 @@ RSpec.describe "ractor: mcp tools" do
     let(:port) { 20_000 + rand(20_000) }
     let(:mcp) { LLM::MCP.http(url: "http://127.0.0.1:#{port}/") }
     let!(:pid) do
-      pid = Process.spawn(RbConfig.ruby, server, "--http", port.to_s, out: File::NULL, err: File::NULL)
-      sleep 0.5
-      pid
+      Process.spawn(
+        RbConfig.ruby,
+        server,
+        "--http",
+        port.to_s,
+        out: File::NULL,
+        err: File::NULL
+      ).tap { sleep 1 }
     end
 
     after do
-      Process.kill("TERM", pid)
+      Process.kill("KILL", pid)
       Process.wait(pid)
     end
 
