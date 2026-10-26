@@ -30,6 +30,20 @@ RSpec.describe "ractor: mcp tools" do
   end
 
   context "with the stdio transport" do
+    ##
+    # The stdio transport spawns the
+    # MCP server from inside the ractor.
+    # On Windows that spawn fails with
+    # Errno::EINVAL before the tool is
+    # reached.
+    before do
+      if Gem.win_platform?
+        skip "Process.spawn with redirected pipes " \
+             "inside a ractor is unsupported on "   \
+             "Windows"
+      end
+    end
+
     let(:mcp) { LLM::MCP.stdio(argv: [RbConfig.ruby, server]) }
 
     it_behaves_like "an MCP tool in a ractor"
