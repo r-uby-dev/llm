@@ -3,7 +3,7 @@
 require "setup"
 
 RSpec.describe "ractor: mcp tools" do
-  let(:server_script) { File.expand_path("../../support/mcp/server.rb", __dir__) }
+  let(:server) { File.expand_path("../../support/mcp/server.rb", __dir__) }
   let(:definition) do
     {
       "name" => "echo",
@@ -30,7 +30,7 @@ RSpec.describe "ractor: mcp tools" do
   end
 
   context "with the stdio transport" do
-    let(:mcp) { LLM::MCP.stdio(argv: [RbConfig.ruby, server_script]) }
+    let(:mcp) { LLM::MCP.stdio(argv: [RbConfig.ruby, server]) }
 
     it_behaves_like "an MCP tool in a ractor"
   end
@@ -42,7 +42,7 @@ RSpec.describe "ractor: mcp tools" do
     let(:port) { 20_000 + rand(20_000) }
     let(:mcp) { LLM::MCP.http(url: "http://127.0.0.1:#{port}/") }
     let!(:pid) do
-      pid = Process.spawn(RbConfig.ruby, server_script, "--http", port.to_s, out: File::NULL, err: File::NULL)
+      pid = Process.spawn(RbConfig.ruby, server, "--http", port.to_s, out: File::NULL, err: File::NULL)
       sleep 0.5
       pid
     end
