@@ -303,7 +303,7 @@ class LLM::Function
     when :fiber
       unless ::Fiber.scheduler || defined?(::FiberScheduler)
         LLM.require "fiber_scheduler", "~> 0.13"
-        ::Fiber.set_scheduler(::FiberScheduler)
+        ::Fiber.set_scheduler(::FiberScheduler.new)
       end
       Fiber::Task.new(self, options)
     when :fork
