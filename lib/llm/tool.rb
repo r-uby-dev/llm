@@ -72,11 +72,19 @@ class LLM::Tool
         true
       end
     STR
+    klass.instance_variable_set(:'@client', mcp)
     ractorize(
       Ractor.make_shareable(klass),
       Ractor.make_shareable(mcp.to_h),
       Ractor.make_shareable(tool)
     )
+  end
+
+  ##
+  # @return [LLM::Tool<MCP>]
+  # @api private
+  def self.client
+    @client
   end
 
   ##
@@ -86,8 +94,11 @@ class LLM::Tool
   # @api private
   def self.ractorize(klass, mcp, tool)
     call = Ractor.shareable_proc do |**args|
-       LLM::MCP.new(**mcp)
-               .call_tool(tool["name"], args)
+      if Ractor.main?
+        klass.client.call_tool(tool["name"], **args)
+      else
+        LLM::MCP.new(**mcp).call_tool(tool["name"], **args)
+      end
     end
     params = Ractor.shareable_proc do
       params { tool["inputSchema"] || {type: "object", properties: {}} }
