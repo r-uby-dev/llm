@@ -260,7 +260,7 @@ def main(argv)
 
     ##
     # Let's go!
-    concurrency ||= :sequential
+    concurrency ||= :ractor
     path   = temp ? nil : data[Dir.getwd]
     params = agent_opts.merge(model:, path:, concurrency:, tools: LLM::Tool.subclasses)
     agent  = LLM::Agent.new(llm, params)
