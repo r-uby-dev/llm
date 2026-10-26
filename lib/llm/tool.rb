@@ -100,16 +100,13 @@ class LLM::Tool
         LLM::MCP.new(**mcp).call_tool(tool["name"], **args)
       end
     end
-    params = Ractor.shareable_proc do
-      params { tool["inputSchema"] || {type: "object", properties: {}} }
-    end
     body = Ractor.shareable_proc do
       define_method(:call, &call)
-      instance_eval(&params)
     end
     klass.name tool["name"]
     klass.description tool["description"]
-    klass.class_eval(&body)
+    klass.params tool["inputSchema"] || {type: "object", properties: {}}
+    klass.tap { it.class_eval(&body) }
   end
   private_class_method :ractorize
 
@@ -252,11 +249,14 @@ class LLM::Tool
 
   ##
   # Returns (or sets) tool parameters
-  # @yieldparam [LLM::Schema] schema The schema object to define parameters
+  # @param [Hash, nil] p
+  #  Optional set of params to set
+  # @yieldparam [LLM::Schema] schema
+  #  The schema object to define parameters
   # @return [LLM::Schema]
-  def self.params(&)
+  def self.params(p = nil, &)
     lock do
-      function.tap { _1.params(&) }
+      function.tap { _1.params(p, &) }
     end
   end
 

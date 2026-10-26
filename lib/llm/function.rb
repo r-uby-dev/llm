@@ -230,9 +230,12 @@ class LLM::Function
   #  parameters are rendered rather than here, so a tool can say
   #  `parameter :fruit, proc { Enum[Fruit.keys] }` and ask the model
   #  for what is available at the time of the call.
-  # @yieldparam [LLM::Schema] schema The schema object
+  # @param [Hash, nil] p
+  #  Optional set of params to set
+  # @yieldparam [LLM::Schema] schema
+  #   The schema object
   # @return [LLM::Schema::Leaf, nil]
-  def params
+  def params(p = nil)
     if block_given?
       params = yield(@schema)
       params = LLM::Schema.parse(params) if Hash === params
@@ -241,6 +244,8 @@ class LLM::Function
       else
         @params = params
       end
+    elsif p
+      params { p }
     else
       @params || LLM::Schema::Object.new({})
     end
