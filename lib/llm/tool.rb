@@ -88,8 +88,8 @@ class LLM::Tool
   def self.ractorize(klass, mcp, tool)
     call = Ractor.shareable_proc do |**args|
       if Ractor.main?
-        mcp = klass.instance_variable_get(:@mcp)
-        mcp.call_tool(tool["name"], args)
+        client = klass.instance_variable_get(:@mcp)
+        client.call_tool(tool["name"], args)
       else
         LLM::MCP.new(**mcp).call_tool(tool["name"], **args)
       end
