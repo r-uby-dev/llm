@@ -4,7 +4,7 @@ require "setup"
 
 RSpec.describe "ractor: mcp tools" do
   let(:server) { File.expand_path("../../support/mcp/server.rb", __dir__) }
-  let(:definition) do
+  let(:tool) do
     {
       "name" => "echo",
       "description" => "Echoes text",
@@ -16,7 +16,7 @@ RSpec.describe "ractor: mcp tools" do
     }
   end
   let(:function) do
-    LLM::Tool.mcp(mcp, definition).function.dup.tap do |fn|
+    LLM::Tool.mcp(mcp, tool).function.dup.tap do |fn|
       fn.id = "call_1"
       fn.arguments = {"text" => "hello"}
     end
