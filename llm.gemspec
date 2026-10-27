@@ -75,6 +75,7 @@ DESCRIPTION
   spec.add_development_dependency "kramdown", "~> 2.5"
   spec.add_development_dependency "unicode-display_width", "~> 3.2"
   spec.add_development_dependency "async", "~> 2.45"
+  spec.add_development_dependency "fiber_scheduler", "~> 0.13"
 
   ##
   # Not worth the hassle rn
