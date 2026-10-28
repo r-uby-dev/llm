@@ -14,9 +14,18 @@ module LLM
   # A filter may mutate the message in place or return a new
   # one. Either way, the returned message is what gets sent.
   class MessageFilter
+    require_relative "message_filter/rescue"
     require_relative "message_filter/multi"
     require_relative "message_filter/null"
     require_relative "message_filter/delete_backtrace"
+
+    ##
+    # @param [Class] klass
+    #  A subclalss of {LLM::Tracer}
+    # @return [void]
+    def self.inherited(klass)
+      klass.prepend Rescue
+    end
 
     ##
     # @param [LLM::Provider] llm
