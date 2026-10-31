@@ -98,37 +98,28 @@ module LLM::ActiveRecord
       ##
       # Returns the messages this record holds.
       #
-      # A record that stores its state as jsonb reads them from the column,
-      # as a relation: the conversation can be filtered, counted and ordered
-      # in the database, and nothing here needs a provider to be built. Every
-      # other format loads the runtime and hands back the messages it holds.
+      # @note
+      #   A record that stores its state as jsonb
+      #   reads them from the column, as a relation:
+      #   the conversation can be filtered, counted
+      #   and ordered in the database, and nothing here
+      #   needs a provider to be built. Every other format
+      #   loads the runtime and hands back the messages
+      #   it holds.
       #
-      # The two do not agree about what is visible. The relation reads what is
-      # persisted rather than what the runtime holds in memory, it is
-      # unordered - conversation order is `position`, not `id` - and its rows
-      # are {LLM::ActiveRecord::Message} records until
-      # {LLM::ActiveRecord::Message#unwrap!} turns them back into
-      # {LLM::Message} objects. {#messages!} is the runtime's own collection,
-      # for a caller who wants that instead.
       # @see LLM::Context#messages
       # @return [ActiveRecord::Relation, LLM::Buffer]
       def messages
         options = self.class.llm_plugin_options
         if options[:format] == :jsonb
-          LLM::ActiveRecord::Message.for(agent: self)
+          LLM::ActiveRecord::Message.for(record: self)
         else
           ctx.messages
         end
       end
 
       ##
-      # Returns the messages the runtime holds, whatever the storage format is.
-      #
-      # This is what {#messages} answers with for every format but jsonb, and
-      # it is the way back to it for a jsonb record. The difference between
-      # the two is what each reads: this reads what the context holds,
-      # including state that has not been saved, where {#messages} reads the
-      # column.
+      # Returns the messages the runtime holds
       # @see LLM::Context#messages
       # @return [LLM::Buffer]
       def messages!
@@ -136,7 +127,6 @@ module LLM::ActiveRecord
       end
 
       ##
-      # @note The bang keeps the ActiveRecord and Sequel wrappers aligned.
       # @see LLM::Context#model
       # @return [String]
       def model!
@@ -172,18 +162,31 @@ module LLM::ActiveRecord
       end
 
       ##
+      # Returns the overall size of the context window.
       # @see LLM::Context#context_window
-      # @return [Integer]
+      # @return [Integer, nil]
       def context_window
-        ctx.context_window
+        options = self.class.llm_plugin_options
+        if options[:format] == :jsonb
+          agent = LLM::ActiveRecord::Agent.for(record: self)
+          agent.context_window
+        else
+          ctx.context_window
+        end
       end
 
       ##
-      # Returns how many tokens have been used
-      # within the context window
-      # @return [Integer]
+      # Returns how many tokens have been used.
+      # @see LLM::Context#context_used
+      # @return [Integer, nil]
       def context_used
-        ctx.context_used
+        options = self.class.llm_plugin_options
+        if options[:format] == :jsonb
+          agent = LLM::ActiveRecord::Agent.for(record: self)
+          agent.context_used
+        else
+          ctx.context_used
+        end
       end
 
       ##

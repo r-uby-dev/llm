@@ -932,11 +932,21 @@ end
 agent = Agent.find_by(id: 1)
 
 ##
+# Read the number of tokens used directly from
+# the jsonb column
+p agent.context_used
+
+##
+# Read the overall context window size of the model
+# directly from the jsonb column
+p agent.context_available
+
+##
 # Returns a relation over the agent's messages.
 # It is scoped to the agent, and it yields one
 # instance of LLM::ActiveRecord::Message per
 # message the agent has produced.
-messages = LLM::ActiveRecord::Message.for(agent:)
+messages = agent.messages
 
 ##
 # The relation chains like any other
@@ -968,7 +978,7 @@ Each row carries a message, flattened into columns:
 The queries the view runs are already covered. They expand
 one agent, found by primary key, so they are index scans.
 There is nothing to add for
-`LLM::ActiveRecord::Message.for(agent:)`.
+`agent.{context_used,context_window,messages}`.
 
 The queries you write on top of it are not. Once a question
 is asked of every agent, the column is expanded row by row

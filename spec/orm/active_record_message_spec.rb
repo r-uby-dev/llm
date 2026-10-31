@@ -46,7 +46,7 @@ RSpec.describe "LLM::ActiveRecord::Message" do
   let(:provider_record) { provider_model.create!(data: saved(messages)) }
   let(:other_agent) { model.create!(data: saved(other_messages)) }
   let(:assistant_id) { messages.last[:id] }
-  let(:relation) { described_class.for(agent:) }
+  let(:relation) { described_class.for(record: agent) }
 
   let(:messages) do
     [
@@ -80,7 +80,7 @@ RSpec.describe "LLM::ActiveRecord::Message" do
     end
 
     it "scopes the relation to the agent" do
-      expect(described_class.for(agent: other_agent).pluck(:content)).to eq(["other"])
+      expect(described_class.for(record: other_agent).pluck(:content)).to eq(["other"])
     end
 
     it "numbers the messages by position" do
