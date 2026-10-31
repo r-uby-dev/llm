@@ -112,7 +112,7 @@ module LLM::ActiveRecord
       def messages
         options = self.class.llm_plugin_options
         if options[:format] == :jsonb
-          LLM::ActiveRecord::Message.for(agent: self)
+          LLM::ActiveRecord::Message.for(record: self)
         else
           ctx.messages
         end
