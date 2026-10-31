@@ -73,5 +73,6 @@ module LLM::ActiveRecord
 
   require "llm/active_record/acts_as_llm"
   require "llm/active_record/acts_as_agent"
+  require "llm/active_record/agent"
   require "llm/active_record/message"
 end
