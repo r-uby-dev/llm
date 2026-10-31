@@ -168,13 +168,17 @@ module LLM::ActiveRecord
       # @see LLM::Context#context_window
       # @return [Integer, nil]
       def context_window
-        @__context_window ||= begin
-          options = self.class.llm_plugin_options
-          if options[:format] == :jsonb
-            agent = LLM::ActiveRecord::Agent.for(record: self)
-            agent.context_window
-          else
-            ctx.context_window
+        if defined?(@context_window)
+          @context_window
+        else
+          @context_window = begin
+            options = self.class.llm_plugin_options
+            if options[:format] == :jsonb
+              agent = LLM::ActiveRecord::Agent.for(record: self)
+              agent.context_window
+            else
+              ctx.context_window
+            end
           end
         end
       end
@@ -184,13 +188,17 @@ module LLM::ActiveRecord
       # @see LLM::Context#context_used
       # @return [Integer, nil]
       def context_used
-        @__context_used ||= begin
-          options = self.class.llm_plugin_options
-          if options[:format] == :jsonb
-            agent = LLM::ActiveRecord::Agent.for(record: self)
-            agent.context_used
-          else
-            ctx.context_used
+        if defined?(@context_used)
+          @context_used
+        else
+          @context_used = begin
+            options = self.class.llm_plugin_options
+            if options[:format] == :jsonb
+              agent = LLM::ActiveRecord::Agent.for(record: self)
+              agent.context_used
+            else
+              ctx.context_used
+            end
           end
         end
       end
