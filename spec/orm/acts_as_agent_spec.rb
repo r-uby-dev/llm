@@ -268,5 +268,9 @@ RSpec.describe "acts_as_agent" do
     it "stores no wire-format tool calls" do
       expect(message).not_to have_key("original_tool_calls")
     end
+
+    it "stores token usage as a top-level field" do
+      expect(data["token_usage"]).to include("total_tokens" => 0, "input_tokens" => 0)
+    end
   end
 end

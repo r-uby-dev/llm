@@ -221,10 +221,24 @@ module LLM::ActiveRecord
       end
 
       ##
-      # Returns usage from the mapped usage columns.
+      # Returns the accumulated token usage
+      # @see LLM::Context#token_usage
       # @return [LLM::Usage]
       def token_usage
-        ctx.token_usage
+        if defined?(@token_usage)
+          @token_usage
+        else
+          @token_usage = begin
+            options = self.class.llm_plugin_options
+            if options[:format] == :jsonb
+              agent  = LLM::ActiveRecord::Agent.for(record: self)
+              fields = LLM::Usage.fields.to_h { [_1.to_sym, row.public_send(_1)] }
+              LLM::Usage.new(**fields.transform_values { _1 || 0 })
+            else
+              ctx.token_usage
+            end
+          end
+        end
       end
       alias_method :usage, :token_usage
 
