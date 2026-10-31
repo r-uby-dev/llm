@@ -582,6 +582,7 @@ module LLM
         compacted:,
         context_used:,
         context_window:,
+        token_usage: token_usage.to_h,
         messages: @messages.map { serialize_message(_1) }
       }
     end
