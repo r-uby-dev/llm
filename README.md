@@ -936,7 +936,7 @@ agent = Agent.find_by(id: 1)
 # It is scoped to the agent, and it yields one
 # instance of LLM::ActiveRecord::Message per
 # message the agent has produced.
-messages = LLM::ActiveRecord::Message.for(record:)
+messages = agent.messages
 
 ##
 # The relation chains like any other
