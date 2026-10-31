@@ -2,7 +2,7 @@
 
 class SubAgent < LLM::Tool
   name "subagent"
-  description "prepare a release with a subagent"
+  description "cuts a new release"
   parameter :version, String, "the version to release"
   parameter :instructions, String, "optional instructions for the subagent"
   required %i[version]

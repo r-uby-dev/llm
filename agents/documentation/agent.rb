@@ -4,10 +4,9 @@
 require "llm"
 require "llm/tools"
 require "fileutils"
+require_relative "subagent"
 
 class Agent < LLM::Agent
-  require_relative "subagent"
-
   set name: "docs",
       description: "works with docs",
       tools: [LLM::Tool::ReadFile, SubAgent],
