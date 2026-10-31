@@ -5,16 +5,21 @@ require "llm"
 require "llm/tools"
 
 class Agent < LLM::Agent
+  require_relative "subagent"
+
   set :name         => "rel",
       :description  => "release engineer",
       :instructions => File.read(File.join(__dir__, "prompt.md")),
-      :skills       => %w[release.md].map { File.join(__dir__, _1) },
-      :tools        => [LLM::Tool::Git, LLM::Tool::ReadFile, LLM::Tool::Rg, LLM::Tool::EditFile],
+      :tools        => [LLM::Tool::Git, LLM::Tool::ReadFile, LLM::Tool::Rg, LLM::Tool::EditFile, SubAgent],
       :path         => File.join(__dir__, "..", "..", "contexts", "dexter.json"),
       :tracer       => -> { LLM::Tracer.pretty_logger(llm, io: $stderr) }
 
   def release(version:)
-    talk("Let's release version #{version}!")
+    talk([
+      "release version #{version}",
+      "verify the subagent's work",
+      "recall the subagent again if necessary"
+    ])
   end
 end
 

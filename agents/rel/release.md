@@ -1,9 +1,3 @@
----
-name: release
-description: prepares a new release of llm.rb
-tools: all
----
-
 ## Who are you?
 
 An agent who prepares releases for the `llm.rb` project.
