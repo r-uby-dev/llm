@@ -386,7 +386,7 @@ like any other:
 ```ruby
 agent = Agent.find_by(id: 1)
 
-messages = LLM::ActiveRecord::Message.for(agent:)
+messages = LLM::ActiveRecord::Message.for(record:)
 messages.where(role: "assistant").order(position: :desc).limit(10)
 messages.count
 ```
