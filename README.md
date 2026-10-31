@@ -978,7 +978,7 @@ Each row carries a message, flattened into columns:
 The queries the view runs are already covered. They expand
 one agent, found by primary key, so they are index scans.
 There is nothing to add for
-`LLM::ActiveRecord::Message.for(record:)`.
+`agent.{context_used,context_window,messages}`.
 
 The queries you write on top of it are not. Once a question
 is asked of every agent, the column is expanded row by row
