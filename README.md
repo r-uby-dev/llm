@@ -932,6 +932,16 @@ end
 agent = Agent.find_by(id: 1)
 
 ##
+# Read the number of tokens used directly from
+# the jsonb column
+p agent.context_used
+
+##
+# Read the overall context window size of the model
+# directly from the jsonb column
+p agent.context_available
+
+##
 # Returns a relation over the agent's messages.
 # It is scoped to the agent, and it yields one
 # instance of LLM::ActiveRecord::Message per
