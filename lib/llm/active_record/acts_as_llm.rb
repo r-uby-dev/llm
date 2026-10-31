@@ -110,11 +110,13 @@ module LLM::ActiveRecord
       # @see LLM::Context#messages
       # @return [ActiveRecord::Relation, LLM::Buffer]
       def messages
-        options = self.class.llm_plugin_options
-        if options[:format] == :jsonb
-          LLM::ActiveRecord::Message.for(record: self)
-        else
-          ctx.messages
+        @__messages ||= begin
+          options = self.class.llm_plugin_options
+          if options[:format] == :jsonb
+            LLM::ActiveRecord::Message.for(record: self)
+          else
+            ctx.messages
+          end
         end
       end
 
@@ -166,12 +168,14 @@ module LLM::ActiveRecord
       # @see LLM::Context#context_window
       # @return [Integer, nil]
       def context_window
-        options = self.class.llm_plugin_options
-        if options[:format] == :jsonb
-          agent = LLM::ActiveRecord::Agent.for(record: self)
-          agent.context_window
-        else
-          ctx.context_window
+        @__context_window ||= begin
+          options = self.class.llm_plugin_options
+          if options[:format] == :jsonb
+            agent = LLM::ActiveRecord::Agent.for(record: self)
+            agent.context_window
+          else
+            ctx.context_window
+          end
         end
       end
 
@@ -180,12 +184,14 @@ module LLM::ActiveRecord
       # @see LLM::Context#context_used
       # @return [Integer, nil]
       def context_used
-        options = self.class.llm_plugin_options
-        if options[:format] == :jsonb
-          agent = LLM::ActiveRecord::Agent.for(record: self)
-          agent.context_used
-        else
-          ctx.context_used
+        @__context_used ||= begin
+          options = self.class.llm_plugin_options
+          if options[:format] == :jsonb
+            agent = LLM::ActiveRecord::Agent.for(record: self)
+            agent.context_used
+          else
+            ctx.context_used
+          end
         end
       end
 
