@@ -24,12 +24,12 @@ module LLM::ActiveRecord
     #  An agent record.
     # @return [ActiveRecord::Relation]
     def self.for(record:)
-      klass      = agent.class
+      klass      = record.class
       connection = klass.connection
       table      = connection.quote_table_name(klass.table_name)
       options    = klass.llm_plugin_options
       column     = connection.quote_column_name(options.fetch(:data_column))
-      from(<<~SQL).where(agent_id: agent&.id)
+      from(<<~SQL).where(agent_id: record&.id)
         (SELECT #{table}.id                AS agent_id,
                 (message ->> 'id')         AS id,
                 (message ->> 'role')       AS role,
