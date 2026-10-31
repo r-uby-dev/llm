@@ -207,7 +207,17 @@ module LLM::ActiveRecord
       # Returns context window usage as a Rational
       # @return [Rational, nil]
       def context_usage
-        ctx.context_usage
+        if defined?(@context_usage)
+          @context_usage
+        else
+          @context_usage = begin
+            if [context_used, context_window].any?(&:nil?)
+              nil
+            else
+              Rational(context_used, context_window)
+            end
+          end
+        end
       end
 
       ##
