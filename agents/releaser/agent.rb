@@ -6,12 +6,12 @@ require "llm/tools"
 require_relative "subagent"
 
 class Agent < LLM::Agent
-  set name: "releaser",
-      description: "cuts a new gem",
-      instructions: File.read(File.join(__dir__, "prompt.md")),
-      tools: [LLM::Tool::Git, LLM::Tool::ReadFile, SubAgent],
-      path: File.join(__dir__, "..", "..", "contexts", "dexter.json"),
-      tracer: -> { LLM::Tracer.pretty_logger(llm, io: $stderr) }
+  set name:         "releaser",
+      description:  "cuts a new gem",
+      instructions: :set_instructions,
+      tools:        :set_tools,
+      path:         :set_path,
+      tracer:       :set_tracer
 
   def release(version:)
     talk([
@@ -19,6 +19,24 @@ class Agent < LLM::Agent
       "verify the subagent's work",
       "recall the subagent again if necessary"
     ])
+  end
+
+  private
+
+  def set_instructions
+    File.read File.join(__dir__, "prompt.md")
+  end
+
+  def set_tools
+    [LLM::Tool::Git, LLM::Tool::ReadFile, SubAgent]
+  end
+
+  def set_path
+    File.join(__dir__, "memory.json")
+  end
+
+  def set_tracer
+    LLM::Tracer.multi(llm, LLM::Tracer::PrettyLogger)
   end
 end
 
