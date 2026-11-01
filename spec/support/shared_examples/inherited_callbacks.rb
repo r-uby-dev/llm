@@ -26,7 +26,7 @@ RSpec.shared_examples "inherited wrapper callbacks" do
     end
 
     it "resolves the context params from the superclass" do
-      expect(row.send(:ctx).params).to include(store: false)
+      expect(row.unwrap!.params).to include(store: false)
     end
   end
 

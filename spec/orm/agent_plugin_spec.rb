@@ -43,7 +43,7 @@ RSpec.describe "plugin :agent" do
 
   let(:record) { agent.create }
   let(:reload_record) { ->(row) { row.class[row.id] } }
-  let(:flush_record) { ->(row) { LLM::Sequel::Plugin::Utils.save!(row, row.send(:ctx), row.class.llm_plugin_options) } }
+  let(:flush_record) { ->(row) { LLM::Sequel::Plugin::Utils.save!(row, row.unwrap!, row.class.llm_plugin_options) } }
 
   let(:wrap) { ->(klass) { klass.plugin :agent; klass } }
 
@@ -121,7 +121,7 @@ RSpec.describe "plugin :agent" do
     end
 
     it "resolves the tracer from the block" do
-      expect(record.send(:ctx).tracer).to be_a(LLM::Tracer::Logger)
+      expect(record.unwrap!.tracer).to be_a(LLM::Tracer::Logger)
     end
   end
 

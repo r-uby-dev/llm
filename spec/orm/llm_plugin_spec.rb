@@ -27,7 +27,7 @@ RSpec.describe "plugin :llm" do
 
   let(:record) { context.create }
   let(:reload_record) { ->(row) { row.class[row.id] } }
-  let(:flush_record) { ->(row) { LLM::Sequel::Plugin::Utils.save!(row, row.send(:ctx), row.class.llm_plugin_options) } }
+  let(:flush_record) { ->(row) { LLM::Sequel::Plugin::Utils.save!(row, row.unwrap!, row.class.llm_plugin_options) } }
 
   include_examples "a persisted context record"
 

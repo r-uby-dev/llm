@@ -125,7 +125,7 @@ module LLM::ActiveRecord
       # @param (see LLM::Agent#console)
       # @return (see LLM::Agent#console)
       def console(**params)
-        ctx.console(**params)
+        __context__.console(**params)
       end
       alias_method :repl, :console
 
@@ -133,8 +133,8 @@ module LLM::ActiveRecord
 
       ##
       # @return [LLM::Agent]
-      def ctx
-        @ctx ||= begin
+      def __context__
+        @__context__ ||= begin
           options = self.class.llm_plugin_options
           params = Utils.resolve_options(self, options[:context], EMPTY_HASH).dup
           ctx = self.class.agent.new(llm, params.compact.merge(record: self))

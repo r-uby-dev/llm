@@ -49,7 +49,7 @@ RSpec.describe "acts_as_agent" do
 
   let(:record) { agent.create! }
   let(:reload_record) { ->(row) { row.class.find(row.id) } }
-  let(:flush_record) { ->(row) { LLM::ActiveRecord::Utils.save!(row, row.send(:ctx), row.class.llm_plugin_options) } }
+  let(:flush_record) { ->(row) { LLM::ActiveRecord::Utils.save!(row, row.send(:__context__), row.class.llm_plugin_options) } }
 
   describe "#unwrap!" do
     it "returns the record's LLM::Agent" do
@@ -131,7 +131,7 @@ RSpec.describe "acts_as_agent" do
     end
 
     it "resolves the tools against the bound record" do
-      expect(record.send(:ctx).params[:tools]).to eq([tool])
+      expect(record.send(:__context__).params[:tools]).to eq([tool])
     end
   end
 
@@ -193,7 +193,7 @@ RSpec.describe "acts_as_agent" do
     end
 
     it "resolves the tracer from the block" do
-      expect(record.send(:ctx).tracer).to be_a(LLM::Tracer::Logger)
+      expect(record.send(:__context__).tracer).to be_a(LLM::Tracer::Logger)
     end
   end
 
@@ -230,7 +230,7 @@ RSpec.describe "acts_as_agent" do
   end
 
   context "when the record's id is not a UUIDv7" do
-    let(:ctx) { record.send(:ctx) }
+    let(:ctx) { record.send(:__context__) }
 
     it "does not take the record's id" do
       expect(ctx.id).not_to eq(record.id)

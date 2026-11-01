@@ -67,7 +67,7 @@ module LLM::ActiveRecord
       # @see LLM::Context#talk
       # @return [LLM::Response]
       def talk(...)
-        ctx.talk(...)
+        __context__.talk(...)
       end
 
       ##
@@ -77,7 +77,7 @@ module LLM::ActiveRecord
       # @see LLM::Context#ask
       # @return [LLM::Response]
       def ask(...)
-        ctx.ask(...)
+        __context__.ask(...)
       end
 
       ##
@@ -85,14 +85,14 @@ module LLM::ActiveRecord
       # @see LLM::Context#wait
       # @return [Array<LLM::Function::Return>]
       def wait(...)
-        ctx.wait(...)
+        __context__.wait(...)
       end
 
       ##
       # @see LLM::Context#mode
       # @return [Symbol]
       def mode
-        ctx.mode
+        __context__.mode
       end
 
       ##
@@ -115,7 +115,7 @@ module LLM::ActiveRecord
           if options[:format] == :jsonb
             LLM::ActiveRecord::Message.for(record: self)
           else
-            ctx.messages
+            __context__.messages
           end
         end
       end
@@ -125,42 +125,42 @@ module LLM::ActiveRecord
       # @see LLM::Context#messages
       # @return [LLM::Buffer]
       def messages!
-        ctx.messages
+        __context__.messages
       end
 
       ##
       # @see LLM::Context#model
       # @return [String]
       def model!
-        ctx.model
+        __context__.model
       end
 
       ##
       # @see LLM::Context#pending_functions
       # @return [Array<LLM::Function>]
       def pending_functions
-        ctx.pending_functions
+        __context__.pending_functions
       end
 
       ##
       # @see LLM::Context#pending_functions?
       # @return [Boolean]
       def pending_functions?
-        ctx.pending_functions?
+        __context__.pending_functions?
       end
 
       ##
       # @see LLM::Context#returns
       # @return [Array<LLM::Function::Return>]
       def returns
-        ctx.returns
+        __context__.returns
       end
 
       ##
       # @see LLM::Context#cost
       # @return [LLM::Cost]
       def cost
-        ctx.cost
+        __context__.cost
       end
 
       ##
@@ -176,7 +176,7 @@ module LLM::ActiveRecord
             if options[:format] == :jsonb
               __agent__.context_window
             else
-              ctx.context_window
+              __context__.context_window
             end
           end
         end
@@ -195,7 +195,7 @@ module LLM::ActiveRecord
             if options[:format] == :jsonb
               __agent__.context_used
             else
-              ctx.context_used
+              __context__.context_used
             end
           end
         end
@@ -233,7 +233,7 @@ module LLM::ActiveRecord
               fields = LLM::Usage.fields.to_h { [_1.to_sym, agent.public_send(_1)] }
               LLM::Usage.new(**fields.transform_values { _1 || 0 })
             else
-              ctx.token_usage
+              __context__.token_usage
             end
           end
         end
@@ -244,7 +244,7 @@ module LLM::ActiveRecord
       # @see LLM::Context#interrupt!
       # @return [nil]
       def interrupt!
-        ctx.interrupt!
+        __context__.interrupt!
       end
       alias_method :cancel!, :interrupt!
 
@@ -252,7 +252,7 @@ module LLM::ActiveRecord
       # @see LLM::Context#prompt
       # @return [LLM::Prompt]
       def prompt(&)
-        ctx.prompt(&)
+        __context__.prompt(&)
       end
       alias_method :build_prompt, :prompt
 
@@ -260,28 +260,28 @@ module LLM::ActiveRecord
       # @see LLM::Context#image_url
       # @return [LLM::Object]
       def image_url(...)
-        ctx.image_url(...)
+        __context__.image_url(...)
       end
 
       ##
       # @see LLM::Context#local_file
       # @return [LLM::Object]
       def local_file(...)
-        ctx.local_file(...)
+        __context__.local_file(...)
       end
 
       ##
       # @see LLM::Context#remote_file
       # @return [LLM::Object]
       def remote_file(...)
-        ctx.remote_file(...)
+        __context__.remote_file(...)
       end
 
       ##
       # @see LLM::Context#tracer
       # @return [LLM::Tracer]
       def tracer
-        ctx.tracer
+        __context__.tracer
       end
 
       ##
@@ -302,7 +302,7 @@ module LLM::ActiveRecord
       # memoized, so every call returns the same object.
       # @return [LLM::Context, LLM::Agent]
       def unwrap!
-        ctx
+        __context__
       end
 
       private
@@ -326,20 +326,24 @@ module LLM::ActiveRecord
 
       ##
       # @return [LLM::Context]
-      def ctx
-        @ctx ||= begin
-          options = self.class.llm_plugin_options
-          columns = Utils.columns(options)
-          params = Utils.resolve_options(self, options[:context], EMPTY_HASH).dup
-          ctx = LLM::Context.new(llm, params.compact.merge(record: self))
-          data = self[columns[:data_column]]
-          if data.nil? || data == ""
-            ctx
-          else
-            case options[:format]
-            when :string then ctx.restore(string: data)
-            when :json, :jsonb then ctx.restore(data:)
-            else raise ArgumentError, "Unknown format: #{options[:format].inspect}"
+      def __context__
+        if defined?(@__context__)
+          @__context__
+        else
+          @__context__ = begin
+            options = self.class.llm_plugin_options
+            columns = Utils.columns(options)
+            params = Utils.resolve_options(self, options[:context], EMPTY_HASH).dup
+            context = LLM::Context.new(llm, params.compact.merge(record: self))
+            data = self[columns[:data_column]]
+            if data.nil? || data == ""
+              context
+            else
+              case options[:format]
+              when :string then context.restore(string: data)
+              when :json, :jsonb then context.restore(data:)
+              else raise ArgumentError, "Unknown format: #{options[:format].inspect}"
+              end
             end
           end
         end
