@@ -288,6 +288,13 @@ module LLM::ActiveRecord
       end
 
       ##
+      # Returns the runtime this record wraps.
+      # @return [LLM::Context, LLM::Agent]
+      def unwrap!
+        __context__
+      end
+
+      ##
       # Returns the resolved provider instance for this record.
       # @return [LLM::Provider]
       def llm
@@ -296,13 +303,6 @@ module LLM::ActiveRecord
         @llm = Utils.resolve_provider(self, options, EMPTY_HASH)
         @llm.tracer = Utils.resolve_option(self, options[:tracer]) if options[:tracer]
         @llm
-      end
-
-      ##
-      # Returns the runtime this record wraps.
-      # @return [LLM::Context, LLM::Agent]
-      def unwrap!
-        __context__
       end
 
       private
