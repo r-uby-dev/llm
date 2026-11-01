@@ -1740,10 +1740,10 @@ welcome.
 <summary>How well tested is llm.rb?</summary>
 <br>
 
-It is battle tested daily.
+I use it all the time. Especially the console.
 
-It powers the [r.uby.dev](https://r.uby.dev)
-website and I'm aware of at least one production
+It also powers the [r.uby.dev](https://r.uby.dev)
+website. I'm aware of at least one production
 Rails deployment at a large-ish company.
 </details>
 
