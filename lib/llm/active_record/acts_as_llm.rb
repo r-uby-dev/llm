@@ -133,24 +133,6 @@ module LLM::ActiveRecord
       end
 
       ##
-      # @see LLM::Context#model
-      # @return [String]
-      def model!
-        if defined?(@model)
-          @model
-        else
-          @model = begin
-            options = self.class.llm_plugin_options
-            if options[:format] == :jsonb
-              __agent__.model
-            else
-              __context__.model
-            end
-          end
-        end
-      end
-
-      ##
       # @see LLM::Context#pending_functions
       # @return [Array<LLM::Function>]
       def pending_functions
@@ -179,6 +161,21 @@ module LLM::ActiveRecord
       end
 
       ##
+      # @see LLM::Context#model
+      # @return [String]
+      def model!
+        if defined?(@model)
+          @model
+        else
+          @model = begin
+            options = self.class.llm_plugin_options
+            data = public_send(options[:data_column])
+            data&.dig("model")
+          end
+        end
+      end
+
+      ##
       # Returns the overall size of the context window.
       # @see LLM::Context#context_window
       # @return [Integer, nil]
@@ -188,11 +185,8 @@ module LLM::ActiveRecord
         else
           @context_window = begin
             options = self.class.llm_plugin_options
-            if options[:format] == :jsonb
-              __agent__&.context_window
-            else
-              __context__.context_window
-            end
+            data = public_send(options[:data_column])
+            data&.dig("context_window")
           end
         end
       end
@@ -206,12 +200,8 @@ module LLM::ActiveRecord
           @context_used
         else
           @context_used = begin
-            options = self.class.llm_plugin_options
-            if options[:format] == :jsonb
-              __agent__&.context_used
-            else
-              __context__.context_used
-            end
+            data = public_send(options[:data_column])
+            data&.dig("context_used")
           end
         end
       end
@@ -243,13 +233,10 @@ module LLM::ActiveRecord
         else
           @token_usage = begin
             options = self.class.llm_plugin_options
-            if options[:format] == :jsonb
-              agent  = __agent__
-              fields = LLM::Usage.fields.to_h { [_1.to_sym, agent.public_send(_1)] }
-              LLM::Usage.new(**fields.transform_values { _1 || 0 })
-            else
-              __context__.token_usage
-            end
+            data    = public_send(options[:data_column])
+            usage   = data&.dig("token_usage") || {}
+            fields  = LLM::Usage.fields.to_h { [_1.to_sym, usage[_1]] }
+            LLM::Usage.new(**fields.transform_values { _1 || 0 })
           end
         end
       end
