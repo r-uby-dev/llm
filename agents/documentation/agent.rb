@@ -7,11 +7,11 @@ require "fileutils"
 require_relative "subagent"
 
 class Agent < LLM::Agent
-  set name: "docs",
-      description: "works with docs",
-      tools: [LLM::Tool::ReadFile, SubAgent],
-      path: File.join(__dir__, "..", "..", "contexts", "scribe.json"),
-      tracer: proc { LLM::Tracer.pretty(llm, io: $stdout) }
+  set name:        :set_name,
+      description: :set_description,
+      tools:       :set_tools,
+      path:        :set_path,
+      tracer:      :set_tracer
 
   def changelog
     talk([
@@ -20,6 +20,30 @@ class Agent < LLM::Agent
       "recall the subagent again if neccessary"
     ])
   end
+
+  include Module.new {
+    private
+
+    def set_name
+      "docs"
+    end
+
+    def set_description
+      "works with docs"
+    end
+
+    def set_tools
+      [LLM::Tool::ReadFile, SubAgent]
+    end
+
+    def set_path
+      File.join(__dir__, "memory.json")
+    end
+
+    def set_tracer
+      LLM::Tracer.multi llm, LLM::Tracer::PrettyLogger
+    end
+  }
 end
 
 def main(argv)
