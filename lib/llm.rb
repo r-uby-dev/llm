@@ -1,15 +1,13 @@
 # frozen_string_literal: true
 
 ##
-# llm.rb is a zero-dependency AI runtime for Ruby. Fourteen providers, six
-# concurrency strategies, MCP and A2A, streaming tool calls with
-# cancellation, context compaction, and ORM persistence.
+# An agentic runtime.
 #
-# @example The three-step workflow
+# @example LLM::Agent
 #   require "llm"
-#   llm = LLM.deepseek(key: ENV["KEY"])            # 1. pick a provider
-#   agent = LLM::Agent.new(llm, stream: $stdout)   # 2. create an agent
-#   agent.talk "Hello world"                       # 3. talk to it
+#   llm   = LLM.deepseek                             # 1. pick a provider
+#   agent = LLM::Agent.new(llm, stream: $stdout)     # 2. create an agent
+#   agent.talk "Hello world"                         # 3. talk to it
 #
 # @see LLM::Agent The recommended high-level interface
 # @see LLM::Context The low-level stateful runtime (advanced)
