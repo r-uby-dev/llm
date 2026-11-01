@@ -200,6 +200,7 @@ module LLM::ActiveRecord
           @context_used
         else
           @context_used = begin
+            options = self.class.llm_plugin_options
             data = public_send(options[:data_column])
             data&.dig("context_used")
           end
