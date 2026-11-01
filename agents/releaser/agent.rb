@@ -21,31 +21,33 @@ class Agent < LLM::Agent
     ])
   end
 
-  private
+  include Module.new {
+    private
 
-  def set_name
-    "releaser"
-  end
-  
-  def set_description
-    "cuts a new gem"
-  end
+    def set_name
+      "releaser"
+    end
 
-  def set_instructions
-    File.read File.join(__dir__, "prompt.md")
-  end
+    def set_description
+      "cuts a new gem"
+    end
 
-  def set_tools
-    [LLM::Tool::Git, LLM::Tool::ReadFile, SubAgent]
-  end
+    def set_instructions
+      File.read File.join(__dir__, "prompt.md")
+    end
 
-  def set_path
-    File.join(__dir__, "memory.json")
-  end
+    def set_tools
+      [LLM::Tool::Git, LLM::Tool::ReadFile, SubAgent]
+    end
 
-  def set_tracer
-    LLM::Tracer.multi(llm, LLM::Tracer::PrettyLogger)
-  end
+    def set_path
+      File.join(__dir__, "memory.json")
+    end
+
+    def set_tracer
+      LLM::Tracer.multi(llm, LLM::Tracer::PrettyLogger)
+    end
+  }
 end
 
 def main(argv)
