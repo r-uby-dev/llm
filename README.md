@@ -1707,11 +1707,9 @@ The [r.uby.dev](https://r.uby.dev) website.
 <summary>What about local LLM support?</summary>
 <br>
 
-The following providers can be run used with models that
-are running on your own hardware.
-
-* Ollama
-* Llamacpp
+Try:  
+* LLM.ollama
+* LLM.llamacpp
 </details>
 
 <details>
