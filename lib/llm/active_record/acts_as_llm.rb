@@ -189,7 +189,7 @@ module LLM::ActiveRecord
           @context_window = begin
             options = self.class.llm_plugin_options
             if options[:format] == :jsonb
-              __agent__.context_window
+              __agent__&.context_window
             else
               __context__.context_window
             end
@@ -208,7 +208,7 @@ module LLM::ActiveRecord
           @context_used = begin
             options = self.class.llm_plugin_options
             if options[:format] == :jsonb
-              __agent__.context_used
+              __agent__&.context_used
             else
               __context__.context_used
             end
