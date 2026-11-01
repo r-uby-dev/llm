@@ -6,8 +6,8 @@ require "llm/tools"
 require_relative "subagent"
 
 class Agent < LLM::Agent
-  set name:         "releaser",
-      description:  "cuts a new gem",
+  set name:         :set_name,
+      description:  :set_description,
       instructions: :set_instructions,
       tools:        :set_tools,
       path:         :set_path,
@@ -22,6 +22,14 @@ class Agent < LLM::Agent
   end
 
   private
+
+  def set_name
+    "releaser"
+  end
+  
+  def set_description
+    "cuts a new gem"
+  end
 
   def set_instructions
     File.read File.join(__dir__, "prompt.md")
