@@ -20,7 +20,7 @@ class LLM::Usage
   ##
   # @return [Array<String>]
   def self.fields
-    USAGE
+    FIELDS
   end
 
   ##
