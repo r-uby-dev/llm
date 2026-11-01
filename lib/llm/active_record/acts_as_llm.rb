@@ -370,7 +370,7 @@ module LLM::ActiveRecord
         if defined?(@__agent__)
           @__agent__
         else
-          @__agent__ = LLM::ActiveRecord::Agent.for(record: self)
+          @__agent__ = LLM::ActiveRecord::Agent.for(record: self).first
         end
       end
     end
