@@ -27,7 +27,7 @@ RSpec.describe "acts_as_llm" do
 
   let(:record) { context.create! }
   let(:reload_record) { ->(row) { row.class.find(row.id) } }
-  let(:flush_record) { ->(row) { LLM::ActiveRecord::Utils.save!(row, row.send(:ctx), row.class.llm_plugin_options) } }
+  let(:flush_record) { ->(row) { LLM::ActiveRecord::Utils.save!(row, row.send(:__context__), row.class.llm_plugin_options) } }
 
   include_examples "a persisted context record"
 

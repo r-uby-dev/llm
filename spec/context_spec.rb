@@ -96,6 +96,10 @@ RSpec.describe LLM::Context do
       it "includes the context window" do
         expect(context.to_h[:context_window]).to eq(65_536)
       end
+
+      it "includes token usage" do
+        expect(context.to_h[:token_usage]).to eq(LLM::Usage.zero.to_h)
+      end
     end
 
     context "when a payload carries stale projections" do

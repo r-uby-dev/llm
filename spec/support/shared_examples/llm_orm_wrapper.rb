@@ -28,7 +28,7 @@ RSpec.shared_examples "a persisted llm record" do
   it "persists runtime state on the same row" do
     runtime = LLM::Test::Runtime.new
     runtime.messages << LLM::Message.new("user", "hello")
-    record.instance_variable_set(:@ctx, runtime)
+    record.instance_variable_set(:@__context__, runtime)
     flush_record.call(record)
     expect(reload_record.call(record).messages.map(&:content)).to eq(["hello"])
   end
@@ -38,8 +38,8 @@ RSpec.shared_examples "a persisted context record" do
   include_examples "a persisted llm record"
 
   it "restores an LLM::Context runtime" do
-    expect(record.send(:ctx)).to be_a(LLM::Context)
-    expect(record.send(:ctx).params[:store]).to be(false)
+    expect(record.unwrap!).to be_a(LLM::Context)
+    expect(record.unwrap!.params[:store]).to be(false)
   end
 end
 
@@ -47,8 +47,8 @@ RSpec.shared_examples "a persisted agent record" do
   include_examples "a persisted llm record"
 
   it "restores an LLM::Agent runtime" do
-    expect(record.send(:ctx)).to be_a(LLM::Agent)
-    expect(record.send(:ctx).mode).to eq(:responses)
+    expect(record.unwrap!).to be_a(LLM::Agent)
+    expect(record.unwrap!.mode).to eq(:responses)
   end
 
   it "reads agent defaults from the model class" do
@@ -58,7 +58,7 @@ RSpec.shared_examples "a persisted agent record" do
   end
 
   it "resolves an agent field declared as a symbol against the record" do
-    expect(record.send(:ctx).description).to eq("described by the model")
+    expect(record.unwrap!.description).to eq("described by the model")
   end
 end
 

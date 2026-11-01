@@ -67,7 +67,7 @@ module LLM::ActiveRecord
       # @see LLM::Context#talk
       # @return [LLM::Response]
       def talk(...)
-        ctx.talk(...)
+        __context__.talk(...)
       end
 
       ##
@@ -77,7 +77,7 @@ module LLM::ActiveRecord
       # @see LLM::Context#ask
       # @return [LLM::Response]
       def ask(...)
-        ctx.ask(...)
+        __context__.ask(...)
       end
 
       ##
@@ -85,119 +85,161 @@ module LLM::ActiveRecord
       # @see LLM::Context#wait
       # @return [Array<LLM::Function::Return>]
       def wait(...)
-        ctx.wait(...)
+        __context__.wait(...)
       end
 
       ##
       # @see LLM::Context#mode
       # @return [Symbol]
       def mode
-        ctx.mode
+        __context__.mode
       end
 
       ##
       # Returns the messages this record holds.
       #
-      # A record that stores its state as jsonb reads them from the column,
-      # as a relation: the conversation can be filtered, counted and ordered
-      # in the database, and nothing here needs a provider to be built. Every
-      # other format loads the runtime and hands back the messages it holds.
+      # @note
+      #   A record that stores its state as jsonb
+      #   reads them from the column, as a relation:
+      #   the conversation can be filtered, counted
+      #   and ordered in the database, and nothing here
+      #   needs a provider to be built. Every other format
+      #   loads the runtime and hands back the messages
+      #   it holds.
       #
-      # The two do not agree about what is visible. The relation reads what is
-      # persisted rather than what the runtime holds in memory, it is
-      # unordered - conversation order is `position`, not `id` - and its rows
-      # are {LLM::ActiveRecord::Message} records until
-      # {LLM::ActiveRecord::Message#unwrap!} turns them back into
-      # {LLM::Message} objects. {#messages!} is the runtime's own collection,
-      # for a caller who wants that instead.
       # @see LLM::Context#messages
       # @return [ActiveRecord::Relation, LLM::Buffer]
       def messages
-        options = self.class.llm_plugin_options
-        if options[:format] == :jsonb
-          LLM::ActiveRecord::Message.for(agent: self)
+        if defined?(@messages)
+          @messages
         else
-          ctx.messages
+          @messages = begin
+            options = self.class.llm_plugin_options
+            if options[:format] == :jsonb
+              LLM::ActiveRecord::Message.for(record: self)
+            else
+              __context__.messages
+            end
+          end
         end
       end
 
       ##
-      # Returns the messages the runtime holds, whatever the storage format is.
-      #
-      # This is what {#messages} answers with for every format but jsonb, and
-      # it is the way back to it for a jsonb record. The difference between
-      # the two is what each reads: this reads what the context holds,
-      # including state that has not been saved, where {#messages} reads the
-      # column.
+      # Returns the messages the runtime holds
       # @see LLM::Context#messages
       # @return [LLM::Buffer]
       def messages!
-        ctx.messages
-      end
-
-      ##
-      # @note The bang keeps the ActiveRecord and Sequel wrappers aligned.
-      # @see LLM::Context#model
-      # @return [String]
-      def model!
-        ctx.model
+        __context__.messages
       end
 
       ##
       # @see LLM::Context#pending_functions
       # @return [Array<LLM::Function>]
       def pending_functions
-        ctx.pending_functions
+        __context__.pending_functions
       end
 
       ##
       # @see LLM::Context#pending_functions?
       # @return [Boolean]
       def pending_functions?
-        ctx.pending_functions?
+        __context__.pending_functions?
       end
 
       ##
       # @see LLM::Context#returns
       # @return [Array<LLM::Function::Return>]
       def returns
-        ctx.returns
+        __context__.returns
       end
 
       ##
       # @see LLM::Context#cost
       # @return [LLM::Cost]
       def cost
-        ctx.cost
+        __context__.cost
       end
 
       ##
+      # @see LLM::Context#model
+      # @return [String]
+      def model!
+        if defined?(@model)
+          @model
+        else
+          @model = begin
+            options = self.class.llm_plugin_options
+            data = public_send(options[:data_column])
+            data&.dig("model") || __context__.model
+          end
+        end
+      end
+
+      ##
+      # Returns the overall size of the context window.
       # @see LLM::Context#context_window
-      # @return [Integer]
+      # @return [Integer, nil]
       def context_window
-        ctx.context_window
+        if defined?(@context_window)
+          @context_window
+        else
+          @context_window = begin
+            options = self.class.llm_plugin_options
+            data = public_send(options[:data_column])
+            data&.dig("context_window") || __context__.context_window
+          end
+        end
       end
 
       ##
-      # Returns how many tokens have been used
-      # within the context window
-      # @return [Integer]
+      # Returns how many tokens have been used.
+      # @see LLM::Context#context_used
+      # @return [Integer, nil]
       def context_used
-        ctx.context_used
+        if defined?(@context_used)
+          @context_used
+        else
+          @context_used = begin
+            options = self.class.llm_plugin_options
+            data = public_send(options[:data_column])
+            data&.dig("context_used")
+          end
+        end
       end
 
       ##
       # Returns context window usage as a Rational
       # @return [Rational, nil]
       def context_usage
-        ctx.context_usage
+        if defined?(@context_usage)
+          @context_usage
+        else
+          @context_usage = begin
+            if [context_used, context_window].any?(&:nil?)
+              nil
+            else
+              Rational(context_used, context_window)
+            end
+          end
+        end
       end
 
       ##
-      # Returns usage from the mapped usage columns.
+      # Returns the accumulated token usage
+      # @see LLM::Context#token_usage
       # @return [LLM::Usage]
       def token_usage
-        ctx.token_usage
+        if defined?(@token_usage)
+          @token_usage
+        else
+          @token_usage = begin
+            options = self.class.llm_plugin_options
+            data    = public_send(options[:data_column])
+            usage   = data&.dig("token_usage") || {}
+            fields  = LLM::Usage.fields.to_h { [_1.to_sym, usage[_1]] }
+            LLM::Usage.new(**fields.transform_values { _1 || 0 })
+          end
+        end
       end
       alias_method :usage, :token_usage
 
@@ -205,7 +247,7 @@ module LLM::ActiveRecord
       # @see LLM::Context#interrupt!
       # @return [nil]
       def interrupt!
-        ctx.interrupt!
+        __context__.interrupt!
       end
       alias_method :cancel!, :interrupt!
 
@@ -213,7 +255,7 @@ module LLM::ActiveRecord
       # @see LLM::Context#prompt
       # @return [LLM::Prompt]
       def prompt(&)
-        ctx.prompt(&)
+        __context__.prompt(&)
       end
       alias_method :build_prompt, :prompt
 
@@ -221,28 +263,35 @@ module LLM::ActiveRecord
       # @see LLM::Context#image_url
       # @return [LLM::Object]
       def image_url(...)
-        ctx.image_url(...)
+        __context__.image_url(...)
       end
 
       ##
       # @see LLM::Context#local_file
       # @return [LLM::Object]
       def local_file(...)
-        ctx.local_file(...)
+        __context__.local_file(...)
       end
 
       ##
       # @see LLM::Context#remote_file
       # @return [LLM::Object]
       def remote_file(...)
-        ctx.remote_file(...)
+        __context__.remote_file(...)
       end
 
       ##
       # @see LLM::Context#tracer
       # @return [LLM::Tracer]
       def tracer
-        ctx.tracer
+        __context__.tracer
+      end
+
+      ##
+      # Returns the runtime this record wraps.
+      # @return [LLM::Context, LLM::Agent]
+      def unwrap!
+        __context__
       end
 
       ##
@@ -256,23 +305,13 @@ module LLM::ActiveRecord
         @llm
       end
 
-      ##
-      # Returns the runtime this record wraps: an
-      # {LLM::Context LLM::Context} for `acts_as_llm`, and an
-      # {LLM::Agent LLM::Agent} for `acts_as_agent`. The runtime is
-      # memoized, so every call returns the same object.
-      # @return [LLM::Context, LLM::Agent]
-      def unwrap!
-        ctx
-      end
-
       private
 
       ##
       # @return [LLM::Provider]
       # @raise [NotImplementedError]
-      #  when neither this model nor one of its ancestors implements the
-      #  callback
+      #  when neither this model nor one of
+      #  its ancestors implements the callback
       def set_provider
         return super if defined?(super)
         raise NotImplementedError, "implement the set_provider callback"
@@ -287,22 +326,36 @@ module LLM::ActiveRecord
 
       ##
       # @return [LLM::Context]
-      def ctx
-        @ctx ||= begin
-          options = self.class.llm_plugin_options
-          columns = Utils.columns(options)
-          params = Utils.resolve_options(self, options[:context], EMPTY_HASH).dup
-          ctx = LLM::Context.new(llm, params.compact.merge(record: self))
-          data = self[columns[:data_column]]
-          if data.nil? || data == ""
-            ctx
-          else
-            case options[:format]
-            when :string then ctx.restore(string: data)
-            when :json, :jsonb then ctx.restore(data:)
-            else raise ArgumentError, "Unknown format: #{options[:format].inspect}"
+      def __context__
+        if defined?(@__context__)
+          @__context__
+        else
+          @__context__ = begin
+            options = self.class.llm_plugin_options
+            columns = Utils.columns(options)
+            params = Utils.resolve_options(self, options[:context], EMPTY_HASH).dup
+            context = LLM::Context.new(llm, params.compact.merge(record: self))
+            data = self[columns[:data_column]]
+            if data.nil? || data == ""
+              context
+            else
+              case options[:format]
+              when :string then context.restore(string: data)
+              when :json, :jsonb then context.restore(data:)
+              else raise ArgumentError, "Unknown format: #{options[:format].inspect}"
+              end
             end
           end
+        end
+      end
+
+      ##
+      # @return [LLM::ActiveRecord::Agent]
+      def __agent__
+        if defined?(@__agent__)
+          @__agent__
+        else
+          @__agent__ = LLM::ActiveRecord::Agent.for(record: self).first
         end
       end
     end

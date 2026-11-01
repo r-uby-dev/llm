@@ -1,15 +1,13 @@
 # frozen_string_literal: true
 
 ##
-# llm.rb is a zero-dependency AI runtime for Ruby. Fourteen providers, six
-# concurrency strategies, MCP and A2A, streaming tool calls with
-# cancellation, context compaction, and ORM persistence.
+# An agentic runtime.
 #
-# @example The three-step workflow
+# @example LLM::Agent
 #   require "llm"
-#   llm = LLM.deepseek(key: ENV["KEY"])            # 1. pick a provider
-#   agent = LLM::Agent.new(llm, stream: $stdout)   # 2. create an agent
-#   agent.talk "Hello world"                       # 3. talk to it
+#   llm   = LLM.deepseek                             # 1. pick a provider
+#   agent = LLM::Agent.new(llm, stream: $stdout)     # 2. create an agent
+#   agent.talk "Hello world"                         # 3. talk to it
 #
 # @see LLM::Agent The recommended high-level interface
 # @see LLM::Context The low-level stateful runtime (advanced)
@@ -73,6 +71,83 @@ module LLM
   ##
   # Model registry
   @registry = {}
+
+  ##
+  # @param [Hash] opts
+  #  MCP client options
+  # @option opts [Hash, nil] :stdio
+  #  Standard I/O transport options
+  # @option opts [Array<String>] :stdio/:argv
+  #  The command to run for the MCP process
+  # @option opts [Hash] :stdio/:env
+  #  The environment variables to set for the MCP process
+  # @option opts [String, nil] :stdio/:cwd
+  #  The working directory for the MCP process
+  # @return [LLM::MCP]
+  def mcp(**opts)
+    LLM::MCP.new(**opts)
+  end
+
+  ##
+  # Creates a new A2A client connected to a remote agent.
+  #
+  # @param [Hash, nil] http
+  # @option http [String] :url
+  #  The base URL of the A2A agent (e.g., "https://agent.example.com")
+  # @option http [Hash<String, String>] :headers
+  #  Extra HTTP headers (e.g., Authorization)
+  # @option http [Integer, nil] :timeout
+  #  Request timeout in seconds
+  # @option http [LLM::Transport, Class, nil] :transport
+  #  Optional transport override
+  # @param [Symbol] binding
+  #  The protocol binding to use. One of `:rest` or `:jsonrpc`
+  # @return [LLM::A2A]
+  def a2a(http:, binding: :rest)
+    LLM::A2A.http(**http, binding:)
+  end
+
+  ##
+  # Define a function
+  # @example
+  #   LLM.function(:system) do |fn|
+  #     fn.description "Run system command"
+  #     fn.params do |schema|
+  #       schema.object(command: schema.string.required)
+  #     end
+  #     fn.define do |command:|
+  #       system(command)
+  #     end
+  #   end
+  # @param [Symbol] key The function name / key
+  # @param [Proc] b The block to define the function
+  # @return [LLM::Function] The function object
+  def function(key, &b)
+    LLM::Function.new(key, &b)
+  end
+
+  ##
+  # Interrupt an agent.
+  # @see LLM::Agent::Registry
+  # @param [LLM::Agent, nil] agent
+  # @param [String, Integer, nil] id
+  # @param [Integer] attempts
+  # @param [Numeric] interval
+  # @return [LLM::Agent, false]
+  #  The agent that was interrupted, or false
+  def interrupt(agent: nil, id: nil, attempts: 1, interval: 0.1)
+    attempts.times do |count|
+      record = LLM::Agent.registry.find(agent:, id:)
+      if record
+        record.interrupt!
+        return record
+      else
+        break if (count+1) == attempts
+        sleep(interval)
+      end
+    end
+    false
+  end
 
   ##
   # Logs a debug message to `$stderr`
@@ -392,93 +467,6 @@ module LLM
     else
       LLM::Bedrock.new(access_key_id:, secret_access_key:, region:, **)
     end
-  end
-
-  ##
-  # @param [Hash] opts
-  #  MCP client options
-  # @option opts [Hash, nil] :stdio
-  #  Standard I/O transport options
-  # @option opts [Array<String>] :stdio/:argv
-  #  The command to run for the MCP process
-  # @option opts [Hash] :stdio/:env
-  #  The environment variables to set for the MCP process
-  # @option opts [String, nil] :stdio/:cwd
-  #  The working directory for the MCP process
-  # @return [LLM::MCP]
-  def mcp(**opts)
-    LLM::MCP.new(**opts)
-  end
-
-  ##
-  # Creates a new A2A client connected to a remote agent.
-  #
-  # @param [Hash, nil] http
-  # @option http [String] :url
-  #  The base URL of the A2A agent (e.g., "https://agent.example.com")
-  # @option http [Hash<String, String>] :headers
-  #  Extra HTTP headers (e.g., Authorization)
-  # @option http [Integer, nil] :timeout
-  #  Request timeout in seconds
-  # @option http [LLM::Transport, Class, nil] :transport
-  #  Optional transport override
-  # @param [Symbol] binding
-  #  The protocol binding to use. One of `:rest` or `:jsonrpc`
-  # @return [LLM::A2A]
-  def a2a(http:, binding: :rest)
-    LLM::A2A.http(**http, binding:)
-  end
-
-  ##
-  # Define a function
-  # @example
-  #   LLM.function(:system) do |fn|
-  #     fn.description "Run system command"
-  #     fn.params do |schema|
-  #       schema.object(command: schema.string.required)
-  #     end
-  #     fn.define do |command:|
-  #       system(command)
-  #     end
-  #   end
-  # @param [Symbol] key The function name / key
-  # @param [Proc] b The block to define the function
-  # @return [LLM::Function] The function object
-  def function(key, &b)
-    LLM::Function.new(key, &b)
-  end
-
-  ##
-  # Interrupts the turn running under this identity, in this process.
-  #
-  # Named by the agent or by the id, and not by both: a canceller has one of
-  # the two in hand, never the pair. `false` means nothing was registered
-  # under it - the ordinary race, a turn that finished first, and not a
-  # failure.
-  #
-  # It reaches the agents *this process* is running. A cancel that lands in
-  # another worker finds nothing here and must not be told otherwise; an
-  # application that needs a guarantee keeps one of its own, and what this is
-  # for is the fast path.
-  # @see LLM::Agent::Registry
-  # @param [LLM::Agent, nil] agent
-  # @param [String, Integer, nil] id
-  # @param [Integer] attempts
-  # @param [Numeric] interval
-  # @return [LLM::Agent, false]
-  #  The agent that was interrupted, or false when nothing was reached
-  def interrupt(agent: nil, id: nil, attempts: 1, interval: 0.1)
-    attempts.times do |count|
-      record = LLM::Agent.registry.find(agent:, id:)
-      if record
-        record.interrupt!
-        return record
-      else
-        break if (count+1) == attempts
-        sleep(interval)
-      end
-    end
-    false
   end
 
   ##

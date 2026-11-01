@@ -81,14 +81,14 @@ module LLM::Sequel
       # @param (see LLM::Agent#console)
       # @return (see LLM::Agent#console)
       def console(**params)
-        ctx.console(**params)
+        __context__.console(**params)
       end
       alias_method :repl, :console
 
       private
 
-      def ctx
-        @ctx ||= begin
+      def __context__
+        @__context__ ||= begin
           options = self.class.llm_plugin_options
           columns = Agent::Utils.columns(options)
           params = Agent::Utils.resolve_options(self, options[:context], Agent::EMPTY_HASH).dup

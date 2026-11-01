@@ -165,7 +165,7 @@ module LLM::Sequel
     # @see LLM::Context#talk
     # @return [LLM::Response]
     def talk(...)
-      ctx.talk(...)
+      __context__.talk(...)
     end
 
     ##
@@ -175,7 +175,7 @@ module LLM::Sequel
     # @see LLM::Context#ask
     # @return [LLM::Response]
     def ask(...)
-      ctx.ask(...)
+      __context__.ask(...)
     end
 
     ##
@@ -183,14 +183,14 @@ module LLM::Sequel
     # @see LLM::Context#wait
     # @return [Array<LLM::Function::Return>]
     def wait(...)
-      ctx.wait(...)
+      __context__.wait(...)
     end
 
     ##
     # @see LLM::Context#mode
     # @return [Symbol]
     def mode
-      ctx.mode
+      __context__.mode
     end
 
     ##
@@ -202,7 +202,7 @@ module LLM::Sequel
     # @see LLM::Context#messages
     # @return [LLM::Buffer]
     def messages
-      ctx.messages
+      __context__.messages
     end
 
     ##
@@ -213,7 +213,7 @@ module LLM::Sequel
     # @see LLM::Context#messages
     # @return [LLM::Buffer]
     def messages!
-      ctx.messages
+      __context__.messages
     end
 
     ##
@@ -222,42 +222,42 @@ module LLM::Sequel
     # @see LLM::Context#model
     # @return [String]
     def model!
-      ctx.model
+      __context__.model
     end
 
     ##
     # @see LLM::Context#pending_functions
     # @return [Array<LLM::Function>]
     def pending_functions
-      ctx.pending_functions
+      __context__.pending_functions
     end
 
     ##
     # @see LLM::Context#pending_functions?
     # @return [Boolean]
     def pending_functions?
-      ctx.pending_functions?
+      __context__.pending_functions?
     end
 
     ##
     # @see LLM::Context#returns
     # @return [Array<LLM::Function::Return>]
     def returns
-      ctx.returns
+      __context__.returns
     end
 
     ##
     # @see LLM::Context#cost
     # @return [LLM::Cost]
     def cost
-      ctx.cost
+      __context__.cost
     end
 
     ##
     # @see LLM::Context#context_window
     # @return [Integer]
     def context_window
-      ctx.context_window
+      __context__.context_window
     end
 
     ##
@@ -265,21 +265,21 @@ module LLM::Sequel
     # within the context window
     # @return [Integer]
     def context_used
-      ctx.context_used
+      __context__.context_used
     end
 
     ##
     # Returns context window usage as a Rational
     # @return [Rational, nil]
     def context_usage
-      ctx.context_usage
+      __context__.context_usage
     end
 
     ##
     # Returns usage from the mapped usage columns.
     # @return [LLM::Usage]
     def token_usage
-      ctx.token_usage
+      __context__.token_usage
     end
     alias_method :usage, :token_usage
 
@@ -287,7 +287,7 @@ module LLM::Sequel
     # @see LLM::Context#interrupt!
     # @return [nil]
     def interrupt!
-      ctx.interrupt!
+      __context__.interrupt!
     end
     alias_method :cancel!, :interrupt!
 
@@ -295,7 +295,7 @@ module LLM::Sequel
     # @see LLM::Context#prompt
     # @return [LLM::Prompt]
     def prompt(&)
-      ctx.prompt(&)
+      __context__.prompt(&)
     end
     alias_method :build_prompt, :prompt
 
@@ -303,28 +303,28 @@ module LLM::Sequel
     # @see LLM::Context#image_url
     # @return [LLM::Object]
     def image_url(...)
-      ctx.image_url(...)
+      __context__.image_url(...)
     end
 
     ##
     # @see LLM::Context#local_file
     # @return [LLM::Object]
     def local_file(...)
-      ctx.local_file(...)
+      __context__.local_file(...)
     end
 
     ##
     # @see LLM::Context#remote_file
     # @return [LLM::Object]
     def remote_file(...)
-      ctx.remote_file(...)
+      __context__.remote_file(...)
     end
 
     ##
     # @see LLM::Context#tracer
     # @return [LLM::Tracer]
     def tracer
-      ctx.tracer
+      __context__.tracer
     end
 
     ##
@@ -345,7 +345,7 @@ module LLM::Sequel
     # memoized, so every call returns the same object.
     # @return [LLM::Context, LLM::Agent]
     def unwrap!
-      ctx
+      __context__
     end
 
     private
@@ -369,8 +369,8 @@ module LLM::Sequel
 
     ##
     # @return [LLM::Context]
-    def ctx
-      @ctx ||= begin
+    def __context__
+      @__context__ ||= begin
         options = self.class.llm_plugin_options
         columns = Utils.columns(options)
         params = Utils.resolve_options(self, options[:context], Plugin::EMPTY_HASH).dup
