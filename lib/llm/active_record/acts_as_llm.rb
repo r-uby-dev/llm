@@ -174,8 +174,7 @@ module LLM::ActiveRecord
           @context_window = begin
             options = self.class.llm_plugin_options
             if options[:format] == :jsonb
-              agent = LLM::ActiveRecord::Agent.for(record: self)
-              agent.context_window
+              __agent__.context_window
             else
               ctx.context_window
             end
@@ -194,8 +193,7 @@ module LLM::ActiveRecord
           @context_used = begin
             options = self.class.llm_plugin_options
             if options[:format] == :jsonb
-              agent = LLM::ActiveRecord::Agent.for(record: self)
-              agent.context_used
+              __agent__.context_used
             else
               ctx.context_used
             end
@@ -231,8 +229,8 @@ module LLM::ActiveRecord
           @token_usage = begin
             options = self.class.llm_plugin_options
             if options[:format] == :jsonb
-              agent  = LLM::ActiveRecord::Agent.for(record: self)
-              fields = LLM::Usage.fields.to_h { [_1.to_sym, row.public_send(_1)] }
+              agent  = __agent__
+              fields = LLM::Usage.fields.to_h { [_1.to_sym, agent.public_send(_1)] }
               LLM::Usage.new(**fields.transform_values { _1 || 0 })
             else
               ctx.token_usage
@@ -344,6 +342,16 @@ module LLM::ActiveRecord
             else raise ArgumentError, "Unknown format: #{options[:format].inspect}"
             end
           end
+        end
+      end
+
+      ##
+      # @return [LLM::ActiveRecord::Agent]
+      def __agent__
+        if defined?(@__agent__)
+          @__agent__
+        else
+          @__agent__ = LLM::ActiveRecord::Agent.for(record: self)
         end
       end
     end
