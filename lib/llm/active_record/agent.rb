@@ -30,13 +30,13 @@ module LLM::ActiveRecord
       options    = klass.llm_plugin_options
       column     = connection.quote_column_name(options.fetch(:data_column))
       usage_sql  = LLM::Usage.fields.map do |field|
-        "((#{table}.#{column} -> 'token_usage') ->> '#{field}')::int AS #{field},"
-      end.join("\n")
+        ", ((#{table}.#{column} -> 'token_usage') ->> '#{field}')::int AS #{field}"
+      end.join
       from(<<~SQL).where(id: record&.id)
         (SELECT #{table}.id                                       AS id,
                 (#{table}.#{column} ->> 'context_used')::int      AS context_used,
                 (#{table}.#{column} ->> 'context_window')::int    AS context_window,
-                (#{table}.#{column} ->> 'model')::string          AS model,
+                (#{table}.#{column} ->> 'model')::text            AS model
                 #{usage_sql}
          FROM #{table})
          AS llm_agent_context

@@ -311,10 +311,7 @@ module LLM::ActiveRecord
       end
 
       ##
-      # Returns the runtime this record wraps: an
-      # {LLM::Context LLM::Context} for `acts_as_llm`, and an
-      # {LLM::Agent LLM::Agent} for `acts_as_agent`. The runtime is
-      # memoized, so every call returns the same object.
+      # Returns the runtime this record wraps.
       # @return [LLM::Context, LLM::Agent]
       def unwrap!
         __context__
@@ -325,8 +322,8 @@ module LLM::ActiveRecord
       ##
       # @return [LLM::Provider]
       # @raise [NotImplementedError]
-      #  when neither this model nor one of its ancestors implements the
-      #  callback
+      #  when neither this model nor one of
+      #  its ancestors implements the callback
       def set_provider
         return super if defined?(super)
         raise NotImplementedError, "implement the set_provider callback"
