@@ -1742,9 +1742,9 @@ welcome.
 
 I use it all the time. Especially the console.
 
-It also powers the [r.uby.dev](https://r.uby.dev)
-website. I'm aware of at least one production
-Rails deployment at a large-ish company.
+It also powers the [r.uby.dev](https://r.uby.dev) website.  
+I'm aware of at least one production Rails deployment at 
+a large-ish company.
 </details>
 
 ## License
