@@ -170,7 +170,7 @@ module LLM::ActiveRecord
           @model = begin
             options = self.class.llm_plugin_options
             data = public_send(options[:data_column])
-            data&.dig("model")
+            data&.dig("model") || __context__.model
           end
         end
       end
@@ -186,7 +186,7 @@ module LLM::ActiveRecord
           @context_window = begin
             options = self.class.llm_plugin_options
             data = public_send(options[:data_column])
-            data&.dig("context_window")
+            data&.dig("context_window") || __context__.context_window
           end
         end
       end
