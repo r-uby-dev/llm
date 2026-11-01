@@ -1708,8 +1708,8 @@ The [r.uby.dev](https://r.uby.dev) website.
 <br>
 
 Try:  
-* LLM.ollama
-* LLM.llamacpp
+* `LLM.ollama(...)`
+* `LLM.llamacpp(...)`
 </details>
 
 <details>
