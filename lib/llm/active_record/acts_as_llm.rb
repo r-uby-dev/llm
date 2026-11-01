@@ -110,12 +110,16 @@ module LLM::ActiveRecord
       # @see LLM::Context#messages
       # @return [ActiveRecord::Relation, LLM::Buffer]
       def messages
-        @__messages ||= begin
-          options = self.class.llm_plugin_options
-          if options[:format] == :jsonb
-            LLM::ActiveRecord::Message.for(record: self)
-          else
-            __context__.messages
+        if defined?(@messages)
+          @messages
+        else
+          @messages = begin
+            options = self.class.llm_plugin_options
+            if options[:format] == :jsonb
+              LLM::ActiveRecord::Message.for(record: self)
+            else
+              __context__.messages
+            end
           end
         end
       end
@@ -132,7 +136,18 @@ module LLM::ActiveRecord
       # @see LLM::Context#model
       # @return [String]
       def model!
-        __context__.model
+        if defined?(@model)
+          @model
+        else
+          @model = begin
+            options = self.class.llm_plugin_options
+            if options[:format] == :jsonb
+              __agent__.model
+            else
+              __context__.model
+            end
+          end
+        end
       end
 
       ##
