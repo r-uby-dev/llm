@@ -313,7 +313,7 @@ RSpec.describe LLM::Schema::Parser do
       expect { LLM::Schema.parse(schema) }.to raise_error(TypeError)
     end
 
-    [nil, 4, "https://example.invalid/schema", "#/$defs/missing", "#/$defs/name/type"].each do |ref|
+    [nil, 4, "https://example.invalid/schema", "#/$defs/missing", "#/$defs/name/type", "#/$defs/%FF", "#/$defs/%C3"].each do |ref|
       it "rejects an unsupported or unresolvable reference #{ref.inspect}" do
         schema = {"$defs" => {"name" => {"type" => "string"}}, "$ref" => ref}
         expect { LLM::Schema.parse(schema) }.to raise_error(TypeError)

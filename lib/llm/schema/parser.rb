@@ -114,12 +114,14 @@ class LLM::Schema
       seen = {}
       while schema.key?("$ref")
         ref = schema["$ref"]
-        raise TypeError, "unsupported schema ref #{ref.inspect}" unless ref.is_a?(::String) && ref.start_with?("#/")
+        raise TypeError, "unsupported schema ref #{ref.inspect}" unless ref.is_a?(::String) && ref.valid_encoding? && ref.start_with?("#/")
         raise TypeError, "circular schema ref #{ref.inspect}" if seen[ref]
         seen[ref] = true
         pointer = ref.delete_prefix("#")
         raise TypeError, "unresolvable schema ref #{ref.inspect}" if pointer.match?(/%(?![0-9a-fA-F]{2})/)
-        target = URI::DEFAULT_PARSER.unescape(pointer).split("/", -1).drop(1).reduce(root) do |node, token|
+        pointer = URI::DEFAULT_PARSER.unescape(pointer)
+        raise TypeError, "unresolvable schema ref #{ref.inspect}" unless pointer.valid_encoding?
+        target = pointer.split("/", -1).drop(1).reduce(root) do |node, token|
           raise TypeError, "unresolvable schema ref #{ref.inspect}" if token.match?(/~(?:[^01]|$)/)
           key = token.gsub("~1", "/").gsub("~0", "~")
           case node
