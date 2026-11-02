@@ -127,6 +127,36 @@ RSpec.describe "LLM::Agent in a ractor" do
     end
   end
 
+  context "when given a schema" do
+    let(:schema) do
+      {"type" => "object", "properties" => {"answer" => {"type" => "string"}}}
+    end
+
+    before do
+      agent.set(schema:)
+    end
+
+    it "can access the schema" do
+      expect(Ractor.new { TestAgent.schema }.value).to eq(schema)
+    end
+  end
+
+  context "when given a schema class" do
+    let(:schema) do
+      stub_const("TestSchema", Class.new(LLM::Schema) do
+        property :answer, LLM::Schema::String, "The answer"
+      end)
+    end
+
+    before do
+      agent.set(schema:)
+    end
+
+    it "can access the schema class" do
+      expect(Ractor.new { TestAgent.schema }.value).to eq(schema)
+    end
+  end
+
   context "when given tools" do
     let(:tools) do
       [LLM::Tool::ReadFile]

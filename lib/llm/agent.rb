@@ -229,9 +229,9 @@ module LLM
     #  Returns a schema
     def self.schema(schema = UNDEFINED, &block)
      if schema.equal?(UNDEFINED) and block.nil?
-        @schema
+        LLM.share!(@schema)
       else
-        @schema = block || schema
+        @schema = LLM.share!(block || schema)
       end
     end
 
