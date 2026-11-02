@@ -16,10 +16,9 @@ class Intercept < LLM::Intercept
   end
 
   def call(function:)
-    if  function.name == "edit-file"    and
-        function.arguments.instructions and
-        not self.class.called?
-      self.class.called!
+    if function.name == "edit-file"    and
+       function.arguments.instructions and
+       not self.class.called?
       function.return(
         error: true,
         type: "logic_error",
@@ -27,6 +26,8 @@ class Intercept < LLM::Intercept
                   "for the edit-file subagent but future turns " \
                   "can"
       )
+    else
+      self.class.called!
     end
   end
 end
