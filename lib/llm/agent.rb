@@ -87,6 +87,29 @@ module LLM
     attr_reader :llm
 
     ##
+    # Tries to deep-freeze an object so
+    # it can be shared across ractors. Might
+    # fail when the object cannot be deeply
+    # frozen. Failure is a noop that returns
+    # the paramter it is given.
+    #
+    # @note
+    #
+    #   This method is used where it can be
+    #   on class-level agent attributes that
+    #   can be accessed across Ractor via
+    #   a global reference (eg Agent.name).
+    #
+    # @return [Object]
+    def self.share!(obj)
+      Ractor.make_shareable(obj)
+    rescue Ractor::Error
+      LLM.debug "'#{obj.inspect}' cannot be made Ractor-shareable"
+      obj
+    end
+    private_class_method :share!
+
+    ##
     # Returns an instance of {LLM::Agent::Registry LLM::Agent::Registry}.
     # @note
     #  The registry holds all _active_
@@ -151,9 +174,8 @@ module LLM
         if @name.nil?
           name  = to_s.split("::").last
           @name = name.gsub(CASE_PATTERN, "-").downcase
-        else
-          @name
         end
+        share!(@name)
       else
         if Class === name
           name  = name.to_s.split("::").last
@@ -180,7 +202,7 @@ module LLM
     #  Returns the agent's description
     def self.description(desc = UNDEFINED, &block)
       if desc.equal?(UNDEFINED) and block.nil?
-        @desc
+        share!(@desc)
       else
         @desc = block || desc
       end
@@ -215,7 +237,7 @@ module LLM
     #  Returns the model
     def self.model(model = UNDEFINED, &block)
      if model.equal?(UNDEFINED) and block.nil?
-        @model
+        share!(@model)
       else
         @model = block || model
       end
@@ -247,7 +269,7 @@ module LLM
     #  Returns the instructions
     def self.instructions(instructions = UNDEFINED, &block)
      if instructions.equal?(UNDEFINED) and block.nil?
-        @instructions
+        share!(@instructions)
       else
         @instructions = block || instructions
       end
@@ -271,6 +293,7 @@ module LLM
         @tracer = block || tracer
       end
     end
+
     ##
     # Set or get an agent's compactor.
     # @param [Object, Symbol, Proc, nil] compactor
@@ -291,7 +314,7 @@ module LLM
     # @return [Hash, Proc, nil]
     def self.compactor_options(options = UNDEFINED, &block)
       if options.equal?(UNDEFINED) and block.nil?
-        @compactor_options
+        share!(@compactor_options)
       else
         @compactor_options = block || options
       end
@@ -337,7 +360,7 @@ module LLM
     # @return [String, nil]
     def self.path(path = UNDEFINED, &block)
       if path.equal?(UNDEFINED) and block.nil?
-        @path
+        share!(@path)
       else
         @path = block || path
       end
