@@ -462,6 +462,17 @@ it.
   though `.tools` shares the tools it is given as arguments,
   and stores the block it takes as it was given.
 
+* **agent: a class-level attribute is returned frozen** <br>
+  A value that cannot be made shareable - a `Proc` whose
+  `self` is not shareable is one - is stored as it was
+  given, and
+  [`LLM.debug`](https://r.uby.dev/api-docs/llm.rb/LLM.html#debug-class_method)
+  reports it when debug mode is on. A reader returns a
+  frozen value, so a write to it, like
+  `LLM::Agent.instructions << "..."`, raises `FrozenError`.
+  That is the migration: a caller that mutates the value in
+  place has to build a copy of its own first.
+
 * **agent: add `LLM::Agent.intercept_options`** <br>
   [`LLM::Agent.intercept_options`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#intercept_options-class_method)
   is where an agent's intercept options are declared, so they
@@ -475,17 +486,6 @@ it.
   the agent builds, so they are passed to the intercept. Before, a
   class-level agent could declare an intercept but not its options.
 
-* **agent: a class-level attribute is returned frozen** <br>
-  A value that cannot be made shareable - a `Proc` whose
-  `self` is not shareable is one - is stored as it was
-  given, and
-  [`LLM.debug`](https://r.uby.dev/api-docs/llm.rb/LLM.html#debug-class_method)
-  reports it when debug mode is on. A reader returns a
-  frozen value, so a write to it, like
-  `LLM::Agent.instructions << "..."`, raises `FrozenError`.
-  That is the migration: a caller that mutates the value in
-  place has to build a copy of its own first.
-
 ### LLM::Intercept
 
 * **intercept: add `LLM::Intercept::Rescue`** <br>
@@ -498,10 +498,12 @@ it.
   prepends it to every subclass, so every intercept is covered.
   `LLM::Interrupt` is re-raised and still travels up the stack,
   and any other `StandardError` or `ScriptError` goes to
-  `Rescue.crash`, which writes a report to `$stderr`: the
-  intercept's class, the exception's class, its message, and the
-  first ten lines of its backtrace. `#call` returns `nil` then,
-  so the tool call runs as normal.
+  `#crash`, which writes a report to `$stderr`: the intercept's
+  class, the exception's class, its message, and the first ten
+  lines of its backtrace. `#call` returns the error return that
+  [`LLM::Function#error`](https://r.uby.dev/api-docs/llm.rb/LLM/Function.html#error-instance_method)
+  builds then, so the model is told the intercept crashed, and
+  the tool call does not run.
 
 ### LLM::Function
 
@@ -534,6 +536,16 @@ it.
   captured under every concurrency strategy.
   Before, a failure reported its class and its
   message only.
+
+* **function: add `LLM::Function#error`** <br>
+  [`LLM::Function#error`](https://r.uby.dev/api-docs/llm.rb/LLM/Function.html#error-instance_method)
+  builds the `LLM::Function::Return` that reports a failed tool
+  call from an exception: it takes the exception as `ex:` and
+  sets `error`, `type`, `message` and `backtrace` from it. Any
+  other keyword is merged into the same value, so a caller can
+  add a `note:` to the return the model is given. Before, a
+  caller that caught an exception on behalf of a tool call built
+  the return, and its fields, itself.
 
 * **function: trace a sequential tool call** <br>
   The `:sequential` strategy tells a tracer that a tool started now, so
@@ -642,7 +654,7 @@ it.
   subclass, so every filter is covered.
   `LLM::Interrupt` is re-raised, and an interrupt still
   travels up the stack. Any other `StandardError` or
-  `ScriptError` goes to `Rescue.crash`, which writes the
+  `ScriptError` goes to `#crash`, which writes the
   report to `$stderr`: the filter's class, the exception's
   class, its message, and the first ten lines of its
   backtrace. The return value of `crash` is what `#call`
