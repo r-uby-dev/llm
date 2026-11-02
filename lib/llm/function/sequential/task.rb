@@ -37,23 +37,26 @@ module LLM::Function::Sequential
     # @return [LLM::Function::Return, LLM::Interrupt]
     def wait
       return @intercepted if intercepted?
+      result = LLM::Object.new(unbox: nil)
       if @cancelled && !@result
         @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
         @finished_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-        @result = LLM::Interrupt.new
+        @result = result
+        @result.unbox = LLM::Interrupt.new
+      else
+        @result = (@result || begin
+          @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+          begin
+            result.unbox = function.call
+          rescue LLM::Interrupt => ex
+            result.unbox = ex
+          ensure
+            @finished_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+          end
+          result
+        end)
       end
-      @result = @result ? @result : begin
-        @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-        begin
-          @result = LLM::Object.from(unbox: function.call)
-        rescue LLM::Interrupt => ex
-          @result = LLM::Object.from(unbox: ex)
-        ensure
-          @finished_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-        end
-        @result
-      end
-      @result.is_a?(LLM::Interrupt) ? @result : @result&.unbox
+      @result.unbox
     end
     alias_method :value, :wait
 
