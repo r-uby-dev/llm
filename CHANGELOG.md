@@ -451,16 +451,15 @@ it.
   and stores the block it takes as it was given.
 
 * **agent: a class-level attribute is returned frozen** <br>
-  A value that cannot be made shareable - a `Proc` whose `self`
-  is not shareable is one - is stored as it was given, and
+  A value that cannot be made shareable - a `Proc` whose
+  `self` is not shareable is one - is stored as it was
+  given, and
   [`LLM.debug`](https://r.uby.dev/api-docs/llm.rb/LLM.html#debug-class_method)
-  reports it when debug mode is on. A reader returns a frozen
-  value now, so a write to it, like
+  reports it when debug mode is on. A reader returns a
+  frozen value, so a write to it, like
   `LLM::Agent.instructions << "..."`, raises `FrozenError`.
-  That is the migration: a class-level agent attribute that
-  was returned as given is returned deep-frozen when it can
-  be, so a caller that mutates the value in place has to build
-  a copy of its own first.
+  That is the migration: a caller that mutates the value in
+  place has to build a copy of its own first.
 
 ### LLM::Function
 
@@ -504,6 +503,20 @@ it.
   closes. Before, a sequential call reported that a tool finished and
   never that it started, so the two callbacks did not pair up the way
   they do on the other strategies.
+
+* **function: trace a sequential tool error and interrupt** <br>
+  A tool that fails, or is interrupted, under the `:sequential`
+  strategy reaches
+  [`LLM::Tracer#on_tool_error`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer.html#on_tool_error-instance_method)
+  and
+  [`LLM::Tracer#on_tool_interrupt`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer.html#on_tool_interrupt-instance_method)
+  now, the way every other strategy does.
+  [`LLM::Function::Sequential::Task#wait`](https://r.uby.dev/api-docs/llm.rb/LLM/Function/Sequential/Task.html#wait-instance_method)
+  returns the exception in band now, next to the timings that
+  [`LLM::Function::Group#wait`](https://r.uby.dev/api-docs/llm.rb/LLM/Function/Group.html#wait-instance_method)
+  reads, so a failed call closes its span with `on_tool_error`
+  and an interrupted one closes it with `on_tool_interrupt`,
+  including a task that was cancelled before its `#call`.
 
 ### Console
 
