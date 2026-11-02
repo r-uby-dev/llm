@@ -30,15 +30,15 @@ The v17 series requires Ruby 3.4 or later. <br>
 This version works with older rubies and dependencies (ie: json v2).
 
 ```bash
-gem install llm.rb
+gem install llm.rb -v 17.0.1
 ```
 
 ##### v18
 
-The v18 series is available as a prerelease. It requires 
-Ruby 4.0.0 or later. Ruby 4.1.0+ is recommended.
-The _optional_ dependencies ActiveRecord and Sequel
-must be updated to their latest version(s). The major
+The v18 series requires  Ruby 4.0.0 or later. Ruby 4.1.0+ 
+is recommended. The _optional_ dependencies ActiveRecord a
+nd Sequel must be updated to their latest version(s). The 
+major
 [json](https://github.com/ruby/json) 
 version bump (v2 => v3) can require changes and not
 all gems have caught up yet. The [r-uby-dev/llm](https://github.com/r-uby-dev/llm)
@@ -47,10 +47,10 @@ gem is an early adopter of json v3.
 The v18 series
 includes [substational runtime improvements](CHANGELOG.md) -
 especially for running tool calls on a [Ractor](https://docs.ruby-lang.org/en/4.0/Ractor.html)
-and it is the recommended version to use (even as a prerelease).  
+and it is the recommended version to use.   
 
 ```bash
-gem install llm.rb --pre
+gem install llm.rb
 ```
 
 ## Quick start
