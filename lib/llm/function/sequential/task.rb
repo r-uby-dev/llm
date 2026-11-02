@@ -9,7 +9,13 @@ module LLM::Function::Sequential
     ##
     # @return [nil]
     def spawn
-      # no-op (execution happens in wait)
+      @span = @tracer&.on_tool_start(
+        id: function.id,
+        name: function.name,
+        arguments: function.arguments,
+        model: function.model
+      )
+      nil
     end
 
     ##
