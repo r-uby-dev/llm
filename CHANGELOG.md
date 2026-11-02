@@ -65,11 +65,21 @@ it.
 
 * **ruby: declare the stdlib gems as runtime dependencies** <br>
   The gemspec declares `net-http` (`~> 0.10`), `json`
-  (`~> 3.1`), `securerandom` (`~> 0.4`), `time` (`~> 0.5`),
-  `stringio` (`~> 3.2`), `digest` (`~> 3.3`) and `openssl`
-  (`~> 4.0`) as runtime dependencies. The v17 series declared
-  none, which left each gem implicit, and each one is now
-  declared, so a fresh `bundle install` installs it.
+  (`~> 3.1`), `securerandom` (`~> 0.4`), `time` (`~> 0.5`)
+  and `stringio` (`~> 3.2`) as runtime dependencies. The v17
+  series declared none, which left each gem implicit, and each
+  one is now declared, so a fresh `bundle install` installs it.
+
+* **ruby: make `openssl` and `digest` optional dependencies** <br>
+  The `openssl` (`~> 4.0`) and `digest` (`~> 3.3`) gems are
+  development dependencies now, where they were runtime
+  dependencies, so neither C extension is installed unless you
+  need it. [`LLM::Bedrock`](https://r.uby.dev/api-docs/llm.rb/LLM/Bedrock.html)
+  requires both when it loads, and
+  [`LLM::Tracer::Telemetry`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer/Telemetry.html)
+  requires `digest` when it is built. A gem that is missing
+  raises `LLM::LoadError`, which names the gem and the command
+  that installs it.
 
 ### LLM
 
