@@ -291,7 +291,7 @@ RSpec.describe LLM::Schema::Parser do
       end
     end
 
-    ["00", "-1", "-", "bad"].each do |index|
+    ["00", "-1", "-", "bad", "99999999999999999999999999"].each do |index|
       it "rejects an invalid array reference index #{index}" do
         schema = {"$defs" => {"choices" => [{"type" => "string"}]}, "$ref" => "#/$defs/choices/#{index}"}
         expect { LLM::Schema.parse(schema) }.to raise_error(TypeError, /unresolvable/)

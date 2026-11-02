@@ -128,7 +128,9 @@ class LLM::Schema
           when ::Hash then node.fetch(key)
           when ::Array
             raise TypeError, "unresolvable schema ref #{ref.inspect}" unless key.match?(/\A(?:0|[1-9][0-9]*)\z/)
-            node.fetch(key.to_i)
+            index = key.to_i
+            raise TypeError, "unresolvable schema ref #{ref.inspect}" if index >= node.length
+            node.fetch(index)
           else raise TypeError, "unresolvable schema ref #{ref.inspect}"
           end
         end
