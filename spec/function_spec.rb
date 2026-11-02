@@ -45,6 +45,33 @@ RSpec.describe LLM::Function do
       end
     end
 
+    context "when configured with a tracer" do
+      let(:strategy) { :sequential }
+      let(:tracer) { LLM::Tracer::Null.new(llm) }
+      let(:llm) { LLM.openai(key: "test") }
+      
+      before do
+        tool.tracer = tracer
+        tool.model = "gpt-4.1"
+      end
+
+      it "traces the tool start" do
+        expect(tracer).to receive(:on_tool_start).with(
+          id: "call_1",
+          name: "system",
+          arguments: {"command" => "date"},
+          model: "gpt-4.1"
+        )
+        task.group_class.new([task]).wait
+      end
+
+      it "traces the tool finish with the span returned at start" do
+        allow(tracer).to receive(:on_tool_start).and_return(:span)
+        expect(tracer).to receive(:on_tool_finish).with(hash_including(span: :span))
+        task.group_class.new([task]).wait
+      end
+    end
+
     describe "when calling #value", :ractor do
       it "returns the tool's result" do
         expect(within { task.value.to_h }).to eq(
