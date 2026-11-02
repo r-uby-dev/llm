@@ -74,4 +74,70 @@ RSpec.describe LLM::Google::StreamParser do
       expect(parts.first["thoughtSignature"]).to eq("abc123")
     end
   end
+
+  describe "parallel and partial function calls" do
+    let(:weather) do
+      LLM.function(:weather) do |fn|
+        fn.params { it.object(city: it.string.required) }
+        fn.define { |city:| {city:} }
+      end
+    end
+
+    before { stream.extra[:tools] = [weather] }
+
+    [true, false].each do |ids|
+      it "keeps two complete same-name calls separate with ids=#{ids}" do
+        first = {"name" => "weather", "args" => {"city" => "Paris"}}
+        second = {"name" => "weather", "args" => {"city" => "Berlin"}}
+        first["id"], second["id"] = "paris", "berlin" if ids
+        parse!({"functionCall" => first, "thoughtSignature" => "signature-a"})
+        parse!({"functionCall" => second, "thoughtSignature" => "signature-b"})
+        expect(parts.size).to eq(2)
+        expect(parts.map { it["functionCall"]["args"] }).to eq([{"city" => "Paris"}, {"city" => "Berlin"}])
+        expect(parts.map { it["thoughtSignature"] }).to eq(%w[signature-a signature-b])
+        expect(stream.calls.map(&:arguments)).to eq([{"city" => "Paris"}, {"city" => "Berlin"}])
+        expect(stream.calls.map(&:id).uniq.size).to eq(2)
+      end
+    end
+
+    it "merges an incomplete call before emitting it" do
+      parse!({"functionCall" => {"name" => "weather"}})
+      expect(stream.calls).to be_empty
+      parse!({"functionCall" => {"args" => {"city" => "Paris"}}})
+      expect(parts.size).to eq(1)
+      expect(stream.calls.map(&:arguments)).to eq([{"city" => "Paris"}])
+      parse!({"thoughtSignature" => "signature"})
+      expect(parts.first["thoughtSignature"]).to eq("signature")
+    end
+
+    it "starts a partial second call when its id changes" do
+      parse!({"functionCall" => {"id" => "paris", "name" => "weather", "args" => {"city" => "Paris"}}})
+      parse!({"functionCall" => {"id" => "berlin", "name" => "weather"}})
+      parse!({"functionCall" => {"id" => "berlin", "args" => {"city" => "Berlin"}}})
+      expect(parts.size).to eq(2)
+      expect(stream.calls.map(&:arguments)).to eq([{"city" => "Paris"}, {"city" => "Berlin"}])
+    end
+
+    it "keeps different function names as different calls" do
+      other = LLM.function(:forecast) do |fn|
+        fn.params { it.object(city: it.string.required) }
+        fn.define { |city:| {city:} }
+      end
+      stream.extra[:tools] << other
+      parse!({"functionCall" => {"name" => "weather", "args" => {"city" => "Paris"}}})
+      parse!({"functionCall" => {"name" => "forecast", "args" => {"city" => "Berlin"}}})
+      expect(parts.size).to eq(2)
+      expect(stream.calls.map(&:name)).to eq(%i[weather forecast])
+    end
+
+    it "keeps same-id metadata updates on the existing call" do
+      call = {"id" => "paris", "name" => "weather", "args" => {"city" => "Paris"}}
+      parse!({"functionCall" => call})
+      parse!({"functionCall" => call.dup, "thoughtSignature" => "signature"})
+      expect(parts.size).to eq(1)
+      expect(stream.calls.size).to eq(1)
+      expect(parts.first["thoughtSignature"]).to eq("signature")
+    end
+  end
+
 end
