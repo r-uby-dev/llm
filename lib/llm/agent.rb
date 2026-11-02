@@ -385,9 +385,9 @@ module LLM
       if block
         @tools = block
       elsif single_callable?(tools)
-        @tools = tools.first
+        @tools = LLM.share!(tools.first)
       else
-        @tools = tools.flatten
+        @tools = LLM.share!(tools.flatten)
       end
     end
 
