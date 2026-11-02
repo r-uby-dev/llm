@@ -28,6 +28,7 @@ before) can be seen in [changelog/old.md](changelog/old.md).
 | `LLM::Context#transformer`, and `LLM::Transformer::Multi#transformers` | `LLM::Context#filter`, and `LLM::MessageFilter::Multi#filters` |
 | `LLM::Transport::PersistentHTTP.registry` and `.lock` | each transport keeps a client and a lock of its own |
 | `LLM::Tool::Utils#wait`, `#spawn` and `#now`, and `LLM::Tool::Utils::Command` | they are `LLM::Tool::Utils::Process#wait`, `#spawn` and `#now`, and `LLM::Tool::Utils::Process::Command` |
+| `LLM::ActiveRecord::Message.for(agent:)` | `LLM::ActiveRecord::Message.for(record:)` |
 
 ### Skills
 
@@ -135,6 +136,14 @@ it.
   changed to store tool calls in the abstract form,
   and the `original_tool_calls` field has been
   dropped from it.
+
+* **context: save token usage with the payload** <br>
+  [`LLM::Context#to_h`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html#to_h-instance_method)
+  includes a `token_usage` hash now, so the usage a conversation
+  accumulated is saved beside `context_used` and `context_window`.
+  It is written for queryability, like the other two, and the
+  runtime derives it from the messages when a payload is restored,
+  so a payload that carries none still restores.
 
 * **context: add `LLM::Context#compactor_options`** <br>
   [`LLM::Context#compactor_options`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html#compactor_options-instance_method)
@@ -406,6 +415,17 @@ it.
   Before, a failure reported its class and its
   message only.
 
+* **function: trace a sequential tool call** <br>
+  The `:sequential` strategy tells a tracer that a tool started now, so
+  [`LLM::Function::Sequential::Task`](https://r.uby.dev/api-docs/llm.rb/LLM/Function/Sequential/Task.html)
+  calls
+  [`LLM::Tracer#on_tool_start`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer.html#on_tool_start-instance_method)
+  when it spawns, and the span it returns is the span that
+  [`LLM::Tracer#on_tool_finish`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer.html#on_tool_finish-instance_method)
+  closes. Before, a sequential call reported that a tool finished and
+  never that it started, so the two callbacks did not pair up the way
+  they do on the other strategies.
+
 ### Console
 
 * **console: run tool calls on a Ractor by default** <br>
@@ -443,13 +463,20 @@ it.
   perform. No alias is left behind, because the v18 series is a
   breaking release already.
 
-* **filter: rename the transformer options and stream callbacks** <br>
+* **filter: rename `transformer:` and `transformer_options:`** <br>
   The `transformer:` and `transformer_options:` options a context or
-  agent takes are `filter:` and `filter_options:` now,
-  `LLM::Context#transformer` is
-  [`LLM::Context#filter`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html#filter-instance_method),
-  and the stream callbacks `on_transform` and `on_transform_finish`
-  are `on_filter` and `on_filter_finish`.
+  agent takes are `filter:` and `filter_options:` now.
+
+* **filter: rename `LLM::Context#transformer`** <br>
+  The method that returns the filter a context is configured with is
+  [`LLM::Context#filter`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html#filter-instance_method)
+  now. `LLM::Context#transformer` is removed, and no alias is left
+  behind.
+
+* **filter: rename the `on_transform` stream callbacks** <br>
+  The `on_transform` and `on_transform_finish` callbacks a stream
+  implements are `on_filter` and `on_filter_finish` now, and each is
+  given the filter that rewrites a prompt.
 
 * **filter: add `LLM::MessageFilter.multi`** <br>
   [`LLM::MessageFilter.multi`](https://r.uby.dev/api-docs/llm.rb/LLM/MessageFilter.html#multi-class_method)
@@ -503,6 +530,18 @@ it.
   returns a Symbol, where the old `#provider_name` returned a
   String, so cast it when you need a String.
 
+### LLM::Usage
+
+* **usage: add `LLM::Usage.fields`** <br>
+  [`LLM::Usage.fields`](https://r.uby.dev/api-docs/llm.rb/LLM/Usage.html#fields-class_method)
+  returns the names of the fields an `LLM::Usage` object holds, as an
+  array of strings: `input_tokens`, `output_tokens`, `reasoning_tokens`,
+  `input_audio_tokens`, `output_audio_tokens`, `input_image_tokens`,
+  `cache_read_tokens`, `cache_write_tokens`, and `total_tokens`. The
+  ActiveRecord wrapper builds usage from a column with it, so a field
+  that is added to usage is read from a saved conversation without a
+  second list to maintain.
+
 ### JSON
 
 * **json: remove the Yajl adapter** <br>
@@ -523,9 +562,43 @@ it.
   [`LLM::Context`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html)
   or an
   [`LLM::Agent`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html).
-  This means a caller no longer has to reach for `send(:ctx)` but
-  can use this new method instead. The runtime is memoized and every
-  call returns the same object.
+  This means a caller no longer has to reach for the wrapper's
+  private runtime accessor but can use this new method instead. The
+  runtime is memoized and every call returns the same object.
+
+* **orm: read token usage from the column** <br>
+  [`LLM::ActiveRecord#token_usage`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord.html#token_usage-instance_method)
+  (and its `#usage` alias) reads the `token_usage` that a `:jsonb` record
+  holds in its column and returns it as an
+  [`LLM::Usage`](https://r.uby.dev/api-docs/llm.rb/LLM/Usage.html), so the
+  usage of a saved conversation can be read without a provider, without
+  credentials, and without loading the runtime. Every field is zero
+  when the column holds no usage, and the value is memoized.
+
+* **orm: read context window usage from the column** <br>
+  [`LLM::ActiveRecord#context_window`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord.html#context_window-instance_method),
+  [`LLM::ActiveRecord#context_used`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord.html#context_used-instance_method)
+  and
+  [`LLM::ActiveRecord#context_usage`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord.html#context_usage-instance_method)
+  read the projections that a `:jsonb` record holds in its column now,
+  so the context window usage of a saved conversation can be read
+  without loading the runtime. `#context_window` falls back to the
+  runtime when the column holds none, `#context_used` returns `nil` when
+  it holds none, and `#context_usage` returns `nil` when either of the
+  two is `nil`.
+
+* **orm: read the model from the column** <br>
+  [`LLM::ActiveRecord#model!`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord.html#model!-instance_method)
+  returns the `model` that a `:jsonb` record holds in its column, and it
+  falls back to the model the runtime resolves when the column holds
+  none.
+
+* **orm: `LLM::ActiveRecord::Message.for` takes `record:`** <br>
+  [`LLM::ActiveRecord::Message.for`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord/Message.html#for-class_method)
+  takes the record as `record:` now, where it took it as `agent:`, so the
+  keyword matches the `record:` a runtime is bound with when a wrapper
+  builds one. The relation it returns is still scoped to that record's
+  id.
 
 ### Transport
 
