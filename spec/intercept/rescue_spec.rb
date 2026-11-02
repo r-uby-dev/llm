@@ -49,7 +49,7 @@ RSpec.describe LLM::Intercept::Rescue do
 
   it "reports the crash on standard error" do
     expect { crashing.new(provider).call(function:) }
-      .to output(/an llm.rb intercept has crashed/).to_stderr
+      .to output(/has crashed/).to_stderr
   end
 
   it "lets an interrupt through" do

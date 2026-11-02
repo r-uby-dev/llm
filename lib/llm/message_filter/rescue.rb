@@ -15,26 +15,7 @@ class LLM::MessageFilter
   # all, and LLM::Interrupt travelling up the stack
   # is intentional.
   module Rescue
-    ##
-    # @param [StandardError] ex
-    # @return [void]
-    def self.crash(filter, ex)
-      $stderr.puts "",
-                   "an llm.rb filter has crashed.",
-                   "",
-                   "[  MessageFilter    ] #{filter.class}",
-                   "[  class     ] #{ex.class}",
-                   "[  message   ] #{ex.message}",
-                   "[  backtrace ] ",
-                   "#{(ex.backtrace || []).take(10).join("\n")}",
-                   ""
-    end
-
-    ##
-    # @api private
-    ERRORS = [StandardError, ScriptError]
-    private_constant :ERRORS
-
+    include LLM::Rescue
     ##
     # @param [LLM::Message] message
     # @param [Hash] options
@@ -44,7 +25,7 @@ class LLM::MessageFilter
     rescue LLM::Interrupt
       raise
     rescue *ERRORS => ex
-      LLM::MessageFilter::Rescue.crash(self, ex)
+      crash(ex:)
     end
   end
 end
