@@ -502,6 +502,7 @@ class LLM::Provider
     [
       LLM::InsufficientQuotaError,
       LLM::RateLimitError,
+      SystemCallError,
       Net::ReadTimeout,
       Net::WriteTimeout,
       Net::OpenTimeout
