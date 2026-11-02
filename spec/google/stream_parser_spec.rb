@@ -110,6 +110,16 @@ RSpec.describe LLM::Google::StreamParser do
       expect(parts.first["thoughtSignature"]).to eq("signature")
     end
 
+    it "keeps preceding text separate from a partial call" do
+      parse!({"text" => "Checking the weather."})
+      parse!({"functionCall" => {"name" => "weather"}})
+      expect(stream.calls).to be_empty
+      parse!({"functionCall" => {"args" => {"city" => "Paris"}}})
+      expect(parts.size).to eq(2)
+      expect(parts.first).to eq({"text" => "Checking the weather."})
+      expect(stream.calls.map(&:arguments)).to eq([{"city" => "Paris"}])
+    end
+
     it "starts a partial second call when its id changes" do
       parse!({"functionCall" => {"id" => "paris", "name" => "weather", "args" => {"city" => "Paris"}}})
       parse!({"functionCall" => {"id" => "berlin", "name" => "weather"}})
