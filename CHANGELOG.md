@@ -85,14 +85,15 @@ it.
   method or by setting
   `LLMRB_DEBUG_MODE=1`
   in your shell.
-  <br><br>
-  It takes an optional `IO` as its second argument, and it writes
-  to `$stderr` by default. The default can be replaced with
-  [`LLM.debug_io=`](https://r.uby.dev/api-docs/llm.rb/LLM.html#debug_io=-class_method),
-  and
+
+* **core: add `LLM.debug_io`** <br>
   [`LLM.debug_io`](https://r.uby.dev/api-docs/llm.rb/LLM.html#debug_io-class_method)
-  returns the IO that is in use, so debug output can be sent
-  to a file:
+  returns the IO that debug output is written to, and
+  [`LLM.debug_io=`](https://r.uby.dev/api-docs/llm.rb/LLM.html#debug_io=-class_method)
+  replaces it. It is `$stderr` by default, and
+  `LLM.debug` takes an optional `IO` as its second argument
+  to write a single message somewhere else, so debug output
+  can be sent to a file:
 
   ```ruby
   LLM.debug_io = File.open("llm.log", "w+")
@@ -184,9 +185,8 @@ it.
   method instead of `Kernel.raise`
   when a command times out. The
   "wait" method is used internally
-  by the
-  [`LLM::Tool::Exec`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Exec.html)
-  tool and it can be used by your
+  by the `LLM::Tool::Exec` tool,
+  and it can be used by your
   own tools as well. Tools that
   depended on the old behavior
   will require an update (although
@@ -317,15 +317,17 @@ it.
 
 ### LLM::Object
 
-* **object: add `LLM::Object#freeze` and `LLM::Object#frozen?`** <br>
+* **object: add `LLM::Object#freeze`** <br>
   [`LLM::Object#freeze`](https://r.uby.dev/api-docs/llm.rb/LLM/Object.html#freeze-instance_method)
   freezes the object and everything nested in it, down to the strings
   in its arrays, and makes the result Ractor-shareable, so a parsed
   response can be handed to a `:ractor` tool call. It returns self,
-  and freezing it twice does nothing.
+  and freezing it twice does nothing. A write to a frozen object -
+  through `#[]=`, `#merge!`, or `#delete` - raises `FrozenError`.
+
+* **object: add `LLM::Object#frozen?`** <br>
   [`LLM::Object#frozen?`](https://r.uby.dev/api-docs/llm.rb/LLM/Object.html#frozen?-instance_method)
-  returns true once the object has been frozen, and a write to a frozen
-  object - through `#[]=`, `#merge!`, or `#delete` - raises `FrozenError`.
+  returns true once the object has been frozen.
 
 ### LLM::Schema
 
@@ -407,17 +409,23 @@ it.
   * [LLM::Agent.set](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#set-class_method) (can set both)
 
 * **agent: add `LLM::Agent#compactor` and `LLM::Agent#compactor_options`** <br>
-  The
-  [`LLM::Agent`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html)
-  class adds two new methods that provide access to an agent's
-  compactor (and its options) at the instance level. By default
-  the compactor is a Null compactor that does nothing:
+  The `LLM::Agent` class adds two new methods that provide
+  access to an agent's compactor (and its options) at the
+  instance level. By default the compactor is a Null compactor
+  that does nothing:
   * [`LLM::Agent#compactor`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#compactor-instance_method)
   <br> returns the compactor class
   ([`LLM::Compactor::Null`](https://r.uby.dev/api-docs/llm.rb/LLM/Compactor/Null.html)
   by default)
   * [`LLM::Agent#compactor_options`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#compactor_options-instance_method)
   <br> returns the compactor options (`{}` by default)
+
+* **agent: build an agent on a Ractor** <br>
+  The `FIELDS` and `IVARS` constants the constructor reads were plain
+  arrays, so building an agent inside a Ractor raised
+  `Ractor::IsolationError`. Both are Ractor-shareable now, so a
+  subagent tool that builds an agent when it is called works under
+  the `:ractor` concurrency strategy.
 
 ### LLM::Function
 
