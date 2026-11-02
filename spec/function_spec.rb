@@ -680,6 +680,146 @@ RSpec.describe LLM::Function do
         end
       end
     end
+
+    describe "when configured with a tracer" do
+      let(:tracer) { LLM::Tracer::Null.new(nil) }
+      let(:group) do
+        LLM::Function::Sequential::Group.new(functions.map { |fn| fn.task(:sequential) })
+      end
+      let(:functions) { [function] }
+      let(:fn_class) do
+        Class.new(LLM::Tool) do
+          name "failing"
+
+          def call
+            raise "boom"
+          end
+        end
+      end
+      let(:function) do
+        fn_class.function.dup.tap do |fn|
+          fn.id = "call_1"
+          fn.arguments = {}
+          fn.tracer = tracer
+        end
+      end
+
+      before do
+        allow(tracer).to receive(:on_tool_start).and_return(:span)
+        allow(tracer).to receive(:on_tool_error)
+        allow(tracer).to receive(:on_tool_interrupt)
+      end
+
+      it "reports an error with the span returned at start" do
+        result = group.wait.first
+
+        expect(result.error?).to be(true)
+        expect(tracer).to have_received(:on_tool_error).with(
+          ex: result,
+          span: :span,
+          started_at: instance_of(Float),
+          finished_at: instance_of(Float)
+        )
+      end
+
+      context "when the running tool is interrupted" do
+        let(:started) { Queue.new }
+        let(:fn_class) do
+          started = self.started
+          Class.new(LLM::Tool) do
+            name "slow"
+
+            define_method(:call) do
+              started << true
+              sleep 10
+              {ok: true}
+            end
+          end
+        end
+
+        it "reports the interrupt with the span returned at start" do
+          thread = Thread.new do
+            group.wait
+          rescue LLM::Interrupt => ex
+            ex
+          end
+          thread.report_on_exception = false
+
+          Timeout.timeout(2) { started.pop }
+          group.interrupt!
+          interrupt = thread.value
+
+          expect(interrupt).to be_a(LLM::Interrupt)
+          expect(tracer).to have_received(:on_tool_interrupt).with(
+            ex: interrupt,
+            span: :span,
+            started_at: instance_of(Float),
+            finished_at: instance_of(Float)
+          )
+        ensure
+          group.interrupt! if thread&.alive?
+        end
+      end
+
+      context "when a group is interrupted before a later tool starts" do
+        let(:started) { Queue.new }
+        let(:second_started) { Queue.new }
+        let(:second_interrupted) { Queue.new }
+        let(:functions) { [function, second_function] }
+        let(:fn_class) do
+          started = self.started
+          Class.new(LLM::Tool) do
+            name "slow"
+
+            define_method(:call) do
+              started << true
+              sleep 10
+              {ok: true}
+            end
+          end
+        end
+        let(:second_function) do
+          started = second_started
+          interrupted = second_interrupted
+          Class.new(LLM::Tool) do
+            name "later"
+
+            define_method(:call) do
+              started << true
+              {ok: true}
+            end
+
+            define_method(:on_interrupt) do
+              interrupted << true
+            end
+          end.function.dup.tap do |fn|
+            fn.id = "call_2"
+            fn.arguments = {}
+            fn.tracer = tracer
+          end
+        end
+
+        it "skips the tool and traces its interruption" do
+          thread = Thread.new do
+            group.wait
+          rescue LLM::Interrupt => ex
+            ex
+          end
+          thread.report_on_exception = false
+
+          Timeout.timeout(2) { started.pop }
+          group.interrupt!
+          interrupt = thread.value
+
+          expect(interrupt).to be_a(LLM::Interrupt)
+          expect { second_started.pop(true) }.to raise_error(ThreadError)
+          expect(second_interrupted.pop).to be(true)
+          expect(tracer).to have_received(:on_tool_interrupt).twice
+        ensure
+          group.interrupt! if thread&.alive?
+        end
+      end
+    end
   end
 
   describe LLM::Function::Task do
