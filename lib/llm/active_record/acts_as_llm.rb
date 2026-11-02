@@ -167,11 +167,8 @@ module LLM::ActiveRecord
         if defined?(@model)
           @model
         else
-          @model = begin
-            options = self.class.llm_plugin_options
-            data = public_send(options[:data_column])
-            data&.dig("model") || __context__.model
-          end
+          @model = __data__&.dig("model") ||
+                   __context__.model
         end
       end
 
@@ -183,11 +180,8 @@ module LLM::ActiveRecord
         if defined?(@context_window)
           @context_window
         else
-          @context_window = begin
-            options = self.class.llm_plugin_options
-            data = public_send(options[:data_column])
-            data&.dig("context_window") || __context__.context_window
-          end
+          @context_window = __data__&.dig("context_window") ||
+                            __context__.context_window
         end
       end
 
@@ -199,11 +193,7 @@ module LLM::ActiveRecord
         if defined?(@context_used)
           @context_used
         else
-          @context_used = begin
-            options = self.class.llm_plugin_options
-            data = public_send(options[:data_column])
-            data&.dig("context_used")
-          end
+          @context_used = __data__&.dig("context_used")
         end
       end
 
@@ -233,9 +223,7 @@ module LLM::ActiveRecord
           @token_usage
         else
           @token_usage = begin
-            options = self.class.llm_plugin_options
-            data    = public_send(options[:data_column])
-            usage   = data&.dig("token_usage") || {}
+            usage   = __data__&.dig("token_usage") || {}
             fields  = LLM::Usage.fields.to_h { [_1.to_sym, usage[_1]] }
             LLM::Usage.new(**fields.transform_values { _1 || 0 })
           end
@@ -357,6 +345,13 @@ module LLM::ActiveRecord
         else
           @__agent__ = LLM::ActiveRecord::Agent.for(record: self).first
         end
+      end
+
+      ##
+      # @return [Hash, nil]
+      def __data__
+        options = self.class.llm_plugin_options
+        public_send(options[:data_column])
       end
     end
   end
