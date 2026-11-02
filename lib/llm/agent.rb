@@ -148,11 +148,7 @@ module LLM
     #  Return's the agents name
     def self.name(name = UNDEFINED, &block)
       if name.equal?(UNDEFINED) and block.nil?
-        if @name.nil?
-          name  = to_s.split("::").last
-          @name = name.gsub(CASE_PATTERN, "-").downcase
-        end
-        LLM.share!(@name)
+        LLM.share!(@name || to_s.split("::").last.gsub(CASE_PATTERN, "-").downcase)
       else
         if Class === name
           name  = name.to_s.split("::").last
