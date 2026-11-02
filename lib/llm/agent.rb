@@ -152,9 +152,9 @@ module LLM
       else
         if Class === name
           name  = name.to_s.split("::").last
-          @name = name.gsub(CASE_PATTERN, "-").downcase
+          @name = LLM.share!(name.gsub(CASE_PATTERN, "-").downcase)
         else
-          @name = block || name
+          @name = LLM.share!(block || name)
         end
       end
     end
@@ -177,7 +177,7 @@ module LLM
       if desc.equal?(UNDEFINED) and block.nil?
         LLM.share!(@desc)
       else
-        @desc = block || desc
+        @desc = LLM.share!(block || desc)
       end
     end
 
@@ -212,7 +212,7 @@ module LLM
      if model.equal?(UNDEFINED) and block.nil?
         LLM.share!(@model)
       else
-        @model = block || model
+        @model = LLM.share!(block || model)
       end
     end
 
@@ -244,7 +244,7 @@ module LLM
      if instructions.equal?(UNDEFINED) and block.nil?
         LLM.share!(@instructions)
       else
-        @instructions = block || instructions
+        @instructions = LLM.share!(block || instructions)
       end
     end
 
