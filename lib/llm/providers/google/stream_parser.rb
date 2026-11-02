@@ -166,8 +166,10 @@ class LLM::Google
       delta_id = delta_call["id"].to_s
       return previous_id == delta_id unless previous_id.empty? || delta_id.empty?
       return false if previous_call["name"] && delta_call["name"] && previous_call["name"] != delta_call["name"]
-      # Complete calls without a shared ID are distinct parts, even when
-      # the same function is called twice with different arguments.
+      # Two calls merge when they share an id, or when either of them
+      # is incomplete; two complete calls with different - or absent -
+      # ids stay separate, even when the same function is called twice
+      # with different arguments.
       !complete_call?(previous_call) || !complete_call?(delta_call)
     end
 
