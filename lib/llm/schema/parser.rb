@@ -110,6 +110,13 @@ class LLM::Schema
       end
     end
 
+    # Resolve local JSON Pointers while preserving the referencing schema's overrides.
+    #
+    # Decode percent escapes before splitting, because an escaped delimiter must be
+    # represented as ``~1`` in a pointer token. Unescape ``~1`` before ``~0`` so a
+    # literal ``~1`` is not transformed twice. Track the original ref string: a
+    # circular reference must repeat one. Finally, merge the reference site last so
+    # constraints such as ``minLength`` and ``maxLength`` accumulate along a chain.
     def resolve_ref(schema, root)
       seen = {}
       while schema.key?("$ref")
