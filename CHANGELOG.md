@@ -119,6 +119,18 @@ it.
   before it now, and a signature sent beside other content
   stays where it was sent.
 
+* **google: keep parallel streamed tool calls apart** <br>
+  A streamed response can hold more than one
+  complete function call (parallel tool calls), and
+  the stream parser appended each call to the part
+  before it, so an earlier call was overwritten by
+  the call that followed and only the last one
+  survived. Each complete call is a part of its own
+  now, even when it repeats a function name and
+  carries no `id`, while a continuation of a partial
+  call, and an update that repeats the same `id`,
+  are still merged into the part they continue.
+
 ### LLM::Context
 
 * **context: store tool calls in the abstract form** <br>
@@ -227,15 +239,21 @@ it.
 
 * **tools: move process helpers into `LLM::Tool::Utils::Process`** <br>
   The `#wait`, `#spawn` and `#now` methods moved out of
-  `LLM::Tool::Utils` and into the new
+  [`LLM::Tool::Utils`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Utils.html)
+  and into the new
   [`LLM::Tool::Utils::Process`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Utils/Process.html)
   module, and `LLM::Tool::Utils::Command` is
   `LLM::Tool::Utils::Process::Command` now. `#wait` still
   throws `:kill` when a command exceeds its timeout, exactly
   as it did in its old home, and `LLM::Tool::Exec` includes
-  `Process` now. `LLM::Tool::ReadFile` includes `Utils`
-  alone, so the read-file tool no longer pulls in
-  `test-cmd` as a transitive dependency.
+  `Process` now.
+
+* **tools: `LLM::Tool::ReadFile` drops its `test-cmd` dependency** <br>
+  [`LLM::Tool::ReadFile`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/ReadFile.html)
+  includes `LLM::Tool::Utils` alone now, so the read-file
+  tool no longer pulls in `test-cmd` as a transitive
+  dependency the way it did when the process helpers
+  lived in `Utils`.
 
 ### LLM::MCP
 
@@ -318,6 +336,24 @@ it.
   of them comes back as a plain `Hash` all the way down. Before, a
   property kept the object it was built from, and the result could
   not be used where a plain JSON schema is expected.
+
+* **schema: follow a chain of local references** <br>
+  A `$ref` that points at another schema that holds
+  a `$ref` of its own is resolved all the way down
+  now, where only one hop was followed before and the
+  second reference was read as if it were a concrete
+  schema. A chain of aliases is bounded, and a
+  reference that loops back on itself raises
+  `TypeError`.
+
+* **schema: decode a JSON Pointer in a `$ref`** <br>
+  [`LLM::Schema.parse`](https://r.uby.dev/api-docs/llm.rb/LLM/Schema.html#parse-class_method)
+  decodes a JSON Pointer the way RFC 6901 spells it
+  out now, so a token that holds a percent-encoded
+  character, a `/` (`~1`), or a `~` (`~0`) resolves,
+  an empty token is kept, and a token that names an
+  array index addresses that array. A pointer that
+  cannot be resolved still raises `TypeError`.
 
 ### LLM::Provider
 
