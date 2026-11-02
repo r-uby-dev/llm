@@ -36,13 +36,13 @@ class LLM::Intercept
     ERRORS = [StandardError, ScriptError]
     private_constant :ERRORS
 
-    def call(...)
+    def call(function:, **)
       super
     rescue LLM::Interrupt
       raise
     rescue *ERRORS => ex
       LLM::Intercept::Rescue.crash(self, ex)
-      nil
+      function.error(ex:, note: "an intercept crashed")
     end
   end
 end

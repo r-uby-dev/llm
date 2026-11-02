@@ -4,7 +4,22 @@ require "setup"
 
 RSpec.describe LLM::Intercept::Rescue do
   let(:provider) { LLM.openai(key: "test") }
-  let(:function) { nil }
+  let(:tool) do
+    Class.new(LLM::Tool) do
+      name "echo"
+      description "Echo a value"
+
+      def call(value:)
+        "echo: #{value}"
+      end
+    end
+  end
+  let(:function) do
+    tool.function.dup.tap do |fn|
+      fn.id = "call_1"
+      fn.arguments = {"value" => "hi"}
+    end
+  end
   let(:crashing) do
     Class.new(LLM::Intercept) do
       def call(function:, **)
@@ -24,8 +39,12 @@ RSpec.describe LLM::Intercept::Rescue do
     expect(crashing.ancestors).to include(described_class)
   end
 
-  it "lets the tool call through when the intercept raises" do
-    expect(crashing.new(provider).call(function:)).to be_nil
+  it "returns a tool return when the intercept raises" do
+    expect(crashing.new(provider).call(function:)).to be_error
+  end
+
+  it "names the error after the exception" do
+    expect(crashing.new(provider).call(function:).value[:type]).to eq("RuntimeError")
   end
 
   it "reports the crash on standard error" do
