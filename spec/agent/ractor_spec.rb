@@ -6,10 +6,7 @@ require "llm/providers/openai"
 RSpec.describe "LLM::Agent in a ractor" do
   let(:agent) { stub_const("TestAgent", Ractor.make_shareable(Class.new(LLM::Agent))) }
   let(:name) do
-    Ractor.new(agent) do |klass|
-      llm = LLM.openai(key: "test")
-      klass.new(llm).name
-    end.value
+    Ractor.new(agent) { TestAgent.name }.value
   end
 
   it "derives a name for a class that never had one set" do
