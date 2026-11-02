@@ -29,6 +29,7 @@ before) can be seen in [changelog/old.md](changelog/old.md).
 | `LLM::Transport::PersistentHTTP.registry` and `.lock` | each transport keeps a client and a lock of its own |
 | `LLM::Tool::Utils#wait`, `#spawn` and `#now`, and `LLM::Tool::Utils::Command` | they are `LLM::Tool::Utils::Process#wait`, `#spawn` and `#now`, and `LLM::Tool::Utils::Process::Command` |
 | `LLM::ActiveRecord::Message.for(agent:)` | `LLM::ActiveRecord::Message.for(record:)` |
+| a class-level agent attribute is returned as given | it is deep-frozen when it can be, so a write to the returned value raises `FrozenError` |
 
 ### Skills
 
@@ -253,10 +254,8 @@ it.
   and into the new
   [`LLM::Tool::Utils::Process`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Utils/Process.html)
   module, and `LLM::Tool::Utils::Command` is
-  `LLM::Tool::Utils::Process::Command` now. `#wait` still
-  throws `:kill` when a command exceeds its timeout, exactly
-  as it did in its old home, and `LLM::Tool::Exec` includes
-  `Process` now.
+  `LLM::Tool::Utils::Process::Command` now.
+  `LLM::Tool::Exec` includes the new module.
 
 * **tools: `LLM::Tool::ReadFile` drops its `test-cmd` dependency** <br>
   [`LLM::Tool::ReadFile`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/ReadFile.html)
@@ -436,6 +435,32 @@ it.
   `Ractor::IsolationError`. Both are Ractor-shareable now, so a
   subagent tool that builds an agent when it is called works under
   the `:ractor` concurrency strategy.
+
+* **agent: share class-level agent attributes with a Ractor** <br>
+  A class-level attribute is deep-frozen when it is set, and
+  the reader returns the shareable value, so a Ractor other
+  than the one that loaded the agent class can read it.
+  Before, the value was stored as it was given, and a second
+  Ractor that read an attribute such as
+  `LLM::Agent.instructions` raised `Ractor::IsolationError`
+  for a `String`, a `Hash` or an `Array`. The attributes are
+  [`LLM::Agent.name`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#name-class_method),
+  `.description`, `.model`, `.schema`, `.instructions`,
+  `.path`, `.compactor_options`, `.tools` and `.confirm`,
+  though `.tools` shares the tools it is given as arguments,
+  and stores the block it takes as it was given.
+
+* **agent: a class-level attribute is returned frozen** <br>
+  A value that cannot be made shareable - a `Proc` whose `self`
+  is not shareable is one - is stored as it was given, and
+  [`LLM.debug`](https://r.uby.dev/api-docs/llm.rb/LLM.html#debug-class_method)
+  reports it when debug mode is on. A reader returns a frozen
+  value now, so a write to it, like
+  `LLM::Agent.instructions << "..."`, raises `FrozenError`.
+  That is the migration: a class-level agent attribute that
+  was returned as given is returned deep-frozen when it can
+  be, so a caller that mutates the value in place has to build
+  a copy of its own first.
 
 ### LLM::Function
 
