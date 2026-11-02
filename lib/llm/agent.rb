@@ -49,21 +49,24 @@ module LLM
 
     ##
     # @api private
-    FIELDS = Ractor.make_shareable(%i[record
-                                      name description
-                                      path tool_budget
-                                      retry_budget model
-                                      schema
-                                      tracer stream
-                                      compactor compactor_options
-                                      tools concurrency
-                                      instructions confirm
-                                      intercept])
-    IVARS  = Ractor.make_shareable(%i[record
-                                      name description
-                                      path tool_budget
-                                      tracer concurrency
-                                      instructions confirm])
+    FIELDS = LLM.share!(%i[
+      record name
+      description path
+      tool_budget retry_budget
+      model schema
+      tracer stream
+      compactor compactor_options
+      tools concurrency
+      instructions confirm
+      intercept
+    ])
+    IVARS  = LLM.share!(%i[
+      record name
+      description path
+      tool_budget tracer
+      concurrency instructions
+      confirm
+    ])
     private_constant :FIELDS, :IVARS
 
     ##
