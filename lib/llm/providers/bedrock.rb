@@ -31,6 +31,11 @@ module LLM
   #   ctx.talk "Hello, how are you?"
   #   ctx.messages.select(&:assistant?).each { puts _1.content }
   class Bedrock < Provider
+    ##
+    # Optional stdlib dependencies
+    LLM.require "digest", "~> 3.3"
+    LLM.require "openssl", "~> 4.0"
+
     require_relative "bedrock/signature"
     require_relative "bedrock/error_handler"
     require_relative "bedrock/request_adapter"

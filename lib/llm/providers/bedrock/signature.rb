@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require "digest"
-require "openssl"
-
 class LLM::Bedrock
   ##
   # Signs HTTP requests and headers with AWS Signature V4.
