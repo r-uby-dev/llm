@@ -8,12 +8,9 @@ RSpec.describe "LLM::Agent in a ractor" do
   let(:agent) { stub_const("TestAgent", Ractor.make_shareable(Class.new(LLM::Agent))) }
 
   context "when given the name" do
-    let(:name) do
-      Ractor.new(agent) { TestAgent.name }.value
-    end
 
     it "derives a name for a class that never had one set" do
-      expect(name).to eq("test-agent")
+      expect(Ractor.new(agent) { TestAgent.name }.value).to eq("test-agent")
     end
 
     it "derives the same name on the main ractor" do
@@ -30,8 +27,8 @@ RSpec.describe "LLM::Agent in a ractor" do
       agent.set(tools:)
     end
 
-    it do
-      expect(Ractor.new(agent) { it.tools }.value).to eq(tools)
+    it "can access the tools" do
+      expect(Ractor.new { TestAgent.tools }.value).to eq(tools)
     end
   end
 end
