@@ -396,6 +396,18 @@ it.
   documented now, so a caller can read the address a provider
   talks to without reaching into its instance variables.
 
+* **provider: retry a request that raises `SystemCallError`** <br>
+  [`LLM::Provider#retry_errors`](https://r.uby.dev/api-docs/llm.rb/LLM/Provider.html#retry_errors-instance_method)
+  includes `SystemCallError` now, so a request the socket drops -
+  `Errno::ECONNRESET` and `Errno::EPIPE` are the ones a pooled
+  connection sees - is retried instead of failing the turn.
+  `SystemCallError` is the superclass of every `Errno::*` error,
+  and a retry is made the way a rate limited request is: the
+  stream is told with
+  [`LLM::Stream#on_retry`](https://r.uby.dev/api-docs/llm.rb/LLM/Stream.html#on_retry-instance_method),
+  the runtime sleeps a growing interval, and the request is made
+  again up to the provider's `retry_budget`.
+
 ### LLM::Agent
 
 * **agent: `LLM.interrupt` returns the agent it interrupted** <br>
