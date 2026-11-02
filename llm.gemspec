@@ -16,7 +16,10 @@ Gem::Specification.new do |spec|
                   "Samad Mahmood",
                   "Rohan Sharma",
                   "erSpell",
-                  "Madhavi Dayma"].sort
+                  "Madhavi Dayma",
+                  "Vamsi-2581",
+                  "Shahada",
+                  "jihtsan"].sort
   spec.email = ["robert@r.uby.dev"]
 
   spec.summary = "An agentic runtime for Ruby"
