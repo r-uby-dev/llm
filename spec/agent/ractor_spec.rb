@@ -68,6 +68,66 @@ RSpec.describe "LLM::Agent in a ractor" do
     end
   end
 
+  context "when given a tracer" do
+    before do
+      agent.set(tracer: LLM::Tracer::Null)
+    end
+
+    it "can access the tracer" do
+      expect(Ractor.new { TestAgent.tracer }.value).to eq(LLM::Tracer::Null)
+    end
+  end
+
+  context "when given a tool budget" do
+    before do
+      agent.set(tool_budget: 5)
+    end
+
+    it "can access the tool budget" do
+      expect(Ractor.new { TestAgent.tool_budget }.value).to eq(5)
+    end
+  end
+
+  context "when given a retry budget" do
+    before do
+      agent.set(retry_budget: 3)
+    end
+
+    it "can access the retry budget" do
+      expect(Ractor.new { TestAgent.retry_budget }.value).to eq(3)
+    end
+  end
+
+  context "when given a path" do
+    before do
+      agent.set(path: +"/tmp/test-agent")
+    end
+
+    it "can access the path" do
+      expect(Ractor.new { TestAgent.path }.value).to eq("/tmp/test-agent")
+    end
+  end
+
+  context "when given confirmations" do
+    before do
+      agent.set(confirm: %w[delete-file])
+    end
+
+    it "can access the confirmations" do
+      expect(Ractor.new { TestAgent.confirm }.value).to eq(%w[delete-file])
+    end
+  end
+
+  context "when given compactor options" do
+    before do
+      agent.set(compactor_options: {max_tokens: 10})
+    end
+
+    it "can access the compactor options" do
+      expect(Ractor.new { TestAgent.compactor_options }.value).to eq(max_tokens: 10)
+    end
+  end
+
   context "when given tools" do
     let(:tools) do
       [LLM::Tool::ReadFile]

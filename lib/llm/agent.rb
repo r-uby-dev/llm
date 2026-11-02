@@ -289,7 +289,7 @@ module LLM
       if options.equal?(UNDEFINED) and block.nil?
         LLM.share!(@compactor_options)
       else
-        @compactor_options = block || options
+        @compactor_options = LLM.share!(block || options)
       end
     end
 
@@ -335,7 +335,7 @@ module LLM
       if path.equal?(UNDEFINED) and block.nil?
         LLM.share!(@path)
       else
-        @path = block || path
+        @path = LLM.share!(block || path)
       end
     end
 
@@ -411,11 +411,11 @@ module LLM
     def self.confirm(*tool_names, &block)
       return @confirm if tool_names.empty? and !block
       if block
-        @confirm = block
+        @confirm = LLM.share!(block)
       elsif single_callable?(tool_names)
-        @confirm = tool_names.first
+        @confirm = LLM.share!(tool_names.first)
       else
-        @confirm = tool_names.flatten.map(&:to_s)
+        @confirm = LLM.share!(tool_names.flatten.map(&:to_s))
       end
     end
 
