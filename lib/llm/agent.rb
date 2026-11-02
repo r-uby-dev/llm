@@ -87,29 +87,6 @@ module LLM
     attr_reader :llm
 
     ##
-    # Tries to deep-freeze an object so
-    # it can be shared across ractors. Might
-    # fail when the object cannot be deeply
-    # frozen. Failure is a noop that returns
-    # the paramter it is given.
-    #
-    # @note
-    #
-    #   This method is used where it can be
-    #   on class-level agent attributes that
-    #   can be accessed across Ractor via
-    #   a global reference (eg Agent.name).
-    #
-    # @return [Object]
-    def self.share!(obj)
-      Ractor.make_shareable(obj)
-    rescue Ractor::Error
-      LLM.debug "'#{obj.inspect}' cannot be made Ractor-shareable"
-      obj
-    end
-    private_class_method :share!
-
-    ##
     # Returns an instance of {LLM::Agent::Registry LLM::Agent::Registry}.
     # @note
     #  The registry holds all _active_
@@ -175,7 +152,7 @@ module LLM
           name  = to_s.split("::").last
           @name = name.gsub(CASE_PATTERN, "-").downcase
         end
-        share!(@name)
+        LLM.share!(@name)
       else
         if Class === name
           name  = name.to_s.split("::").last
@@ -202,7 +179,7 @@ module LLM
     #  Returns the agent's description
     def self.description(desc = UNDEFINED, &block)
       if desc.equal?(UNDEFINED) and block.nil?
-        share!(@desc)
+        LLM.share!(@desc)
       else
         @desc = block || desc
       end
@@ -237,7 +214,7 @@ module LLM
     #  Returns the model
     def self.model(model = UNDEFINED, &block)
      if model.equal?(UNDEFINED) and block.nil?
-        share!(@model)
+        LLM.share!(@model)
       else
         @model = block || model
       end
@@ -269,7 +246,7 @@ module LLM
     #  Returns the instructions
     def self.instructions(instructions = UNDEFINED, &block)
      if instructions.equal?(UNDEFINED) and block.nil?
-        share!(@instructions)
+        LLM.share!(@instructions)
       else
         @instructions = block || instructions
       end
@@ -314,7 +291,7 @@ module LLM
     # @return [Hash, Proc, nil]
     def self.compactor_options(options = UNDEFINED, &block)
       if options.equal?(UNDEFINED) and block.nil?
-        share!(@compactor_options)
+        LLM.share!(@compactor_options)
       else
         @compactor_options = block || options
       end
@@ -360,7 +337,7 @@ module LLM
     # @return [String, nil]
     def self.path(path = UNDEFINED, &block)
       if path.equal?(UNDEFINED) and block.nil?
-        share!(@path)
+        LLM.share!(@path)
       else
         @path = block || path
       end
