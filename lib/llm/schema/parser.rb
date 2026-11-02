@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "uri"
+
 class LLM::Schema
   ##
   # The {LLM::Schema::Parser LLM::Schema::Parser} module provides
@@ -109,12 +111,34 @@ class LLM::Schema
     end
 
     def resolve_ref(schema, root)
-      return schema unless schema.key?("$ref")
-      ref = schema["$ref"]
-      raise TypeError, "unsupported schema ref #{ref.inspect}" unless ref.start_with?("#/")
-      target = ref.delete_prefix("#/").split("/").reduce(root) { |node, key| node.fetch(key) }
-      normalize_schema(target).merge(schema.except("$ref"))
-    rescue KeyError
+      seen = {}
+      while schema.key?("$ref")
+        ref = schema["$ref"]
+        raise TypeError, "unsupported schema ref #{ref.inspect}" unless ref.is_a?(::String) && ref.valid_encoding? && ref.start_with?("#/")
+        raise TypeError, "circular schema ref #{ref.inspect}" if seen[ref]
+        seen[ref] = true
+        pointer = ref.delete_prefix("#")
+        raise TypeError, "unresolvable schema ref #{ref.inspect}" if pointer.match?(/%(?![0-9a-fA-F]{2})/)
+        pointer = URI::DEFAULT_PARSER.unescape(pointer)
+        raise TypeError, "unresolvable schema ref #{ref.inspect}" unless pointer.valid_encoding?
+        target = pointer.split("/", -1).drop(1).reduce(root) do |node, token|
+          raise TypeError, "unresolvable schema ref #{ref.inspect}" if token.match?(/~(?:[^01]|$)/)
+          key = token.gsub("~1", "/").gsub("~0", "~")
+          case node
+          when ::Hash then node.fetch(key)
+          when ::Array
+            raise TypeError, "unresolvable schema ref #{ref.inspect}" unless key.match?(/\A(?:0|[1-9][0-9]*)\z/)
+            index = key.to_i
+            raise TypeError, "unresolvable schema ref #{ref.inspect}" if index >= node.length
+            node.fetch(index)
+          else raise TypeError, "unresolvable schema ref #{ref.inspect}"
+          end
+        end
+        raise TypeError, "unresolvable schema ref #{ref.inspect}" unless target.is_a?(::Hash)
+        schema = normalize_schema(target).merge(schema.except("$ref"))
+      end
+      schema
+    rescue KeyError, IndexError
       raise TypeError, "unresolvable schema ref #{ref.inspect}"
     end
 
