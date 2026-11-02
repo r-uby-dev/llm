@@ -42,7 +42,12 @@ must be updated to their latest version(s). The major
 [json](https://github.com/ruby/json) 
 version bump (v2 => v3) can require changes and not
 all gems have caught up yet. The [r-uby-dev/llm](https://github.com/r-uby-dev/llm)
-gem is an early adopter of json v3.
+gem is an early adopter of json v3. 
+
+The v18 series
+includes [substational runtime improvements](CHANGELOG.md) -
+especially for running tool calls on a [Ractor](https://docs.ruby-lang.org/en/4.0/Ractor.html)
+and it the recommended version to use (even as a prerelease).  
 
 ```bash
 gem install llm.rb --pre
