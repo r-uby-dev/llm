@@ -127,7 +127,7 @@ RSpec.describe LLM::Google::StreamParser do
       parse!({"functionCall" => {"name" => "weather", "args" => {"city" => "Paris"}}})
       parse!({"functionCall" => {"name" => "forecast", "args" => {"city" => "Berlin"}}})
       expect(parts.size).to eq(2)
-      expect(stream.calls.map(&:name)).to eq(%w[weather forecast])
+      expect(stream.calls.map(&:name)).to eq(%i[weather forecast])
     end
 
     it "keeps same-id metadata updates on the existing call" do
