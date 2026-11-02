@@ -4,14 +4,40 @@
 require "llm"
 require "llm/tools"
 require "fileutils"
-require_relative "subagent"
+require_relative "edit_file"
+
+class Intercept < LLM::Intercept
+  def self.called!
+    @called = true
+  end
+
+  def self.called?
+    @called
+  end
+
+  def call(function:)
+    if  function.name == "edit-file"    and
+        function.arguments.instructions and
+        not self.class.called?
+      self.class.called!
+      function.return(
+        error: true,
+        type: "logic_error",
+        message: "the first turn can not include instructions " \
+                  "for the edit-file subagent but future turns " \
+                  "can"
+      )
+    end
+  end
+end
 
 class Agent < LLM::Agent
   set name:        :set_name,
       description: :set_description,
       tools:       :set_tools,
       path:        :set_path,
-      tracer:      :set_tracer
+      tracer:      :set_tracer,
+      intercept:   :set_intercept
 
   def changelog
     talk([
@@ -33,7 +59,7 @@ class Agent < LLM::Agent
     end
 
     def set_tools
-      [LLM::Tool::ReadFile, SubAgent]
+      [LLM::Tool::ReadFile, EditFile]
     end
 
     def set_path
@@ -41,7 +67,11 @@ class Agent < LLM::Agent
     end
 
     def set_tracer
-      LLM::Tracer.multi llm, LLM::Tracer::PrettyLogger
+      LLM::Tracer.multi(llm, LLM::Tracer::PrettyLogger)
+    end
+
+    def set_intercept
+      LLM::Intercept.multi(llm, Intercept)
     end
   }
 end

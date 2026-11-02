@@ -28,6 +28,8 @@ before) can be seen in [changelog/old.md](changelog/old.md).
 | `LLM::Context#transformer`, and `LLM::Transformer::Multi#transformers` | `LLM::Context#filter`, and `LLM::MessageFilter::Multi#filters` |
 | `LLM::Transport::PersistentHTTP.registry` and `.lock` | each transport keeps a client and a lock of its own |
 | `LLM::Tool::Utils#wait`, `#spawn` and `#now`, and `LLM::Tool::Utils::Command` | they are `LLM::Tool::Utils::Process#wait`, `#spawn` and `#now`, and `LLM::Tool::Utils::Process::Command` |
+| `LLM::ActiveRecord::Message.for(agent:)` | `LLM::ActiveRecord::Message.for(record:)` |
+| a class-level agent attribute is returned as given | it is deep-frozen when it can be, so a write to the returned value raises `FrozenError` |
 
 ### Skills
 
@@ -64,11 +66,21 @@ it.
 
 * **ruby: declare the stdlib gems as runtime dependencies** <br>
   The gemspec declares `net-http` (`~> 0.10`), `json`
-  (`~> 3.1`), `securerandom` (`~> 0.4`), `time` (`~> 0.5`),
-  `stringio` (`~> 3.2`), `digest` (`~> 3.3`) and `openssl`
-  (`~> 4.0`) as runtime dependencies. The v17 series declared
-  none, which left each gem implicit, and each one is now
-  declared, so a fresh `bundle install` installs it.
+  (`~> 3.1`), `securerandom` (`~> 0.4`), `time` (`~> 0.5`)
+  and `stringio` (`~> 3.2`) as runtime dependencies. The v17
+  series declared none, which left each gem implicit, and each
+  one is now declared, so a fresh `bundle install` installs it.
+
+* **ruby: make `openssl` and `digest` optional dependencies** <br>
+  The `openssl` (`~> 4.0`) and `digest` (`~> 3.3`) gems are
+  development dependencies now, where they were runtime
+  dependencies, so neither C extension is installed unless you
+  need it. [`LLM::Bedrock`](https://r.uby.dev/api-docs/llm.rb/LLM/Bedrock.html)
+  requires both when it loads, and
+  [`LLM::Tracer::Telemetry`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer/Telemetry.html)
+  requires `digest` when it is built. A gem that is missing
+  raises `LLM::LoadError`, which names the gem and the command
+  that installs it.
 
 ### LLM
 
@@ -84,14 +96,15 @@ it.
   method or by setting
   `LLMRB_DEBUG_MODE=1`
   in your shell.
-  <br><br>
-  It takes an optional `IO` as its second argument, and it writes
-  to `$stderr` by default. The default can be replaced with
-  [`LLM.debug_io=`](https://r.uby.dev/api-docs/llm.rb/LLM.html#debug_io=-class_method),
-  and
+
+* **core: add `LLM.debug_io`** <br>
   [`LLM.debug_io`](https://r.uby.dev/api-docs/llm.rb/LLM.html#debug_io-class_method)
-  returns the IO that is in use, so debug output can be sent
-  to a file:
+  returns the IO that debug output is written to, and
+  [`LLM.debug_io=`](https://r.uby.dev/api-docs/llm.rb/LLM.html#debug_io=-class_method)
+  replaces it. It is `$stderr` by default, and
+  `LLM.debug` takes an optional `IO` as its second argument
+  to write a single message somewhere else, so debug output
+  can be sent to a file:
 
   ```ruby
   LLM.debug_io = File.open("llm.log", "w+")
@@ -118,6 +131,18 @@ it.
   before it now, and a signature sent beside other content
   stays where it was sent.
 
+* **google: keep parallel streamed tool calls apart** <br>
+  A streamed response can hold more than one
+  complete function call (parallel tool calls), and
+  the stream parser appended each call to the part
+  before it, so an earlier call was overwritten by
+  the call that followed and only the last one
+  survived. Each complete call is a part of its own
+  now, even when it repeats a function name and
+  carries no `id`, while a continuation of a partial
+  call, and an update that repeats the same `id`,
+  are still merged into the part they continue.
+
 ### LLM::Context
 
 * **context: store tool calls in the abstract form** <br>
@@ -135,6 +160,14 @@ it.
   changed to store tool calls in the abstract form,
   and the `original_tool_calls` field has been
   dropped from it.
+
+* **context: save token usage with the payload** <br>
+  [`LLM::Context#to_h`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html#to_h-instance_method)
+  includes a `token_usage` hash now, so the usage a conversation
+  accumulated is saved beside `context_used` and `context_window`.
+  It is written for queryability, like the other two, and the
+  runtime derives it from the messages when a payload is restored,
+  so a payload that carries none still restores.
 
 * **context: add `LLM::Context#compactor_options`** <br>
   [`LLM::Context#compactor_options`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html#compactor_options-instance_method)
@@ -163,9 +196,8 @@ it.
   method instead of `Kernel.raise`
   when a command times out. The
   "wait" method is used internally
-  by the
-  [`LLM::Tool::Exec`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Exec.html)
-  tool and it can be used by your
+  by the `LLM::Tool::Exec` tool,
+  and it can be used by your
   own tools as well. Tools that
   depended on the old behavior
   will require an update (although
@@ -218,15 +250,19 @@ it.
 
 * **tools: move process helpers into `LLM::Tool::Utils::Process`** <br>
   The `#wait`, `#spawn` and `#now` methods moved out of
-  `LLM::Tool::Utils` and into the new
+  [`LLM::Tool::Utils`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Utils.html)
+  and into the new
   [`LLM::Tool::Utils::Process`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Utils/Process.html)
   module, and `LLM::Tool::Utils::Command` is
-  `LLM::Tool::Utils::Process::Command` now. `#wait` still
-  throws `:kill` when a command exceeds its timeout, exactly
-  as it did in its old home, and `LLM::Tool::Exec` includes
-  `Process` now. `LLM::Tool::ReadFile` includes `Utils`
-  alone, so the read-file tool no longer pulls in
-  `test-cmd` as a transitive dependency.
+  `LLM::Tool::Utils::Process::Command` now.
+  `LLM::Tool::Exec` includes the new module.
+
+* **tools: `LLM::Tool::ReadFile` drops its `test-cmd` dependency** <br>
+  [`LLM::Tool::ReadFile`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/ReadFile.html)
+  includes `LLM::Tool::Utils` alone now, so the read-file
+  tool no longer pulls in `test-cmd` as a transitive
+  dependency the way it did when the process helpers
+  lived in `Utils`.
 
 ### LLM::MCP
 
@@ -290,15 +326,17 @@ it.
 
 ### LLM::Object
 
-* **object: add `LLM::Object#freeze` and `LLM::Object#frozen?`** <br>
+* **object: add `LLM::Object#freeze`** <br>
   [`LLM::Object#freeze`](https://r.uby.dev/api-docs/llm.rb/LLM/Object.html#freeze-instance_method)
   freezes the object and everything nested in it, down to the strings
   in its arrays, and makes the result Ractor-shareable, so a parsed
   response can be handed to a `:ractor` tool call. It returns self,
-  and freezing it twice does nothing.
+  and freezing it twice does nothing. A write to a frozen object -
+  through `#[]=`, `#merge!`, or `#delete` - raises `FrozenError`.
+
+* **object: add `LLM::Object#frozen?`** <br>
   [`LLM::Object#frozen?`](https://r.uby.dev/api-docs/llm.rb/LLM/Object.html#frozen?-instance_method)
-  returns true once the object has been frozen, and a write to a frozen
-  object - through `#[]=`, `#merge!`, or `#delete` - raises `FrozenError`.
+  returns true once the object has been frozen.
 
 ### LLM::Schema
 
@@ -309,6 +347,24 @@ it.
   of them comes back as a plain `Hash` all the way down. Before, a
   property kept the object it was built from, and the result could
   not be used where a plain JSON schema is expected.
+
+* **schema: follow a chain of local references** <br>
+  A `$ref` that points at another schema that holds
+  a `$ref` of its own is resolved all the way down
+  now, where only one hop was followed before and the
+  second reference was read as if it were a concrete
+  schema. A chain of aliases is bounded, and a
+  reference that loops back on itself raises
+  `TypeError`.
+
+* **schema: decode a JSON Pointer in a `$ref`** <br>
+  [`LLM::Schema.parse`](https://r.uby.dev/api-docs/llm.rb/LLM/Schema.html#parse-class_method)
+  decodes a JSON Pointer the way RFC 6901 spells it
+  out now, so a token that holds a percent-encoded
+  character, a `/` (`~1`), or a `~` (`~0`) resolves,
+  an empty token is kept, and a token that names an
+  array index addresses that array. A pointer that
+  cannot be resolved still raises `TypeError`.
 
 ### LLM::Provider
 
@@ -362,17 +418,48 @@ it.
   * [LLM::Agent.set](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#set-class_method) (can set both)
 
 * **agent: add `LLM::Agent#compactor` and `LLM::Agent#compactor_options`** <br>
-  The
-  [`LLM::Agent`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html)
-  class adds two new methods that provide access to an agent's
-  compactor (and its options) at the instance level. By default
-  the compactor is a Null compactor that does nothing:
+  The `LLM::Agent` class adds two new methods that provide
+  access to an agent's compactor (and its options) at the
+  instance level. By default the compactor is a Null compactor
+  that does nothing:
   * [`LLM::Agent#compactor`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#compactor-instance_method)
   <br> returns the compactor class
   ([`LLM::Compactor::Null`](https://r.uby.dev/api-docs/llm.rb/LLM/Compactor/Null.html)
   by default)
   * [`LLM::Agent#compactor_options`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#compactor_options-instance_method)
   <br> returns the compactor options (`{}` by default)
+
+* **agent: build an agent on a Ractor** <br>
+  The `FIELDS` and `IVARS` constants the constructor reads were plain
+  arrays, so building an agent inside a Ractor raised
+  `Ractor::IsolationError`. Both are Ractor-shareable now, so a
+  subagent tool that builds an agent when it is called works under
+  the `:ractor` concurrency strategy.
+
+* **agent: share class-level agent attributes with a Ractor** <br>
+  A class-level attribute is deep-frozen when it is set, and
+  the reader returns the shareable value, so a Ractor other
+  than the one that loaded the agent class can read it.
+  Before, the value was stored as it was given, and a second
+  Ractor that read an attribute such as
+  `LLM::Agent.instructions` raised `Ractor::IsolationError`
+  for a `String`, a `Hash` or an `Array`. The attributes are
+  [`LLM::Agent.name`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#name-class_method),
+  `.description`, `.model`, `.schema`, `.instructions`,
+  `.path`, `.compactor_options`, `.tools` and `.confirm`,
+  though `.tools` shares the tools it is given as arguments,
+  and stores the block it takes as it was given.
+
+* **agent: a class-level attribute is returned frozen** <br>
+  A value that cannot be made shareable - a `Proc` whose
+  `self` is not shareable is one - is stored as it was
+  given, and
+  [`LLM.debug`](https://r.uby.dev/api-docs/llm.rb/LLM.html#debug-class_method)
+  reports it when debug mode is on. A reader returns a
+  frozen value, so a write to it, like
+  `LLM::Agent.instructions << "..."`, raises `FrozenError`.
+  That is the migration: a caller that mutates the value in
+  place has to build a copy of its own first.
 
 ### LLM::Function
 
@@ -405,6 +492,31 @@ it.
   captured under every concurrency strategy.
   Before, a failure reported its class and its
   message only.
+
+* **function: trace a sequential tool call** <br>
+  The `:sequential` strategy tells a tracer that a tool started now, so
+  [`LLM::Function::Sequential::Task`](https://r.uby.dev/api-docs/llm.rb/LLM/Function/Sequential/Task.html)
+  calls
+  [`LLM::Tracer#on_tool_start`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer.html#on_tool_start-instance_method)
+  when it spawns, and the span it returns is the span that
+  [`LLM::Tracer#on_tool_finish`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer.html#on_tool_finish-instance_method)
+  closes. Before, a sequential call reported that a tool finished and
+  never that it started, so the two callbacks did not pair up the way
+  they do on the other strategies.
+
+* **function: trace a sequential tool error and interrupt** <br>
+  A tool that fails, or is interrupted, under the `:sequential`
+  strategy reaches
+  [`LLM::Tracer#on_tool_error`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer.html#on_tool_error-instance_method)
+  and
+  [`LLM::Tracer#on_tool_interrupt`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer.html#on_tool_interrupt-instance_method)
+  now, the way every other strategy does.
+  [`LLM::Function::Sequential::Task#wait`](https://r.uby.dev/api-docs/llm.rb/LLM/Function/Sequential/Task.html#wait-instance_method)
+  returns the exception in band now, next to the timings that
+  [`LLM::Function::Group#wait`](https://r.uby.dev/api-docs/llm.rb/LLM/Function/Group.html#wait-instance_method)
+  reads, so a failed call closes its span with `on_tool_error`
+  and an interrupted one closes it with `on_tool_interrupt`,
+  including a task that was cancelled before its `#call`.
 
 ### Console
 
@@ -443,13 +555,20 @@ it.
   perform. No alias is left behind, because the v18 series is a
   breaking release already.
 
-* **filter: rename the transformer options and stream callbacks** <br>
+* **filter: rename `transformer:` and `transformer_options:`** <br>
   The `transformer:` and `transformer_options:` options a context or
-  agent takes are `filter:` and `filter_options:` now,
-  `LLM::Context#transformer` is
-  [`LLM::Context#filter`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html#filter-instance_method),
-  and the stream callbacks `on_transform` and `on_transform_finish`
-  are `on_filter` and `on_filter_finish`.
+  agent takes are `filter:` and `filter_options:` now.
+
+* **filter: rename `LLM::Context#transformer`** <br>
+  The method that returns the filter a context is configured with is
+  [`LLM::Context#filter`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html#filter-instance_method)
+  now. `LLM::Context#transformer` is removed, and no alias is left
+  behind.
+
+* **filter: rename the `on_transform` stream callbacks** <br>
+  The `on_transform` and `on_transform_finish` callbacks a stream
+  implements are `on_filter` and `on_filter_finish` now, and each is
+  given the filter that rewrites a prompt.
 
 * **filter: add `LLM::MessageFilter.multi`** <br>
   [`LLM::MessageFilter.multi`](https://r.uby.dev/api-docs/llm.rb/LLM/MessageFilter.html#multi-class_method)
@@ -503,6 +622,18 @@ it.
   returns a Symbol, where the old `#provider_name` returned a
   String, so cast it when you need a String.
 
+### LLM::Usage
+
+* **usage: add `LLM::Usage.fields`** <br>
+  [`LLM::Usage.fields`](https://r.uby.dev/api-docs/llm.rb/LLM/Usage.html#fields-class_method)
+  returns the names of the fields an `LLM::Usage` object holds, as an
+  array of strings: `input_tokens`, `output_tokens`, `reasoning_tokens`,
+  `input_audio_tokens`, `output_audio_tokens`, `input_image_tokens`,
+  `cache_read_tokens`, `cache_write_tokens`, and `total_tokens`. The
+  ActiveRecord wrapper builds usage from a column with it, so a field
+  that is added to usage is read from a saved conversation without a
+  second list to maintain.
+
 ### JSON
 
 * **json: remove the Yajl adapter** <br>
@@ -523,9 +654,43 @@ it.
   [`LLM::Context`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html)
   or an
   [`LLM::Agent`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html).
-  This means a caller no longer has to reach for `send(:ctx)` but
-  can use this new method instead. The runtime is memoized and every
-  call returns the same object.
+  This means a caller no longer has to reach for the wrapper's
+  private runtime accessor but can use this new method instead. The
+  runtime is memoized and every call returns the same object.
+
+* **orm: read token usage from the column** <br>
+  [`LLM::ActiveRecord#token_usage`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord.html#token_usage-instance_method)
+  (and its `#usage` alias) reads the `token_usage` that a `:jsonb` record
+  holds in its column and returns it as an
+  [`LLM::Usage`](https://r.uby.dev/api-docs/llm.rb/LLM/Usage.html), so the
+  usage of a saved conversation can be read without a provider, without
+  credentials, and without loading the runtime. Every field is zero
+  when the column holds no usage, and the value is memoized.
+
+* **orm: read context window usage from the column** <br>
+  [`LLM::ActiveRecord#context_window`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord.html#context_window-instance_method),
+  [`LLM::ActiveRecord#context_used`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord.html#context_used-instance_method)
+  and
+  [`LLM::ActiveRecord#context_usage`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord.html#context_usage-instance_method)
+  read the projections that a `:jsonb` record holds in its column now,
+  so the context window usage of a saved conversation can be read
+  without loading the runtime. `#context_window` falls back to the
+  runtime when the column holds none, `#context_used` returns `nil` when
+  it holds none, and `#context_usage` returns `nil` when either of the
+  two is `nil`.
+
+* **orm: read the model from the column** <br>
+  [`LLM::ActiveRecord#model!`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord.html#model!-instance_method)
+  returns the `model` that a `:jsonb` record holds in its column, and it
+  falls back to the model the runtime resolves when the column holds
+  none.
+
+* **orm: `LLM::ActiveRecord::Message.for` takes `record:`** <br>
+  [`LLM::ActiveRecord::Message.for`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord/Message.html#for-class_method)
+  takes the record as `record:` now, where it took it as `agent:`, so the
+  keyword matches the `record:` a runtime is bound with when a wrapper
+  builds one. The relation it returns is still scoped to that record's
+  id.
 
 ### Transport
 

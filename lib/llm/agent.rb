@@ -49,21 +49,24 @@ module LLM
 
     ##
     # @api private
-    FIELDS = %i[record
-                name description
-                path tool_budget
-                retry_budget model
-                schema
-                tracer stream
-                compactor compactor_options
-                tools concurrency
-                instructions confirm
-                intercept]
-    IVARS  =  %i[record
-                 name description
-                 path tool_budget
-                 tracer concurrency
-                 instructions confirm]
+    FIELDS = LLM.share!(%i[
+      record name
+      description path
+      tool_budget retry_budget
+      model schema
+      tracer stream
+      compactor compactor_options
+      tools concurrency
+      instructions confirm
+      intercept
+    ])
+    IVARS  = LLM.share!(%i[
+      record name
+      description path
+      tool_budget tracer
+      concurrency instructions
+      confirm
+    ])
     private_constant :FIELDS, :IVARS
 
     ##
@@ -148,18 +151,13 @@ module LLM
     #  Return's the agents name
     def self.name(name = UNDEFINED, &block)
       if name.equal?(UNDEFINED) and block.nil?
-        if @name.nil?
-          name  = to_s.split("::").last
-          @name = name.gsub(CASE_PATTERN, "-").downcase
-        else
-          @name
-        end
+        LLM.share!(@name || to_s.split("::").last.gsub(CASE_PATTERN, "-").downcase)
       else
         if Class === name
           name  = name.to_s.split("::").last
-          @name = name.gsub(CASE_PATTERN, "-").downcase
+          @name = LLM.share!(name.gsub(CASE_PATTERN, "-").downcase)
         else
-          @name = block || name
+          @name = LLM.share!(block || name)
         end
       end
     end
@@ -180,9 +178,9 @@ module LLM
     #  Returns the agent's description
     def self.description(desc = UNDEFINED, &block)
       if desc.equal?(UNDEFINED) and block.nil?
-        @desc
+        LLM.share!(@desc)
       else
-        @desc = block || desc
+        @desc = LLM.share!(block || desc)
       end
     end
 
@@ -215,9 +213,9 @@ module LLM
     #  Returns the model
     def self.model(model = UNDEFINED, &block)
      if model.equal?(UNDEFINED) and block.nil?
-        @model
+        LLM.share!(@model)
       else
-        @model = block || model
+        @model = LLM.share!(block || model)
       end
     end
 
@@ -231,9 +229,9 @@ module LLM
     #  Returns a schema
     def self.schema(schema = UNDEFINED, &block)
      if schema.equal?(UNDEFINED) and block.nil?
-        @schema
+        LLM.share!(@schema)
       else
-        @schema = block || schema
+        @schema = LLM.share!(block || schema)
       end
     end
 
@@ -247,9 +245,9 @@ module LLM
     #  Returns the instructions
     def self.instructions(instructions = UNDEFINED, &block)
      if instructions.equal?(UNDEFINED) and block.nil?
-        @instructions
+        LLM.share!(@instructions)
       else
-        @instructions = block || instructions
+        @instructions = LLM.share!(block || instructions)
       end
     end
 
@@ -271,6 +269,7 @@ module LLM
         @tracer = block || tracer
       end
     end
+
     ##
     # Set or get an agent's compactor.
     # @param [Object, Symbol, Proc, nil] compactor
@@ -291,9 +290,9 @@ module LLM
     # @return [Hash, Proc, nil]
     def self.compactor_options(options = UNDEFINED, &block)
       if options.equal?(UNDEFINED) and block.nil?
-        @compactor_options
+        LLM.share!(@compactor_options)
       else
-        @compactor_options = block || options
+        @compactor_options = LLM.share!(block || options)
       end
     end
 
@@ -337,9 +336,9 @@ module LLM
     # @return [String, nil]
     def self.path(path = UNDEFINED, &block)
       if path.equal?(UNDEFINED) and block.nil?
-        @path
+        LLM.share!(@path)
       else
-        @path = block || path
+        @path = LLM.share!(block || path)
       end
     end
 
@@ -389,9 +388,9 @@ module LLM
       if block
         @tools = block
       elsif single_callable?(tools)
-        @tools = tools.first
+        @tools = LLM.share!(tools.first)
       else
-        @tools = tools.flatten
+        @tools = LLM.share!(tools.flatten)
       end
     end
 
@@ -415,11 +414,11 @@ module LLM
     def self.confirm(*tool_names, &block)
       return @confirm if tool_names.empty? and !block
       if block
-        @confirm = block
+        @confirm = LLM.share!(block)
       elsif single_callable?(tool_names)
-        @confirm = tool_names.first
+        @confirm = LLM.share!(tool_names.first)
       else
-        @confirm = tool_names.flatten.map(&:to_s)
+        @confirm = LLM.share!(tool_names.flatten.map(&:to_s))
       end
     end
 

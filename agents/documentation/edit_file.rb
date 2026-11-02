@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-class SubAgent < LLM::Tool
-  name "subagent"
-  description "edit a file with a subagent "
+class EditFile < LLM::Tool
+  name "edit-file"
+  description "edit a file"
   parameter :file, Enum["CHANGELOG.md"], "the file to edit"
   parameter :instructions, String, "optional instructions for the subagent"
   required %i[file]
@@ -11,7 +11,7 @@ class SubAgent < LLM::Tool
     options  = {concurrency: :ractor,
                 tracer: LLM::Tracer.pretty(llm, io: $stderr),
                 instructions: File.read(prompts[file]),
-                tools: LLM::Tool.subclasses}
+                tools: [*(LLM::Tool.subclasses - [EditFile])]}
     subagent = LLM::Agent.new(llm, options)
     case file
     when "CHANGELOG.md"

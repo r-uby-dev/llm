@@ -5,6 +5,13 @@ require "fileutils"
 require "tmpdir"
 
 RSpec.describe LLM::Agent do
+  describe "ractor constants" do
+    it "shares its constructor field lists" do
+      expect(Ractor.shareable?(described_class.const_get(:FIELDS))).to be(true)
+      expect(Ractor.shareable?(described_class.const_get(:IVARS))).to be(true)
+    end
+  end
+
   let(:provider) { LLM.openai(key: "test") }
   let(:empty_functions) { [].extend(LLM::Function::Array) }
   let(:tool) do

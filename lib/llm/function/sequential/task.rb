@@ -27,22 +27,36 @@ module LLM::Function::Sequential
     ##
     # @return [nil]
     def interrupt!
+      @cancelled = true
       function.interrupt!
       nil
     end
     alias_method :cancel!, :interrupt!
 
     ##
-    # @return [LLM::Function::Return]
+    # @return [LLM::Function::Return, LLM::Interrupt]
     def wait
       return @intercepted if intercepted?
-      @result = @result ? @result : begin
+      result = LLM::Object.new(unbox: nil)
+      if @cancelled and !@result
         @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-        @result = LLM::Object.from(unbox: function.call)
         @finished_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-        @result
+        @result = result
+        @result.unbox = LLM::Interrupt.new
+      else
+        @result = (@result || begin
+          @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+          begin
+            result.unbox = function.call
+          rescue LLM::Interrupt => ex
+            result.unbox = ex
+          ensure
+            @finished_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+          end
+          result
+        end)
       end
-      @result&.unbox
+      @result.unbox
     end
     alias_method :value, :wait
 

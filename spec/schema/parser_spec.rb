@@ -244,6 +244,82 @@ RSpec.describe LLM::Schema::Parser do
       end
     end
 
+    context "when importing local reference chains" do
+      let(:schema) do
+        {
+          "type" => "object",
+          "$defs" => {
+            "Identifier" => {"type" => "string", "minLength" => 1, "description" => "base"},
+            "DocumentId" => {"$ref" => "#/$defs/Identifier", "description" => "alias", "maxLength" => 8}
+          },
+          "properties" => {"id" => {"$ref" => "#/$defs/DocumentId", "description" => "site"}},
+          "required" => ["id"]
+        }
+      end
+
+      it "resolves aliases while retaining referencing-site metadata and required flags" do
+        before = Marshal.dump(schema)
+        expect(parse["id"].to_h).to eq(LLM::Schema.new.string.min(1).max(8).description("site").to_h)
+        expect(Marshal.dump(schema)).to eq(before)
+      end
+
+      it "imports the same schema through a public MCP tool manifest" do
+        client = LLM::MCP.http(url: "http://127.0.0.1:1")
+        tool = LLM::Tool.mcp(client, {"name" => "lookup", "description" => "lookup", "inputSchema" => schema})
+        expect(tool.function.params["id"]).to be_a(LLM::Schema::String)
+        expect(tool.function.params["id"]).to be_required
+        expect(tool.function.params["id"].to_h[:minLength]).to eq(1)
+      end
+    end
+
+    {
+      "document/id" => "document~1id",
+      "document~id" => "document~0id",
+      "~1" => "~01",
+      "" => ""
+    }.each do |name, token|
+      it "resolves the JSON Pointer token #{token.inspect}" do
+        schema = {"$defs" => {name => {"type" => "string"}}, "$ref" => "#/$defs/#{token}"}
+        expect(LLM::Schema.parse(schema)).to be_a(LLM::Schema::String)
+      end
+    end
+
+    {"document id" => "document%20id", "c%d" => "c%25d", "%2F" => "%252F", "+" => "+"}.each do |name, token|
+      it "decodes the URI fragment #{token.inspect} once without treating plus as space" do
+        schema = {"$defs" => {name => {"type" => "string"}}, "$ref" => "#/$defs/#{token}"}
+        expect(LLM::Schema.parse(schema)).to be_a(LLM::Schema::String)
+      end
+    end
+
+    ["00", "-1", "-", "bad", "99999999999999999999999999"].each do |index|
+      it "rejects an invalid array reference index #{index}" do
+        schema = {"$defs" => {"choices" => [{"type" => "string"}]}, "$ref" => "#/$defs/choices/#{index}"}
+        expect { LLM::Schema.parse(schema) }.to raise_error(TypeError, /unresolvable/)
+      end
+    end
+
+    it "resolves an empty token immediately beneath the document root" do
+      schema = {"" => {"type" => "string"}, "$ref" => "#/"}
+      expect(LLM::Schema.parse(schema)).to be_a(LLM::Schema::String)
+    end
+
+    it "resolves a schema inside a union array" do
+      schema = {"$defs" => {"Choice" => {"anyOf" => [{"type" => "string"}]}}, "$ref" => "#/$defs/Choice/anyOf/0"}
+      expect(LLM::Schema.parse(schema)).to be_a(LLM::Schema::String)
+    end
+
+    it "rejects a pure alias cycle" do
+      schema = {"$defs" => {"A" => {"$ref" => "#/$defs/B"}, "B" => {"$ref" => "#/$defs/A"}}, "$ref" => "#/$defs/A"}
+      expect { LLM::Schema.parse(schema) }.to raise_error(TypeError)
+    end
+
+    [nil, 4, "https://example.invalid/schema", "#/$defs/missing", "#/$defs/name/type", "#/$defs/%FF", "#/$defs/%C3"].each do |ref|
+      it "rejects an unsupported or unresolvable reference #{ref.inspect}" do
+        schema = {"$defs" => {"name" => {"type" => "string"}}, "$ref" => ref}
+        expect { LLM::Schema.parse(schema) }.to raise_error(TypeError)
+      end
+    end
+
     context "when given an unsupported schema type" do
       let(:schema) { {type: "nope"} }
 

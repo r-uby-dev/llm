@@ -151,13 +151,26 @@ class LLM::Google
       last_existing_part = parts.last
       last_call = Hash === last_existing_part ? last_existing_part["functionCall"] : nil
       delta_call = delta["functionCall"]
-      if Hash === last_call && Hash === delta_call
+      if function_call_continuation?(last_existing_part, delta)
         last_existing_part["functionCall"] = last_call.merge(delta_call)
         merge_extra_keys!(last_existing_part, delta, "functionCall")
       else
         parts << delta
       end
       emit_tool(parts.length - 1, cindex, parts.last || delta)
+    end
+
+    def function_call_continuation?(previous, delta)
+      previous_call = Hash === previous ? previous["functionCall"] : nil
+      delta_call = delta["functionCall"]
+      return false unless Hash === previous_call && Hash === delta_call
+      previous_id = previous_call["id"].to_s
+      delta_id = delta_call["id"].to_s
+      return previous_id == delta_id unless previous_id.empty? || delta_id.empty?
+      return false if previous_call["name"] && delta_call["name"] && previous_call["name"] != delta_call["name"]
+      # Complete calls without a shared ID are distinct parts, even when
+      # the same function is called twice with different arguments.
+      !complete_tool?(previous) || !complete_tool?(delta)
     end
 
     def emit_content(value)
