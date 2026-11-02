@@ -10,10 +10,10 @@ module LLM::Function::Sequential
     # @return [nil]
     def spawn
       @span = @tracer&.on_tool_start(
-        id: function.id,
-        name: function.name,
-        arguments: function.arguments,
-        model: function.model
+        id: @function.id,
+        name: @function.name,
+        arguments: @function.arguments,
+        model: @function.model
       )
       nil
     end
