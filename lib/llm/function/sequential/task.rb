@@ -38,7 +38,7 @@ module LLM::Function::Sequential
     def wait
       return @intercepted if intercepted?
       result = LLM::Object.new(unbox: nil)
-      if @cancelled && !@result
+      if @cancelled and !@result
         @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
         @finished_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
         @result = result
