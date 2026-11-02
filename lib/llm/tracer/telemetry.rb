@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "digest"
-
 module LLM
   ##
   # The {LLM::Tracer::Telemetry LLM::Tracer::Telemetry} tracer provides
@@ -44,6 +42,9 @@ module LLM
     #  An LLM provider
     # @return [LLM::Tracer::Telemetry]
     def initialize(llm, options = {})
+      ##
+      # Optional stdlib dependencies
+      LLM.require "digest", "~> 3.3" unless defined?(::Digest)
       super
       @exporter = options.delete(:exporter)
       setup!

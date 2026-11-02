@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "digest"
-
 class LLM::Bedrock
   ##
   # Decodes AWS Event Stream binary frames.

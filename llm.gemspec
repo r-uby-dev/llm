@@ -58,8 +58,6 @@ DESCRIPTION
   spec.add_runtime_dependency "securerandom", "~> 0.4"
   spec.add_runtime_dependency "time", "~> 0.5"
   spec.add_runtime_dependency "stringio", "~> 3.2"
-  spec.add_runtime_dependency "digest", "~> 3.3"
-  spec.add_runtime_dependency "openssl", "~> 4.0"
 
   ##
   # Optional dependencies
@@ -84,6 +82,8 @@ DESCRIPTION
   spec.add_development_dependency "kramdown", "~> 2.5"
   spec.add_development_dependency "unicode-display_width", "~> 3.2"
   spec.add_development_dependency "async", "~> 2.45"
+  spec.add_development_dependency "digest", "~> 3.3"
+  spec.add_development_dependency "openssl", "~> 4.0"
 
   ##
   # Not worth the hassle rn
