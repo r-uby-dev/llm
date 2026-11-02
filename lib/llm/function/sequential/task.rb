@@ -38,8 +38,13 @@ module LLM::Function::Sequential
       return @intercepted if intercepted?
       @result = @result ? @result : begin
         @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-        @result = LLM::Object.from(unbox: function.call)
-        @finished_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        begin
+          @result = LLM::Object.from(unbox: function.call)
+        rescue LLM::Interrupt => ex
+          @result = LLM::Object.from(unbox: ex)
+        ensure
+          @finished_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        end
         @result
       end
       @result&.unbox

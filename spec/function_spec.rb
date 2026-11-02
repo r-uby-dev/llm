@@ -652,6 +652,82 @@ RSpec.describe LLM::Function do
           expect { thread.value }.to raise_error(LLM::Interrupt)
         end
       end
+
+      describe "when configured with a tracer" do
+        let(:tracer) do
+          double("tracer", on_tool_start: :span, on_tool_error: nil, on_tool_interrupt: nil)
+        end
+        let(:function) do
+          fn_class.function.dup.tap do |fn|
+            fn.id = "call_1"
+            fn.arguments = {}
+            fn.tracer = tracer
+          end
+        end
+
+        context "when the tool raises" do
+          let(:fn_class) do
+            Class.new(LLM::Tool) do
+              name "failing"
+
+              def call
+                raise "boom"
+              end
+            end
+          end
+
+          it "reports the error with the span returned at start" do
+            result = group.wait.first
+
+            expect(result.error?).to be(true)
+            expect(tracer).to have_received(:on_tool_error).with(
+              ex: result,
+              span: :span,
+              started_at: instance_of(Float),
+              finished_at: instance_of(Float)
+            )
+          end
+        end
+
+        context "when the running tool is interrupted" do
+          let(:started) { Queue.new }
+          let(:fn_class) do
+            started = self.started
+            Class.new(LLM::Tool) do
+              name "slow"
+
+              define_method(:call) do
+                started << true
+                sleep 10
+                {ok: true}
+              end
+            end
+          end
+
+          it "reports the interrupt with the span returned at start" do
+            thread = Thread.new do
+              group.wait
+            rescue LLM::Interrupt => ex
+              ex
+            end
+            thread.report_on_exception = false
+
+            Timeout.timeout(2) { started.pop }
+            group.interrupt!
+            interrupt = thread.value
+
+            expect(interrupt).to be_a(LLM::Interrupt)
+            expect(tracer).to have_received(:on_tool_interrupt).with(
+              ex: interrupt,
+              span: :span,
+              started_at: instance_of(Float),
+              finished_at: instance_of(Float)
+            )
+          ensure
+            group.interrupt! if thread&.alive?
+          end
+        end
+      end
     end
   end
 
