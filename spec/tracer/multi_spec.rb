@@ -234,6 +234,58 @@ RSpec.describe LLM::Tracer::Multi do
     end
   end
 
+  describe "#on_tool_start / #on_tool_finish through a sequential task" do
+    let(:tool) do
+      Class.new(LLM::Tool) do
+        name "echo"
+        description "Echo a value"
+
+        def call
+          "ok"
+        end
+      end
+    end
+    let(:function) do
+      tool.function.dup.tap do |fn|
+        fn.id = "call_1"
+        fn.arguments = {}
+      end
+    end
+    let(:task) { LLM::Function::Sequential::Task.new(function, tracer: multi) }
+    let(:calls) { tracer.calls.map(&:first) }
+    let(:closed_span) { tracer.calls.find { |name,| name == :on_tool_finish }.last[:span] }
+
+    before { LLM::Function::Sequential::Group.new([task]).wait }
+
+    shared_examples "a tracer in a sequential tool call" do
+      it "is told the tool started" do
+        expect(calls).to include(:on_tool_start)
+      end
+
+      it "is told the tool finished" do
+        expect(calls).to include(:on_tool_finish)
+      end
+
+      it "closes the span it opened" do
+        expect(closed_span).to eq(span)
+      end
+    end
+
+    context "with the first tracer" do
+      let(:tracer) { tracer_a }
+      let(:span) { "a:tool" }
+
+      it_behaves_like "a tracer in a sequential tool call"
+    end
+
+    context "with the second tracer" do
+      let(:tracer) { tracer_b }
+      let(:span) { "b:tool" }
+
+      it_behaves_like "a tracer in a sequential tool call"
+    end
+  end
+
   describe "#on_interrupt" do
     it "fans out with each tracer's own span" do
       spans = multi.on_request_start(operation: "chat", request_id:)
