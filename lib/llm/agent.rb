@@ -58,7 +58,7 @@ module LLM
       compactor compactor_options
       tools concurrency
       instructions confirm
-      intercept
+      intercept intercept_options
     ])
     IVARS  = LLM.share!(%i[
       record name
@@ -308,6 +308,21 @@ module LLM
         @intercept
       else
         @intercept = block || intercept
+      end
+    end
+
+    ##
+    # Set or get an intercept's options
+    # @param [Hash] options
+    #  The options
+    # @param [Proc] block
+    #  A block that is lazy evaled.
+    # @return [Hash, nil]
+    def self.intercept_options(options = UNDEFINED, &block)
+      if options.equal?(UNDEFINED) and block.nil?
+        @intercept_options
+      else
+        @intercept_options = block || options
       end
     end
 

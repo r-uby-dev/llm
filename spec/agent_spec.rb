@@ -1223,6 +1223,36 @@ RSpec.describe LLM::Agent do
         expect(wrapped_context(agent).intercept).to equal(intercept)
       end
     end
+
+    context "when given options" do
+      let(:agent) do
+        Class.new(described_class) { intercept_options({threshold: 5}) }.new(llm)
+      end
+
+      it "are forwarded to the intercept" do
+        expect(wrapped_context(agent).intercept.options).to eq(threshold: 5)
+      end
+    end
+
+    context "when given options as a block" do
+      let(:agent) do
+        Class.new(described_class) { intercept_options { {threshold: 5} } }.new(llm)
+      end
+
+      it "are resolved and forwarded to the intercept" do
+        expect(wrapped_context(agent).intercept.options).to eq(threshold: 5)
+      end
+    end
+
+    context "when given options to the set method" do
+      let(:agent) do
+        Class.new(described_class) { set intercept_options: {threshold: 5} }.new(llm)
+      end
+
+      it "are forwarded to the intercept" do
+        expect(wrapped_context(agent).intercept.options).to eq(threshold: 5)
+      end
+    end
   end
 
   def call_functions

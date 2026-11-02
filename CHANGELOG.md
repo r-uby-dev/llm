@@ -462,6 +462,19 @@ it.
   though `.tools` shares the tools it is given as arguments,
   and stores the block it takes as it was given.
 
+* **agent: add `LLM::Agent.intercept_options`** <br>
+  [`LLM::Agent.intercept_options`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#intercept_options-class_method)
+  is where an agent's intercept options are declared, so they
+  can sit beside the intercept itself. `set intercept_options:`
+  takes a `Hash`, a `Proc` that is resolved when the agent is
+  built, or a `Symbol` that names an instance method, and an
+  `intercept_options:` given to
+  [`LLM::Agent.new`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#initialize-instance_method)
+  is taken the same way. The options reach the
+  [`LLM::Context`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html)
+  the agent builds, so they are passed to the intercept. Before, a
+  class-level agent could declare an intercept but not its options.
+
 * **agent: a class-level attribute is returned frozen** <br>
   A value that cannot be made shareable - a `Proc` whose
   `self` is not shareable is one - is stored as it was
