@@ -15,33 +15,18 @@ class LLM::Intercept
   # all, and LLM::Interrupt travelling up the stack
   # is intentional.
   module Rescue
+    include LLM::Rescue
     ##
-    # @param [LLM::Intercept] intercept
-    # @param [StandardError] ex
-    # @return [void]
-    def self.crash(intercept, ex)
-      $stderr.puts "",
-                   "an llm.rb intercept has crashed.",
-                   "",
-                   "[  intercept ] #{intercept.class}",
-                   "[  class     ] #{ex.class}",
-                   "[  message   ] #{ex.message}",
-                   "[  backtrace ] ",
-                   "#{(ex.backtrace || []).take(10).join("\n")}",
-                   ""
-    end
-
-    ##
-    # @api private
-    ERRORS = [StandardError, ScriptError]
-    private_constant :ERRORS
-
+    # @param [LLM::Function] function
+    #  A function
+    # @param [Hash] **
+    #  An optional set of options
     def call(function:, **)
       super
     rescue LLM::Interrupt
       raise
     rescue *ERRORS => ex
-      LLM::Intercept::Rescue.crash(self, ex)
+      crash(ex:)
       function.error(ex:, note: "an intercept crashed")
     end
   end

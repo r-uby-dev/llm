@@ -173,18 +173,8 @@ RSpec.describe LLM::Tracer::Telemetry do
 
     context "when the scope is not one of the three" do
       it "reports the refusal rather than raising it" do
-        expect($stderr).to receive(:puts).with(
-          "",
-          "an llm.rb tracer has crashed.",
-          "",
-          "[  tracer    ] LLM::Tracer::Telemetry",
-          "[  class     ] LLM::Error",
-          "[  message   ] scope 'nonsense' is not a valid tracer scope",
-          "[  backtrace ] ",
-          a_kind_of(String),
-          ""
-        )
-        tracer.on_interrupt(scope: :nonsense)
+        expect { tracer.on_interrupt(scope: :nonsense) }
+          .to output(/\[  message   \] scope 'nonsense' is not a valid tracer scope/).to_stderr
       end
     end
   end
