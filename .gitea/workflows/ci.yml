@@ -32,10 +32,10 @@ jobs:
 
       - name: verify ruby
         run: |
-          installed=$(ruby -e "print RUBY_VERSION")
-          wanted=$(tr -d " \n" < .ruby-version)
+          installed=$(ruby -e "print RUBY_DESCRIPTION.split[1]" | tr -d "-")
+          wanted=$(tr -d " \n-" < .ruby-version)
           if [ "$installed" != "$wanted" ]; then
-            echo "the runner has ruby $installed, .ruby-version says $wanted" >&2
+            echo "the runner has $(ruby -v), .ruby-version says $(cat .ruby-version)" >&2
             exit 1
           fi
 
