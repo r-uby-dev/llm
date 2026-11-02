@@ -473,6 +473,23 @@ it.
   That is the migration: a caller that mutates the value in
   place has to build a copy of its own first.
 
+### LLM::Intercept
+
+* **intercept: add `LLM::Intercept::Rescue`** <br>
+  The
+  [`LLM::Intercept::Rescue`](https://r.uby.dev/api-docs/llm.rb/LLM/Intercept/Rescue.html)
+  module rescues the exception that an intercept's `#call`
+  raises, so an intercept that crashes no longer takes the tool
+  call down with it.
+  [`LLM::Intercept`](https://r.uby.dev/api-docs/llm.rb/LLM/Intercept.html)
+  prepends it to every subclass, so every intercept is covered.
+  `LLM::Interrupt` is re-raised and still travels up the stack,
+  and any other `StandardError` or `ScriptError` goes to
+  `Rescue.crash`, which writes a report to `$stderr`: the
+  intercept's class, the exception's class, its message, and the
+  first ten lines of its backtrace. `#call` returns `nil` then,
+  so the tool call runs as normal.
+
 ### LLM::Function
 
 * **function: run a `:ractor` tool call in a single ractor** <br>
