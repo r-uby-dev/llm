@@ -22,6 +22,29 @@ module LLM
     Warning[:experimental] = old
   end
 
+  ##
+  # Tries to deep-freeze an object so it can be
+  # shared across ractors. Might fail when the
+  # object cannot be deeply frozen. Failure is
+  # a noop that returns the parameter it is given.
+  #
+  # @note
+  #
+  #   This method is used on class-level agent
+  #   attributes that can be accessed across a
+  #   Ractor boundary via a global reference
+  #   (eg Agent.name).
+  #
+  # @api private
+  # @param [Object] obj
+  # @return [Object]
+  def self.share!(obj)
+    ::Ractor.make_shareable(obj)
+  rescue ::Ractor::Error
+    debug "'#{obj.inspect}' cannot be made Ractor-shareable"
+    obj
+  end
+
   require "stringio"
   require "securerandom"
   require "time"
