@@ -42,7 +42,7 @@ DESCRIPTION
 
   spec.files = Dir[
     "README.md", "LICENSE",
-    "lib/*.rb", "lib/**/*.rb",
+    "lib/**/*.rb",
     "data/*.json", "CHANGELOG.md",
     "docs/deepdive.md",
     "docs/deepdive/*/*.md",

@@ -1,0 +1,43 @@
+# frozen_string_literal: true
+
+require "setup"
+require "tmpdir"
+require "llm/tools/git"
+
+RSpec.describe LLM::Tool::Git::Status do
+  let(:tool) { described_class.new }
+  let(:dir) { Dir.mktmpdir("git-status-spec") }
+
+  before do
+    skip "git is not on the PATH" unless command_available?("git")
+    Dir.chdir(dir) { make_repo! }
+  end
+
+  around do |example|
+    Dir.chdir(dir) { example.call }
+    FileUtils.rm_rf(dir)
+  end
+
+  describe ".function" do
+    it "defines the path parameter" do
+      expect(described_class.function.params.properties.keys).to contain_exactly(:path)
+    end
+  end
+
+  describe "#call" do
+    it "reports a clean tree as an empty string" do
+      expect(tool.call[:stdout]).to eq("")
+    end
+
+    it "reports an untracked file" do
+      File.write("new.txt", "hi\n")
+      expect(tool.call[:stdout]).to eq("?? new.txt\n")
+    end
+
+    it "reports only the given path" do
+      File.write("new.txt", "hi\n")
+      File.write("file.txt", "goodbye\n")
+      expect(tool.call(path: "new.txt")[:stdout]).to eq("?? new.txt\n")
+    end
+  end
+end
