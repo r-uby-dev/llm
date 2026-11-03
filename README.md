@@ -49,7 +49,7 @@ There is an outstanding
 that means the combination of llm.rb, Ractor, and
 the YJIT should be avoided. Without YJIT enabled the
 bug (a SIGSEGV) is avoided. Also works fine with YJIT
-enabled but no Ractor usage.
+enabled but no Ractor use.
 
 The v18 series
 includes [substational runtime improvements](CHANGELOG.md) -
