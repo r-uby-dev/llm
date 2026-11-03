@@ -225,7 +225,30 @@ class LLM::Tool
   # Returns all registered tool classes with definitions.
   # @return [Array<Class<LLM::Tool>>]
   def self.registry
-    super.select(&:name)
+    super.select(&:name).reject(&:abstract?)
+  end
+
+  ##
+  # @return [Array<Class<LLM::Tool>>]
+  def self.subclasses
+    super.reject(&:abstract?)
+  end
+
+  ##
+  # @example
+  #   class LLM::Tool::Git < LLM::Tool
+  #     abstract!
+  #   end
+  # @return [void]
+  def self.abstract!
+    @abstract = true
+  end
+
+  ##
+  # Returns true when the tool is abstract
+  # @return [Boolean]
+  def self.abstract?
+    !!@abstract
   end
 
   ##

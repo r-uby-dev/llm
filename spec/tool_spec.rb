@@ -267,6 +267,47 @@ RSpec.describe LLM::Tool do
     end
   end
 
+  describe ".abstract!" do
+    let!(:base) do
+      Class.new(described_class) do
+        abstract!
+        name "abstract"
+        description "an abstract tool"
+      end
+    end
+    let!(:concrete) do
+      Class.new(described_class) do
+        name "concrete"
+        description "a concrete tool"
+      end
+    end
+    let!(:child) { Class.new(base) }
+
+    it "marks the tool as abstract" do
+      expect(base).to be_abstract
+    end
+
+    it "does not mark a tool below it as abstract" do
+      expect(child).to_not be_abstract
+    end
+
+    it "skips an abstract tool in the registry" do
+      expect(described_class.registry).to_not include(base)
+    end
+
+    it "includes a concrete tool in the registry" do
+      expect(described_class.registry).to include(concrete)
+    end
+
+    it "skips an abstract tool in subclasses" do
+      expect(described_class.subclasses).to_not include(base)
+    end
+
+    it "includes a concrete tool in subclasses" do
+      expect(described_class.subclasses).to include(concrete)
+    end
+  end
+
   describe ".set" do
     context "with name and description" do
       let(:tool) do
