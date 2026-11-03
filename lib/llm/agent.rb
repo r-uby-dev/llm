@@ -501,17 +501,17 @@ module LLM
     end
 
     ##
-    # Returns the ORM record this agent is bound to, or nil.
-    # @return [Object, nil]
-    def record
-      @record
-    end
-
-    ##
     # Returns the agent's description
     # @return [String, nil]
     def description
       @description
+    end
+
+    ##
+    # Returns the ORM record this agent is bound to, or nil.
+    # @return [Object, nil]
+    def record
+      @record
     end
 
     ##
