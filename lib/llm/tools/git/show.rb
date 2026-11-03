@@ -24,7 +24,7 @@ class LLM::Tool::Git
     def call(rev: "HEAD", path: nil, stat: false)
       Exec
         .new(env:)
-        .call(arguments: parse!(rev:, path:, stat:))
+        .call(arguments: ["git", *parse!(rev:, path:, stat:)])
     end
 
     private

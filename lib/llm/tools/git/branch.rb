@@ -22,7 +22,7 @@ class LLM::Tool::Git
     def call(action: "list", name: nil)
       Exec
         .new(env:)
-        .call(arguments: parse!(action:, name:))
+        .call(arguments: ["git", *parse!(action:, name:)])
     end
 
     private

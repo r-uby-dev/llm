@@ -10,7 +10,7 @@ class LLM::Tool::Git
     parameter :rev, String, "a revision, defaults to HEAD"
     parameter :path, String, "only commits that touch this path"
     parameter :max_count, Integer, "how many commits to return"
-    defaults rev: "HEAD", path: nil, max_count: 25
+    defaults rev: "HEAD", path: nil, max_count: 10
 
     ##
     # @param [String] rev
@@ -20,10 +20,10 @@ class LLM::Tool::Git
     # @param [Integer] max_count
     #  The maximum number of commits to return
     # @return [Hash]
-    def call(rev: "HEAD", path: nil, max_count: 25)
+    def call(rev: "HEAD", path: nil, max_count: 10)
       Exec
         .new(env:)
-        .call(arguments: parse!(rev:, path:, max_count:))
+        .call(arguments: ["git", *parse!(rev:, path:, max_count:)])
     end
 
     private

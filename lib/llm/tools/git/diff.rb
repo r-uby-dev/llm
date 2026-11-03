@@ -30,7 +30,7 @@ class LLM::Tool::Git
     def call(rev: nil, path: nil, staged: false, stat: false, context: nil)
       Exec
         .new(env:)
-        .call(arguments: parse!(rev:, path:, staged:, stat:, context:))
+        .call(arguments: ["git", *parse!(rev:, path:, staged:, stat:, context:)])
     end
 
     private
