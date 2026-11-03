@@ -54,9 +54,7 @@ enabled but no Ractor use.
 The v18 series
 includes [substational runtime improvements](CHANGELOG.md) -
 especially for running tool calls on a [Ractor](https://docs.ruby-lang.org/en/4.0/Ractor.html)
-and it is the recommended version to use.   
-
-The current prerelease is `v18.0.0.beta9`.
+and it is the recommended version to use.
 
 ```bash
 gem install llm.rb

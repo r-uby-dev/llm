@@ -7,6 +7,18 @@ before) can be seen in [changelog/old.md](changelog/old.md).
 
 ## What's next
 
+*No unreleased changes yet. Check back after the next release.*
+
+## v18.0.0
+
+Changes since `v17.0.1`.
+
+This is a major release, and it carries a number of breaking
+changes. It requires Ruby 4.0 or later, runs tool calls on a
+Ractor by default, removes the `LLM::Skill` feature, renames
+`LLM::Transformer` to `LLM::MessageFilter`, and reworks the
+payload schema, the tracer interface and the tooling API.
+
 ### Breaking
 
 #### Migration
