@@ -48,6 +48,7 @@ module LLM
   require "stringio"
   require "securerandom"
   require "time"
+  require_relative "llm/core_ext/rbconfig"
   require_relative "llm/rescue"
   require_relative "llm/lock"
   require_relative "llm/compactor"
