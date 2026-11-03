@@ -6,9 +6,9 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
-        a bot that can run UNIX system commands"}]},{"role":"user","content":[{"type":"text","text":"Hey,
-        run the ''date'' command"}]}],"model":"mistral-large-latest","tools":[{"type":"function","function":{"name":"system","description":"Runs
-        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}],"stream_options":{"include_usage":true},"stream":true}'
+        a bot that can tell the current date"}]},{"role":"user","content":[{"type":"text","text":"Hey,
+        what is the date today?"}]}],"model":"mistral-large-latest","tools":[{"type":"function","function":{"name":"get-date","description":"Returns
+        the current date","parameters":{"type":"object","properties":{},"required":[]}}}],"stream_options":{"include_usage":true},"stream":true}'
     headers:
       User-Agent:
       - llm.rb v17.0.1
@@ -70,7 +70,7 @@ http_interactions:
       string: |+
         data: {"id":"47b5747366aa47e4bab4af6d59b6ca64","object":"chat.completion.chunk","created":1792508547,"model":"mistral-large-latest","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
 
-        data: {"id":"47b5747366aa47e4bab4af6d59b6ca64","object":"chat.completion.chunk","created":1792508547,"model":"mistral-large-latest","choices":[{"index":0,"delta":{"tool_calls":[{"id":"XAthmBUtx","type":"function","function":{"name":"system","arguments":"{\"command\": \"date\"}"},"index":0}]},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":79,"total_tokens":89,"completion_tokens":10,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":0},"service_tier":"standard"},"p":"abcdefghijklmnopqrstuvwxyz"}
+        data: {"id":"47b5747366aa47e4bab4af6d59b6ca64","object":"chat.completion.chunk","created":1792508547,"model":"mistral-large-latest","choices":[{"index":0,"delta":{"tool_calls":[{"id":"XAthmBUtx","type":"function","function":{"name":"get-date","arguments":"{}"},"index":0}]},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":79,"total_tokens":89,"completion_tokens":10,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":0},"service_tier":"standard"},"p":"abcdefghijklmnopqrstuvwxyz"}
 
         data: [DONE]
 
@@ -81,10 +81,9 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
-        a bot that can run UNIX system commands"}]},{"role":"user","content":[{"type":"text","text":"Hey,
-        run the ''date'' command"}]},{"role":"assistant","content":null,"tool_calls":[{"id":"XAthmBUtx","type":"function","function":{"name":"system","arguments":"{\"command\":
-        \"date\"}"},"index":0}]},{"role":"tool","name":"system","tool_call_id":"XAthmBUtx","content":"{\"success\":true}"}],"model":"mistral-large-latest","tools":[{"type":"function","function":{"name":"system","description":"Runs
-        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}],"stream_options":{"include_usage":true},"stream":true}'
+        a bot that can tell the current date"}]},{"role":"user","content":[{"type":"text","text":"Hey,
+        what is the date today?"}]},{"role":"assistant","content":null,"tool_calls":[{"id":"XAthmBUtx","type":"function","function":{"name":"get-date","arguments":"{}"},"index":0}]},{"role":"tool","name":"get-date","tool_call_id":"XAthmBUtx","content":"{\"today\":\"2026-11-03\"}"}],"model":"mistral-large-latest","tools":[{"type":"function","function":{"name":"get-date","description":"Returns
+        the current date","parameters":{"type":"object","properties":{},"required":[]}}}],"stream_options":{"include_usage":true},"stream":true}'
     headers:
       User-Agent:
       - llm.rb v17.0.1

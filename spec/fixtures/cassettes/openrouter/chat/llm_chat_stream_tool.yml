@@ -6,9 +6,9 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
-        a bot that can run UNIX system commands"}]},{"role":"user","content":[{"type":"text","text":"Hey,
-        run the ''date'' command"}]}],"model":"openrouter/auto","tools":[{"type":"function","name":"system","function":{"name":"system","description":"Runs
-        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}],"stream_options":{"include_usage":true},"stream":true}'
+        a bot that can tell the current date"}]},{"role":"user","content":[{"type":"text","text":"Hey,
+        what is the date today?"}]}],"model":"openrouter/auto","tools":[{"type":"function","name":"get-date","function":{"name":"get-date","description":"Returns
+        the current date","parameters":{"type":"object","properties":{},"required":[]}}}],"stream_options":{"include_usage":true},"stream":true}'
     headers:
       User-Agent:
       - llm.rb v15.0.3
@@ -73,9 +73,9 @@ http_interactions:
 
         data: {"id":"gen-1787553399-J2iANcyPB54iZDCMR9YG","object":"chat.completion.chunk","created":1787553401,"model":"deepseek/deepseek-v4-flash-0731","provider":"CoreWeave","choices":[{"index":0,"delta":{"content":"\n\n","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
 
-        data: {"id":"gen-1787553399-J2iANcyPB54iZDCMR9YG","object":"chat.completion.chunk","created":1787553401,"model":"deepseek/deepseek-v4-flash-0731","provider":"CoreWeave","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"id":"call_4e7859d6a66941c68240d5b4","type":"function","function":{"name":"system","arguments":""}}]},"finish_reason":null,"native_finish_reason":null}]}
+        data: {"id":"gen-1787553399-J2iANcyPB54iZDCMR9YG","object":"chat.completion.chunk","created":1787553401,"model":"deepseek/deepseek-v4-flash-0731","provider":"CoreWeave","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"id":"call_4e7859d6a66941c68240d5b4","type":"function","function":{"name":"get-date","arguments":""}}]},"finish_reason":null,"native_finish_reason":null}]}
 
-        data: {"id":"gen-1787553399-J2iANcyPB54iZDCMR9YG","object":"chat.completion.chunk","created":1787553401,"model":"deepseek/deepseek-v4-flash-0731","provider":"CoreWeave","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":"{\"command\":\"date\"}"}}]},"finish_reason":null,"native_finish_reason":null}]}
+        data: {"id":"gen-1787553399-J2iANcyPB54iZDCMR9YG","object":"chat.completion.chunk","created":1787553401,"model":"deepseek/deepseek-v4-flash-0731","provider":"CoreWeave","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":"{}"}}]},"finish_reason":null,"native_finish_reason":null}]}
 
         data: {"id":"gen-1787553399-J2iANcyPB54iZDCMR9YG","object":"chat.completion.chunk","created":1787553401,"model":"deepseek/deepseek-v4-flash-0731","provider":"CoreWeave","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":null},"finish_reason":"tool_calls","native_finish_reason":"tool_calls"}]}
 
@@ -90,9 +90,9 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
-        a bot that can run UNIX system commands"}]},{"role":"user","content":[{"type":"text","text":"Hey,
-        run the ''date'' command"}]},{"role":"assistant","content":null,"tool_calls":[{"index":0,"id":"call_4e7859d6a66941c68240d5b4","type":"function","function":{"name":"system","arguments":"{\"command\":\"date\"}"}}]},{"role":"tool","tool_call_id":"call_4e7859d6a66941c68240d5b4","content":"{\"success\":true}"}],"model":"openrouter/auto","tools":[{"type":"function","name":"system","function":{"name":"system","description":"Runs
-        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}],"stream_options":{"include_usage":true},"stream":true}'
+        a bot that can tell the current date"}]},{"role":"user","content":[{"type":"text","text":"Hey,
+        what is the date today?"}]},{"role":"assistant","content":null,"tool_calls":[{"index":0,"id":"call_4e7859d6a66941c68240d5b4","type":"function","function":{"name":"get-date","arguments":"{}"}}]},{"role":"tool","tool_call_id":"call_4e7859d6a66941c68240d5b4","content":"{\"today\":\"2026-11-03\"}"}],"model":"openrouter/auto","tools":[{"type":"function","name":"get-date","function":{"name":"get-date","description":"Returns
+        the current date","parameters":{"type":"object","properties":{},"required":[]}}}],"stream_options":{"include_usage":true},"stream":true}'
     headers:
       User-Agent:
       - llm.rb v15.0.3

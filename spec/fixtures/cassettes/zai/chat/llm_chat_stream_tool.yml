@@ -6,9 +6,9 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
-        a bot that can run UNIX system commands"}]},{"role":"user","content":[{"type":"text","text":"Hey,
-        run the ''date'' command"}]}],"model":"glm-4.5-flash","tools":[{"type":"function","name":"system","function":{"name":"system","description":"Runs
-        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}],"stream":true,"stream_options":{"include_usage":true}}'
+        a bot that can tell the current date"}]},{"role":"user","content":[{"type":"text","text":"Hey,
+        what is the date today?"}]}],"model":"glm-4.5-flash","tools":[{"type":"function","name":"get-date","function":{"name":"get-date","description":"Returns
+        the current date","parameters":{"type":"object","properties":{},"required":[]}}}],"stream":true,"stream_options":{"include_usage":true}}'
     headers:
       Content-Type:
       - application/json
@@ -189,7 +189,7 @@ http_interactions:
 
         data: {"id":"202509281757390fdd89e3a6e34bab","created":1759053459,"model":"glm-4.5-flash","choices":[{"index":0,"delta":{"role":"assistant","content":".\n"}}]}
 
-        data: {"id":"202509281757390fdd89e3a6e34bab","created":1759053459,"model":"glm-4.5-flash","choices":[{"index":0,"finish_reason":"tool_calls","delta":{"tool_calls":[{"id":"call__akbRsBQTpOFLvTb7aACeg","index":-1,"type":"function","function":{"name":"system","arguments":"{\"command\": \"date\"}"}}]}}]}
+        data: {"id":"202509281757390fdd89e3a6e34bab","created":1759053459,"model":"glm-4.5-flash","choices":[{"index":0,"finish_reason":"tool_calls","delta":{"tool_calls":[{"id":"call__akbRsBQTpOFLvTb7aACeg","index":-1,"type":"function","function":{"name":"get-date","arguments":"{}"}}]}}]}
 
         data: {"id":"202509281757390fdd89e3a6e34bab","created":1759053459,"model":"glm-4.5-flash","choices":[{"index":0,"finish_reason":"tool_calls","delta":{"role":"assistant","content":""}}],"usage":{"prompt_tokens":173,"completion_tokens":83,"total_tokens":256,"prompt_tokens_details":{"cached_tokens":43}}}
 
@@ -202,10 +202,9 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
-        a bot that can run UNIX system commands"}]},{"role":"user","content":[{"type":"text","text":"Hey,
-        run the ''date'' command"}]},{"role":"assistant","content":null,"tool_calls":[{"id":"call__akbRsBQTpOFLvTb7aACeg","index":-1,"type":"function","function":{"name":"system","arguments":"{\"command\":
-        \"date\"}"}}]},{"role":"tool","tool_call_id":"call__akbRsBQTpOFLvTb7aACeg","content":"{\"success\":true}"}],"model":"glm-4.5-flash","tools":[{"type":"function","name":"system","function":{"name":"system","description":"Runs
-        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}],"stream":true,"stream_options":{"include_usage":true}}'
+        a bot that can tell the current date"}]},{"role":"user","content":[{"type":"text","text":"Hey,
+        what is the date today?"}]},{"role":"assistant","content":null,"tool_calls":[{"id":"call__akbRsBQTpOFLvTb7aACeg","index":-1,"type":"function","function":{"name":"get-date","arguments":"{}"}}]},{"role":"tool","tool_call_id":"call__akbRsBQTpOFLvTb7aACeg","content":"{\"today\":\"2026-11-03\"}"}],"model":"glm-4.5-flash","tools":[{"type":"function","name":"get-date","function":{"name":"get-date","description":"Returns
+        the current date","parameters":{"type":"object","properties":{},"required":[]}}}],"stream":true,"stream_options":{"include_usage":true}}'
     headers:
       Content-Type:
       - application/json

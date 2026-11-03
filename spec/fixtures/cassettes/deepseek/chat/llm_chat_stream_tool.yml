@@ -6,9 +6,9 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
-        a bot that can run UNIX system commands"}]},{"role":"user","content":[{"type":"text","text":"Hey,
-        run the ''date'' command"}]}],"model":"deepseek-flash","tools":[{"type":"function","name":"system","function":{"name":"system","description":"Runs
-        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}],"stream_options":{"include_usage":true},"stream":true}'
+        a bot that can tell the current date"}]},{"role":"user","content":[{"type":"text","text":"Hey,
+        what is the date today?"}]}],"model":"deepseek-flash","tools":[{"type":"function","name":"get-date","function":{"name":"get-date","description":"Returns
+        the current date","parameters":{"type":"object","properties":{},"required":[]}}}],"stream_options":{"include_usage":true},"stream":true}'
     headers:
       User-Agent:
       - llm.rb v15.1.0
@@ -112,25 +112,25 @@ http_interactions:
 
         data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"content":".","reasoning_content":null},"logprobs":null,"finish_reason":null}],"usage":null}
 
-        data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"call_00_7c78uzvV7LTcCMnfyZA88802","type":"function","function":{"name":"system","arguments":""}}]},"logprobs":null,"finish_reason":null}],"usage":null}
+        data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"call_00_7c78uzvV7LTcCMnfyZA88802","type":"function","function":{"name":"get-date","arguments":""}}]},"logprobs":null,"finish_reason":null}],"usage":null}
 
-        data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{"}}]},"logprobs":null,"finish_reason":null}],"usage":null}
+        data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{}"}}]},"logprobs":null,"finish_reason":null}],"usage":null}
 
-        data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\""}}]},"logprobs":null,"finish_reason":null}],"usage":null}
+        data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":""}}]},"logprobs":null,"finish_reason":null}],"usage":null}
 
-        data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"command"}}]},"logprobs":null,"finish_reason":null}],"usage":null}
+        data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":""}}]},"logprobs":null,"finish_reason":null}],"usage":null}
 
-        data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\""}}]},"logprobs":null,"finish_reason":null}],"usage":null}
+        data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":""}}]},"logprobs":null,"finish_reason":null}],"usage":null}
 
-        data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":": "}}]},"logprobs":null,"finish_reason":null}],"usage":null}
+        data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":""}}]},"logprobs":null,"finish_reason":null}],"usage":null}
 
-        data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\""}}]},"logprobs":null,"finish_reason":null}],"usage":null}
+        data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":""}}]},"logprobs":null,"finish_reason":null}],"usage":null}
 
-        data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"date"}}]},"logprobs":null,"finish_reason":null}],"usage":null}
+        data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":""}}]},"logprobs":null,"finish_reason":null}],"usage":null}
 
-        data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\""}}]},"logprobs":null,"finish_reason":null}],"usage":null}
+        data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":""}}]},"logprobs":null,"finish_reason":null}],"usage":null}
 
-        data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"}"}}]},"logprobs":null,"finish_reason":null}],"usage":null}
+        data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":""}}]},"logprobs":null,"finish_reason":null}],"usage":null}
 
         data: {"id":"a9b35d16-7637-4ec0-872a-3d80cef2d679","object":"chat.completion.chunk","created":1789053688,"model":"deepseek-flash","system_fingerprint":"aeb56401ca74e127821c4f9126dcb669","choices":[{"index":0,"delta":{"content":"","reasoning_content":null},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":304,"completion_tokens":61,"total_tokens":365,"prompt_tokens_details":{"cached_tokens":128},"completion_tokens_details":{"reasoning_tokens":14},"prompt_cache_hit_tokens":128,"prompt_cache_miss_tokens":176}}
 
@@ -143,11 +143,10 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
-        a bot that can run UNIX system commands"}]},{"role":"user","content":[{"type":"text","text":"Hey,
-        run the ''date'' command"}]},{"role":"assistant","tool_calls":[{"index":0,"id":"call_00_7c78uzvV7LTcCMnfyZA88802","type":"function","function":{"name":"system","arguments":"{\"command\":
-        \"date\"}"}}],"reasoning_content":"The user wants me to run the ''date'' command.
-        Simple."},{"role":"tool","tool_call_id":"call_00_7c78uzvV7LTcCMnfyZA88802","content":"{\"success\":true}"}],"model":"deepseek-flash","tools":[{"type":"function","name":"system","function":{"name":"system","description":"Runs
-        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}],"stream_options":{"include_usage":true},"stream":true}'
+        a bot that can tell the current date"}]},{"role":"user","content":[{"type":"text","text":"Hey,
+        what is the date today?"}]},{"role":"assistant","tool_calls":[{"index":0,"id":"call_00_7c78uzvV7LTcCMnfyZA88802","type":"function","function":{"name":"get-date","arguments":"{}"}}],"reasoning_content":"The
+        user wants me to run the ''date'' command. Simple."},{"role":"tool","tool_call_id":"call_00_7c78uzvV7LTcCMnfyZA88802","content":"{\"today\":\"2026-11-03\"}"}],"model":"deepseek-flash","tools":[{"type":"function","name":"get-date","function":{"name":"get-date","description":"Returns
+        the current date","parameters":{"type":"object","properties":{},"required":[]}}}],"stream_options":{"include_usage":true},"stream":true}'
     headers:
       User-Agent:
       - llm.rb v15.1.0

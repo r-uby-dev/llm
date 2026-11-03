@@ -52,24 +52,24 @@ RSpec.shared_examples "LLM::Context: tool stream" do |dirname, options = {}|
   context "when given a tool call", vcr.call("llm_chat_stream_tool") do
     let(:params) { {stream: true, tools: [tool]} }
     let(:tool) do
-      LLM.function(:system) do |fn|
-        fn.description "Runs system commands"
-        fn.params { _1.object(command: _1.string.required) }
-        fn.define { |command:| {success: Kernel.system(command)} }
+      LLM.function(:"get-date") do |fn|
+        fn.description "Returns the current date"
+        fn.define { {today: Date.today} }
       end
     end
     let(:prompt) do
       ctx.build_prompt do
-        _1.user "You are a bot that can run UNIX system commands"
-        _1.user "Hey, run the 'date' command"
+        _1.user "You are a bot that can tell the current date"
+        _1.user "Hey, what is the date today?"
       end
     end
 
     before { ctx.talk(prompt) }
 
     it "calls the function(s)" do
-      expect(Kernel).to receive(:system).with("date").and_return("2022-01-01")
-      ctx.talk ctx.pending_functions.map(&:call)
+      returns = ctx.pending_functions.map(&:call)
+      expect(returns.map(&:value)).to eq([{today: Date.today}])
+      ctx.talk returns
       expect(ctx.pending_functions).to be_empty
     end
   end
