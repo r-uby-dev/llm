@@ -20,6 +20,15 @@ module LLM
   # {LLM::Intercept::Null LLM::Intercept::Null}
   # and it is a noop.
   class Intercept
+    ##
+    # @param [Class] klass
+    #  A subclass of {LLM::Intercept}
+    # @return [void]
+    def self.inherited(klass)
+      klass.prepend Rescue
+    end
+
+    require_relative "intercept/rescue"
     require_relative "intercept/null"
     require_relative "intercept/multi"
 

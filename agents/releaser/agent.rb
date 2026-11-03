@@ -37,7 +37,11 @@ class Agent < LLM::Agent
     end
 
     def set_tools
-      [LLM::Tool::Git, LLM::Tool::ReadFile, SubAgent]
+      [
+        LLM::Tool::Git::Diff,
+        LLM::Tool::ReadFile,
+        SubAgent
+      ]
     end
 
     def set_path

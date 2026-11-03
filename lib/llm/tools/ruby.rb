@@ -35,11 +35,4 @@ class LLM::Tool
       )
     end
   end
-
-  begin
-    Ractor.make_shareable(RbConfig::CONFIG)
-  rescue => ex
-    LLM.debug "[#{ex.class}]: #{ex.message} " \
-              "(from lib/llm/tools/ruby.rb)"
-  end
 end

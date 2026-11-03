@@ -23,6 +23,7 @@ before) can be seen in [changelog/old.md](changelog/old.md).
 | `LLM::Function::Ractor::Mailbox`, and `LLM::Function::Ractor::Task#mailbox` | both are removed, and the task implements `#alive?`, `#wait`, and `#interrupt!` |
 | `llm.rb` runs tool calls sequentially | it runs them on a Ractor, and `-c` picks the strategy |
 | `LLM::Skill`, the `skills:` option, and `on_skill_call` / `on_skill_return` | all are removed |
+| `LLM::Tool::Git` is a single tool, named `git`, that takes an `arguments` array | it is an abstract superclass, and each subcommand is a tool of its own, eg `git-log` |
 | `LLM::Tracer#provider_name`, `#provider_host`, and `#provider_port` | the provider implements `#name`, `#host`, and `#port` |
 | `LLM::Transformer`, the `transformer:` and `transformer_options:` options, and `on_transform` / `on_transform_finish` | `LLM::MessageFilter`, `filter:` and `filter_options:`, and `on_filter` / `on_filter_finish` |
 | `LLM::Context#transformer`, and `LLM::Transformer::Multi#transformers` | `LLM::Context#filter`, and `LLM::MessageFilter::Multi#filters` |
@@ -264,6 +265,32 @@ it.
   dependency the way it did when the process helpers
   lived in `Utils`.
 
+* **tool: add `LLM::Tool.abstract?` and `LLM::Tool.abstract!`** <br>
+  [`LLM::Tool.abstract!`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool.html#abstract!-class_method)
+  marks a tool class as abstract, and
+  [`LLM::Tool.abstract?`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool.html#abstract?-class_method)
+  returns true once the class is marked. An abstract tool can be the
+  superclass of other tools, and it cannot itself be used as a tool: it
+  is left out of `LLM::Tool.registry` and `LLM::Tool.subclasses`, so a
+  superclass that holds the code its subclasses share no longer appears
+  beside the tools that inherit from it.
+
+* **tools: split the git tool into seven tools** <br>
+  [`LLM::Tool::Git`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git.html)
+  was a single tool, named `git`, that took an `arguments` array and ran
+  the subcommand it named. It is an abstract superclass now, and each
+  subcommand is a tool of its own:
+  [`LLM::Tool::Git::Log`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git/Log.html)
+  (`git-log`), `LLM::Tool::Git::Diff` (`git-diff`), `LLM::Tool::Git::Show`
+  (`git-show`), `LLM::Tool::Git::Status` (`git-status`),
+  `LLM::Tool::Git::Commit` (`git-commit`), `LLM::Tool::Git::Branch`
+  (`git-branch`) and `LLM::Tool::Git::Checkout` (`git-checkout`). Each one
+  takes the keywords of the subcommand it runs - `rev:`, `path:` and
+  `max_count:` for `git-log`, `message:` and `paths:` for `git-commit` -
+  and builds the argument vector itself, so a model no longer has to know
+  the shape of a git command line. None of them takes the `timeout:` the
+  old tool took. The tool named `git` is gone.
+
 ### LLM::MCP
 
 * **mcp: add `LLM::MCP#to_h`** <br>
@@ -396,6 +423,18 @@ it.
   documented now, so a caller can read the address a provider
   talks to without reaching into its instance variables.
 
+* **provider: retry a request that raises `SystemCallError`** <br>
+  [`LLM::Provider#retry_errors`](https://r.uby.dev/api-docs/llm.rb/LLM/Provider.html#retry_errors-instance_method)
+  includes `SystemCallError` now, so a request the socket drops -
+  `Errno::ECONNRESET` and `Errno::EPIPE` are the ones a pooled
+  connection sees - is retried instead of failing the turn.
+  `SystemCallError` is the superclass of every `Errno::*` error,
+  and a retry is made the way a rate limited request is: the
+  stream is told with
+  [`LLM::Stream#on_retry`](https://r.uby.dev/api-docs/llm.rb/LLM/Stream.html#on_retry-instance_method),
+  the runtime sleeps a growing interval, and the request is made
+  again up to the provider's `retry_budget`.
+
 ### LLM::Agent
 
 * **agent: `LLM.interrupt` returns the agent it interrupted** <br>
@@ -461,6 +500,38 @@ it.
   That is the migration: a caller that mutates the value in
   place has to build a copy of its own first.
 
+* **agent: add `LLM::Agent.intercept_options`** <br>
+  [`LLM::Agent.intercept_options`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#intercept_options-class_method)
+  is where an agent's intercept options are declared, so they
+  can sit beside the intercept itself. `set intercept_options:`
+  takes a `Hash`, a `Proc` that is resolved when the agent is
+  built, or a `Symbol` that names an instance method, and an
+  `intercept_options:` given to
+  [`LLM::Agent.new`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#initialize-instance_method)
+  is taken the same way. The options reach the
+  [`LLM::Context`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html)
+  the agent builds, so they are passed to the intercept. Before, a
+  class-level agent could declare an intercept but not its options.
+
+### LLM::Intercept
+
+* **intercept: add `LLM::Intercept::Rescue`** <br>
+  The
+  [`LLM::Intercept::Rescue`](https://r.uby.dev/api-docs/llm.rb/LLM/Intercept/Rescue.html)
+  module rescues the exception that an intercept's `#call`
+  raises, so an intercept that crashes no longer takes the tool
+  call down with it.
+  [`LLM::Intercept`](https://r.uby.dev/api-docs/llm.rb/LLM/Intercept.html)
+  prepends it to every subclass, so every intercept is covered.
+  `LLM::Interrupt` is re-raised and still travels up the stack,
+  and any other `StandardError` or `ScriptError` goes to
+  `#crash`, which writes a report to `$stderr`: the intercept's
+  class, the exception's class, its message, and the first ten
+  lines of its backtrace. `#call` returns the error return that
+  [`LLM::Function#error`](https://r.uby.dev/api-docs/llm.rb/LLM/Function.html#error-instance_method)
+  builds then, so the model is told the intercept crashed, and
+  the tool call does not run.
+
 ### LLM::Function
 
 * **function: run a `:ractor` tool call in a single ractor** <br>
@@ -492,6 +563,16 @@ it.
   captured under every concurrency strategy.
   Before, a failure reported its class and its
   message only.
+
+* **function: add `LLM::Function#error`** <br>
+  [`LLM::Function#error`](https://r.uby.dev/api-docs/llm.rb/LLM/Function.html#error-instance_method)
+  builds the `LLM::Function::Return` that reports a failed tool
+  call from an exception: it takes the exception as `ex:` and
+  sets `error`, `type`, `message` and `backtrace` from it. Any
+  other keyword is merged into the same value, so a caller can
+  add a `note:` to the return the model is given. Before, a
+  caller that caught an exception on behalf of a tool call built
+  the return, and its fields, itself.
 
 * **function: trace a sequential tool call** <br>
   The `:sequential` strategy tells a tracer that a tool started now, so
@@ -600,7 +681,7 @@ it.
   subclass, so every filter is covered.
   `LLM::Interrupt` is re-raised, and an interrupt still
   travels up the stack. Any other `StandardError` or
-  `ScriptError` goes to `Rescue.crash`, which writes the
+  `ScriptError` goes to `#crash`, which writes the
   report to `$stderr`: the filter's class, the exception's
   class, its message, and the first ten lines of its
   backtrace. The return value of `crash` is what `#call`
@@ -684,6 +765,15 @@ it.
   returns the `model` that a `:jsonb` record holds in its column, and it
   falls back to the model the runtime resolves when the column holds
   none.
+
+* **orm: add `compactor` and `compactor_options` to the ActiveRecord wrapper** <br>
+  [`LLM::ActiveRecord#compactor`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord.html#compactor-instance_method)
+  returns the compactor a record's runtime is configured with, and
+  [`LLM::ActiveRecord#compactor_options`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord.html#compactor_options-instance_method)
+  returns the options that compactor was configured with, and `{}` when
+  none were given. Both delegate to the runtime the record wraps, so a
+  caller reads them from the record the way it reads `#context_window`
+  and `#token_usage`.
 
 * **orm: `LLM::ActiveRecord::Message.for` takes `record:`** <br>
   [`LLM::ActiveRecord::Message.for`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord/Message.html#for-class_method)

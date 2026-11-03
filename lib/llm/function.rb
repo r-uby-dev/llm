@@ -453,6 +453,20 @@ class LLM::Function
   end
 
   ##
+  # @param [Exception] ex
+  #  An exception
+  # @param [Hash] extra
+  #  Extra attributes to add to the error
+  # @return [LLM::Function::Return]
+  def error(ex:, **extra)
+    error = extra.merge({
+      error: true, type: ex.class.to_s,
+      message: ex.message, backtrace: ex.backtrace
+    })
+    self.return(error)
+  end
+
+  ##
   # @return [Hash]
   def adapt(provider)
     provider.adapt_function(self)

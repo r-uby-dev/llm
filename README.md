@@ -44,12 +44,19 @@ version bump (v2 => v3) can require changes and not
 all gems have caught up yet. The [r-uby-dev/llm](https://github.com/r-uby-dev/llm)
 gem is an early adopter of json v3. 
 
+There is an outstanding 
+[ruby-core bug](https://bugs.ruby-lang.org/issues/22499)
+that means the combination of llm.rb, Ractor, and
+the YJIT should be avoided. Without YJIT enabled the
+bug (a SIGSEGV) is avoided. Also works fine with YJIT
+enabled but no Ractor use.
+
 The v18 series
 includes [substational runtime improvements](CHANGELOG.md) -
 especially for running tool calls on a [Ractor](https://docs.ruby-lang.org/en/4.0/Ractor.html)
 and it is the recommended version to use.   
 
-The current prerelease is `v18.0.0.beta8`.
+The current prerelease is `v18.0.0.beta9`.
 
 ```bash
 gem install llm.rb

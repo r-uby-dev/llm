@@ -54,6 +54,62 @@ class LLM::Tool
   end
 
   ##
+  # Returns (or sets) the tool name
+  # @param [String, nil] name The tool name
+  # @return [String]
+  def self.name(name = nil)
+    lock do
+      name ? function.name(name) : function.name
+    end
+  end
+
+  ##
+  # Returns (or sets) the tool description
+  # @param [String, nil] desc The tool description
+  # @return [String]
+  def self.description(desc = nil)
+    lock do
+      desc ? function.description(desc) : function.description
+    end
+  end
+
+  ##
+  # Returns (or sets) tool parameters
+  # @param [Hash, nil] p
+  #  Optional set of params to set
+  # @yieldparam [LLM::Schema] schema
+  #  The schema object to define parameters
+  # @return [LLM::Schema]
+  def self.params(p = nil, &)
+    lock do
+      function.tap { _1.params(p, &) }
+    end
+  end
+
+  ##
+  # @return [Array<Class<LLM::Tool>>]
+  def self.subclasses
+    super.reject(&:abstract?)
+  end
+
+  ##
+  # @example
+  #   class LLM::Tool::Git < LLM::Tool
+  #     abstract!
+  #   end
+  # @return [void]
+  def self.abstract!
+    @abstract = true
+  end
+
+  ##
+  # Returns true when the tool is abstract
+  # @return [Boolean]
+  def self.abstract?
+    !!@abstract
+  end
+
+  ##
   # @param [LLM::MCP] mcp
   #  The MCP client that will execute the tool call
   # @param [Hash] tool
@@ -110,7 +166,7 @@ class LLM::Tool
     klass.instance_variable_set(:"@a2a", a2a)
     schema = LLM::Schema.new
     inputs = schema.object(input: schema.string.description("The input string").required).to_h
-    tool = Ractor.make_shareable({
+    tool = LLM.share!({
       "name" => name,
       "description" => skill.description,
       "inputSchema" => inputs
@@ -125,21 +181,6 @@ class LLM::Tool
     end
     ractorize(klass, tool, call)
   end
-
-  ##
-  # @param [Class<LLM::Tool>] klass
-  # @param [Hash] tool
-  # @param [Proc] call
-  # @return [Class<LLM::Tool>]
-  # @api private
-  def self.ractorize(klass, tool, call)
-    body = Ractor.shareable_proc { define_method(:call, &call) }
-    klass.name tool["name"]
-    klass.description tool["description"]
-    klass.params tool["inputSchema"] || {type: "object", properties: {}}
-    klass.tap { it.class_eval(&body) }
-  end
-  private_class_method :ractorize
 
   ##
   # Clear the registry
@@ -212,20 +253,10 @@ class LLM::Tool
   end
 
   ##
-  # Returns (or sets) the tool name
-  # @param [String, nil] name The tool name
-  # @return [String]
-  def self.name(name = nil)
-    lock do
-      name ? function.name(name) : function.name
-    end
-  end
-
-  ##
   # Returns all registered tool classes with definitions.
   # @return [Array<Class<LLM::Tool>>]
   def self.registry
-    super.select(&:name)
+    super.select(&:name).reject(&:abstract?)
   end
 
   ##
@@ -235,29 +266,6 @@ class LLM::Tool
   # @raise [LLM::NoSuchToolError]
   def self.find_by_name!(name)
     find_by_name(name) || raise(LLM::NoSuchToolError, "tool '#{name}' not found")
-  end
-
-  ##
-  # Returns (or sets) the tool description
-  # @param [String, nil] desc The tool description
-  # @return [String]
-  def self.description(desc = nil)
-    lock do
-      desc ? function.description(desc) : function.description
-    end
-  end
-
-  ##
-  # Returns (or sets) tool parameters
-  # @param [Hash, nil] p
-  #  Optional set of params to set
-  # @yieldparam [LLM::Schema] schema
-  #  The schema object to define parameters
-  # @return [LLM::Schema]
-  def self.params(p = nil, &)
-    lock do
-      function.tap { _1.params(p, &) }
-    end
   end
 
   ##
@@ -281,6 +289,21 @@ class LLM::Tool
   def self.a2a?
     false
   end
+
+  ##
+  # @param [Class<LLM::Tool>] klass
+  # @param [Hash] tool
+  # @param [Proc] call
+  # @return [Class<LLM::Tool>]
+  # @api private
+  def self.ractorize(klass, tool, call)
+    body = Ractor.shareable_proc { define_method(:call, &call) }
+    klass.name tool["name"]
+    klass.description tool["description"]
+    klass.params tool["inputSchema"] || {type: "object", properties: {}}
+    klass.tap { it.class_eval(&body) }
+  end
+  private_class_method :ractorize
 
   ##
   # Returns a function bound to this tool instance.

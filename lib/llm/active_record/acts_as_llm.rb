@@ -173,6 +173,20 @@ module LLM::ActiveRecord
       end
 
       ##
+      # @see LLM::Agent#compactor
+      # @return [LLM::Compactor, nil]
+      def compactor
+        __context__.compactor
+      end
+
+      ##
+      # @see LLM::Agent#compactor_options
+      # @return [Hash]
+      def compactor_options
+        __context__.compactor_options
+      end
+
+      ##
       # Returns the overall size of the context window.
       # @see LLM::Context#context_window
       # @return [Integer, nil]
