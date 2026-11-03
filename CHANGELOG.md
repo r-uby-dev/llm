@@ -23,6 +23,7 @@ before) can be seen in [changelog/old.md](changelog/old.md).
 | `LLM::Function::Ractor::Mailbox`, and `LLM::Function::Ractor::Task#mailbox` | both are removed, and the task implements `#alive?`, `#wait`, and `#interrupt!` |
 | `llm.rb` runs tool calls sequentially | it runs them on a Ractor, and `-c` picks the strategy |
 | `LLM::Skill`, the `skills:` option, and `on_skill_call` / `on_skill_return` | all are removed |
+| `LLM::Tool::Git` is a single tool, named `git`, that takes an `arguments` array | it is an abstract superclass, and each subcommand is a tool of its own, eg `git-log` |
 | `LLM::Tracer#provider_name`, `#provider_host`, and `#provider_port` | the provider implements `#name`, `#host`, and `#port` |
 | `LLM::Transformer`, the `transformer:` and `transformer_options:` options, and `on_transform` / `on_transform_finish` | `LLM::MessageFilter`, `filter:` and `filter_options:`, and `on_filter` / `on_filter_finish` |
 | `LLM::Context#transformer`, and `LLM::Transformer::Multi#transformers` | `LLM::Context#filter`, and `LLM::MessageFilter::Multi#filters` |
@@ -263,6 +264,32 @@ it.
   tool no longer pulls in `test-cmd` as a transitive
   dependency the way it did when the process helpers
   lived in `Utils`.
+
+* **tool: add `LLM::Tool.abstract?` and `LLM::Tool.abstract!`** <br>
+  [`LLM::Tool.abstract!`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool.html#abstract!-class_method)
+  marks a tool class as abstract, and
+  [`LLM::Tool.abstract?`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool.html#abstract?-class_method)
+  returns true once the class is marked. An abstract tool can be the
+  superclass of other tools, and it cannot itself be used as a tool: it
+  is left out of `LLM::Tool.registry` and `LLM::Tool.subclasses`, so a
+  superclass that holds the code its subclasses share no longer appears
+  beside the tools that inherit from it.
+
+* **tools: split the git tool into seven tools** <br>
+  [`LLM::Tool::Git`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git.html)
+  was a single tool, named `git`, that took an `arguments` array and ran
+  the subcommand it named. It is an abstract superclass now, and each
+  subcommand is a tool of its own:
+  [`LLM::Tool::Git::Log`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git/Log.html)
+  (`git-log`), `LLM::Tool::Git::Diff` (`git-diff`), `LLM::Tool::Git::Show`
+  (`git-show`), `LLM::Tool::Git::Status` (`git-status`),
+  `LLM::Tool::Git::Commit` (`git-commit`), `LLM::Tool::Git::Branch`
+  (`git-branch`) and `LLM::Tool::Git::Checkout` (`git-checkout`). Each one
+  takes the keywords of the subcommand it runs - `rev:`, `path:` and
+  `max_count:` for `git-log`, `message:` and `paths:` for `git-commit` -
+  and builds the argument vector itself, so a model no longer has to know
+  the shape of a git command line. None of them takes the `timeout:` the
+  old tool took. The tool named `git` is gone.
 
 ### LLM::MCP
 
@@ -738,6 +765,15 @@ it.
   returns the `model` that a `:jsonb` record holds in its column, and it
   falls back to the model the runtime resolves when the column holds
   none.
+
+* **orm: add `compactor` and `compactor_options` to the ActiveRecord wrapper** <br>
+  [`LLM::ActiveRecord#compactor`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord.html#compactor-instance_method)
+  returns the compactor a record's runtime is configured with, and
+  [`LLM::ActiveRecord#compactor_options`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord.html#compactor_options-instance_method)
+  returns the options that compactor was configured with, and `{}` when
+  none were given. Both delegate to the runtime the record wraps, so a
+  caller reads them from the record the way it reads `#context_window`
+  and `#token_usage`.
 
 * **orm: `LLM::ActiveRecord::Message.for` takes `record:`** <br>
   [`LLM::ActiveRecord::Message.for`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord/Message.html#for-class_method)
