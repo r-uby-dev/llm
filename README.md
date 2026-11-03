@@ -42,11 +42,14 @@ must be updated to their latest version(s). The major
 [json](https://github.com/ruby/json) 
 version bump (v2 => v3) can require changes and not
 all gems have caught up yet. The [r-uby-dev/llm](https://github.com/r-uby-dev/llm)
-gem is an early adopter of json v3. There is an
-outstanding [ruby-core bug](https://bugs.ruby-lang.org/issues/22499)
+gem is an early adopter of json v3. 
+
+There is an outstanding 
+[ruby-core bug](https://bugs.ruby-lang.org/issues/22499)
 that means the combination of llm.rb, Ractor, and
-the YJIT should be avoided. Without YJIT enabled it
-works fine.
+the YJIT should be avoided. Without YJIT enabled the
+SIGSEGV is avoided. With YJIT but without Ractor also
+avoids the SIGSEGV. 
 
 The v18 series
 includes [substational runtime improvements](CHANGELOG.md) -
