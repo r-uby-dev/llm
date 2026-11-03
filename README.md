@@ -48,8 +48,8 @@ There is an outstanding
 [ruby-core bug](https://bugs.ruby-lang.org/issues/22499)
 that means the combination of llm.rb, Ractor, and
 the YJIT should be avoided. Without YJIT enabled the
-SIGSEGV is avoided. With YJIT but without Ractor also
-avoids the SIGSEGV. 
+bug (a SIGSEGV) is avoided. Also works fine with YJIT
+enabled but no Ractor usage.
 
 The v18 series
 includes [substational runtime improvements](CHANGELOG.md) -
