@@ -11,7 +11,7 @@ class EditFile < LLM::Tool
     options  = {concurrency: :ractor,
                 tracer: LLM::Tracer.pretty(llm, io: $stderr),
                 instructions: File.read(prompts[file]),
-                tools: [*(LLM::Tool.subclasses - [EditFile])]}
+                tools: toolset}
     subagent = LLM::Agent.new(llm, options)
     case file
     when "CHANGELOG.md"
@@ -29,6 +29,15 @@ class EditFile < LLM::Tool
 
   def llm
     LLM.deepseek
+  end
+
+  def toolset
+    [
+      LLM::Tool::EditFile , LLM::Tool::ReadFile,
+      LLM::Tool::Git::Log , LLM::Tool::Git::Show,
+      LLM::Tool::Ls       , LLM::Tool::Pwd,
+      LLM::Tool::Rg
+    ]
   end
 
   def prompts
