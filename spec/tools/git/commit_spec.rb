@@ -22,7 +22,7 @@ RSpec.describe LLM::Tool::Git::Commit do
     let(:params) { described_class.function.params }
 
     it "defines the message, paths and all parameters" do
-      expect(params.properties.keys).to contain_exactly(:message, :paths, :all)
+      expect(params.properties.keys).to contain_exactly("message", "paths", "all")
     end
 
     it "marks message as required" do
@@ -58,7 +58,7 @@ RSpec.describe LLM::Tool::Git::Commit do
 
     it "raises when all: and paths: are combined" do
       expect { tool.call(message: "nope", all: true, paths: ["file.txt"]) }
-        .to raise_error(ArgumentError, "all: and paths: cannot be combined")
+        .to raise_error(LLM::Error, "'all' and 'paths' cannot be combined")
     end
 
     it "raises when message: is not given" do
