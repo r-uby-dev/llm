@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module RbConfig
+module LLM::RbConfig
   ##
   # Deep-dup via Ractor.new
   # Returns a deeply frozen RbConfig::CONFIG
@@ -13,10 +13,11 @@ module RbConfig
   # be accessed across ractors. This
   # is used by the ruby.rb tool.
   # @return [String]
-  def self.ruby
+  def ruby
     File.join(
       RACTOR_CONFIG["bindir"],
       RACTOR_CONFIG["ruby_install_name"] + RACTOR_CONFIG["EXEEXT"]
     )
   end
+  ::RbConfig.singleton_class.prepend(self)
 end unless RbConfig.const_defined?(:RACTOR_CONFIG)
