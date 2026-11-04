@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+##
+# Ractor-safe RbConfig methods
 module LLM::RbConfig
   ##
   # Deep-dup via Ractor.new
