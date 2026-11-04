@@ -17,11 +17,4 @@ module Gem
       RbConfig::RACTOR_CONFIG["ruby_version"]
     )
   end
-
-  ##
-  # @return [String]
-  def self.default_exec_format
-    name = RbConfig::RACTOR_CONFIG["ruby_install_name"]
-    name.sub("ruby", "%s")
-  end
 end if defined?(Gem)
