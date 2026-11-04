@@ -19,4 +19,4 @@ module RbConfig
       RACTOR_CONFIG["ruby_install_name"] + RACTOR_CONFIG["EXEEXT"]
     )
   end
-end unless RbConfig.const_defined?(:RACTOR_CONFIG) or Ractor.shareable?(RbConfig::CONFIG)
+end unless RbConfig.const_defined?(:RACTOR_CONFIG)
