@@ -111,7 +111,7 @@ options = {
   tracer: LLM::Tracer.multi(llm, LLM::Tracer::Logger),
   tools:  [GetTime],
   stream: StringIO.new,
-  concurrency: LLM::VERSION[0..1].to_i >= 18 ? :ractor : :thread
+  concurrency: :ractor
 }
 
 agent = LLM::Agent.new(llm, options)
@@ -141,7 +141,7 @@ require "llm"
 require "llm/tools/read_file"
 
 llm         = LLM.deepseek
-concurrency = LLM::VERSION[0..1].to_i >= 18 ? :ractor : :thread
+concurrency = :ractor
 agent       = LLM::Agent.new(llm, concurrency:)
 
 Thread.new do
@@ -1175,7 +1175,7 @@ require "llm"
 require "llm/tools"
 
 llm         = LLM.deepseek
-concurrency = LLM::VERSION.start_with?("18.") ? :ractor : :thread
+concurrency = :ractor
 agent       = LLM::Agent.new(llm, concurrency:)
 
 Thread.new do
