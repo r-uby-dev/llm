@@ -13,6 +13,7 @@ class LLM::Tool
   # @see LLM::Tool::Git::Checkout
   class Git < self
     abstract!
+    DEFAULT_TIMEOUT = 5
     require_relative "exec"
     require_relative "git/log"
     require_relative "git/diff"

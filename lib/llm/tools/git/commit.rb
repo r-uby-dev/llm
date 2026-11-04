@@ -11,7 +11,8 @@ class LLM::Tool::Git
     parameter :paths, Array[String], "one or more paths to commit"
     parameter :all, Boolean, "commit every tracked change"
     required %i[message]
-    defaults paths: [], all: false
+    parameter :timeout, Integer, "the maximum allowed time for git to run (in seconds)"
+    defaults paths: [], all: false, timeout: DEFAULT_TIMEOUT
 
     ##
     # @param [String] message
@@ -22,11 +23,13 @@ class LLM::Tool::Git
     #  Whether to commit every tracked change
     # @raise [LLM::Error]
     #  When all: and paths: are given together
+    # @param [Integer] timeout
+    #  The maximum time to allow git to run, in seconds
     # @return [Hash]
-    def call(message:, paths: [], all: false)
+    def call(message:, paths: [], all: false, timeout: DEFAULT_TIMEOUT)
       Exec
         .new(env:)
-        .call(arguments: ["git", *parse!(message:, paths:, all:)])
+        .call(arguments: ["git", *parse!(message:, paths:, all:)], timeout:)
     end
 
     private

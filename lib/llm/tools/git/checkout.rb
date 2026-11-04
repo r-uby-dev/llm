@@ -12,7 +12,8 @@ class LLM::Tool::Git
     parameter :create, Boolean, "create the branch named by ref"
     parameter :path, String, "restore this path from ref"
     required %i[ref]
-    defaults create: false, path: nil
+    parameter :timeout, Integer, "the maximum allowed time for git to run (in seconds)"
+    defaults create: false, path: nil, timeout: DEFAULT_TIMEOUT
 
     ##
     # @param [String] ref
@@ -21,11 +22,13 @@ class LLM::Tool::Git
     #  Whether to create the branch named by ref
     # @param [String, nil] path
     #  An optional path to restore from ref
+    # @param [Integer] timeout
+    #  The maximum time to allow git to run, in seconds
     # @return [Hash]
-    def call(ref:, create: false, path: nil)
+    def call(ref:, create: false, path: nil, timeout: DEFAULT_TIMEOUT)
       Exec
         .new(env:)
-        .call(arguments: ["git", *parse!(ref:, create:, path:)])
+        .call(arguments: ["git", *parse!(ref:, create:, path:)], timeout:)
     end
 
     private
