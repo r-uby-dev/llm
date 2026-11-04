@@ -1,7 +1,8 @@
+require_relative "rbconfig"
+
 ##
 # Ractor-safe Gem methods.
 module Gem
-  require_relative "rbconfig"
   ##
   # @return [String]
   def self.default_bindir
