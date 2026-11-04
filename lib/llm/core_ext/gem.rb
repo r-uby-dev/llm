@@ -17,4 +17,4 @@ module Gem
       RbConfig::RACTOR_CONFIG["ruby_version"]
     )
   end
-end if defined?(Gem)
+end if RbConfig.const_defined?(:RACTOR_CONFIG)
