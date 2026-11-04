@@ -6,9 +6,9 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
-        a bot that can run UNIX system commands"}]},{"role":"user","content":[{"type":"text","text":"Hey,
-        run the ''date'' command"}]}],"model":"grok-4-0709","tools":[{"type":"function","name":"system","function":{"name":"system","description":"Runs
-        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}],"stream":true,"stream_options":{"include_usage":true}}'
+        a bot that can tell the current date"}]},{"role":"user","content":[{"type":"text","text":"Hey,
+        what is the date today?"}]}],"model":"grok-4-0709","tools":[{"type":"function","name":"get-date","function":{"name":"get-date","description":"Returns
+        the current date","parameters":{"type":"object","properties":{},"required":[]}}}],"stream":true,"stream_options":{"include_usage":true}}'
     headers:
       Content-Type:
       - application/json
@@ -696,7 +696,7 @@ http_interactions:
 
         data: {"id":"dd726c26-8763-0ffd-deb0-5421553fcd6b_us-east-1","object":"chat.completion.chunk","created":1757791992,"model":"grok-4-0709","choices":[{"index":0,"delta":{}}],"system_fingerprint":"fp_19e21a36c0"}
 
-        data: {"id":"dd726c26-8763-0ffd-deb0-5421553fcd6b_us-east-1","object":"chat.completion.chunk","created":1757791992,"model":"grok-4-0709","choices":[{"index":0,"delta":{"tool_calls":[{"id":"call_06947674","function":{"name":"system","arguments":"{\"command\":\"date\"}"},"index":0,"type":"function"}]}}],"system_fingerprint":"fp_19e21a36c0"}
+        data: {"id":"dd726c26-8763-0ffd-deb0-5421553fcd6b_us-east-1","object":"chat.completion.chunk","created":1757791992,"model":"grok-4-0709","choices":[{"index":0,"delta":{"tool_calls":[{"id":"call_06947674","function":{"name":"get-date","arguments":"{}"},"index":0,"type":"function"}]}}],"system_fingerprint":"fp_19e21a36c0"}
 
         data: {"id":"dd726c26-8763-0ffd-deb0-5421553fcd6b_us-east-1","object":"chat.completion.chunk","created":1757791992,"model":"grok-4-0709","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}],"system_fingerprint":"fp_19e21a36c0"}
 
@@ -711,9 +711,9 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
-        a bot that can run UNIX system commands"}]},{"role":"user","content":[{"type":"text","text":"Hey,
-        run the ''date'' command"}]},{"role":"assistant","content":null,"tool_calls":[{"id":"call_06947674","function":{"name":"system","arguments":"{\"command\":\"date\"}"},"index":0,"type":"function"}]},{"role":"tool","tool_call_id":"call_06947674","content":"{\"success\":true}"}],"model":"grok-4-0709","tools":[{"type":"function","name":"system","function":{"name":"system","description":"Runs
-        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}],"stream":true,"stream_options":{"include_usage":true}}'
+        a bot that can tell the current date"}]},{"role":"user","content":[{"type":"text","text":"Hey,
+        what is the date today?"}]},{"role":"assistant","content":null,"tool_calls":[{"id":"call_06947674","function":{"name":"get-date","arguments":"{}"},"index":0,"type":"function"}]},{"role":"tool","tool_call_id":"call_06947674","content":"{\"today\":\"2026-11-03\"}"}],"model":"grok-4-0709","tools":[{"type":"function","name":"get-date","function":{"name":"get-date","description":"Returns
+        the current date","parameters":{"type":"object","properties":{},"required":[]}}}],"stream":true,"stream_options":{"include_usage":true}}'
     headers:
       Content-Type:
       - application/json

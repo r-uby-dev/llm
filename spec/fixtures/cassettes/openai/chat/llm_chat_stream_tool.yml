@@ -6,9 +6,9 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"input":[{"role":"user","content":[{"type":"input_text","text":"You
-        are a bot that can run UNIX system commands"}]},{"role":"user","content":[{"type":"input_text","text":"Hey,
-        run the ''date'' command"}]}],"model":"gpt-5.6-luna","store":false,"stream":true,"tools":[{"type":"function","name":"system","description":"Runs
-        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"],"additionalProperties":false},"strict":false}]}'
+        are a bot that can tell the current date"}]},{"role":"user","content":[{"type":"input_text","text":"Hey,
+        what is the date today?"}]}],"model":"gpt-5.6-luna","store":false,"stream":true,"tools":[{"type":"function","name":"get-date","description":"Returns
+        the current date","parameters":{"type":"object","properties":{},"required":[],"additionalProperties":false},"strict":false}]}'
     headers:
       User-Agent:
       - llm.rb v15.2.2
@@ -87,31 +87,31 @@ http_interactions:
         data: {"type":"response.in_progress","response":{"id":"resp_007c3e7bdcdd902a016aa967b72cd087d2af3c6301d8d30bc1","object":"response","created_at":1789487031,"status":"in_progress","background":false,"completed_at":null,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":null,"max_tool_calls":null,"model":"gpt-5.6-luna","moderation":null,"output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":"24h","reasoning":{"context":"all_turns","effort":"medium","mode":"standard","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tool_usage":{"image_gen":{"input_tokens":0,"input_tokens_details":{"image_tokens":0,"text_tokens":0},"output_tokens":0,"output_tokens_details":{"image_tokens":0,"text_tokens":0},"total_tokens":0},"web_search":{"num_requests":0}},"tools":[{"type":"function","description":"Runs system commands","name":"system","output_schema":null,"parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"],"additionalProperties":false},"strict":false}],"top_logprobs":0,"top_p":0.98,"truncation":"disabled","usage":null,"user":null,"metadata":{}},"sequence_number":1}
 
         event: response.output_item.added
-        data: {"type":"response.output_item.added","item":{"id":"fc_007c3e7bdcdd902a016aa967b87eb887d299bb7ba455f19f29","type":"function_call","status":"in_progress","arguments":"","call_id":"call_dEQPsSQsv3LBtfjlg8bZiCHn","name":"system"},"output_index":0,"sequence_number":2}
+        data: {"type":"response.output_item.added","item":{"id":"fc_007c3e7bdcdd902a016aa967b87eb887d299bb7ba455f19f29","type":"function_call","status":"in_progress","arguments":"","call_id":"call_dEQPsSQsv3LBtfjlg8bZiCHn","name":"get-date"},"output_index":0,"sequence_number":2}
 
         event: response.function_call_arguments.delta
-        data: {"type":"response.function_call_arguments.delta","delta":"{\"","item_id":"fc_007c3e7bdcdd902a016aa967b87eb887d299bb7ba455f19f29","obfuscation":"j2Vu8SwisXUWOj","output_index":0,"sequence_number":3}
+        data: {"type":"response.function_call_arguments.delta","delta":"{}","item_id":"fc_007c3e7bdcdd902a016aa967b87eb887d299bb7ba455f19f29","obfuscation":"j2Vu8SwisXUWOj","output_index":0,"sequence_number":3}
 
         event: response.function_call_arguments.delta
-        data: {"type":"response.function_call_arguments.delta","delta":"command","item_id":"fc_007c3e7bdcdd902a016aa967b87eb887d299bb7ba455f19f29","obfuscation":"60ysDjXLf","output_index":0,"sequence_number":4}
+        data: {"type":"response.function_call_arguments.delta","delta":"","item_id":"fc_007c3e7bdcdd902a016aa967b87eb887d299bb7ba455f19f29","obfuscation":"60ysDjXLf","output_index":0,"sequence_number":4}
 
         event: response.function_call_arguments.delta
-        data: {"type":"response.function_call_arguments.delta","delta":"\":\"","item_id":"fc_007c3e7bdcdd902a016aa967b87eb887d299bb7ba455f19f29","obfuscation":"aQs06YXEUCC6n","output_index":0,"sequence_number":5}
+        data: {"type":"response.function_call_arguments.delta","delta":"","item_id":"fc_007c3e7bdcdd902a016aa967b87eb887d299bb7ba455f19f29","obfuscation":"aQs06YXEUCC6n","output_index":0,"sequence_number":5}
 
         event: response.function_call_arguments.delta
-        data: {"type":"response.function_call_arguments.delta","delta":"date","item_id":"fc_007c3e7bdcdd902a016aa967b87eb887d299bb7ba455f19f29","obfuscation":"rQ6A1NDIb3SC","output_index":0,"sequence_number":6}
+        data: {"type":"response.function_call_arguments.delta","delta":"","item_id":"fc_007c3e7bdcdd902a016aa967b87eb887d299bb7ba455f19f29","obfuscation":"rQ6A1NDIb3SC","output_index":0,"sequence_number":6}
 
         event: response.function_call_arguments.delta
-        data: {"type":"response.function_call_arguments.delta","delta":"\"}","item_id":"fc_007c3e7bdcdd902a016aa967b87eb887d299bb7ba455f19f29","obfuscation":"mbR96YRixJLMIX","output_index":0,"sequence_number":7}
+        data: {"type":"response.function_call_arguments.delta","delta":"","item_id":"fc_007c3e7bdcdd902a016aa967b87eb887d299bb7ba455f19f29","obfuscation":"mbR96YRixJLMIX","output_index":0,"sequence_number":7}
 
         event: response.function_call_arguments.done
-        data: {"type":"response.function_call_arguments.done","arguments":"{\"command\":\"date\"}","item_id":"fc_007c3e7bdcdd902a016aa967b87eb887d299bb7ba455f19f29","output_index":0,"sequence_number":8}
+        data: {"type":"response.function_call_arguments.done","arguments":"{}","item_id":"fc_007c3e7bdcdd902a016aa967b87eb887d299bb7ba455f19f29","output_index":0,"sequence_number":8}
 
         event: response.output_item.done
-        data: {"type":"response.output_item.done","item":{"id":"fc_007c3e7bdcdd902a016aa967b87eb887d299bb7ba455f19f29","type":"function_call","status":"completed","arguments":"{\"command\":\"date\"}","call_id":"call_dEQPsSQsv3LBtfjlg8bZiCHn","name":"system"},"output_index":0,"sequence_number":9}
+        data: {"type":"response.output_item.done","item":{"id":"fc_007c3e7bdcdd902a016aa967b87eb887d299bb7ba455f19f29","type":"function_call","status":"completed","arguments":"{}","call_id":"call_dEQPsSQsv3LBtfjlg8bZiCHn","name":"get-date"},"output_index":0,"sequence_number":9}
 
         event: response.completed
-        data: {"type":"response.completed","response":{"id":"resp_007c3e7bdcdd902a016aa967b72cd087d2af3c6301d8d30bc1","object":"response","created_at":1789487031,"status":"completed","background":false,"completed_at":1789487032,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":null,"max_tool_calls":null,"model":"gpt-5.6-luna","moderation":null,"output":[{"id":"fc_007c3e7bdcdd902a016aa967b87eb887d299bb7ba455f19f29","type":"function_call","status":"completed","arguments":"{\"command\":\"date\"}","call_id":"call_dEQPsSQsv3LBtfjlg8bZiCHn","name":"system"}],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":"24h","reasoning":{"context":"all_turns","effort":"medium","mode":"standard","summary":null},"safety_identifier":null,"service_tier":"default","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tool_usage":{"image_gen":{"input_tokens":0,"input_tokens_details":{"image_tokens":0,"text_tokens":0},"output_tokens":0,"output_tokens_details":{"image_tokens":0,"text_tokens":0},"total_tokens":0},"web_search":{"num_requests":0}},"tools":[{"type":"function","description":"Runs system commands","name":"system","output_schema":null,"parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"],"additionalProperties":false},"strict":false}],"top_logprobs":0,"top_p":0.98,"truncation":"disabled","usage":{"input_tokens":61,"input_tokens_details":{"cache_write_tokens":0,"cached_tokens":0},"output_tokens":17,"output_tokens_details":{"reasoning_tokens":0},"total_tokens":78},"user":null,"metadata":{}},"sequence_number":10}
+        data: {"type":"response.completed","response":{"id":"resp_007c3e7bdcdd902a016aa967b72cd087d2af3c6301d8d30bc1","object":"response","created_at":1789487031,"status":"completed","background":false,"completed_at":1789487032,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":null,"max_tool_calls":null,"model":"gpt-5.6-luna","moderation":null,"output":[{"id":"fc_007c3e7bdcdd902a016aa967b87eb887d299bb7ba455f19f29","type":"function_call","status":"completed","arguments":"{}","call_id":"call_dEQPsSQsv3LBtfjlg8bZiCHn","name":"get-date"}],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":"24h","reasoning":{"context":"all_turns","effort":"medium","mode":"standard","summary":null},"safety_identifier":null,"service_tier":"default","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tool_usage":{"image_gen":{"input_tokens":0,"input_tokens_details":{"image_tokens":0,"text_tokens":0},"output_tokens":0,"output_tokens_details":{"image_tokens":0,"text_tokens":0},"total_tokens":0},"web_search":{"num_requests":0}},"tools":[{"type":"function","description":"Runs system commands","name":"system","output_schema":null,"parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"],"additionalProperties":false},"strict":false}],"top_logprobs":0,"top_p":0.98,"truncation":"disabled","usage":{"input_tokens":61,"input_tokens_details":{"cache_write_tokens":0,"cached_tokens":0},"output_tokens":17,"output_tokens_details":{"reasoning_tokens":0},"total_tokens":78},"user":null,"metadata":{}},"sequence_number":10}
 
   recorded_at: Tue, 15 Sep 2026 15:43:35 GMT
 - request:
@@ -120,9 +120,9 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"input":[{"role":"user","content":[{"type":"input_text","text":"You
-        are a bot that can run UNIX system commands"}]},{"role":"user","content":[{"type":"input_text","text":"Hey,
-        run the ''date'' command"}]},{"id":"fc_007c3e7bdcdd902a016aa967b87eb887d299bb7ba455f19f29","type":"function_call","status":"completed","arguments":"{\"command\":\"date\"}","call_id":"call_dEQPsSQsv3LBtfjlg8bZiCHn","name":"system"},{"type":"function_call_output","call_id":"call_dEQPsSQsv3LBtfjlg8bZiCHn","output":"{\"success\":true}"}],"model":"gpt-5.6-luna","store":false,"stream":true,"tools":[{"type":"function","name":"system","description":"Runs
-        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"],"additionalProperties":false},"strict":false}]}'
+        are a bot that can tell the current date"}]},{"role":"user","content":[{"type":"input_text","text":"Hey,
+        what is the date today?"}]},{"id":"fc_007c3e7bdcdd902a016aa967b87eb887d299bb7ba455f19f29","type":"function_call","status":"completed","arguments":"{}","call_id":"call_dEQPsSQsv3LBtfjlg8bZiCHn","name":"get-date"},{"type":"function_call_output","call_id":"call_dEQPsSQsv3LBtfjlg8bZiCHn","output":"{\"today\":\"2026-11-03\"}"}],"model":"gpt-5.6-luna","store":false,"stream":true,"tools":[{"type":"function","name":"get-date","description":"Returns
+        the current date","parameters":{"type":"object","properties":{},"required":[],"additionalProperties":false},"strict":false}]}'
     headers:
       User-Agent:
       - llm.rb v15.2.2

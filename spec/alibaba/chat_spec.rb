@@ -18,23 +18,24 @@ RSpec.describe "LLM::Context: alibaba" do
   context "when given a tool call", vcr: {cassette_name: "alibaba/chat/llm_chat_stream_tool"} do
     let(:params) { {stream: true, tools: [tool]} }
     let(:tool) do
-      LLM.function(:system) do |fn|
-        fn.description "Runs system commands"
-        fn.params { it.object(command: it.string.required) }
-        fn.define { |command:| {success: true, output: "Mon Jul 10 12:34:56 UTC 2026"} }
+      LLM.function(:"get-date") do |fn|
+        fn.description "Returns the current date"
+        fn.define { {today: Date.today} }
       end
     end
     let(:prompt) do
       ctx.build_prompt do
-        it.user "You are a bot that can run UNIX system commands"
-        it.user "Hey, run the 'date' command"
+        it.user "You are a bot that can tell the current date"
+        it.user "Hey, what is the date today?"
       end
     end
 
     before { ctx.talk(prompt) }
 
     it "calls the function(s)" do
-      ctx.talk ctx.pending_functions.map(&:call)
+      returns = ctx.pending_functions.map(&:call)
+      expect(returns.map(&:value)).to eq([{today: Date.today}])
+      ctx.talk returns
       expect(ctx.pending_functions).to be_empty
     end
   end

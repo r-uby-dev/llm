@@ -6,9 +6,9 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
-        a bot that can run UNIX system commands"}]},{"role":"user","content":[{"type":"text","text":"Hey,
-        run the ''date'' command"}]}],"model":"zai-org/GLM-5.2","tools":[{"type":"function","name":"system","function":{"name":"system","description":"Runs
-        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}],"stream":true,"stream_options":{"include_usage":true}}'
+        a bot that can tell the current date"}]},{"role":"user","content":[{"type":"text","text":"Hey,
+        what is the date today?"}]}],"model":"zai-org/GLM-5.2","tools":[{"type":"function","name":"get-date","function":{"name":"get-date","description":"Returns
+        the current date","parameters":{"type":"object","properties":{},"required":[]}}}],"stream":true,"stream_options":{"include_usage":true}}'
     headers:
       User-Agent:
       - llm.rb v12.0.0.beta.1
@@ -58,7 +58,7 @@ http_interactions:
 
         data: {"service_tier": null, "id": "chatcmpl-Rsrq5jsoIVf2DhOL9o9D9imj", "object": "chat.completion.chunk", "created": 1782584201, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": ".", "tool_calls": null}, "logprobs": null, "finish_reason": null}], "usage": null}
 
-        data: {"service_tier": null, "id": "chatcmpl-Rsrq5jsoIVf2DhOL9o9D9imj", "object": "chat.completion.chunk", "created": 1782584201, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": null, "tool_calls": [{"index": 0, "id": "call_d14d", "function": {"arguments": "{\"command\": \"date\"}", "name": "system"}, "type": "function"}]}, "logprobs": null, "finish_reason": null}], "usage": {"prompt_tokens": 170, "total_tokens": 193, "completion_tokens": 23, "estimated_cost": null, "prompt_tokens_details": null, "reasoning_tokens": 0}}
+        data: {"service_tier": null, "id": "chatcmpl-Rsrq5jsoIVf2DhOL9o9D9imj", "object": "chat.completion.chunk", "created": 1782584201, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": null, "tool_calls": [{"index": 0, "id": "call_d14d", "function": {"arguments": "{}", "name": "get-date"}, "type": "function"}]}, "logprobs": null, "finish_reason": null}], "usage": {"prompt_tokens": 170, "total_tokens": 193, "completion_tokens": 23, "estimated_cost": null, "prompt_tokens_details": null, "reasoning_tokens": 0}}
 
         data: {"service_tier": null, "id": "chatcmpl-Rsrq5jsoIVf2DhOL9o9D9imj", "object": "chat.completion.chunk", "created": 1782584201, "model": "zai-org/GLM-5.2", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "", "reasoning_content": null, "tool_calls": null}, "logprobs": null, "finish_reason": "tool_calls"}], "usage": {"prompt_tokens": 170, "total_tokens": 193, "completion_tokens": 23, "estimated_cost": null, "prompt_tokens_details": null, "reasoning_tokens": 0}}
 
@@ -73,10 +73,9 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
-        a bot that can run UNIX system commands"}]},{"role":"user","content":[{"type":"text","text":"Hey,
-        run the ''date'' command"}]},{"role":"assistant","content":null,"tool_calls":[{"index":0,"id":"call_d14d","function":{"arguments":"{\"command\":
-        \"date\"}","name":"system"},"type":"function"}]},{"role":"tool","tool_call_id":"call_d14d","content":"{\"success\":true}"}],"model":"zai-org/GLM-5.2","tools":[{"type":"function","name":"system","function":{"name":"system","description":"Runs
-        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}}],"stream":true,"stream_options":{"include_usage":true}}'
+        a bot that can tell the current date"}]},{"role":"user","content":[{"type":"text","text":"Hey,
+        what is the date today?"}]},{"role":"assistant","content":null,"tool_calls":[{"index":0,"id":"call_d14d","function":{"arguments":"{}","name":"get-date"},"type":"function"}]},{"role":"tool","tool_call_id":"call_d14d","content":"{\"today\":\"2026-11-03\"}"}],"model":"zai-org/GLM-5.2","tools":[{"type":"function","name":"get-date","function":{"name":"get-date","description":"Returns
+        the current date","parameters":{"type":"object","properties":{},"required":[]}}}],"stream":true,"stream_options":{"include_usage":true}}'
     headers:
       User-Agent:
       - llm.rb v12.0.0.beta.1

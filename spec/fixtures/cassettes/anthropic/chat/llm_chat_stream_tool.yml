@@ -6,9 +6,9 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"messages":[{"role":"user","content":[{"type":"text","text":"Hey,
-        run the ''date'' command"}]},{"role":"user","content":[{"type":"text","text":"You
-        are a bot that can run UNIX system commands"}]}],"model":"claude-sonnet-4-20250514","max_tokens":1024,"tools":[{"name":"system","description":"Runs
-        system commands","input_schema":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}],"stream":true}'
+        what is the date today?"}]},{"role":"user","content":[{"type":"text","text":"You
+        are a bot that can tell the current date"}]}],"model":"claude-sonnet-4-20250514","max_tokens":1024,"tools":[{"name":"get-date","description":"Returns
+        the current date","input_schema":{"type":"object","properties":{},"required":[]}}],"stream":true}'
     headers:
       Content-Type:
       - application/json
@@ -103,22 +103,22 @@ http_interactions:
         data: {"type":"content_block_stop","index":0            }
 
         event: content_block_start
-        data: {"type":"content_block_start","index":1,"content_block":{"type":"tool_use","id":"toolu_01PabM8SbAD7d1xbTctiNvF5","name":"system","input":{}}    }
+        data: {"type":"content_block_start","index":1,"content_block":{"type":"tool_use","id":"toolu_01PabM8SbAD7d1xbTctiNvF5","name":"get-date","input":{}}    }
 
         event: content_block_delta
         data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":""}      }
 
         event: content_block_delta
-        data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"{\""} }
+        data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"{}"} }
 
         event: content_block_delta
-        data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"co"}      }
+        data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":""}      }
 
         event: content_block_delta
-        data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"mmand\": "}             }
+        data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":""}             }
 
         event: content_block_delta
-        data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"\"date\"}"}    }
+        data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":""}    }
 
         event: content_block_stop
         data: {"type":"content_block_stop","index":1}
@@ -136,9 +136,9 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"messages":[{"role":"user","content":[{"type":"text","text":"You are
-        a bot that can run UNIX system commands"}]},{"role":"user","content":[{"type":"text","text":"Hey,
-        run the ''date'' command"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01PabM8SbAD7d1xbTctiNvF5","name":"system","input":{"command":"date"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01PabM8SbAD7d1xbTctiNvF5","content":[{"type":"text","text":"{\"success\":true}"}]}]}],"model":"claude-sonnet-4-20250514","max_tokens":1024,"tools":[{"name":"system","description":"Runs
-        system commands","input_schema":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}],"stream":true}'
+        a bot that can tell the current date"}]},{"role":"user","content":[{"type":"text","text":"Hey,
+        what is the date today?"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01PabM8SbAD7d1xbTctiNvF5","name":"get-date","input":{}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01PabM8SbAD7d1xbTctiNvF5","content":[{"type":"text","text":"{\"today\":\"2026-11-03\"}"}]}]}],"model":"claude-sonnet-4-20250514","max_tokens":1024,"tools":[{"name":"get-date","description":"Returns
+        the current date","input_schema":{"type":"object","properties":{},"required":[]}}],"stream":true}'
     headers:
       Content-Type:
       - application/json

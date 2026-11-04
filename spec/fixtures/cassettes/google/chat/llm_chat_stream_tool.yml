@@ -6,9 +6,9 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"contents":[{"role":"user","parts":[{"text":"You are a bot that can
-        run UNIX system commands"}]},{"role":"user","parts":[{"text":"Hey, run the
-        ''date'' command"}]}],"tools":[{"functionDeclarations":[{"name":"system","description":"Runs
-        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}]}]}'
+        tell the current date"}]},{"role":"user","parts":[{"text":"Hey, what is the
+        date today?"}]}],"tools":[{"functionDeclarations":[{"name":"get-date","description":"Returns
+        the current date","parameters":{"type":"object","properties":{},"required":[]}}]}]}'
     headers:
       User-Agent:
       - llm.rb v12.6.0
@@ -52,7 +52,7 @@ http_interactions:
     body:
       encoding: UTF-8
       string: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"functionCall\":
-        {\"name\": \"system\",\"args\": {\"command\": \"date\"},\"id\": \"vkZV2zjT\"},\"thoughtSignature\":
+        {\"name\": \"get-date\",\"args\": {},\"id\": \"vkZV2zjT\"},\"thoughtSignature\":
         \"EjQKMgERTTIPm9GB2H9k2Mb/zlbsQuJHeFapl0oNr4uuNDy76YBTWc82gxFw8ryG6HzgiqQU\"}],\"role\":
         \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 58,\"candidatesTokenCount\":
         14,\"totalTokenCount\": 72,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\":
@@ -70,9 +70,9 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"contents":[{"role":"user","parts":[{"text":"You are a bot that can
-        run UNIX system commands"}]},{"role":"user","parts":[{"text":"Hey, run the
-        ''date'' command"}]},{"role":"model","parts":[{"functionCall":{"name":"system","args":{"command":"date"},"id":"vkZV2zjT"},"thoughtSignature":"EjQKMgERTTIPm9GB2H9k2Mb/zlbsQuJHeFapl0oNr4uuNDy76YBTWc82gxFw8ryG6HzgiqQU"}]},{"role":"user","parts":[{"functionResponse":{"name":"system","response":{"success":true}}}]}],"tools":[{"functionDeclarations":[{"name":"system","description":"Runs
-        system commands","parameters":{"type":"object","properties":{"command":{"type":"string"}},"required":["command"]}}]}]}'
+        tell the current date"}]},{"role":"user","parts":[{"text":"Hey, what is the
+        date today?"}]},{"role":"model","parts":[{"functionCall":{"name":"get-date","args":{},"id":"vkZV2zjT"},"thoughtSignature":"EjQKMgERTTIPm9GB2H9k2Mb/zlbsQuJHeFapl0oNr4uuNDy76YBTWc82gxFw8ryG6HzgiqQU"}]},{"role":"user","parts":[{"functionResponse":{"name":"get-date","response":{"today":"2026-11-03"}}}]}],"tools":[{"functionDeclarations":[{"name":"get-date","description":"Returns
+        the current date","parameters":{"type":"object","properties":{},"required":[]}}]}]}'
     headers:
       User-Agent:
       - llm.rb v12.6.0
