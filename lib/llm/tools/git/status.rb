@@ -8,16 +8,19 @@ class LLM::Tool::Git
     name "git-status"
     description "Show the working tree status"
     parameter :path, String, "only report this path"
-    defaults path: nil
+    parameter :timeout, Integer, "the maximum allowed time for git to run (in seconds)"
+    defaults path: nil, timeout: DEFAULT_TIMEOUT
 
     ##
     # @param [String, nil] path
     #  An optional path
+    # @param [Integer] timeout
+    #  The maximum time to allow git to run, in seconds
     # @return [Hash]
-    def call(path: nil)
+    def call(path: nil, timeout: DEFAULT_TIMEOUT)
       Exec
         .new(env:)
-        .call(arguments: ["git", *parse!(path:)])
+        .call(arguments: ["git", *parse!(path:)], timeout:)
     end
 
     private

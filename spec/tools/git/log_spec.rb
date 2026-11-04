@@ -22,7 +22,7 @@ RSpec.describe LLM::Tool::Git::Log do
     let(:params) { described_class.function.params }
 
     it "defines the rev, path and max_count parameters" do
-      expect(params.properties.keys).to contain_exactly("rev", "path", "max_count")
+      expect(params.properties.keys).to contain_exactly("rev", "timeout", "path", "max_count")
     end
 
     it "defaults rev to HEAD" do

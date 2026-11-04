@@ -13,7 +13,8 @@ class LLM::Tool::Git
     parameter :staged, Boolean, "diff the index instead of the working tree"
     parameter :stat, Boolean, "show a diffstat instead of a patch"
     parameter :context, Integer, "how many context lines to show"
-    defaults rev: nil, path: nil, staged: false, stat: false, context: nil
+    parameter :timeout, Integer, "the maximum allowed time for git to run (in seconds)"
+    defaults rev: nil, path: nil, staged: false, stat: false, context: nil, timeout: DEFAULT_TIMEOUT
 
     ##
     # @param [String, nil] rev
@@ -26,11 +27,13 @@ class LLM::Tool::Git
     #  Whether to show a diffstat instead of a patch
     # @param [Integer, nil] context
     #  The number of context lines to show
+    # @param [Integer] timeout
+    #  The maximum time to allow git to run, in seconds
     # @return [Hash]
-    def call(rev: nil, path: nil, staged: false, stat: false, context: nil)
+    def call(rev: nil, path: nil, staged: false, stat: false, context: nil, timeout: DEFAULT_TIMEOUT)
       Exec
         .new(env:)
-        .call(arguments: ["git", *parse!(rev:, path:, staged:, stat:, context:)])
+        .call(arguments: ["git", *parse!(rev:, path:, staged:, stat:, context:)], timeout:)
     end
 
     private

@@ -8,6 +8,7 @@ class LLM::Tool
   # for process management.
   class Ruby < self
     require "rbconfig"
+    require "llm/core_ext/rbconfig"
     require_relative "exec"
 
     name "ruby"

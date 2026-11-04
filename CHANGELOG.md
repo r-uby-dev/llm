@@ -252,6 +252,14 @@ it.
   `persistent: true` still works, because the pool
   is built inside the Ractor.
 
+* **tools: run the `ruby` tool on a Ractor** <br>
+  [`LLM::Tool::Ruby`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Ruby.html)
+  finds the interpreter it runs with `RbConfig.ruby`, and the builtin
+  method reads `RbConfig::CONFIG`, which is not Ractor-shareable, so a
+  tool call that ran on another Ractor raised `Ractor::IsolationError`.
+  `RbConfig.ruby` is built from a shareable copy of the config now, so
+  the `:ractor` concurrency strategy can call the tool.
+
 * **tool: `params` accepts a hash** <br>
   [`LLM::Tool.params`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool.html#params-class_method)
   and
@@ -292,16 +300,24 @@ it.
   was a single tool, named `git`, that took an `arguments` array and ran
   the subcommand it named. It is an abstract superclass now, and each
   subcommand is a tool of its own:
-  [`LLM::Tool::Git::Log`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git/Log.html)
-  (`git-log`), `LLM::Tool::Git::Diff` (`git-diff`), `LLM::Tool::Git::Show`
-  (`git-show`), `LLM::Tool::Git::Status` (`git-status`),
-  `LLM::Tool::Git::Commit` (`git-commit`), `LLM::Tool::Git::Branch`
-  (`git-branch`) and `LLM::Tool::Git::Checkout` (`git-checkout`). Each one
-  takes the keywords of the subcommand it runs - `rev:`, `path:` and
+  [`LLM::Tool::Git::Log`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git/Log.html) (`git-log`),
+  [`LLM::Tool::Git::Diff`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git/Diff.html) (`git-diff`),
+  [`LLM::Tool::Git::Show`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git/Show.html) (`git-show`),
+  [`LLM::Tool::Git::Status`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git/Status.html) (`git-status`),
+  [`LLM::Tool::Git::Commit`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git/Commit.html) (`git-commit`),
+  [`LLM::Tool::Git::Branch`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git/Branch.html) (`git-branch`) and
+  [`LLM::Tool::Git::Checkout`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git/Checkout.html) (`git-checkout`).
+  Each one takes the keywords of the subcommand it runs - `rev:`, `path:` and
   `max_count:` for `git-log`, `message:` and `paths:` for `git-commit` -
   and builds the argument vector itself, so a model no longer has to know
-  the shape of a git command line. None of them takes the `timeout:` the
-  old tool took. The tool named `git` is gone.
+  the shape of a git command line. The tool named `git` is gone.
+
+* **tools: the git tools take a `timeout:`** <br>
+  Each of the seven git tools takes an optional `timeout:`, an integer
+  number of seconds that bounds the command it runs. It is five seconds
+  by default, the default the single `git` tool had, and an explicit
+  value is passed to `LLM::Tool::Exec`, which stops a command that runs
+  past it.
 
 ### LLM::MCP
 
