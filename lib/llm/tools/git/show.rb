@@ -11,7 +11,8 @@ class LLM::Tool::Git
     parameter :rev, String, "a revision, defaults to HEAD"
     parameter :path, String, "only show this path"
     parameter :stat, Boolean, "show a diffstat instead of a patch"
-    defaults rev: "HEAD", path: nil, stat: false
+    parameter :timeout, Integer, "the maximum allowed time for git to run (in seconds)"
+    defaults rev: "HEAD", path: nil, stat: false, timeout: DEFAULT_TIMEOUT
 
     ##
     # @param [String] rev
@@ -20,11 +21,13 @@ class LLM::Tool::Git
     #  An optional path
     # @param [Boolean] stat
     #  Whether to show a diffstat instead of a patch
+    # @param [Integer] timeout
+    #  The maximum time to allow git to run, in seconds
     # @return [Hash]
-    def call(rev: "HEAD", path: nil, stat: false)
+    def call(rev: "HEAD", path: nil, stat: false, timeout: DEFAULT_TIMEOUT)
       Exec
         .new(env:)
-        .call(arguments: ["git", *parse!(rev:, path:, stat:)])
+        .call(arguments: ["git", *parse!(rev:, path:, stat:)], timeout:)
     end
 
     private

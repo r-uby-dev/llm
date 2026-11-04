@@ -22,7 +22,7 @@ RSpec.describe LLM::Tool::Git::Branch do
     let(:params) { described_class.function.params }
 
     it "defines the action and name parameters" do
-      expect(params.properties.keys).to contain_exactly("action", "name")
+      expect(params.properties.keys).to contain_exactly("action", "timeout", "name")
     end
 
     it "limits the action to a fixed set of values" do

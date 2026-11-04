@@ -22,7 +22,7 @@ RSpec.describe LLM::Tool::Git::Checkout do
     let(:params) { described_class.function.params }
 
     it "defines the ref, create and path parameters" do
-      expect(params.properties.keys).to contain_exactly("ref", "create", "path")
+      expect(params.properties.keys).to contain_exactly("ref", "timeout", "create", "path")
     end
 
     it "marks ref as required" do

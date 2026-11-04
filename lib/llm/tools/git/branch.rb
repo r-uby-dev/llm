@@ -9,7 +9,8 @@ class LLM::Tool::Git
     description "List, create, or delete branches"
     parameter :action, Enum["list", "create", "delete"], "what to do"
     parameter :name, String, "the branch name (create and delete)"
-    defaults action: "list", name: nil
+    parameter :timeout, Integer, "the maximum allowed time for git to run (in seconds)"
+    defaults action: "list", name: nil, timeout: DEFAULT_TIMEOUT
 
     ##
     # @param [String] action
@@ -18,11 +19,13 @@ class LLM::Tool::Git
     #  The branch name
     # @raise [ArgumentError]
     #  When a branch name is required and not given
+    # @param [Integer] timeout
+    #  The maximum time to allow git to run, in seconds
     # @return [Hash]
-    def call(action: "list", name: nil)
+    def call(action: "list", name: nil, timeout: DEFAULT_TIMEOUT)
       Exec
         .new(env:)
-        .call(arguments: ["git", *parse!(action:, name:)])
+        .call(arguments: ["git", *parse!(action:, name:)], timeout:)
     end
 
     private
