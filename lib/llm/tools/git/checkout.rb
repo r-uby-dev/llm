@@ -25,10 +25,10 @@ class LLM::Tool::Git
     # @param [Integer] timeout
     #  The maximum time to allow git to run, in seconds
     # @return [Hash]
-    def call(ref:, create: false, path: nil, timeout: DEFAULT_TIMEOUT)
+    def call(ref:, create: false, path: nil, timeout: DEFAULT_TIMEOUT, cwd: Dir.getwd)
       Exec
         .new(env:)
-        .call(arguments: ["git", *parse!(ref:, create:, path:)], timeout:)
+        .call(arguments: ["git", "-C", cwd, *parse!(ref:, create:, path:)], timeout:)
     end
 
     private
