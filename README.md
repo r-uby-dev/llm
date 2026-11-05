@@ -27,9 +27,8 @@ tracks what has changed between releases.
 The 
 [r.uby.dev](https://r.uby.dev) 
 website has an agent that can access the 
-[r-uby-dev/llm](https://github.com/r-uby-code/llm)
-source code. And another agent that can
-answer questions about FreeBSD. Both are
+runtime's source code. And another agent that 
+can answer questions about FreeBSD. Both are
 free to use, no account required, and you
 can both learn about the runtime and see
 how it works at the same time.
