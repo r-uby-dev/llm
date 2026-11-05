@@ -1641,46 +1641,17 @@ res = llm.images.create(prompt: "add a dog next to the rocket",
 IO.copy_stream res.images[0], "rocket-with-dog.svg"
 ```
 
-## Docs
+## Where can I learn more?
 
-The [deepdive](docs/deepdive.md) is the reference for everything below
-the quick start. Each chapter is a topic of its own:
-
-- **Fundamentals**:
-  [Providers](docs/deepdive/fundamentals/providers.md),
-  [Agents](docs/deepdive/fundamentals/agents.md),
-  [Tools](docs/deepdive/fundamentals/tools.md),
-  [Stream](docs/deepdive/fundamentals/stream.md),
-  [Schema](docs/deepdive/fundamentals/schema.md)
-- **Features**:
-  [Built-in tools](docs/deepdive/features/builtin_tools.md),
-  [Concurrency](docs/deepdive/features/concurrency.md),
-  [Embeddings](docs/deepdive/features/embeddings.md),
-  [Files](docs/deepdive/features/files.md),
-  [Moderations](docs/deepdive/features/moderations.md),
-  [Responses](docs/deepdive/features/responses.md),
-  [Database](docs/deepdive/features/database.md),
-  [Console](docs/deepdive/features/console.md)
-- **Advanced**:
-  [Context](docs/deepdive/advanced/context.md),
-  [Compaction](docs/deepdive/advanced/compaction.md),
-  [Cancellation](docs/deepdive/advanced/cancellation.md),
-  [Intercept](docs/deepdive/advanced/intercept.md),
-  [MessageFilter](docs/deepdive/advanced/message_filter.md),
-  [Transports](docs/deepdive/advanced/transports.md)
-- **Media**:
-  [Images](docs/deepdive/media/images.md),
-  [Audio](docs/deepdive/media/audio.md),
-  [OCR](docs/deepdive/media/ocr.md)
-- **Protocols**:
-  [MCP](docs/deepdive/protocols/mcp.md),
-  [A2A](docs/deepdive/protocols/a2a.md)
-- **Reference**:
-  [LLM::Response](docs/deepdive/reference/response.md),
-  [LLM::Object](docs/deepdive/reference/object.md),
-  [LLM::Cost](docs/deepdive/reference/cost.md),
-  [Tracer](docs/deepdive/reference/tracer.md),
-  [Model registry](docs/deepdive/reference/model_registry.md)
+The 
+[r.uby.dev](https://r.uby.dev) 
+website has an agent that can access the 
+[r-uby-dev/llm](https://github.com/r-uby-code/llm)
+source code. And another agent that can
+answer questions about FreeBSD. Both are
+free to use, no account required, and you
+can both learn about the runtime and see
+how it works at the same time.
 
 ## FAQ
 
