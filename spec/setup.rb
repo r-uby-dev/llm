@@ -4,6 +4,8 @@ require "llm"
 require "webmock/rspec"
 require "vcr"
 require "dotenv"
+require "tmpdir"
+require "fileutils"
 
 STDOUT.sync = true
 
