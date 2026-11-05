@@ -60,6 +60,18 @@ and it is the recommended version to use.
 gem install llm.rb
 ```
 
+## Learn Fast
+
+The 
+[r.uby.dev](https://r.uby.dev) 
+website has an agent that can access the 
+[r-uby-dev/llm](https://github.com/r-uby-code/llm)
+source code. And another agent that can
+answer questions about FreeBSD. Both are
+free to use, no account required, and you
+can both learn about the runtime and see
+how it works at the same time.
+
 ## Quick start
 
 ### Agents
@@ -1640,18 +1652,6 @@ res = llm.images.create(prompt: "add a dog next to the rocket",
                         agent: res.agent)
 IO.copy_stream res.images[0], "rocket-with-dog.svg"
 ```
-
-## Where can I learn more?
-
-The 
-[r.uby.dev](https://r.uby.dev) 
-website has an agent that can access the 
-[r-uby-dev/llm](https://github.com/r-uby-code/llm)
-source code. And another agent that can
-answer questions about FreeBSD. Both are
-free to use, no account required, and you
-can both learn about the runtime and see
-how it works at the same time.
 
 ## FAQ
 
