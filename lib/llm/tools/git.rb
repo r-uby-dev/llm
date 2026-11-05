@@ -23,6 +23,13 @@ class LLM::Tool
     require_relative "git/branch"
     require_relative "git/checkout"
 
+    def self.inherited(klass)
+      klass.property :cwd,
+                      LLM::Schema::String,
+                      "The current working directory",
+                      default: proc { Dir.getwd }
+    end
+
     private
 
     def env
