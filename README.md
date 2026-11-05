@@ -22,6 +22,18 @@ covers a lot of ground and the
 [changelog](CHANGELOG.md)
 tracks what has changed between releases.
 
+## Learn Fast
+
+The 
+[r.uby.dev](https://r.uby.dev) 
+website has an agent that can access the 
+[r-uby-dev/llm](https://github.com/r-uby-code/llm)
+source code. And another agent that can
+answer questions about FreeBSD. Both are
+free to use, no account required, and you
+can both learn about the runtime and see
+how it works at the same time.
+
 ## Install
 
 ##### v17
@@ -59,18 +71,6 @@ and it is the recommended version to use.
 ```bash
 gem install llm.rb
 ```
-
-## Learn Fast
-
-The 
-[r.uby.dev](https://r.uby.dev) 
-website has an agent that can access the 
-[r-uby-dev/llm](https://github.com/r-uby-code/llm)
-source code. And another agent that can
-answer questions about FreeBSD. Both are
-free to use, no account required, and you
-can both learn about the runtime and see
-how it works at the same time.
 
 ## Quick start
 
