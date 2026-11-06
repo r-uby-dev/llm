@@ -115,6 +115,15 @@ RSpec.describe LLM::Registry do
     end
   end
 
+  context "when given cheaperinference" do
+    let(:provider) { :cheaperinference }
+
+    it "includes the default model" do
+      model = LLM.cheaperinference(key: "TOKEN").default_model
+      expect(registry.limit(model:).context).to be_a(Integer)
+    end
+  end
+
   describe "#keys" do
     let(:provider) { :openai }
 

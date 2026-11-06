@@ -1,0 +1,110 @@
+{
+  "id": "cheaperinference",
+  "env": [
+    "CHEAPER_INFERENCE_API_KEY"
+  ],
+  "npm": "@ai-sdk/openai-compatible",
+  "api": "https://api.cheaperinference.com/v1",
+  "name": "Cheaper Inference",
+  "doc": "https://cheaperinference.com/docs",
+  "models": {
+    "gpt-5.4-mini": {
+      "id": "gpt-5.4-mini",
+      "name": "gpt-5.4-mini",
+      "attachment": true,
+      "reasoning": true,
+      "tool_call": true,
+      "modalities": {
+        "input": [
+          "text",
+          "image"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 400000,
+        "output": 128000
+      }
+    },
+    "gpt-5.4": {
+      "id": "gpt-5.4",
+      "name": "gpt-5.4",
+      "attachment": true,
+      "reasoning": true,
+      "tool_call": true,
+      "modalities": {
+        "input": [
+          "text",
+          "image"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 1000000,
+        "output": 128000
+      }
+    },
+    "claude-sonnet-5": {
+      "id": "claude-sonnet-5",
+      "name": "claude-sonnet-5",
+      "attachment": true,
+      "reasoning": true,
+      "tool_call": true,
+      "modalities": {
+        "input": [
+          "text",
+          "image"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 1000000,
+        "output": 128000
+      }
+    },
+    "deepseek-v4-flash": {
+      "id": "deepseek-v4-flash",
+      "name": "deepseek-v4-flash",
+      "attachment": false,
+      "reasoning": true,
+      "tool_call": true,
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 1000000,
+        "output": 384000
+      }
+    },
+    "glm-5.3": {
+      "id": "glm-5.3",
+      "name": "glm-5.3",
+      "attachment": false,
+      "reasoning": true,
+      "tool_call": true,
+      "modalities": {
+        "input": [
+          "text"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "limit": {
+        "context": 1000000,
+        "output": 1000000
+      }
+    }
+  }
+}

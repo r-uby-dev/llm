@@ -464,6 +464,19 @@ module LLM
   end
 
   ##
+  # @param key (see LLM::CheaperInference#initialize)
+  # @param host (see LLM::CheaperInference#initialize)
+  # @return (see LLM::CheaperInference#initialize)
+  def cheaperinference(key: UNDEFINED, **)
+    lock(:require) { require_relative "llm/providers/cheaperinference" unless defined?(LLM::CheaperInference) }
+    if key == UNDEFINED
+      LLM::CheaperInference.new(key: key(name: __method__), **)
+    else
+      LLM::CheaperInference.new(key:, **)
+    end
+  end
+
+  ##
   # @param key (see LLM::Alibaba#initialize)
   # @param host (see LLM::Alibaba#initialize)
   # @return (see LLM::Alibaba#initialize)
