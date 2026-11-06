@@ -7,7 +7,13 @@ before) can be seen in [changelog/old.md](changelog/old.md).
 
 ## What's next
 
-*No unreleased changes yet. Check back after the next release.*
+### LLM::Tool
+
+* **tools: add a `git-ls-files` tool** <br>
+  [`LLM::Tool::Git::LsFiles`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git/LsFiles.html)
+  (`git-ls-files`) lists the files git tracks, the index beside the
+  changes that `git-status` reports. Like the other git tools it takes
+  an optional `path:`, which narrows the list, and an optional `timeout:`.
 
 ## v18.0.0
 
