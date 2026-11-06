@@ -17,7 +17,7 @@ Welcome to the canonical llm.rb repository.
 llm.rb is a runtime for building agentic AI applications
 on CRuby. It runs on Ruby's standard library by default,
 it supports concurrent and parallel tool execution and has
-a single coherent API that spans 15+ providers. The README
+a single coherent API that spans 16+ providers. The README
 covers a lot of ground and the
 [changelog](CHANGELOG.md)
 tracks what has changed between releases.
@@ -90,7 +90,7 @@ A classic "hello world" example. <br> The environment variable
 `$DEEPSEEK_API_KEY` is assumed to have been set and reference
 a valid DeepSeek API key, otherwise you can provide a key explicitly
 (eg: `LLM.deepseek(key: ENV["MYKEY"])`) and you could swap
-deepseek for any of the other 14 providers as well
+deepseek for any of the other 15 providers as well
 (eg: `llm = LLM.openai`):
 
 ```ruby
@@ -1422,6 +1422,7 @@ every other provider defaults to chat completions.
 * **Moonshot (Kimi)** (`LLM.moonshot`)
 * **Hanzo** (`LLM.hanzo`)
 * **OpenRouter** (`LLM.openrouter`)
+* **Cheaper Inference** (`LLM.cheaperinference`)
 * **Alibaba (Qwen3)** (`LLM.alibaba`, also `LLM.aliyun`)
 * **Mistral** (`LLM.mistral`)
 * **AWS Bedrock** (`LLM.bedrock`)
@@ -1448,6 +1449,7 @@ llm = LLM.xai
 llm = LLM.zai
 llm = LLM.moonshot
 llm = LLM.openrouter
+llm = LLM.cheaperinference
 llm = LLM.alibaba  # also: LLM.aliyun
 llm = LLM.mistral
 llm = LLM.bedrock
@@ -1472,6 +1474,7 @@ llm = LLM.xai(key: ENV["XAI_API_KEY"])
 llm = LLM.zai(key: ENV["ZHIPU_API_KEY"])
 llm = LLM.moonshot(key: ENV["MOONSHOT_API_KEY"])
 llm = LLM.openrouter(key: ENV["OPENROUTER_API_KEY"])
+llm = LLM.cheaperinference(key: ENV["CHEAPER_INFERENCE_API_KEY"])
 llm = LLM.alibaba(key: ENV["DASHSCOPE_API_KEY"]) # also: LLM.aliyun
 llm = LLM.mistral(key: ENV["MISTRAL_API_KEY"])
 llm = LLM.bedrock(
