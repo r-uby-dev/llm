@@ -30,8 +30,8 @@ website has an agent that can access the
 runtime's source code. And another agent that 
 can answer questions about FreeBSD. Both are
 free to use, no account required, and you
-can both learn about the runtime and see
-how it works at the same time.
+can use them to learn about the runtime and 
+see how it works at the same time.
 
 ## Install
 
