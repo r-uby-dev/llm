@@ -219,6 +219,13 @@ module LLM
     end
 
     ##
+    # Returns the options given to the context intercept
+    # @return [Hash]
+    def intercept_options
+      @intercept[:options].dup
+    end
+
+    ##
     # Returns the configured filter class.
     #
     # Filters rewrite the most recent message before it is sent to the
