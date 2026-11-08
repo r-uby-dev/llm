@@ -8,6 +8,7 @@ class LLM::Tool
   # @see LLM::Tool::Git::Diff
   # @see LLM::Tool::Git::Show
   # @see LLM::Tool::Git::Status
+  # @see LLM::Tool::Git::LsFiles
   # @see LLM::Tool::Git::Commit
   # @see LLM::Tool::Git::Branch
   # @see LLM::Tool::Git::Checkout
@@ -19,6 +20,7 @@ class LLM::Tool
     require_relative "git/diff"
     require_relative "git/show"
     require_relative "git/status"
+    require_relative "git/ls-files"
     require_relative "git/commit"
     require_relative "git/branch"
     require_relative "git/checkout"
