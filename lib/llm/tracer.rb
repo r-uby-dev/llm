@@ -28,7 +28,7 @@ module LLM
     require_relative "tracer/logger"
     require_relative "tracer/telemetry"
     require_relative "tracer/null"
-    require_relative "tracer/pretty_logger"
+    require_relative "tracer/enhanced_logger"
     require_relative "tracer/multi"
 
     ##
@@ -64,16 +64,16 @@ module LLM
     end
 
     ##
-    # Builds a {LLM::Tracer::PrettyLogger} for a provider.
+    # Builds a {LLM::Tracer::EnhancedLogger} for a provider.
     # @param [LLM::Provider] llm
     #  A provider
     # @param [Hash] options
-    #  Forwarded to {LLM::Tracer::PrettyLogger} (eg `io:`)
-    # @return [LLM::Tracer::PrettyLogger]
-    def self.pretty_logger(llm, **options)
-      PrettyLogger.new(llm, **options)
+    #  Forwarded to {LLM::Tracer::EnhancedLogger} (eg `io:`)
+    # @return [LLM::Tracer::EnhancedLogger]
+    def self.enhanced_logger(llm, **options)
+      EnhancedLogger.new(llm, **options)
     end
-    (class << self; self; end).alias_method(:pretty, :pretty_logger)
+    (class << self; self; end).alias_method(:enhanced, :enhanced_logger)
 
     ##
     # Builds a {LLM::Tracer::Logger} for a provider.

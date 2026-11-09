@@ -2,18 +2,18 @@
 
 module LLM
   ##
-  # The {LLM::Tracer::PrettyLogger LLM::Tracer::PrettyLogger} class
+  # The {LLM::Tracer::EnhancedLogger LLM::Tracer::EnhancedLogger} class
   # writes human-readable request and tool call logs to a console
   # or file. Each event is a single line with the relevant context
   # inline, no structured JSON.
   #
   # @example
   #   llm = LLM.openai(key: ENV["KEY"])
-  #   llm.tracer = LLM::Tracer.pretty_logger(llm)
+  #   llm.tracer = LLM::Tracer.enhanced_logger(llm)
   #
   # @example Writing to a file
-  #   llm.tracer = LLM::Tracer.pretty_logger(llm, path: "log.txt")
-  class Tracer::PrettyLogger < Tracer
+  #   llm.tracer = LLM::Tracer.enhanced_logger(llm, path: "log.txt")
+  class Tracer::EnhancedLogger < Tracer
     ##
     # @param (see LLM::Tracer#initialize)
     def initialize(llm, options = {})

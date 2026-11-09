@@ -670,7 +670,7 @@ also works for ActiveRecord and Sequel models.
 
 The builtin tracers:
 
-* [`LLM::Tracer.pretty`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer.html#pretty_logger-class_method): human-readable single-line logs to stderr, ideal during development.
+* [`LLM::Tracer.enhanced`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer.html#enhanced_logger-class_method): human-readable single-line logs to stderr, ideal during development.
 * [`LLM::Tracer.telemetry`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer.html#telemetry-class_method):
 exports spans via OTLP for OpenTelemetry in production.
 * [`LLM::Tracer.logger`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer.html#logger-class_method):
@@ -682,7 +682,7 @@ A simple example:
 
 ```ruby
 llm    = LLM.deepseek
-tracer = LLM::Tracer.pretty(llm)
+tracer = LLM::Tracer.enhanced(llm)
 agent  = LLM::Agent.new(llm, tracer:)
 agent.talk "Hello"
 ```
@@ -774,7 +774,7 @@ mcp = LLM::MCP.stdio(
 # be launched once per-request.
 mcp.session do
   llm    = LLM.deepseek
-  tracer = LLM::Tracer.pretty(llm)
+  tracer = LLM::Tracer.enhanced(llm)
   tools  = mcp.tools.select { _1.name == "sem_log" }
   stream = $stdout
   agent  = LLM::Agent.new(llm, tracer:, stream:, tools:)
@@ -992,7 +992,7 @@ class Agent < ActiveRecord::Base
               instructions: proc { File.read("instructions.md") },
               tools: :toolset,
               concurrency: :ractor,
-              tracer: proc { LLM::Tracer.pretty(llm) }
+              tracer: proc { LLM::Tracer.enhanced(llm) }
   end
 
   ##

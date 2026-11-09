@@ -49,7 +49,7 @@ class Agent < LLM::Agent
     end
 
     def set_tracer
-      LLM::Tracer.multi(llm, LLM::Tracer::PrettyLogger)
+      LLM::Tracer.multi(llm, LLM::Tracer::EnhancedLogger)
     end
   }
 end

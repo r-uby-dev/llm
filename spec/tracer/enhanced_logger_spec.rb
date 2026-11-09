@@ -3,7 +3,7 @@
 require "setup"
 require "stringio"
 
-RSpec.describe LLM::Tracer::PrettyLogger do
+RSpec.describe LLM::Tracer::EnhancedLogger do
   let(:provider) { LLM.openai(key: "test") }
   let(:io) { StringIO.new }
   let(:tracer) { described_class.new(provider, io:) }
