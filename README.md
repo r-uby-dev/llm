@@ -139,7 +139,7 @@ that provide deep analysis of what an agent did, what a
 model said, and what tool calls were called.
 
 An eval score starts at 1.0. The `score` method (which receives 
-an instance of [LLM::Agent]()) can then reduce this score
+an instance of [`LLM::Agent`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html)) can then reduce this score
 from a perfect 1.0 all the way down to zero - based on the
 results. What a "pass" means is up to you, you might require
 1.0 for a pass, or 0.8 could be acceptable.
@@ -216,6 +216,38 @@ LLM::Eval.new do
 end
 ```
 
+
+##### intercept.rb
+
+The [`LLM::Intercept`](https://r.uby.dev/api-docs/llm.rb/LLM/Intercept.html) class sits between when a model
+requests a tool and when the runtime calls it. An intercept
+can rewrite tool call parameters before they're sent to the
+tool - essentially rewriting the model's request - or refuse
+the tool call by returning its own [`LLM::Function::Return`](https://r.uby.dev/api-docs/llm.rb/LLM/Function/Return.html).
+
+```ruby
+require "llm"
+require "llm/tools/exec"
+
+class Sandbox < LLM::Intercept
+  def call(function:)
+    case function.name
+    when "exec"
+      refused = ["sh", "rm", "reboot"]
+      command = function.arguments[0]
+      function.return(
+        error: true, 
+        kind: "sandbox_error", 
+        message: "#{command} is forbidden"
+      ) if refused.include?(command)
+    end
+  end
+end
+
+llm   = LLM.deepseek
+agent = LLM::Agent.new(llm, tools: [LLM::Tool::Exec], intercept: Sandbox) 
+agent.talk "delete README.md", stream: $stdout
+```
 
 ##### interrupt.rb
 

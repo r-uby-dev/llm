@@ -175,7 +175,6 @@ def main(argv)
       Process.wait
       exit 0
     end
-  end
   when "models.dev:download"
     return modelsdev_download
   end
