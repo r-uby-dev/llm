@@ -223,8 +223,8 @@ The [`LLM::Intercept`](https://r.uby.dev/api-docs/llm.rb/LLM/Intercept.html) cla
 requests a tool and when the runtime calls it. An intercept
 can rewrite tool call parameters before they're sent to the
 tool - essentially rewriting the model's request - or refuse
-the tool call by returning its own [`LLM::Function::Return`](https://r.uby.dev/api-docs/llm.rb/LLM/Function/Return.html)
-and it covers MCP and A2A tool calls as well: 
+the tool call by returning its own [`LLM::Function::Return`](https://r.uby.dev/api-docs/llm.rb/LLM/Function/Return.html).
+It covers MCP and A2A tool calls as well: 
 
 ```ruby
 require "llm"
