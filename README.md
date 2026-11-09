@@ -179,6 +179,10 @@ LLM::Eval.new do
 
   configure do
     agent do
+      ##
+      # The agent being tested.
+      # Any subclass of {LLM::Agent} works.
+      # Also works with ActiveRecord|Sequel models.
       LLM::Agent.new(
         llm,
         tools: [LLM::Tool::Ls, LLM::Tool::Pwd, LLM::Tool::Exec],
