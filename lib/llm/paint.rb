@@ -36,6 +36,8 @@
 #   LLM::Paint["hello", :blue, :bold] # => "\e[34;1mhello\e[0m"
 #   LLM::Paint["hello", :white, :on_red]
 class LLM::Paint
+  require_relative "paint/io"
+
   ##
   # @return [Hash<Symbol, Integer>]
   #  The codes that set the foreground color
@@ -97,14 +99,15 @@ class LLM::Paint
   end
 
   ##
-  # Detects whether the terminal supports color. Color is
-  # disabled when `$NO_COLOR` is set, and when standard output
-  # is not a terminal.
+  # Detects whether an IO supports color. Color is disabled
+  # when `$NO_COLOR` is set, and when the IO is not a terminal.
+  # @param [IO] io
+  #  The IO to inspect
   # @see https://no-color.org/
   # @return [Boolean]
-  def self.detect
+  def self.detect(io = $stdout)
     return false unless ENV["NO_COLOR"].to_s.strip.empty?
-    $stdout.tty?
+    io.respond_to?(:tty?) && io.tty?
   end
 
   ##
