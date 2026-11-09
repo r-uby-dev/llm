@@ -1,0 +1,51 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "llm"
+require "llm/eval"
+
+def main(argv)
+  rest = []
+  while option = argv.shift
+    case option
+    when "-p" then provider = argv.shift
+    when "-m" then model = argv.shift
+    when "-n", "--samples" then samples = Integer(argv.shift)
+    else rest.push(option)
+    end
+  end
+  if provider.nil?
+    abort "llm-eval: set -p <provider>"
+  else
+    llm = LLM.method(provider).call
+  end
+  if model.nil?
+    model = llm.default_model
+  end
+  if samples.nil?
+    samples = 1
+  end
+  rest.map do
+    path = File.absolute_path?(it) ? File.join(it, "eval.rb") :
+                                     File.join(__dir__, "..", it, "eval.rb")
+    samples.times do
+      LLM::Eval.from(llm, model, path, it+1).call
+    end
+  end
+end
+
+def crash(ex)
+  abort <<~ERROR
+  #{Paint[ex.class.to_s, :red, :bold]}
+  #{ex.message}
+  #{ex.backtrace.take(7).join("\n")}
+  ERROR
+end
+
+begin
+  main(ARGV.dup)
+rescue SystemExit
+  raise $!
+rescue
+  crash($!)
+end
