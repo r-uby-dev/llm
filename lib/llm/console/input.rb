@@ -371,13 +371,13 @@ class LLM::Console
           if @cache&.include?(fragment)
             @cache.candidates
           else
-            LLM::Command.complete(text)
+            LLM::Console::Command.complete(text)
           end
         candidate = cycle(candidates, fragment)
         set(text: "/#{candidate}")
       when :argument
         name, *args = text.split(" ", -1)
-        command = LLM::Command.find_by(name: name[1..])
+        command = LLM::Console::Command.find_by(name: name[1..])
         return unless command
         fragment, index = args.last, args.size - 1
         param = command.parameters.values.find { _1.index == index }

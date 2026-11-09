@@ -105,7 +105,7 @@ RSpec.describe LLM::Console::Input do
       end
     end
 
-    before { LLM::Command.registry[command] = command }
+    before { LLM::Console::Command.registry[command] = command }
 
     context "when completing a command name" do
       before { set_buffer("/mod") }

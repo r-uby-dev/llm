@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class LLM::Console
+class LLM::Console::Command
   ##
   # The 'keep' command frees space in the
   # context window and llm.rb is designed to
@@ -9,7 +9,7 @@ class LLM::Console
   # uses the 'truncate' strategy. See
   # {LLM::Compactor::Truncate LLM::Compactor::Truncate}
   # for more details.
-  class Command::Keep < Command
+  class Keep < self
     name "keep"
     description "free space in the context window"
     parameter :n, String, "the number of messages to keep\n" \

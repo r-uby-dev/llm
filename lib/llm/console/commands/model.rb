@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-class LLM::Console
+class LLM::Console::Command
   ##
   # Switches the active model for the REPL.
   # @see LLM::Console#model=
-  class Model < Command
+  class Model < self
     name "model"
     description "switch the active model"
     parameter :model, String, "The model to switch to"

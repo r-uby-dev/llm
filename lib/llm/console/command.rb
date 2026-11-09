@@ -241,7 +241,3 @@ class LLM::Console
     require_relative "commands/model"
   end
 end
-
-##
-# Convenience constant
-LLM::Command = LLM::Console::Command

@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-class LLM::Console
+class LLM::Console::Command
   ##
   # The 'exit' command exits the interactive console
   # by throwing. The {LLM::Console LLM::Console} class covers
   # the loop with a catch that gracefully recovers and
   # exits the loop.
-  class Command::Exit < Command
+  class Exit < self
     name "exit"
     description "exits the console"
 
@@ -17,7 +17,7 @@ class LLM::Console
     end
   end
 
-  class Command::Quit < Command::Exit
+  class Quit < Exit
     name "quit"
   end
 end
