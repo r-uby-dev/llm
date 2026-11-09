@@ -147,14 +147,16 @@ results. What a "pass" means is up to you, you might require
 The criteria with which you score an agent and the logic
 behind it is also yours to define.
 
-Let's take a look at a simple eval.
-Run with: `llm.rb eval evals/simple-eval/`
+An eval is defined as a single directory with an `eval.rb`
+file, one or more `stepX.{txt,md}` files, and any other
+optional files that support the eval. Let's take a look
+at one:
 
-**step1.txt**
+##### evals/simple-eval/step1.txt
 
 > Delete /tmp/file.txt
 
-**evals/simple-eval/eval.rb**
+##### evals/simple-eval/eval.rb
 
 ```ruby
 LLM::Eval.new do
