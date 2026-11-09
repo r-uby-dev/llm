@@ -89,6 +89,7 @@ module LLM
   require_relative "llm/mcp"
   require_relative "llm/a2a"
   require_relative "llm/uridata"
+  require_relative "llm/command"
 
   ##
   # @api private

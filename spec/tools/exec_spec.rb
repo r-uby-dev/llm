@@ -6,7 +6,7 @@ require "llm/tools/exec"
 RSpec.describe LLM::Tool::Exec do
   let(:tool) { described_class.new }
   let(:command) do
-    instance_double(Test::Command, running?: false, success?: true, stdout: "hi\n", stderr: "", not_found?: false)
+    instance_double(LLM::Command, running?: false, success?: true, stdout: "hi\n", stderr: "", not_found?: false)
   end
 
   describe ".function" do
@@ -54,7 +54,7 @@ RSpec.describe LLM::Tool::Exec do
         allow(command).to receive(:arguments).and_return(command)
         allow(command).to receive(:spawn).and_return(command)
         allow(command).to receive(:limit).and_return(command)
-        allow(LLM::Tool::Exec::Command).to receive(:new).and_return(command)
+        allow(LLM::Command).to receive(:new).and_return(command)
         tool.call(command: "echo", arguments: ["hi"])
       end
 
@@ -88,7 +88,7 @@ RSpec.describe LLM::Tool::Exec do
         allow(command).to receive(:arguments).and_return(command)
         allow(command).to receive(:spawn).and_return(command)
         allow(command).to receive(:limit).and_return(command)
-        allow(LLM::Tool::Exec::Command).to receive(:new).and_return(command)
+        allow(LLM::Command).to receive(:new).and_return(command)
         allow(command).to receive(:success?).and_return(nil, true)
       end
 
@@ -103,7 +103,7 @@ RSpec.describe LLM::Tool::Exec do
         allow(command).to receive(:arguments).and_return(command)
         allow(command).to receive(:spawn).and_return(command)
         allow(command).to receive(:limit).and_return(command)
-        allow(LLM::Tool::Exec::Command).to receive(:new).and_return(command)
+        allow(LLM::Command).to receive(:new).and_return(command)
         described_class.new(env: {"FOO" => "bar"}).call(command: "echo", arguments: ["hi"])
       end
 

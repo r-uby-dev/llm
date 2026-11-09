@@ -13,7 +13,7 @@ module LLM::Tool::Utils
     # @raise [UncaughtThrowError]
     #  When the throw does not have a catch.
     # @throw [:kill, true]
-    # @param [Test::Command] command
+    # @param [LLM::Command] command
     # @param [Integer] timeout
     # @return [void]
     def wait(command:, timeout:)
@@ -42,12 +42,12 @@ module LLM::Tool::Utils
     #  Defaults to the including tool's `self.class.max_bytes`.
     # @raise [ArgumentError]
     #  When `max_bytes` is nil
-    # @return [Test::Command]
+    # @return [LLM::Command]
     def spawn(command:, arguments:, env: {}, max_bytes: self.class.max_bytes)
       if Integer(max_bytes, exception: false).nil?
         raise ArgumentError, "max_bytes cannot be nil"
       end
-      Command
+      LLM::Command
         .new(command)
         .env(env)
         .arguments(*[*arguments])
@@ -69,15 +69,11 @@ module LLM::Tool::Utils
     # `success?` answers `nil` until the status exists, and a command that was
     # never found is the one case where it never will: there was nothing to
     # reap, and `not_found?` is the answer the caller wants.
-    # @param [Test::Command] command
+    # @param [LLM::Command] command
     # @return [Boolean]
     def status_unavailable?(command)
       command.success?.nil? and !command.not_found?
     end
 
-    ##
-    # requires test-cmd.rb
-    LLM.require "test-cmd.rb", "~> 2.7.3"
-    Command = Test::Command
   end
 end
