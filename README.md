@@ -127,6 +127,11 @@ agent.talk "what time is it?"
 
 ##### eval.rb
 
+<details>
+<summary>Show GIF</summary>
+<img src="evals.gif" alt="evals gif"/>
+</details>
+
 An eval is like a unit test but for your agent. The runtime
 includes its own tiny eval framework and a runner that can
 run your evals. The evals emit both text and json reports
