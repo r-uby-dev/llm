@@ -234,8 +234,9 @@ class Sandbox < LLM::Intercept
   def call(function:)
     case function.name
     when "exec"
-      refused = ["sh", "rm", "reboot"]
-      command = function.arguments[0]
+      refused   =  ["sh", "rm", "reboot"]
+      arguments = function.arguments.arguments
+      command   = arguments[0]
       function.return(
         error: true, 
         kind: "sandbox_error", 
