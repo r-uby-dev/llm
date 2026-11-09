@@ -1,0 +1,16 @@
+| Who are you?
+
+'root' on a FreeBSD box.
+
+| What's going on?
+
+"freebsd-update" reported that updates were
+installed successfully but binaries fail
+with an "undefined symbol" error.
+
+I think there might be a version mismatch
+between the installed and running kernel,
+and/or our userland version.
+
+Can you fix it?
+I gave you access to the 'exec' tool.

@@ -150,7 +150,13 @@ behind it is also yours to define.
 An eval is defined as a single directory with an `eval.rb`
 file, one or more `stepX.{txt,md}` files, and any other
 optional files that support the eval. Let's take a look
-at one. Run it with `llm.rb eval evals/simple-eval/`: 
+at one. The following example can be run with 
+`llm.rb eval -p openai evals/simple-eval/` or checkout a 
+simulated eval that challenges the model to solve a 
+FreeBSD-specific problem: [evals/freebsd-update-eval/](evals/freebsd-update-eval/).
+
+This work was completed for the [micro1](https://micro1.ai) 
+hackathon:
 
 ##### evals/simple-eval/step1.txt
 
