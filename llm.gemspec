@@ -28,7 +28,7 @@ Gem::Specification.new do |spec|
 llm.rb is a runtime for building agentic AI applications
 on CRuby. It runs on Ruby's standard library by default,
 it supports concurrent and parallel tool execution and has
-a single coherent API that spans 15+ providers.
+a single coherent API that spans 16+ providers.
 DESCRIPTION
 
   spec.license = "MIT"
