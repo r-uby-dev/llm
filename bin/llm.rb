@@ -166,6 +166,16 @@ end
 
 def main(argv)
   case argv[0]
+  when "eval"
+    begin
+      require "rbconfig"
+      Process.spawn RbConfig.ruby, File.join(__dir__, "..", "libexec", "llm-eval"), argv[1..]
+      Process.wait
+    rescue Interrupt
+      Process.wait
+      exit 0
+    end
+  end
   when "models.dev:download"
     return modelsdev_download
   end

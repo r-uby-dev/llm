@@ -118,18 +118,98 @@ class GetTime < LLM::Tool
 end
 
 llm     = LLM.deepseek
-options = {
-  tracer: LLM::Tracer.multi(llm, LLM::Tracer::Logger),
-  tools:  [GetTime],
-  stream: StringIO.new,
-  concurrency: :ractor
-}
+options = {stream: $stdout, tools: [GetTime], concurrency: :ractor}
 
 agent = LLM::Agent.new(llm, options)
 agent.talk "hello world"
 agent.talk "what time is it?"
-puts options[:stream].string
 ```
+
+##### eval.rb
+
+<details>
+<summary>Show GIF</summary>
+<img src="evals.gif" alt="evals gif"/>
+</details>
+
+An eval is like a unit test but for your agent. The runtime
+includes its own tiny eval framework and a runner that can
+run your evals. The evals emit both text and json reports
+that provide deep analysis of what an agent did, what a 
+model said, and what tool calls were called.
+
+An eval score starts at 1.0. The `score` method (which receives 
+an instance of [LLM::Agent]()) can then reduce this score
+from a perfect 1.0 all the way down to zero - based on the
+results. What a "pass" means is up to you, you might require
+1.0 for a pass, or 0.8 could be acceptable.
+
+The criteria with which you score an agent and the logic
+behind it is also yours to define.
+
+An eval is defined as a single directory with an `eval.rb`
+file, one or more `stepX.{txt,md}` files, and any other
+optional files that support the eval. Let's take a look
+at one:
+
+##### evals/simple-eval/step1.txt
+
+> Delete /tmp/file.txt
+
+##### evals/simple-eval/eval.rb
+
+```ruby
+LLM::Eval.new do
+  set name: "simple-eval",
+      description: "can the agent delete a file?"
+
+  step "step1.txt"
+  
+  setup do
+    FileUtils.touch "/tmp/file.txt"
+  end
+
+  score do |agent|
+    if File.exist?("/tmp/file.txt")
+      penalize!(by: 1.0, why: "/tmp/file.txt should have been deleted")
+    elsif agent.returns.size > 3
+      penalize!(by: 0.5, why: "too many tool calls for this eval")
+    end
+  end
+
+  configure do
+    agent do
+      ##
+      # The agent being tested.
+      # Any subclass of {LLM::Agent} works.
+      # Also works with ActiveRecord|Sequel models.
+      LLM::Agent.new(
+        llm,
+        tools: [LLM::Tool::Ls, LLM::Tool::Pwd, LLM::Tool::Exec],
+        tracer:,
+        intercept:
+      )
+    end
+
+    tracer do
+      LLM::Tracer.multi(
+        llm,
+        LLM::Tracer::Eval::Console.new(llm, eval: self),
+        LLM::Tracer::Eval::JSON.new(llm, eval: self)
+      )
+    end
+
+    intercept do
+      Class.new(LLM::Intercept) do
+        define_method(:call) do |function:|
+          # ...
+        end
+      end
+    end
+  end
+end
+```
+
 
 ##### interrupt.rb
 
