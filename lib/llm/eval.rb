@@ -9,7 +9,6 @@ module LLM
   class Eval
     require "llm"
     require "llm/tools"
-    require "paint"
     require "json"
     require "fileutils"
     require "stringio"

@@ -274,7 +274,7 @@ module LLM::Eval::Tracer
     # @param [Array<Symbol>] colours
     # @return [String]
     def paint(text, *colours)
-      Paint[text, *colours]
+      LLM::Paint[text, *colours]
     end
   end
 end

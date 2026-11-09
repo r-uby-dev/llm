@@ -7,6 +7,15 @@ before) can be seen in [changelog/old.md](changelog/old.md).
 
 ## What's next
 
+### LLM::Paint
+
+* **paint: add `LLM::Paint`** <br>
+  [`LLM::Paint`](https://r.uby.dev/api-docs/llm.rb/LLM/Paint.html) wraps
+  a string in the escape sequences a terminal understands, eg
+  `LLM::Paint["hello", :blue, :bold]`, and returns the string unchanged
+  when color is disabled. It honors `$NO_COLOR`, it is a small stand-in
+  for the `paint` gem, and it is what the eval console tracer uses.
+
 ### LLM::Tool
 
 * **tools: add a `git-ls-files` tool** <br>
