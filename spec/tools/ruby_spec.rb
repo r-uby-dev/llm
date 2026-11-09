@@ -33,7 +33,8 @@ RSpec.describe LLM::Tool::Ruby do
     it "runs ruby through a shell tool" do
       tool.call(code: "puts 1 + 2")
       expect(shell).to have_received(:call).with(
-        arguments: [RbConfig.ruby, "-e", "puts 1 + 2"],
+        command: RbConfig.ruby,
+        arguments: ["-e", "puts 1 + 2"],
         timeout: 15,
         max_bytes: LLM::Tool::Exec.max_bytes
       )

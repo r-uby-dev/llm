@@ -49,7 +49,7 @@ RSpec.describe "a tool that runs in a ractor" do
 
     context "when the parameter defaults read a class-level setting" do
       let(:tool) { LLM::Tool::Exec }
-      let(:arguments) { {arguments: [RbConfig.ruby, "-e", "print 1"]} }
+      let(:arguments) { {command: RbConfig.ruby, arguments: ["-e", "print 1"]} }
 
       it "is the value the tool produced" do
         expect(value).to include(ok: true, stdout: "1")

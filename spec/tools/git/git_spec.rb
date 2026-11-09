@@ -59,13 +59,13 @@ RSpec.describe LLM::Tool::Git do
 
       it "passes the default timeout to Exec" do
         allow(LLM::Tool::Exec).to receive(:new).with(env: {}).and_return(executor)
-        expect(executor).to receive(:call).with(arguments: an_instance_of(Array), timeout: 5)
+        expect(executor).to receive(:call).with(command: "git", arguments: an_instance_of(Array), timeout: 5)
         tool_class.new.call(**arguments)
       end
 
       it "passes an explicit timeout to Exec" do
         allow(LLM::Tool::Exec).to receive(:new).with(env: {}).and_return(executor)
-        expect(executor).to receive(:call).with(arguments: an_instance_of(Array), timeout: 19)
+        expect(executor).to receive(:call).with(command: "git", arguments: an_instance_of(Array), timeout: 19)
         tool_class.new.call(**arguments, timeout: 19)
       end
     end

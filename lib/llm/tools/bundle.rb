@@ -34,7 +34,8 @@ class LLM::Tool
     # @return [Hash]
     def call(arguments: [], timeout: 60, max_bytes: Exec.max_bytes)
       Exec.new(env:).call(
-        arguments: ["bundle", *arguments],
+        command: "bundle",
+        arguments:,
         timeout:,
         max_bytes:
       )

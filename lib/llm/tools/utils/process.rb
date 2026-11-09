@@ -28,11 +28,11 @@ module LLM::Tool::Utils
     end
 
     ##
-    # Spawn a command from a name and arguments,
+    # Spawn a command from a command and arguments,
     # without going through a shell. The command's
     # stdout and stderr are each capped at `max_bytes`.
-    # @param [String] name
-    #  The command name
+    # @param [String] command
+    #  The command to run
     # @param [Array<String>] arguments
     #  One or more arguments
     # @param [Hash] env
@@ -43,12 +43,12 @@ module LLM::Tool::Utils
     # @raise [ArgumentError]
     #  When `max_bytes` is nil
     # @return [Test::Command]
-    def spawn(name:, arguments:, env: {}, max_bytes: self.class.max_bytes)
+    def spawn(command:, arguments:, env: {}, max_bytes: self.class.max_bytes)
       if Integer(max_bytes, exception: false).nil?
         raise ArgumentError, "max_bytes cannot be nil"
       end
       Command
-        .new(name)
+        .new(command)
         .env(env)
         .arguments(*[*arguments])
         .limit(stdout: max_bytes, stderr: max_bytes)

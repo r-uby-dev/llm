@@ -17,10 +17,11 @@ class LLM::Tool
 
     name "exec"
     description "Run a command without a shell"
-    parameter :arguments, Array[String], "a command and its argument(s)"
+    parameter :command, String, "the command to run"
+    parameter :arguments, Array[String], "one or more arguments for the command"
     parameter :timeout, Integer, "the maximum allowed time for the command to run (in seconds)"
     parameter :max_bytes, Integer, "max number of bytes to emit"
-    required %i[arguments]
+    required %i[command]
     defaults timeout: 60, max_bytes: :max_bytes
 
     ##
@@ -48,24 +49,25 @@ class LLM::Tool
     end
 
     ##
+    # @param [String] command
+    #  The command to run
     # @param [Array<String>] arguments
-    #  A command and its arguments. The first element is the command name.
+    #  One or more arguments for the command
     # @param [Integer] timeout
     #  The maximum allowed time for the command to run (in seconds)
     # @param [Integer] max_bytes
     #  the max number of bytes to emit
     # @return [Hash]
-    def call(arguments: [], timeout: 60, max_bytes: self.class.max_bytes)
+    def call(command:, arguments: [], timeout: 60, max_bytes: self.class.max_bytes)
       startat = now
-      name    = arguments[0]
-      command = spawn(name:, arguments: arguments[1..], env:, max_bytes:)
-      killed = catch(:kill) { [wait(command:, timeout:), nil].last }
-      if command.not_found?
-        {ok: false, error: "command '#{name}' was not found on this system"}
+      spawned = spawn(command:, arguments:, env:, max_bytes:)
+      killed = catch(:kill) { [wait(command: spawned, timeout:), nil].last }
+      if spawned.not_found?
+        {ok: false, error: "command '#{command}' was not found on this system"}
       else
-        {ok: command.success?,
-        stdout: truncate(command.stdout, max_bytes:),
-        stderr: truncate(command.stderr, max_bytes:),
+        {ok: spawned.success?,
+        stdout: truncate(spawned.stdout, max_bytes:),
+        stderr: truncate(spawned.stderr, max_bytes:),
         duration: "#{(now - startat).round(1)} seconds",
         note: killed ? "The command was killed after "            \
                        "exceeding the #{timeout}s timeout. "      \
@@ -75,7 +77,7 @@ class LLM::Tool
         }.compact
       end
     rescue LLM::Interrupt
-      command.kill! if command&.running?
+      spawned.kill! if spawned&.running?
       raise
     end
 

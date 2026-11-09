@@ -20,7 +20,8 @@ class LLM::Tool
     # @return [Hash]
     def call(path:, max_bytes: Exec.max_bytes)
       Exec.new.call(
-        arguments: ["mkdir", "-p", path],
+        command: "mkdir",
+        arguments: ["-p", path],
         max_bytes:
       )
     end

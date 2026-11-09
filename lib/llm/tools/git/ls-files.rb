@@ -20,7 +20,7 @@ class LLM::Tool::Git
     def call(path: nil, timeout: DEFAULT_TIMEOUT, cwd: Dir.getwd)
       Exec
         .new(env:)
-        .call(arguments: ["git", "-C", cwd, *parse!(path:)], timeout:)
+        .call(command: "git", arguments: ["-C", cwd, *parse!(path:)], timeout:)
     end
 
     private

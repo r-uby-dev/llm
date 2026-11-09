@@ -30,7 +30,8 @@ class LLM::Tool
     def call(patterns:, path: Dir.getwd, timeout: 5, max_count: 10, max_bytes: Exec.max_bytes)
       validate!(patterns:, path:, max_count:)
       Exec.new.call(
-        arguments: ["rg", "-m", max_count, *[*patterns].flat_map { ["-e", _1] }, path],
+        command: "rg",
+        arguments: ["-m", max_count, *[*patterns].flat_map { ["-e", _1] }, path],
         timeout:,
         max_bytes:
       )

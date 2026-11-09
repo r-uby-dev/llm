@@ -16,8 +16,8 @@ RSpec.describe LLM::Tool::Exec do
       expect(params.properties[:arguments]).to be_a(LLM::Schema::Array)
     end
 
-    it "marks the arguments param as required" do
-      expect(params.properties[:arguments]).to be_required
+    it "marks the command param as required" do
+      expect(params.properties[:command]).to be_required
     end
 
     it "has a timeout parameter with a default" do
@@ -29,21 +29,21 @@ RSpec.describe LLM::Tool::Exec do
     context "when the timeout expires" do
       it "kills the command" do
         now = Time.now
-        tool.call(arguments: [RbConfig.ruby, "-e", "sleep 10"], timeout: 0.1)
+        tool.call(command: RbConfig.ruby, arguments: ["-e", "sleep 10"], timeout: 0.1)
         expect((Time.now - now) < 1).to be(true)
       end
 
       it "includes a note" do
-        res = tool.call(arguments: [RbConfig.ruby, "-e", "sleep 10"], timeout: 0.1)
+        res = tool.call(command: RbConfig.ruby, arguments: ["-e", "sleep 10"], timeout: 0.1)
         expect(res[:note]).to include("The command was killed after")
       end
 
       it "includes partial output" do
-        res = tool.call(arguments: [
-          RbConfig.ruby,
-          "-e",
-          "[$stdout.write('wakawaka'), $stdout.flush, sleep(10)]"
-        ], timeout: 0.5)
+        res = tool.call(
+          command: RbConfig.ruby,
+          arguments: ["-e", "[$stdout.write('wakawaka'), $stdout.flush, sleep(10)]"],
+          timeout: 0.5
+        )
         expect(res[:stdout]).to eq("wakawaka")
       end
     end
@@ -55,7 +55,7 @@ RSpec.describe LLM::Tool::Exec do
         allow(command).to receive(:spawn).and_return(command)
         allow(command).to receive(:limit).and_return(command)
         allow(LLM::Tool::Exec::Command).to receive(:new).and_return(command)
-        tool.call(arguments: ["echo", "hi"])
+        tool.call(command: "echo", arguments: ["hi"])
       end
 
       it "limits stdout and stderr by max_bytes" do
@@ -74,14 +74,14 @@ RSpec.describe LLM::Tool::Exec do
       end
 
       it "returns the command output" do
-        expect(tool.call(arguments: ["echo", "hi"])).to eq(
+        expect(tool.call(command: "echo", arguments: ["hi"])).to eq(
           ok: true, stdout: "hi\n", stderr: "", duration: "0.0 seconds"
         )
       end
     end
 
     context "when the command has not been reaped yet" do
-      let(:result) { tool.call(arguments: ["echo", "hi"]) }
+      let(:result) { tool.call(command: "echo", arguments: ["hi"]) }
 
       before do
         allow(command).to receive(:env).and_return(command)
@@ -104,7 +104,7 @@ RSpec.describe LLM::Tool::Exec do
         allow(command).to receive(:spawn).and_return(command)
         allow(command).to receive(:limit).and_return(command)
         allow(LLM::Tool::Exec::Command).to receive(:new).and_return(command)
-        described_class.new(env: {"FOO" => "bar"}).call(arguments: ["echo", "hi"])
+        described_class.new(env: {"FOO" => "bar"}).call(command: "echo", arguments: ["hi"])
       end
 
       it "passes the env to the command" do
@@ -114,8 +114,9 @@ RSpec.describe LLM::Tool::Exec do
   end
 
   describe "when spawning a real command" do
-    let(:arguments) { [RbConfig.ruby, "-e", "STDOUT.write('hello world')"] }
-    let(:result) { tool.call(arguments:) }
+    let(:command) { RbConfig.ruby }
+    let(:arguments) { ["-e", "STDOUT.write('hello world')"] }
+    let(:result) { tool.call(command:, arguments:) }
 
     context "when the command writes to stdout" do
       it "captures fixed stdout" do
@@ -132,7 +133,8 @@ RSpec.describe LLM::Tool::Exec do
     end
 
     context "when the command sleeps" do
-      let(:arguments) { [RbConfig.ruby, "-e", "sleep 1"] }
+      let(:command) { RbConfig.ruby }
+      let(:arguments) { ["-e", "sleep 1"] }
       let(:seconds) { result[:duration].to_f }
 
       it "measures how long the command ran" do
@@ -141,7 +143,8 @@ RSpec.describe LLM::Tool::Exec do
     end
 
     context "when the command writes without a newline" do
-      let(:arguments) { [RbConfig.ruby, "-e", "STDOUT.write('no-newline')"] }
+      let(:command) { RbConfig.ruby }
+      let(:arguments) { ["-e", "STDOUT.write('no-newline')"] }
 
       it "captures fixed stdout" do
         expect(result[:stdout]).to eq("no-newline")
@@ -153,7 +156,8 @@ RSpec.describe LLM::Tool::Exec do
     end
 
     context "when the command writes to stderr" do
-      let(:arguments) { [RbConfig.ruby, "-e", "STDERR.write('oops')"] }
+      let(:command) { RbConfig.ruby }
+      let(:arguments) { ["-e", "STDERR.write('oops')"] }
 
       it "captures fixed stderr" do
         expect(result).to include(ok: true, stdout: "", stderr: "oops")
@@ -161,7 +165,8 @@ RSpec.describe LLM::Tool::Exec do
     end
 
     context "when the command fails" do
-      let(:arguments) { [RbConfig.ruby, "-e", "exit 1"] }
+      let(:command) { RbConfig.ruby }
+      let(:arguments) { ["-e", "exit 1"] }
 
       it "reports a failing command" do
         expect(result[:ok]).to be(false)
@@ -173,20 +178,22 @@ RSpec.describe LLM::Tool::Exec do
     end
 
     context "when the command is not found" do
-      let(:arguments) { ["definitely-not-a-real-command-xyz"] }
+      let(:command) { "definitely-not-a-real-command-xyz" }
+      let(:arguments) { [] }
 
       it "reports ok as false" do
         expect(result[:ok]).to be(false)
       end
 
       it "reports the error message" do
-        expect(result[:error]).to include(arguments[0])
+        expect(result[:error]).to include(command)
       end
     end
 
     context "when given env" do
       let(:tool) { described_class.new(env: {"EXEC_SPEC_FOO" => "bar"}) }
-      let(:arguments) { [RbConfig.ruby, "-e", "STDOUT.write(ENV['EXEC_SPEC_FOO'].to_s)"] }
+      let(:command) { RbConfig.ruby }
+      let(:arguments) { ["-e", "STDOUT.write(ENV['EXEC_SPEC_FOO'].to_s)"] }
 
       it "sets environment for the spawned command" do
         expect(result).to include(ok: true, stdout: "bar", stderr: "")
@@ -194,8 +201,9 @@ RSpec.describe LLM::Tool::Exec do
     end
 
     context "when given a byte limit" do
-      let(:arguments) { [RbConfig.ruby, "-e", "STDOUT.write('x' * 1000)"] }
-      let(:result) { tool.call(arguments:, max_bytes: 16) }
+      let(:command) { RbConfig.ruby }
+      let(:arguments) { ["-e", "STDOUT.write('x' * 1000)"] }
+      let(:result) { tool.call(command:, arguments:, max_bytes: 16) }
 
       it "caps stdout at max_bytes" do
         expect(result[:stdout]).to eq("x" * 16)
