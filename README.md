@@ -118,17 +118,11 @@ class GetTime < LLM::Tool
 end
 
 llm     = LLM.deepseek
-options = {
-  tracer: LLM::Tracer.multi(llm, LLM::Tracer::Logger),
-  tools:  [GetTime],
-  stream: StringIO.new,
-  concurrency: :ractor
-}
+options = {stream: $stdout, tools: [GetTime], concurrency: :ractor}
 
 agent = LLM::Agent.new(llm, options)
 agent.talk "hello world"
 agent.talk "what time is it?"
-puts options[:stream].string
 ```
 
 ##### eval.rb
@@ -204,7 +198,6 @@ LLM::Eval.new do
   end
 end
 ```
-
 
 
 ##### interrupt.rb
