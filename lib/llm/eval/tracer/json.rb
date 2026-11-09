@@ -203,8 +203,8 @@ module LLM::Eval::Tracer
     end
 
     def plain(value)
-      LLM.json.parse(LLM.json.generate(value))
-    rescue StandardError
+      LLM.json.parse(LLM.json.dump(value))
+    rescue *LLM.json_parser_error
       value.to_s
     end
 
