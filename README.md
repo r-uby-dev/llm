@@ -172,6 +172,7 @@ LLM::Eval.new do
   step "step1.txt"
   
   setup do
+    require "llm/tools"
     FileUtils.touch "/tmp/file.txt"
   end
 
