@@ -60,7 +60,8 @@ or want to see the runtime in action. Great way
 to learn about the runtime and see it in action
 at the same time. [API docs](https://r.uby.dev/api-docs/llm.rb/)
 also exists for people who prefer learning the
-traditional way. 
+traditional way. For everything else, there's
+the README. 
 
 ### Agents
 
