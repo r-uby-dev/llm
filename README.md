@@ -36,7 +36,7 @@ gem install llm.rb -v 17.0.1
 
 ##### Latest (v18)
 
-The v18 release  
+The v18 release 
 includes [substational runtime improvements](changelog/v18.md) -
 especially for running tool calls on a [Ractor](https://docs.ruby-lang.org/en/4.0/Ractor.html)
 and it is the recommended version to use. It is strongly 
