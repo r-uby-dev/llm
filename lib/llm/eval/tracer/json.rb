@@ -204,7 +204,7 @@ module LLM::Eval::Tracer
 
     def plain(value)
       LLM.json.parse(LLM.json.dump(value))
-    rescue *LLM.json_parser_error
+    rescue *LLM.json.parser_error
       value.to_s
     end
 

@@ -89,6 +89,7 @@ module LLM
       require "json" unless defined?(::JSON)
       ::JSON.parse(string, ...)
     end
+    singleton_class.alias_method :parse, :load
 
     ##
     # @return (see JSONAdapter#parser_error)
@@ -115,6 +116,7 @@ module LLM
       require "oj" unless defined?(::Oj)
       ::Oj.load(string, options.merge(mode: :compat, symbol_keys: false, symbolize_names: false))
     end
+    singleton_class.alias_method :parse, :load
 
     ##
     # @return (see JSONAdapter#parser_error)

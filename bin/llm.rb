@@ -169,8 +169,9 @@ def main(argv)
   when "eval"
     begin
       require "rbconfig"
-      Process.spawn RbConfig.ruby, File.join(__dir__, "..", "libexec", "llm-eval"), argv[1..]
+      Process.spawn RbConfig.ruby, File.join(__dir__, "..", "libexec", "llm-eval"), *argv[1..]
       Process.wait
+      exit $?.exitstatus
     rescue Interrupt
       Process.wait
       exit 0
