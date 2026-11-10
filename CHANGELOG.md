@@ -15,12 +15,12 @@ Older releases:
 
 ### LLM::Tool
 
-* **tools: the tool files are named after their tools, in kebab-case** <br>
-  The file a tool lives in has the name of the tool it defines, as
-  `edit-file.rb` and `git/ls-files.rb` always did. That makes
-  `dir_tree.rb`, `read_file.rb` and `write_file.rb` `dir-tree.rb`,
-  `read-file.rb` and `write-file.rb`, so a tool that is required on its
-  own takes the new path, eg `require "llm/tools/read-file"`.
+* **tools: the files under `lib/llm/tools` are kebab-case** <br>
+  Each file is named after the class or method it defines, as
+  `edit-file.rb` and `git/ls-files.rb` always were, so `dir_tree.rb`,
+  `read_file.rb`, `write_file.rb` and `not_found.rb` are `dir-tree.rb`,
+  `read-file.rb`, `write-file.rb` and `not-found.rb`. A tool that is
+  required on its own takes the new path, eg `require "llm/tools/read-file"`.
 
 * **tools: add a `git-clone` tool** <br>
   [`LLM::Tool::Git::Clone`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git/Clone.html)
