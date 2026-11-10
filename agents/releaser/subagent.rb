@@ -9,7 +9,7 @@ class SubAgent < LLM::Tool
 
   def call(version:, instructions: nil)
     options = {concurrency: :ractor,
-               tracer: LLM::Tracer.pretty(llm, io: $stderr),
+               tracer: LLM::Tracer.enhanced(llm, io: $stderr),
                instructions: File.read(prompts["release.md"]),
                tools: LLM::Tool.subclasses}
     subagent = LLM::Agent.new(llm, options)

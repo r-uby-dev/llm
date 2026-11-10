@@ -9,7 +9,7 @@ class EditFile < LLM::Tool
 
   def call(file:, instructions: nil)
     options  = {concurrency: :ractor,
-                tracer: LLM::Tracer.pretty(llm, io: $stderr),
+                tracer: LLM::Tracer.enhanced(llm, io: $stderr),
                 instructions: File.read(prompts[file]),
                 tools: toolset}
     subagent = LLM::Agent.new(llm, options)
