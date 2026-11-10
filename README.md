@@ -194,7 +194,8 @@ LLM::Eval.new do
         llm,
         tools: [LLM::Tool::Ls, LLM::Tool::Pwd, LLM::Tool::Exec],
         tracer:,
-        intercept:
+        intercept:,
+        filter:
       )
     end
 
@@ -209,6 +210,14 @@ LLM::Eval.new do
     intercept do
       Class.new(LLM::Intercept) do
         define_method(:call) do |function:|
+          # ...
+        end
+      end
+    end
+
+    filter do
+      Class.new(LLM::MessageFilter) do
+        define_method(:call) do |message:|
           # ...
         end
       end
