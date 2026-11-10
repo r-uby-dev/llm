@@ -12,7 +12,22 @@ and [changelog/v12.md](changelog/v12.md).
 
 ## What's next
 
-*No unreleased changes yet. Check back after the next release.*
+### LLM::OpenAI
+
+* **openai: images default to `gpt-image-2.6-flare`** <br>
+  [`LLM::OpenAI::Images#create`](https://r.uby.dev/api-docs/llm.rb/LLM/OpenAI/Images.html#create-instance_method)
+  and
+  [`LLM::OpenAI::Images#edit`](https://r.uby.dev/api-docs/llm.rb/LLM/OpenAI/Images.html#edit-instance_method)
+  ask for `gpt-image-2.6-flare` when they are given no `model:`, where they
+  asked for `gpt-image-1-mini`. OpenAI removes `gpt-image-1-mini` from its
+  API on December 1st, 2026. A `model:` that is given is sent unchanged.
+
+### Console
+
+* **console: `llm.rb eval` resolves a relative path from the working directory** <br>
+  `llm.rb eval` joins a relative path with `Dir.getwd` now, where it joined
+  it with the root of the llm.rb checkout, so the path is read relative to
+  the directory the command runs in.
 
 ## v19.0.0
 
