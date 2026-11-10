@@ -1529,6 +1529,172 @@ agent.talk "Run the skill"
 ```
 </details>
 
+<details><summary>RAG</summary>
+<br>
+
+Most providers offer an embedding model that can be
+used for semantic search, or similarity search. An
+embedding model can generate embeddings that can then
+be stored in a database that is optimized for storing
+and querying vectors, such as SQLite's [sqlite-vec](https://github.com/asg017/sqlite-vec)
+or PostgreSQL's [pg-vector](https://github.com/pgvector/pgvector).
+
+llm.rb also includes support for OpenAI's vector store API. It
+provides a vector database as a HTTP service but we won't cover
+that here.
+
+```ruby
+require "llm"
+
+llm  = LLM.openai
+body = "llm.rb is Ruby's capable AI runtime."
+embedding = llm.embed([body]).embeddings.first
+
+# Document is your ActiveRecord or Sequel model
+# with a vector column (e.g. sqlite-vec or pgvector)
+Document.create!(
+  title: "llm.rb",
+  body:,
+  embedding:,
+)
+```
+
+</details>
+
+<details><summary>Images</summary>
+<br>
+
+A handful of providers can generate images from a text prompt.
+OpenAI, Google, xAI, and DeepInfra all support it. The API is
+the same across providers:
+
+```ruby
+require "llm"
+
+llm = LLM.openai
+res = llm.images.create(prompt: "a dog on a rocket to the moon")
+IO.copy_stream res.images[0], "rocket.png"
+```
+
+##### DeepSeek
+
+DeepSeek does not have a dedicated image model, but the runtime
+generates SVG vector graphics through its text model. Each
+generation produces a valid SVG document that can be converted
+to PNG with tools like `rsvg-convert`. Pass an existing agent
+to maintain a session across generations:
+
+```ruby
+require "llm"
+llm = LLM.deepseek
+
+##
+# First generation
+res = llm.images.create(prompt: "a rocket on the moon")
+IO.copy_stream res.images[0], "rocket.svg"
+
+##
+# Refine with follow-up prompts (shares context)
+res = llm.images.create(prompt: "add a dog next to the rocket",
+                        agent: res.agent)
+IO.copy_stream res.images[0], "rocket-with-dog.svg"
+```
+
+## FAQ
+
+<details>
+<summary>Does it work on Windows?</summary>
+<br>
+I think so. Our Windows build is green on CI.
+That's the only signal I have to go by.
+
+But I know support is a little more limited compared
+to other platforms. The `fork` strategy is not
+available because Windows does not implement it
+
+And the `curses` gem that the console requires has
+to be compiled from source, and this can be a
+challenge on Windows without a compiler toolchain.
+By default the console does not work but it might
+work if you are able to install the `curses` gem.
+
+The `ractor` concurrency strategy **does work**
+on Windows **but requires llm.rb v18+ and Ruby v4.1.0+**.
+Both are available as preleases. So overall everything
+mostly works as long as you avoid the parts that don't
+work. Pull requests that improve Windows support are
+very welcome.
+</details>
+
+<details>
+<summary>Where can I see llm.rb in action?</summary>
+<br>
+
+The [r.uby.dev](https://r.uby.dev) website.
+
+</details>
+<details>
+<summary>What about local LLM support?</summary>
+<br>
+
+Try:  
+* `LLM.ollama(...)`
+* `LLM.llamacpp(...)`
+</details>
+
+<details>
+<summary>I have a limited budget. What should I do?</summary>
+<br>
+
+If you're on a budget, [DeepSeek](https://platform.deepseek.com)
+is hard to beat and it works really well with llm.rb.
+</details>
+
+<details>
+<summary>Who maintains llm.rb?</summary>
+<br>
+
+The llm.rb project was started more than three
+years ago by
+[@altruby](https://github.com/altruby) and
+[@antaz](https://github.com/altruby). The primary
+maintainer is [@altruby](https://github.com/altruby).
+There have been multiple other contributors over the
+last three years and new contributors are always
+welcome.
+</details>
+
+<details>
+<summary>How well tested is llm.rb?</summary>
+<br>
+
+I use it all the time. Especially the console.  
+It also powers the [r.uby.dev](https://r.uby.dev) website.  
+I'm aware of at least one production Rails deployment at 
+a large-ish company.
+</details>
+
+## License
+
+<center>
+<table align="center" width="60%">
+  <tr>
+    <td valign="middle">
+      <p align="left">
+        This software is released under the terms of the MIT license. <br>
+        See <a href="./LICENSE">LICENSE</a> for details.
+      </p>
+    </td>
+    <td align="right" valign="middle" width="128">
+      <a href="https://www.youtube.com/watch?v=Dai9lZ4Sne0">
+        <img src="easteregg.jpg" width="128" alt="Easter Egg">
+      </a>
+    </td>
+  </tr>
+</table>
+</center>
+</details>
+
 ### Providers
 
 Each provider is constructed with a class-level factory method on
@@ -1704,164 +1870,3 @@ llm = llm.with("X-OpenRouter-Title" => "Example App")
 ```
 
 </details>
-
-### RAG
-
-Most providers offer an embedding model that can be
-used for semantic search, or similarity search. An
-embedding model can generate embeddings that can then
-be stored in a database that is optimized for storing
-and querying vectors, such as SQLite's [sqlite-vec](https://github.com/asg017/sqlite-vec)
-or PostgreSQL's [pg-vector](https://github.com/pgvector/pgvector).
-
-llm.rb also includes support for OpenAI's vector store API. It
-provides a vector database as a HTTP service but we won't cover
-that here.
-
-```ruby
-require "llm"
-
-llm  = LLM.openai
-body = "llm.rb is Ruby's capable AI runtime."
-embedding = llm.embed([body]).embeddings.first
-
-# Document is your ActiveRecord or Sequel model
-# with a vector column (e.g. sqlite-vec or pgvector)
-Document.create!(
-  title: "llm.rb",
-  body:,
-  embedding:,
-)
-```
-
-### Images
-
-A handful of providers can generate images from a text prompt.
-OpenAI, Google, xAI, and DeepInfra all support it. The API is
-the same across providers:
-
-```ruby
-require "llm"
-
-llm = LLM.openai
-res = llm.images.create(prompt: "a dog on a rocket to the moon")
-IO.copy_stream res.images[0], "rocket.png"
-```
-
-##### DeepSeek
-
-DeepSeek does not have a dedicated image model, but the runtime
-generates SVG vector graphics through its text model. Each
-generation produces a valid SVG document that can be converted
-to PNG with tools like `rsvg-convert`. Pass an existing agent
-to maintain a session across generations:
-
-```ruby
-require "llm"
-llm = LLM.deepseek
-
-##
-# First generation
-res = llm.images.create(prompt: "a rocket on the moon")
-IO.copy_stream res.images[0], "rocket.svg"
-
-##
-# Refine with follow-up prompts (shares context)
-res = llm.images.create(prompt: "add a dog next to the rocket",
-                        agent: res.agent)
-IO.copy_stream res.images[0], "rocket-with-dog.svg"
-```
-
-## FAQ
-
-<details>
-<summary>Does it work on Windows?</summary>
-<br>
-I think so. Our Windows build is green on CI.
-That's the only signal I have to go by.
-
-But I know support is a little more limited compared
-to other platforms. The `fork` strategy is not
-available because Windows does not implement it
-
-And the `curses` gem that the console requires has
-to be compiled from source, and this can be a
-challenge on Windows without a compiler toolchain.
-By default the console does not work but it might
-work if you are able to install the `curses` gem.
-
-The `ractor` concurrency strategy **does work**
-on Windows **but requires llm.rb v18+ and Ruby v4.1.0+**.
-Both are available as preleases. So overall everything
-mostly works as long as you avoid the parts that don't
-work. Pull requests that improve Windows support are
-very welcome.
-</details>
-
-<details>
-<summary>Where can I see llm.rb in action?</summary>
-<br>
-
-The [r.uby.dev](https://r.uby.dev) website.
-
-</details>
-<details>
-<summary>What about local LLM support?</summary>
-<br>
-
-Try:  
-* `LLM.ollama(...)`
-* `LLM.llamacpp(...)`
-</details>
-
-<details>
-<summary>I have a limited budget. What should I do?</summary>
-<br>
-
-If you're on a budget, [DeepSeek](https://platform.deepseek.com)
-is hard to beat and it works really well with llm.rb.
-</details>
-
-<details>
-<summary>Who maintains llm.rb?</summary>
-<br>
-
-The llm.rb project was started more than three
-years ago by
-[@altruby](https://github.com/altruby) and
-[@antaz](https://github.com/altruby). The primary
-maintainer is [@altruby](https://github.com/altruby).
-There have been multiple other contributors over the
-last three years and new contributors are always
-welcome.
-</details>
-
-<details>
-<summary>How well tested is llm.rb?</summary>
-<br>
-
-I use it all the time. Especially the console.  
-It also powers the [r.uby.dev](https://r.uby.dev) website.  
-I'm aware of at least one production Rails deployment at 
-a large-ish company.
-</details>
-
-## License
-
-<center>
-<table align="center" width="60%">
-  <tr>
-    <td valign="middle">
-      <p align="left">
-        This software is released under the terms of the MIT license. <br>
-        See <a href="./LICENSE">LICENSE</a> for details.
-      </p>
-    </td>
-    <td align="right" valign="middle" width="128">
-      <a href="https://www.youtube.com/watch?v=Dai9lZ4Sne0">
-        <img src="easteregg.jpg" width="128" alt="Easter Egg">
-      </a>
-    </td>
-  </tr>
-</table>
-</center>
