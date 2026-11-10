@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "setup"
-require "llm/tools/dir_tree"
+require "llm/tools/dir-tree"
 
 RSpec.describe LLM::Tool::DirTree do
   let(:tool) { described_class.new }
