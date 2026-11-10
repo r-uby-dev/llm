@@ -1,14 +1,15 @@
 > Changelog <br>
 > [r.uby.dev](https://r.uby.dev) project
 
-This file covers the v19 series. <br> Older releases can be seen in
-[changelog/v18.md](changelog/v18.md),
-[changelog/v17.md](changelog/v17.md),
-[changelog/v16.md](changelog/v16.md),
-[changelog/v15.md](changelog/v15.md),
-[changelog/v14.md](changelog/v14.md),
-[changelog/v13.md](changelog/v13.md),
-and [changelog/v12.md](changelog/v12.md).
+This file covers the v19 series. <br> 
+Older releases:  
+* [changelog/v18.md](changelog/v18.md)
+* [changelog/v17.md](changelog/v17.md)
+* [changelog/v16.md](changelog/v16.md)
+* [changelog/v15.md](changelog/v15.md)
+* [changelog/v14.md](changelog/v14.md)
+* [changelog/v13.md](changelog/v13.md)
+* [changelog/v12.md](changelog/v12.md)
 
 ## What's next
 
