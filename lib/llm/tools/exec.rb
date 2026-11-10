@@ -2,13 +2,10 @@
 
 class LLM::Tool
   ##
-  # The {LLM::Tool::Exec} class implements a tool that can
-  # spawn a command. That can be dangerous given a low-quality
-  # model, or a high-quality model that simply makes a bad
-  # decision. The risk can be reduced through a confirmation
-  # step such as {LLM::Agent.confirm LLM::Agent.confirm}, or
-  # by managing the tool loop manually through
-  # {LLM::Context LLM::Context}.
+  # The {LLM::Tool::Exec LLM::Tool::Exec} tool spawns
+  # a command without a shell. It can be used both
+  # directly and indirectly, and multiple other llm.rb
+  # tools are built on top of this one.
   class Exec < self
     require_relative "utils"
     require_relative "utils/process"

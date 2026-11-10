@@ -2,10 +2,9 @@
 
 class LLM::Tool
   ##
-  # The {LLM::Tool::Ruby LLM::Tool::Ruby} class implements
-  # a tool that can execute an arbitrary string of Ruby code
-  # and return the result. It routes through {LLM::Tool::Exec}
-  # for process management.
+  # The {LLM::Tool::Ruby LLM::Tool::Ruby} tool
+  # evaluates a string of Ruby code by spawning
+  # a Ruby process with `-e` option.
   class Ruby < self
     require "rbconfig"
     require "llm/core_ext/rbconfig"
