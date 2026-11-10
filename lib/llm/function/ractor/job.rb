@@ -34,7 +34,7 @@ class LLM::Function
       LLM.debug "[ractor #{@cookie}] job started"
       finished_at = -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) }
       window = LLM::Function::Window.new(thread: ::Thread.current)
-      runner = @runner_class.new
+      runner = Class === @runner_class ? @runner_class.new : @runner_class
       watcher = watch(runner, window)
       kwargs = Hash === @arguments ? @arguments.transform_keys(&:to_sym) : @arguments
       window.running!

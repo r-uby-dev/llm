@@ -190,6 +190,34 @@ RSpec.describe LLM::Function::Ractor::Task do
     end
   end
 
+  describe "an instance of LLM::Tool" do
+    let(:tool) do
+      Class.new(LLM::Tool) do
+        name "echo"
+        description "Echo a value"
+
+        def initialize(foo:)
+          @foo = foo
+        end
+
+        def call(value: "hello")
+          {foo: @foo, value:}
+        end
+      end.new(foo: "bar")
+    end
+
+    let(:function) do
+      tool.function.tap do |function|
+        function.id = "call_1"
+        function.arguments = {"value" => "hello"}
+      end
+    end
+
+    it "runs the instance on a ractor" do
+      expect(function.task(:ractor).wait.value).to eq({foo: "bar", value: "hello"})
+    end
+  end
+
   def within(seconds = 5, &block)
     thread = Thread.new do
       Thread.current.report_on_exception = false
