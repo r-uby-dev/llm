@@ -52,11 +52,11 @@ end
 def help
   prog = File.basename($PROGRAM_NAME)
   warn ""
-  warn "Usage: #{prog} [command] [options]"
+  warn "Usage: #{prog} [options] [command] [...options]"
   warn ""
   warn "Commands:"
-  warn ""
-  warn "models.dev:download         Download the models.dev registry"
+  warn "eval                        Run an eval"
+  warn "update-data                 Update the models.dev registry"
   warn ""
   warn "Options:"
   warn "  -p PROVIDER               Choose a provider"
@@ -122,7 +122,7 @@ def fatal(ex)
   exit 1
 end
 
-def modelsdev_download
+def update_data
   ##
   # Requirements
   require "net/http"
@@ -176,8 +176,8 @@ def main(argv)
       Process.wait
       exit 0
     end
-  when "models.dev:download"
-    return modelsdev_download
+  when "update-data", "models.dev:download"
+    return update_data
   end
 
   ##
