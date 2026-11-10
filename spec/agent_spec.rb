@@ -582,6 +582,16 @@ RSpec.describe LLM::Agent do
       it { is_expected.to be_a(LLM::Tracer::Null) }
     end
 
+    describe "#intercept" do
+      subject { agent.intercept }
+      it { is_expected.to be_a(ctx.intercept.class) }
+    end
+
+    describe "#intercept_options" do
+      subject { agent.intercept_options }
+      it { is_expected.to eq(ctx.intercept_options) }
+    end
+
     describe "#params" do
       subject { agent.params }
       it { is_expected.to eq(ctx.params) }
@@ -684,6 +694,24 @@ RSpec.describe LLM::Agent do
       expect(agent.compactor_options).to eq({keep: 64})
       agent.compactor_options[:keep] = 1
       expect(agent.compactor_options).to eq({keep: 64})
+    end
+  end
+
+  describe "#intercept and #intercept_options" do
+    it "defaults to LLM::Intercept::Null with no options" do
+      agent = described_class.new(provider)
+      expect(agent.intercept).to be_a(LLM::Intercept::Null)
+      expect(agent.intercept_options).to eq({})
+    end
+
+    it "returns the intercept and options it was given" do
+      intercept = LLM::Intercept::Null.new(provider)
+      agent = described_class.new(provider, intercept:, intercept_options: {threshold: 5})
+      expect(agent.intercept).to equal(intercept)
+      expect(agent.intercept_options).to eq({threshold: 5})
+      agent.intercept_options[:threshold] = 1
+      expect(agent.intercept_options).to eq({threshold: 5})
+      expect(agent.intercept.options).to eq({threshold: 5})
     end
   end
 

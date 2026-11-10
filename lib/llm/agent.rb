@@ -745,6 +745,20 @@ module LLM
     end
 
     ##
+    # @see LLM::Context#intercept
+    # @return [LLM::Intercept]
+    def intercept
+      @ctx.intercept
+    end
+
+    ##
+    # @see LLM::Context#intercept_options
+    # @return [Hash]
+    def intercept_options
+      @ctx.intercept_options
+    end
+
+    ##
     # Start an agent console.
     #
     # @note

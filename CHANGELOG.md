@@ -13,7 +13,30 @@ Older releases:
 
 ## What's next
 
-*No unreleased changes yet. Check back after the next release.*
+### LLM::Tool
+
+* **tools: add a `git-clone` tool** <br>
+  [`LLM::Tool::Git::Clone`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git/Clone.html)
+  (`git-clone`) clones a repository into a new directory. It takes the
+  `repository:` to clone, an optional `directory:` to clone into, which
+  defaults to the name of the repository, and an optional `timeout:`.
+
+### LLM::Agent
+
+* **agent: add `LLM::Agent#intercept` and `LLM::Agent#intercept_options`** <br>
+  The `LLM::Agent` class adds two new methods that provide
+  access to an agent's intercept (and its options) at the
+  instance level, as `#compactor` and `#compactor_options` do
+  for its compactor. By default the intercept is a Null
+  intercept that lets every tool call through:
+  * [`LLM::Agent#intercept`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#intercept-instance_method)
+  <br> returns the intercept (an
+  [`LLM::Intercept::Null`](https://r.uby.dev/api-docs/llm.rb/LLM/Intercept/Null.html)
+  by default)
+  * [`LLM::Agent#intercept_options`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#intercept_options-instance_method)
+  <br> returns a copy of the intercept options (`{}` by default),
+  through the new
+  [`LLM::Context#intercept_options`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html#intercept_options-instance_method)
 
 ## v19.0.1
 
