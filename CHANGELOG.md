@@ -15,6 +15,8 @@ before) can be seen in [changelog/old.md](changelog/old.md).
 |-----|-----|
 | `LLM::Tool::Exec#call(arguments: ["echo", "hi"])` | `LLM::Tool::Exec#call(command: "echo", arguments: ["hi"])` |
 | `LLM::Tool::Utils::Process#spawn(name:)` | `LLM::Tool::Utils::Process#spawn(command:)` |
+| `LLM::Tracer::PrettyLogger` | `LLM::Tracer::EnhancedLogger` |
+| `LLM::Tracer.pretty_logger`, and `LLM::Tracer.pretty` | `LLM::Tracer.enhanced_logger`, and `LLM::Tracer.enhanced` |
 | `LLM::Command`, an alias for `LLM::Console::Command` | `LLM::Command` spawns a command, and `LLM::Console::Command` is spelled out |
 | `LLM::Tool::Utils::Process::Command`, and the `test-cmd.rb` gem | `LLM::Command`, which ships with llm.rb |
 
@@ -133,6 +135,61 @@ before) can be seen in [changelog/old.md](changelog/old.md).
   `LLM::Paint["hello", :blue, :bold]`, and returns the string unchanged
   when color is disabled. It honors `$NO_COLOR`, it is a small stand-in
   for the `paint` gem, and it is what the eval console tracer uses.
+
+* **paint: add `LLM::Paint::IO`** <br>
+  [`LLM::Paint::IO`](https://r.uby.dev/api-docs/llm.rb/LLM/Paint/IO.html) wraps
+  an IO so that the text written to it is wrapped in the escape sequences a
+  terminal understands, and written unchanged when color is disabled.
+  [`LLM::Paint::IO#write`](https://r.uby.dev/api-docs/llm.rb/LLM/Paint/IO.html#write-instance_method)
+  writes text with the colors and effects it is given,
+  [`LLM::Paint::IO#puts`](https://r.uby.dev/api-docs/llm.rb/LLM/Paint/IO.html#puts-instance_method)
+  writes it with a newline,
+  [`LLM::Paint::IO#color?`](https://r.uby.dev/api-docs/llm.rb/LLM/Paint/IO.html#color?-instance_method)
+  returns true when the wrapper writes color,
+  [`LLM::Paint::IO#color=`](https://r.uby.dev/api-docs/llm.rb/LLM/Paint/IO.html#color=-instance_method)
+  sets it, and
+  [`LLM::Paint::IO#io`](https://r.uby.dev/api-docs/llm.rb/LLM/Paint/IO.html#io-instance_method)
+  returns the IO that is wrapped.
+
+* **paint: `LLM::Paint.detect` takes an IO** <br>
+  [`LLM::Paint.detect`](https://r.uby.dev/api-docs/llm.rb/LLM/Paint.html#detect-class_method)
+  takes the IO to inspect as an argument now, where it inspected `$stdout`
+  alone. It still returns false when `$NO_COLOR` is set, and it returns
+  false for an IO that does not respond to `tty?`.
+
+### LLM::Tracer
+
+* **tracer: rename `LLM::Tracer::PrettyLogger` as `LLM::Tracer::EnhancedLogger`** <br>
+  [`LLM::Tracer::EnhancedLogger`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer/EnhancedLogger.html)
+  is the tracer that `LLM::Tracer::PrettyLogger` was.
+  [`LLM::Tracer.enhanced_logger`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer.html#enhanced_logger-class_method)
+  builds it,
+  [`LLM::Tracer.enhanced`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer.html#enhanced-class_method)
+  is its alias, and both replace `LLM::Tracer.pretty_logger` and
+  `LLM::Tracer.pretty`.
+
+* **tracer: the enhanced logger draws a readable log** <br>
+  A chat request, a tool call and an interrupt are each a line of their
+  own, with a marker that names the event, a duration for a request and a
+  tool call, and the tokens a request used. The timestamp, and the comma
+  separated fields it prefixed, are gone.
+
+* **tracer: the enhanced logger writes a summary on exit** <br>
+  [`LLM::Tracer::EnhancedLogger#on_exit`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer/EnhancedLogger.html#on_exit-instance_method)
+  writes the provider, the model, the number of requests, the tool calls
+  with a breakdown by name, the tokens returned in and out, the cost the
+  registry prices them at, the slowest tool call, the errors, and the
+  elapsed time. It is written only when the tracer saw a request or a tool
+  call, and it closes the file the tracer opened.
+
+* **tracer: the enhanced logger writes color** <br>
+  [`LLM::Tracer::EnhancedLogger`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer/EnhancedLogger.html)
+  writes through an
+  [`LLM::Paint::IO`](https://r.uby.dev/api-docs/llm.rb/LLM/Paint/IO.html),
+  so its log is colored when the IO it writes to is a terminal, and plain
+  when it is not, when `$NO_COLOR` is set, or when
+  [`LLM::Paint.enabled`](https://r.uby.dev/api-docs/llm.rb/LLM/Paint.html#enabled=-class_method)
+  is false.
 
 ## v18.0.0
 
@@ -1313,10 +1370,10 @@ For everything else, keep reading.
   reported the crash to standard error and
   swallowed it, so the request was not traced.
 
-* **tracer: alias `LLM::Tracer.pretty_logger` as `LLM::Tracer.pretty`** <br>
+* **tracer: alias `LLM::Tracer.enhanced_logger` as `LLM::Tracer.enhanced`** <br>
   Add
-  [`LLM::Tracer.pretty`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer.html#pretty_logger-class_method)
-  as an alias for `LLM::Tracer.pretty_logger`,
+  [`LLM::Tracer.enhanced`](https://r.uby.dev/api-docs/llm.rb/LLM/Tracer.html#pretty_logger-class_method)
+  as an alias for `LLM::Tracer.enhanced_logger`,
   so the shorter name builds the same tracer
   with the same options. The README uses
   `pretty` throughout.
