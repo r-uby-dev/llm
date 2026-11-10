@@ -101,6 +101,12 @@ and [changelog/v12.md](changelog/v12.md).
   changes that `git-status` reports. Like the other git tools it takes
   an optional `path:`, which narrows the list, and an optional `timeout:`.
 
+* **tools: add a `git-pull` tool** <br>
+  [`LLM::Tool::Git::Pull`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git/Pull.html)
+  (`git-pull`) pulls the changes of a remote branch into the current
+  branch. It takes an optional `remote:`, an optional `branch:`, which
+  requires a remote, and an optional `timeout:`.
+
 * **tools: add `LLM::Tool::DirTree`** <br>
   [`LLM::Tool::DirTree`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/DirTree.html)
   (`dir-tree`) returns the contents of a directory as a nested hash: a
