@@ -9,10 +9,7 @@ module LLM
   class Eval
     require "llm"
     require "llm/tools"
-    require "json"
     require "fileutils"
-    require "stringio"
-    require "time"
     require_relative "eval/tracer"
     require_relative "eval/run"
 

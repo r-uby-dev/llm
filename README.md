@@ -169,7 +169,7 @@ LLM::Eval.new do
   step "step1.txt"
   
   setup do
-    require "llm/tools"
+    require "fileutils"
     FileUtils.touch "/tmp/file.txt"
   end
 

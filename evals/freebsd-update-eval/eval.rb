@@ -6,7 +6,6 @@ LLM::Eval.new do
   freebsd = nil
 
   setup do
-    require "llm/tools"
     require_relative "freebsd"
     freebsd = FreeBSD.new
   end
