@@ -76,14 +76,23 @@ module LLM
       require "json" unless defined?(::JSON)
       pretty = options.delete(:pretty) || false
       if ::JSON::State === state
-        target = pretty ? :pretty_generate : :generate
-        ::JSON.public_send target, normalize(obj), state
+        if pretty
+          ::JSON.pretty_generate normalize(obj), state
+        else
+          ::JSON.generate normalize(obj), state
+        end
       elsif state
-        target = pretty ? :pretty_generate : :dump
-        ::JSON.public_send target, normalize(obj), state, **options
+        if pretty
+          ::JSON.pretty_generate normalize(obj), state, **options
+        else
+          ::JSON.dump normalize(obj), state, **options
+        end
       else
-        target = pretty ? :pretty_generate : :dump
-        ::JSON.public_send target, normalize(obj), **options
+        if pretty
+          ::JSON.pretty_generate normalize(obj), **options
+        else
+          ::JSON.dump normalize(obj), **options
+        end
       end
     end
 
