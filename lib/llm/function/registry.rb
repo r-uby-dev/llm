@@ -100,6 +100,9 @@ class LLM::Function
     ##
     # @api private
     def lock(&)
+      @__monitor ||= Monitor.new
+      @__registry ||= {}
+      @__names ||= {}
       @__monitor.synchronize(&)
     end
   end
