@@ -52,16 +52,21 @@ gem install llm.rb
 
 ## Quick start
 
-### Learn Fast
+### Resources
 
-The 
-[r.uby.dev](https://r.uby.dev) 
-website has an agent that can access the 
-runtime's source code. And another agent that 
-can answer questions about FreeBSD. Both are
-free to use, no account required, and you
-can use them to learn about the runtime and 
-see how it works at the same time.
+If you have a question the README doesn't answer
+or want to see the runtime in action,
+[r.uby.dev](https://r.uby.dev)
+is the place to go. The website has an agent 
+that has access to the runtime's source code. 
+And another agent that can answer questions 
+about FreeBSD. Both are free to use. No account 
+required. Great way to learn about the runtime
+and see it in action at the same time.
+
+[API docs](https://r.uby.dev/api-docs/llm.rb/)
+also exist for people who prefer learning the
+traditional way. 
 
 ### Agents
 
