@@ -41,12 +41,14 @@ DESCRIPTION
   spec.metadata["changelog_uri"] = "https://github.com/r-uby-dev/llm/blob/main/CHANGELOG.md"
 
   spec.files = Dir[
-    "README.md", "LICENSE",
+    "README.md",
+    "LICENSE",
+    "libexec/*",
     "lib/**/*.rb",
-    "data/*.json", "CHANGELOG.md",
-    "docs/deepdive.md",
-    "docs/deepdive/*/*.md",
-    "llm.gemspec", "bin/llm.rb"
+    "data/*.json",
+    "CHANGELOG.md",
+    "llm.gemspec",
+    "bin/llm.rb"
   ]
   spec.executables = ["llm.rb"]
   spec.require_paths = ["lib"]
