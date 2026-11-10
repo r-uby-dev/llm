@@ -169,6 +169,17 @@ module LLM
     ##
     # @param [Proc] block
     #  A proc.
+    def filter(&block)
+      if block
+        @filter = block
+      else
+        @filter
+      end
+    end
+
+    ##
+    # @param [Proc] block
+    #  A proc.
     def tracer(&block)
       if block
         @tracer = block
@@ -211,6 +222,7 @@ module LLM
       instance_eval(&@block) if @block
       instance_eval(&@setup) if @setup
       @intercept = instance_eval(&@intercept) if @intercept
+      @filter = instance_eval(&@filter) if @filter
       @tracer = instance_eval(&@tracer) if @tracer
       @agent = @agent.call
     ensure
