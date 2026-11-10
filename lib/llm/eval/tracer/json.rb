@@ -119,7 +119,7 @@ module LLM::Eval::Tracer
     def on_exit
       FileUtils.mkdir_p(@root)
       dest = File.join(@root, "sample.json")
-      File.write(dest, LLM.json.dump(report))
+      File.write(dest, LLM.json.dump(report, pretty: true))
       dest
     end
 

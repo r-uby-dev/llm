@@ -74,12 +74,16 @@ module LLM
     # @return (see JSONAdapter#dump)
     def self.dump(obj, state = nil, **options)
       require "json" unless defined?(::JSON)
+      pretty = options.delete(:pretty) || false
       if ::JSON::State === state
-        ::JSON.generate(normalize(obj), state)
+        target = pretty ? :pretty_generate : :generate
+        ::JSON.public_send target, normalize(obj), state
       elsif state
-        ::JSON.dump(normalize(obj), state, **options)
+        target = pretty ? :pretty_generate : :dump
+        ::JSON.public_send target, normalize(obj), state, **options
       else
-        ::JSON.dump(normalize(obj), **options)
+        target = pretty ? :pretty_generate : :dump
+        ::JSON.public_send target, normalize(obj), **options
       end
     end
 
