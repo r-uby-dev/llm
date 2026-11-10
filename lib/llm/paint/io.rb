@@ -69,7 +69,7 @@ class LLM::Paint
     # @param (see LLM::Paint::IO#write)
     # @return (see LLM::Paint::IO#write)
     def puts(text, *options)
-      write("#{text}\n", options)
+      write("#{text}\n", *options)
     end
   end
 end
