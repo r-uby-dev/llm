@@ -160,8 +160,7 @@ RSpec.describe LLM::Function do
 
     it "rejects proc-defined functions" do
       expect { proc_function.task(:ractor) }.to raise_error(
-        LLM::RactorError,
-        "Ractor concurrency only supports class-based tools"
+        LLM::RactorError, /Ractor concurrency only supports class-based tools/
       )
     end
 

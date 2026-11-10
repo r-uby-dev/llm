@@ -155,7 +155,7 @@ module LLM
     # @return [Array<LLM::Function>]
     def functions
       @functions ||= tool_calls.filter_map do |fn|
-        function = available_tools.find { _1.name.to_s == fn.name } || function_missing(fn.name)
+        function = available_tools.find { _1.name.to_s == fn.name } || LLM::Tool::NotFound(name: fn.name)
         function = function.dup
         function.tap { _1.id = fn.id }
         function.tap { _1.arguments = fn.arguments }
@@ -297,14 +297,6 @@ module LLM
       tools = nil if tools.empty?
       tools = tools || response&.__tools__ || []
       tools.map { _1.respond_to?(:function) ? _1.function : _1 }
-    end
-
-    ##
-    # @return [LLM::Function]
-    def function_missing(name)
-      LLM.function(name) do |fn|
-        fn.define { raise LLM::NoSuchToolError, "tool '#{name}' not found" }
-      end
     end
   end
 end
