@@ -14,10 +14,10 @@ RSpec.describe LLM::Tool::Git::Clone do
     skip "git is not on the PATH" unless command_available?("git")
     FileUtils.mkdir_p(origin)
     Dir.chdir(origin) { make_repo! }
-    FileUtils.mkdir_p(work)
   end
 
   around do |example|
+    FileUtils.mkdir_p(work)
     Dir.chdir(work) { example.call }
     FileUtils.rm_rf(dir)
   end
