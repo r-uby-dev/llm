@@ -139,6 +139,29 @@ and [changelog/v12.md](changelog/v12.md).
   the keyword matches the one `LLM::Tool::Exec#call` takes. A tool of
   your own that spawns a command passes `command:` now.
 
+### LLM::Function
+
+* **function: `LLM::Function#task(:ractor)` accepts a tool instance** <br>
+  [`LLM::Function#task`](https://r.uby.dev/api-docs/llm.rb/LLM/Function.html#task-instance_method)
+  accepts an instance of [`LLM::Tool`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool.html)
+  when it is given the `:ractor` strategy, where it took a class alone and
+  raised `LLM::RactorError` for an instance. A runner that is neither a
+  class nor an instance of `LLM::Tool` still raises
+  [`LLM::RactorError`](https://r.uby.dev/api-docs/llm.rb/LLM/RactorError.html).
+
+* **function: an unknown tool returns its error in band under `:ractor`** <br>
+  A tool call for a tool the runtime does not know is turned into an
+  anonymous subclass of `LLM::Tool` whose `#call` raises
+  [`LLM::NoSuchToolError`](https://r.uby.dev/api-docs/llm.rb/LLM/NoSuchToolError.html),
+  and the runtime returns that error to the model in band, the way the
+  other strategies do. The tool is a class rather than a proc, so the
+  `:ractor` strategy runs it, where it raised `LLM::RactorError` before.
+
+* **function: the `LLM::RactorError` names the function and its runner** <br>
+  The `LLM::RactorError` that `LLM::Function#task` raises for a runner the
+  `:ractor` strategy cannot use names the function and inspects the
+  runner, where its message was one generic line.
+
 ### Console
 
 * **console: add `llm.rb eval`** <br>
