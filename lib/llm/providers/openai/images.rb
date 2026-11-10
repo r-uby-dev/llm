@@ -35,7 +35,7 @@ class LLM::OpenAI
     # @param [Hash] params Other parameters (see OpenAI docs)
     # @raise (see LLM::Provider#request)
     # @return [LLM::Response]
-    def create(prompt:, model: "gpt-image-1-mini", output_format: "png", **params)
+    def create(prompt:, model: "gpt-image-2.6-flare", output_format: "png", **params)
       req = LLM::Transport::Request.post(path("/images/generations"), headers)
       req.body = LLM.json.dump({prompt:, n: 1, model:, output_format:}.merge!(params))
       res, span, tracer, request_id = execute(request: req, operation: "request")
@@ -58,7 +58,7 @@ class LLM::OpenAI
     # @param [Hash] params Other parameters (see OpenAI docs)
     # @raise (see LLM::Provider#request)
     # @return [LLM::Response]
-    def edit(image:, prompt:, model: "gpt-image-1-mini", output_format: "png", **params)
+    def edit(image:, prompt:, model: "gpt-image-2.6-flare", output_format: "png", **params)
       image = LLM.File(image)
       multi = LLM::Multipart.new(params.merge!(image:, prompt:, model:, output_format:))
       req = LLM::Transport::Request.post(path("/images/edits"), headers)
