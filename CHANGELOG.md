@@ -13,6 +13,19 @@ Older releases:
 
 ## What's next
 
+*No unreleased changes yet. Check back after the next release.*
+
+## v19.0.1
+
+Changes since `v19.0.0`.
+
+This is a patch release. It fixes the `:ractor` strategy, which
+called `#new` on the `LLM::Tool` instance given to
+`LLM::Function#task`, and it makes `llm.rb eval` resolve a
+relative path from the working directory. It also defaults the
+OpenAI images `model:` to `gpt-image-2.6-flare`, ahead of the
+`gpt-image-1-mini` retirement.
+
 ### LLM::OpenAI
 
 * **openai: images default to `gpt-image-2.6-flare`** <br>
