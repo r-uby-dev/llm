@@ -13,7 +13,13 @@ Older releases:
 
 ## What's next
 
-*No unreleased changes yet. Check back after the next release.*
+### LLM::Tool
+
+* **tools: add a `git-clone` tool** <br>
+  [`LLM::Tool::Git::Clone`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git/Clone.html)
+  (`git-clone`) clones a repository into a new directory. It takes the
+  `repository:` to clone, an optional `directory:` to clone into, which
+  defaults to the name of the repository, and an optional `timeout:`.
 
 ## v19.0.1
 
