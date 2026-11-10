@@ -41,7 +41,8 @@ includes [substational runtime improvements](CHANGELOG.md) -
 especially for running tool calls on a [Ractor](https://docs.ruby-lang.org/en/4.0/Ractor.html)
 and it is the recommended version to use. It is strongly 
 recommended over earlier versions. It requires Ruby4+,
-JSON v3, and the latest versions of ActiveRecord|Sequel:
+JSON v3, and the latest versions of ActiveRecord|Sequel
+(optional):
 
 ```bash
 gem install llm.rb
