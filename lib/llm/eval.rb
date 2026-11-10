@@ -60,7 +60,6 @@ module LLM
     attr_reader :penalties
 
     ##
-    # @param [LLM::Provider] llm
     # @param [Proc] b
     # @return [LLM::Eval]
     def initialize(&b)
@@ -190,7 +189,6 @@ module LLM
     end
 
     ##
-    # @param [Integer] samples
     # @return [Array<Hash>]
     def call
       eval

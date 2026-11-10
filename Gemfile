@@ -2,6 +2,7 @@
 
 source "https://rubygems.org"
 gemspec
+gem "yard", github: "altruby/yard", branch: "patch2"
 
 ##
 # TODO: do we need this? what for?

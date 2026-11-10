@@ -19,9 +19,9 @@ class LLM::Intercept
     ##
     # @param [LLM::Function] function
     #  A function
-    # @param [Hash] **
+    # @param [Hash] options
     #  An optional set of options
-    def call(function:, **)
+    def call(function:, **options)
       super
     rescue LLM::Interrupt
       raise

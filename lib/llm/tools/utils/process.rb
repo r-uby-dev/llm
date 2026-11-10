@@ -12,7 +12,6 @@ module LLM::Tool::Utils
     #  an exception.
     # @raise [UncaughtThrowError]
     #  When the throw does not have a catch.
-    # @throw [:kill, true]
     # @param [LLM::Command] command
     # @param [Integer] timeout
     # @return [void]
