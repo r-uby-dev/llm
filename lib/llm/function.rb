@@ -311,9 +311,10 @@ class LLM::Function
       LLM.require "xchan", "~> 0.24" unless defined?(::Chan::UNIXSocket)
       Fork::Task.new(self, options)
     when :ractor
-      raise LLM::RactorError, "Ractor concurrency only supports class-based tools" unless Class === @runner
-      if @runner.respond_to?(:skill?) && @runner.skill?
-        raise LLM::RactorError, "Ractor concurrency does not support skill-backed tools"
+      unless Class === @runner
+        raise LLM::RactorError,
+              "Ractor concurrency only supports class-based tools\n" \
+              "(function: #{@name}, runner: #{@runner.inspect})"
       end
       Ractor::Task.new(self, options.merge(runner_class: @runner, id:, name:, arguments:, model:))
     else
