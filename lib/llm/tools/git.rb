@@ -12,6 +12,7 @@ class LLM::Tool
   # @see LLM::Tool::Git::Commit
   # @see LLM::Tool::Git::Branch
   # @see LLM::Tool::Git::Checkout
+  # @see LLM::Tool::Git::Pull
   class Git < self
     abstract!
     DEFAULT_TIMEOUT = 5
@@ -24,6 +25,7 @@ class LLM::Tool
     require_relative "git/commit"
     require_relative "git/branch"
     require_relative "git/checkout"
+    require_relative "git/pull"
 
     def self.inherited(klass)
       klass.property :cwd,

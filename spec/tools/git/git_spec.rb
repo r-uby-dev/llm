@@ -31,10 +31,10 @@ RSpec.describe LLM::Tool::Git do
       expect(LLM::Tool.subclasses).to_not include(described_class)
     end
 
-    it "returns the eight git tools" do
+    it "returns the nine git tools" do
       expect(described_class.subclasses.map(&:name)).to contain_exactly(
         "git-branch", "git-checkout", "git-commit", "git-diff",
-        "git-log", "git-ls-files", "git-show", "git-status"
+        "git-log", "git-ls-files", "git-pull", "git-show", "git-status"
       )
     end
   end
@@ -45,6 +45,7 @@ RSpec.describe LLM::Tool::Git do
     Diff: {},
     Log: {},
     LsFiles: {},
+    Pull: {},
     Show: {},
     Status: {}
   }.each do |name, arguments|
