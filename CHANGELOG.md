@@ -18,9 +18,18 @@ and [changelog/v12.md](changelog/v12.md).
   [`LLM::OpenAI::Images#create`](https://r.uby.dev/api-docs/llm.rb/LLM/OpenAI/Images.html#create-instance_method)
   and
   [`LLM::OpenAI::Images#edit`](https://r.uby.dev/api-docs/llm.rb/LLM/OpenAI/Images.html#edit-instance_method)
-  ask for `gpt-image-2.6-flare` when they are given no `model:`, where they
-  asked for `gpt-image-1-mini`. OpenAI removes `gpt-image-1-mini` from its
-  API on December 1st, 2026. A `model:` that is given is sent unchanged.
+  default the `model:` parameter to `gpt-image-2.6-flare` now, where they
+  defaulted it to `gpt-image-1-mini`. OpenAI removes `gpt-image-1-mini` from
+  its API on December 1st, 2026. A `model:` that is given is sent unchanged.
+
+### LLM::Function
+
+* **function: the `:ractor` strategy runs a `LLM::Tool` instance** <br>
+  [`LLM::Function#task`](https://r.uby.dev/api-docs/llm.rb/LLM/Function.html#task-instance_method)
+  runs the [`LLM::Tool`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool.html)
+  instance it is given under the `:ractor` strategy, where it called `#new`
+  on that instance and raised `NoMethodError`. An instance that takes an
+  argument in `#initialize` runs with the state it was given.
 
 ### Console
 
