@@ -2,7 +2,7 @@
 
 require "tmpdir"
 require "setup"
-require "llm/tools/write_file"
+require "llm/tools/write-file"
 
 RSpec.describe LLM::Tool::WriteFile do
   let(:tool) { described_class.new }

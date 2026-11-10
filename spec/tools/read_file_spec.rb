@@ -2,7 +2,7 @@
 
 require "tmpdir"
 require "setup"
-require "llm/tools/read_file"
+require "llm/tools/read-file"
 
 RSpec.describe LLM::Tool::ReadFile do
   let(:tool) { described_class.new }

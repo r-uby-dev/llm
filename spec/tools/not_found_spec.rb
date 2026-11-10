@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "setup"
-require "llm/tools/not_found"
+require "llm/tools/not-found"
 
 RSpec.describe "LLM::Tool.NotFound" do
   let(:function) do
