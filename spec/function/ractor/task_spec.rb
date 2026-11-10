@@ -7,26 +7,6 @@ RSpec.describe LLM::Function::Ractor::Task do
     skip "not supported by oj" unless ENV.fetch("JSON_PARSER", "json").downcase == "json"
   end
 
-  def within(seconds = 5, &block)
-    thread = Thread.new do
-      Thread.current.report_on_exception = false
-      block.call
-    end
-    unless thread.join(seconds)
-      stacks = Thread.list.filter_map do |t|
-        next if t == Thread.current
-        "thread #{t.object_id} (#{t.status}):\n#{t.backtrace&.first(10)&.join("\n") || "(unavailable)"}"
-      end
-      ractor = task.instance_variable_get(:@ractor)
-      raise "timed out after #{seconds} seconds; ractor: #{ractor&.inspect}; " \
-        "exited: #{task.instance_variable_get(:@exited).inspect}; " \
-        "result port: #{task.instance_variable_get(:@resultp)&.inspect}; " \
-        "exit port: #{task.instance_variable_get(:@exitp)&.inspect}; " \
-        "thread stacks:\n#{stacks.join("\n\n")}"
-    end
-    thread.value
-  end
-
   let(:task) do
     Class.new(LLM::Tool) do
       name "quick"
@@ -208,5 +188,25 @@ RSpec.describe LLM::Function::Ractor::Task do
     it "raises LLM::Interrupt" do
       expect { within { group.wait } }.to raise_error(LLM::Interrupt)
     end
+  end
+
+  def within(seconds = 5, &block)
+    thread = Thread.new do
+      Thread.current.report_on_exception = false
+      block.call
+    end
+    unless thread.join(seconds)
+      stacks = Thread.list.filter_map do |t|
+        next if t == Thread.current
+        "thread #{t.object_id} (#{t.status}):\n#{t.backtrace&.first(10)&.join("\n") || "(unavailable)"}"
+      end
+      ractor = task.instance_variable_get(:@ractor)
+      raise "timed out after #{seconds} seconds; ractor: #{ractor&.inspect}; " \
+        "exited: #{task.instance_variable_get(:@exited).inspect}; " \
+        "result port: #{task.instance_variable_get(:@resultp)&.inspect}; " \
+        "exit port: #{task.instance_variable_get(:@exitp)&.inspect}; " \
+        "thread stacks:\n#{stacks.join("\n\n")}"
+    end
+    thread.value
   end
 end
