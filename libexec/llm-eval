@@ -27,7 +27,7 @@ def main(argv)
   end
   rest.map do
     path = File.absolute_path?(it) ? File.join(it, "eval.rb") :
-                                     File.join(__dir__, "..", it, "eval.rb")
+                                     File.join(Dir.getwd, it, "eval.rb")
     samples.times do
       LLM::Eval.from(llm, model, path, it+1).call
     end
@@ -36,7 +36,7 @@ end
 
 def crash(ex)
   abort <<~ERROR
-  #{Paint[ex.class.to_s, :red, :bold]}
+  #{LLM::Paint[ex.class.to_s, :red, :bold]}
   #{ex.message}
   #{ex.backtrace.take(7).join("\n")}
   ERROR
