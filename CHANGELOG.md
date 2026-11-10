@@ -13,6 +13,16 @@ Older releases:
 
 ## What's next
 
+### LLM::Eval
+
+* **eval: add `LLM::Eval#filter`** <br>
+  [`LLM::Eval#filter`](https://r.uby.dev/api-docs/llm.rb/LLM/Eval.html#filter-instance_method)
+  takes the block that builds a message filter, the way `#intercept` takes
+  the block that builds an intercept. The block returns a message filter,
+  eg a `Class.new(LLM::MessageFilter)` that implements `#call`, and it is
+  evaluated when the eval runs, so an `agent do ... end` block passes it
+  as `filter:`.
+
 ### LLM::Tool
 
 * **tools: the files under `lib/llm/tools` are kebab-case** <br>
