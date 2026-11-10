@@ -149,11 +149,11 @@ hackathon:
 
 ###### 1 sample
 
-> llm.rb eval -p openai|etc -m model evals/freebsd-update-eval/
+> llm.rb eval -p openai -m model evals/freebsd-update-eval/
 
 ###### 3 samples
 
-> llm.rb eval -p openai|etc -m model -n 3 evals/freebsd-update-eval/
+> llm.rb eval -p openai -m model -n 3 evals/freebsd-update-eval/
 
 ##### evals/simple-eval/step1.txt
 
