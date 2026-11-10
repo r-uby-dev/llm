@@ -20,7 +20,7 @@ RSpec.describe LLM::Tool::Git::LsFiles do
 
   describe ".function" do
     it "defines the path parameter" do
-      expect(described_class.function.params.properties.keys).to contain_exactly("path", "timeout")
+      expect(described_class.function.params.properties.keys).to contain_exactly("path", "timeout", "cwd")
     end
   end
 

@@ -23,7 +23,7 @@ RSpec.describe LLM::Tool::Git::Diff do
 
     it "defines the rev, path, staged, stat and context parameters" do
       expect(params.properties.keys).to contain_exactly(
-        "rev", "timeout", "path", "staged", "stat", "context"
+        "rev", "timeout", "path", "staged", "stat", "context", "cwd"
       )
     end
 

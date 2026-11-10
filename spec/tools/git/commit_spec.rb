@@ -22,7 +22,7 @@ RSpec.describe LLM::Tool::Git::Commit do
     let(:params) { described_class.function.params }
 
     it "defines the message, paths and all parameters" do
-      expect(params.properties.keys).to contain_exactly("message", "timeout", "paths", "all")
+      expect(params.properties.keys).to contain_exactly("message", "timeout", "paths", "all", "cwd")
     end
 
     it "marks message as required" do

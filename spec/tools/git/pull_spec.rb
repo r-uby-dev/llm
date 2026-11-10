@@ -25,8 +25,8 @@ RSpec.describe LLM::Tool::Git::Pull do
   describe ".function" do
     let(:params) { described_class.function.params }
 
-    it "defines the remote, branch and timeout parameters" do
-      expect(params.properties.keys).to contain_exactly("remote", "branch", "timeout")
+    it "defines the remote, branch, timeout and cwd parameters" do
+      expect(params.properties.keys).to contain_exactly("remote", "branch", "timeout", "cwd")
     end
   end
 

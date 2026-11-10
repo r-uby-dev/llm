@@ -16,6 +16,17 @@ class LLM::Tool
   class Git < self
     abstract!
     DEFAULT_TIMEOUT = 5
+
+    ##
+    # @param [LLM::Tool::Git] klass
+    # @return [void]
+    def self.inherited(klass)
+      klass.parameter :cwd,
+                      String,
+                      "The current working directory"
+      super
+    end
+
     require_relative "exec"
     require_relative "git/log"
     require_relative "git/diff"
@@ -26,13 +37,6 @@ class LLM::Tool
     require_relative "git/branch"
     require_relative "git/checkout"
     require_relative "git/pull"
-
-    def self.inherited(klass)
-      klass.property :cwd,
-                      LLM::Schema::String,
-                      "The current working directory",
-                      default: proc { Dir.getwd }
-    end
 
     private
 
