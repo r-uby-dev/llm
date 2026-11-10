@@ -1865,7 +1865,7 @@ a large-ish company.
       </p>
     </td>
     <td align="right" valign="middle" width="128">
-      <a href="https://www.youtube.com/watch?v=WXdl883HUWQ">
+      <a title="what's up doc" href="https://www.youtube.com/watch?v=WXdl883HUWQ">
         <img src="bugsbunny.jpg" width="128" alt="what's up doc">
       </a>
     </td>
