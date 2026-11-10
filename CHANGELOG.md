@@ -12,6 +12,18 @@ and [changelog/v12.md](changelog/v12.md).
 
 ## What's next
 
+*No unreleased changes yet. Check back after the next release.*
+
+## v19.0.0
+
+Changes since `v18.0.0`.
+
+This is a smaller release than v18. It adds the `LLM::Eval`
+framework and the `llm.rb eval` command that runs it,
+`LLM::Command`, `LLM::Paint`, and a few tools, and it carries
+breaking changes to `LLM::Tracer::PrettyLogger`,
+`LLM::Tool::Exec#call` and `LLM::Tool::Utils::Process#spawn`.
+
 ### Breaking
 
 #### Migration

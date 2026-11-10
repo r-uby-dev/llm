@@ -34,7 +34,7 @@ This version works with older rubies and dependencies (ie: json v2).
 gem install llm.rb -v 17.0.1
 ```
 
-##### Latest (v18)
+##### Latest (v19)
 
 The v18 release 
 includes [substational runtime improvements](changelog/v18.md) -
@@ -44,9 +44,9 @@ recommended over earlier versions. It requires Ruby4+,
 JSON v3, and the latest versions of ActiveRecord|Sequel
 (optional).
 
-The v19 release (unreleased) is in active development,
-and includes the tiny eval framework that this README
-documents. Earlier versions don't include it: 
+The v19 release (latest) is a smaller release that includes a 
+tiny eval framework that was authored for the [micro1](https://micro1.ai)
+hackathon. It is the recommended release. 
 
 ```bash
 gem install llm.rb
