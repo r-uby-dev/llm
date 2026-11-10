@@ -20,6 +20,17 @@ before) can be seen in [changelog/old.md](changelog/old.md).
 | `LLM::Command`, an alias for `LLM::Console::Command` | `LLM::Command` spawns a command, and `LLM::Console::Command` is spelled out |
 | `LLM::Tool::Utils::Process::Command`, and the `test-cmd.rb` gem | `LLM::Command`, which ships with llm.rb |
 
+### LLM
+
+* **core: `LLM.json.dump` takes a `pretty:` option** <br>
+  [`LLM.json.dump`](https://r.uby.dev/api-docs/llm.rb/LLM.html#json-class_method)
+  dumps an object with `JSON.pretty_generate` when it is given
+  `pretty: true`, so the string it returns is indented and read by a
+  person. Without the option it dumps with `JSON.dump`, the way it did
+  before. The
+  [`LLM::JSONAdapter::Oj`](https://r.uby.dev/api-docs/llm.rb/LLM/JSONAdapter/Oj.html)
+  adapter takes no such option.
+
 ### LLM::Eval
 
 * **eval: add `LLM::Eval`** <br>
@@ -63,7 +74,7 @@ before) can be seen in [changelog/old.md](changelog/old.md).
   tokens, reply and reasoning, each tool call with its arguments and
   duration, every error, and the score and its penalties. The report is
   written to `runs/<eval>/<provider>/<model>/<sample>/sample.json` on
-  exit.
+  exit, as indented JSON.
 
 ### LLM::Command
 
@@ -126,6 +137,11 @@ before) can be seen in [changelog/old.md](changelog/old.md).
   `-m` or from the provider's `default_model`, and each eval is run `-n`
   times, where `-n` is 1 by default. A relative path is resolved against
   the root of the llm.rb checkout.
+
+* **console: `models.dev:download` is `update-data`** <br>
+  The command that refreshes the `data/` directory from models.dev is
+  `llm.rb update-data` now, and `llm.rb models.dev:download` is still
+  accepted.
 
 ### LLM::Paint
 
