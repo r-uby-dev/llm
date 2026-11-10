@@ -56,8 +56,9 @@ gem install llm.rb
 
 [r.uby.dev](https://r.uby.dev) is the place to go
 if you have a question the README doesn't answer
-or want to see the runtime in action.
-[API docs](https://r.uby.dev/api-docs/llm.rb/)
+or want to see the runtime in action. Great way
+to learn about the runtime and see it in action
+at the same time. [API docs](https://r.uby.dev/api-docs/llm.rb/)
 also exists for people who prefer learning the
 traditional way. 
 
