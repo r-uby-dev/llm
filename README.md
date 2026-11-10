@@ -145,6 +145,16 @@ FreeBSD-specific problem: [evals/freebsd-update-eval/](evals/freebsd-update-eval
 This work was completed for the [micro1](https://micro1.ai) 
 hackathon:
 
+##### CLI
+
+###### 1 sample
+
+> llm.rb eval -p openai|etc -m model evals/freebsd-update-eval/
+
+###### 3 samples
+
+> llm.rb eval -p openai|etc -m model -n 3 evals/freebsd-update-eval/
+
 ##### evals/simple-eval/step1.txt
 
 > Delete /tmp/file.txt
