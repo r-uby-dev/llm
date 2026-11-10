@@ -8,45 +8,6 @@
   "name": "Moonshot AI",
   "doc": "https://platform.moonshot.ai/docs/api/chat",
   "models": {
-    "kimi-k2.7-code": {
-      "id": "kimi-k2.7-code",
-      "name": "Kimi K2.7 Code",
-      "description": "Coding-focused Kimi model, stronger on long-horizon repo work with less overthinking",
-      "family": "kimi-k2",
-      "attachment": true,
-      "reasoning": true,
-      "reasoning_options": [],
-      "tool_call": true,
-      "interleaved": {
-        "field": "reasoning_content"
-      },
-      "structured_output": true,
-      "temperature": false,
-      "knowledge": "2025-01",
-      "release_date": "2026-06-12",
-      "last_updated": "2026-06-12",
-      "modalities": {
-        "input": [
-          "text",
-          "image",
-          "video"
-        ],
-        "output": [
-          "text"
-        ]
-      },
-      "open_weights": true,
-      "limit": {
-        "context": 262144,
-        "output": 262144
-      },
-      "cost": {
-        "input": 0.95,
-        "output": 4,
-        "cache_read": 0.19
-      },
-      "canonical_model_id": "moonshotai/kimi-k2.7-code"
-    },
     "kimi-k3": {
       "id": "kimi-k3",
       "name": "Kimi K3",
@@ -143,18 +104,14 @@
       },
       "canonical_model_id": "moonshotai/kimi-k3.1-pro"
     },
-    "kimi-k2.6": {
-      "id": "kimi-k2.6",
-      "name": "Kimi K2.6",
-      "description": "Multimodal Kimi workhorse for agent loops, coding tasks, and visual context",
+    "kimi-k2.7-code-highspeed": {
+      "id": "kimi-k2.7-code-highspeed",
+      "name": "Kimi K2.7 Code HighSpeed",
+      "description": "Coding-focused Kimi model, stronger on long-horizon repo work with less overthinking",
       "family": "kimi-k2",
       "attachment": true,
       "reasoning": true,
-      "reasoning_options": [
-        {
-          "type": "toggle"
-        }
-      ],
+      "reasoning_options": [],
       "tool_call": true,
       "interleaved": {
         "field": "reasoning_content"
@@ -162,8 +119,8 @@
       "structured_output": true,
       "temperature": false,
       "knowledge": "2025-01",
-      "release_date": "2026-04-20",
-      "last_updated": "2026-04-20",
+      "release_date": "2026-06-12",
+      "last_updated": "2026-06-12",
       "modalities": {
         "input": [
           "text",
@@ -180,11 +137,11 @@
         "output": 262144
       },
       "cost": {
-        "input": 0.95,
-        "output": 4,
-        "cache_read": 0.16
+        "input": 1.9,
+        "output": 8,
+        "cache_read": 0.38
       },
-      "canonical_model_id": "moonshotai/kimi-k2.6"
+      "canonical_model_id": "moonshotai/kimi-k2.7-code"
     },
     "kimi-k3.1-pro": {
       "id": "kimi-k3.1-pro",
@@ -234,9 +191,52 @@
       },
       "canonical_model_id": "moonshotai/kimi-k3.1-pro"
     },
-    "kimi-k2.7-code-highspeed": {
-      "id": "kimi-k2.7-code-highspeed",
-      "name": "Kimi K2.7 Code HighSpeed",
+    "kimi-k2.6": {
+      "id": "kimi-k2.6",
+      "name": "Kimi K2.6",
+      "description": "Multimodal Kimi workhorse for agent loops, coding tasks, and visual context",
+      "family": "kimi-k2",
+      "attachment": true,
+      "reasoning": true,
+      "reasoning_options": [
+        {
+          "type": "toggle"
+        }
+      ],
+      "tool_call": true,
+      "interleaved": {
+        "field": "reasoning_content"
+      },
+      "structured_output": true,
+      "temperature": false,
+      "knowledge": "2025-01",
+      "release_date": "2026-04-20",
+      "last_updated": "2026-04-20",
+      "modalities": {
+        "input": [
+          "text",
+          "image",
+          "video"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "open_weights": true,
+      "limit": {
+        "context": 262144,
+        "output": 262144
+      },
+      "cost": {
+        "input": 0.95,
+        "output": 4,
+        "cache_read": 0.16
+      },
+      "canonical_model_id": "moonshotai/kimi-k2.6"
+    },
+    "kimi-k2.7-code": {
+      "id": "kimi-k2.7-code",
+      "name": "Kimi K2.7 Code",
       "description": "Coding-focused Kimi model, stronger on long-horizon repo work with less overthinking",
       "family": "kimi-k2",
       "attachment": true,
@@ -267,9 +267,9 @@
         "output": 262144
       },
       "cost": {
-        "input": 1.9,
-        "output": 8,
-        "cache_read": 0.38
+        "input": 0.95,
+        "output": 4,
+        "cache_read": 0.19
       },
       "canonical_model_id": "moonshotai/kimi-k2.7-code"
     }
