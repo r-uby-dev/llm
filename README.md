@@ -36,13 +36,17 @@ gem install llm.rb -v 17.0.1
 
 ##### Latest (v18)
 
-Every release after v17 
-includes [substational runtime improvements](CHANGELOG.md) -
+The v18 release  
+includes [substational runtime improvements](changelog/v18.md) -
 especially for running tool calls on a [Ractor](https://docs.ruby-lang.org/en/4.0/Ractor.html)
 and it is the recommended version to use. It is strongly 
 recommended over earlier versions. It requires Ruby4+,
 JSON v3, and the latest versions of ActiveRecord|Sequel
-(optional):
+(optional).
+
+The v19 release (unreleased) is in active development,
+and includes the tiny eval framework that this README
+documents. Earlier versions don't include it: 
 
 ```bash
 gem install llm.rb
