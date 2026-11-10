@@ -91,7 +91,7 @@ module LLM
   require_relative "llm/a2a"
   require_relative "llm/uridata"
   require_relative "llm/command"
-  require_relative "llm/tools/not_found"
+  require_relative "llm/tools/not-found"
 
   ##
   # @api private
