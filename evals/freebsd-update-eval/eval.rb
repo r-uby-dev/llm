@@ -45,7 +45,7 @@ LLM::Eval.new do
           LLM::Function::Return.new(
             function.id,
             function.name,
-            freebsd.call(function.arguments[:arguments])
+            freebsd.call([function.arguments[:command], *function.arguments[:arguments]])
           )
         end
       end
