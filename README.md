@@ -44,28 +44,13 @@ This version works with older rubies and dependencies (ie: json v2).
 gem install llm.rb -v 17.0.1
 ```
 
-##### v18
+##### Latest (v18)
 
-The v18 series requires  Ruby 4.0.0 or later. Ruby 4.1.0+ 
-is recommended. The _optional_ dependencies ActiveRecord a
-nd Sequel must be updated to their latest version(s). The 
-major
-[json](https://github.com/ruby/json) 
-version bump (v2 => v3) can require changes and not
-all gems have caught up yet. The [r-uby-dev/llm](https://github.com/r-uby-dev/llm)
-gem is an early adopter of json v3. 
-
-There is an outstanding 
-[ruby-core bug](https://bugs.ruby-lang.org/issues/22499)
-that means the combination of llm.rb, Ractor, and
-the YJIT should be avoided. Without YJIT enabled the
-bug (a SIGSEGV) is avoided. Also works fine with YJIT
-enabled but no Ractor use.
-
-The v18 series
+Every release after v17 
 includes [substational runtime improvements](CHANGELOG.md) -
 especially for running tool calls on a [Ractor](https://docs.ruby-lang.org/en/4.0/Ractor.html)
-and it is the recommended version to use.
+and it is the recommended version to use. It is strongly 
+recommended over earlier versions.
 
 ```bash
 gem install llm.rb
