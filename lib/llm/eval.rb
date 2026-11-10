@@ -7,7 +7,6 @@ module LLM
   # to an eval.rb file that describes
   # the eval.
   class Eval
-    require "llm"
     require "llm/tools"
     require "fileutils"
     require_relative "eval/tracer"
