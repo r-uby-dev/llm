@@ -13,6 +13,7 @@ class LLM::Tool
   # @see LLM::Tool::Git::Branch
   # @see LLM::Tool::Git::Checkout
   # @see LLM::Tool::Git::Pull
+  # @see LLM::Tool::Git::Authors
   class Git < self
     abstract!
     DEFAULT_TIMEOUT = 5
@@ -37,6 +38,7 @@ class LLM::Tool
     require_relative "git/branch"
     require_relative "git/checkout"
     require_relative "git/pull"
+    require_relative "git/authors"
 
     private
 
