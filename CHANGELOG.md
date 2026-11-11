@@ -55,6 +55,16 @@ Older releases:
   through the new
   [`LLM::Context#intercept_options`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html#intercept_options-instance_method)
 
+### LLM::Context
+
+* **context: the compactor, filter and intercept options stay out of the request body** <br>
+  [`LLM::Context`](https://r.uby.dev/api-docs/llm.rb/LLM/Context.html)
+  leaves `compactor_options:`, `filter_options:` and `intercept_options:`
+  out of the params it sends to a provider now, where it sent them as
+  top-level fields of the request body, next to `model`. They configure
+  the context's compactor, filter and intercept, as `compactor:`,
+  `filter:` and `intercept:` do, and those are not sent either.
+
 ## v19.0.1
 
 Changes since `v19.0.0`.
