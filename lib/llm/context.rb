@@ -79,7 +79,7 @@ module LLM
     # @api private
     # @return [Array<Symbol>]
     def self.params
-      %w[intercept retry_budget concurrency filter compactor record id]
+      %w[intercept intercept_options retry_budget concurrency filter filter_options compactor compactor_options record id]
     end
 
     ##

@@ -382,6 +382,33 @@ RSpec.describe LLM::Context do
     end
   end
 
+  context "when given compactor, filter and intercept options" do
+    let(:provider) { LLM.openai(key: "test") }
+    let(:model) { "gpt-5.4" }
+    let(:options) { {compactor_options: {keep: 2}, filter_options: {drop: 3}, intercept_options: {threshold: 1}} }
+    let(:response) { response!(choices: [LLM::Message.new("assistant", "pong")]) }
+
+    context "with mode: :completions" do
+      let(:ctx) { described_class.new(provider, model:, mode: :completions, **options) }
+
+      it "keeps them out of the request params" do
+        expect(provider).to receive(:complete).with(anything, hash_excluding(*options.keys)).and_return(response)
+        ctx.talk("ping")
+      end
+    end
+
+    context "with mode: :responses" do
+      let(:ctx) { described_class.new(provider, model:, mode: :responses, **options) }
+      let(:responses) { double }
+
+      it "keeps them out of the request params" do
+        allow(provider).to receive(:responses).and_return(responses)
+        expect(responses).to receive(:create).with(anything, hash_excluding(*options.keys)).and_return(response)
+        ctx.talk("ping")
+      end
+    end
+  end
+
   context "when serializing tagged prompt objects" do
     let(:provider) { LLM.openai(key: "test") }
     let(:model) { "gpt-5.4" }
