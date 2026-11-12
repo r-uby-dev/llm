@@ -1,7 +1,7 @@
 > Changelog <br>
 > [r.uby.dev](https://r.uby.dev) project
 
-This file covers the v19 series. <br> 
+This file covers the v19|v20 series. <br> 
 Older releases:  
 * [changelog/v18.md](changelog/v18.md)
 * [changelog/v17.md](changelog/v17.md)
@@ -12,6 +12,10 @@ Older releases:
 * [changelog/v12.md](changelog/v12.md)
 
 ## What's next
+
+Nothing yet.
+
+## v20.0.0
 
 Changes since `v19.1.1`.
 

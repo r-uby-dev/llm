@@ -37,7 +37,7 @@ This version works with older rubies and dependencies (ie: json v2).
 gem install llm.rb -v 17.0.1
 ```
 
-##### Latest (v19)
+##### Latest (v20)
 
 The v19 release is a smaller release that includes a 
 tiny eval framework that was authored for the [micro1](https://micro1.ai)
