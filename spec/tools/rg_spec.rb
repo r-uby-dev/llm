@@ -2,7 +2,6 @@
 
 require "setup"
 require "llm/tools/rg"
-require "llm/tools/exec"
 
 RSpec.describe LLM::Tool::Rg do
   let(:tool) { described_class.new }

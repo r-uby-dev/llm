@@ -2,7 +2,7 @@
 
 require "setup"
 require "llm/tools/ruby"
-require "llm/tools/exec"
+require "llm/tools/ruby"
 
 RSpec.describe LLM::Tool::Ruby do
   let(:tool) { described_class.new }

@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
-class LLM::Tool
+require_relative "../unix"
+
+class LLM::Tool::Unix
   ##
-  # The {LLM::Tool::Mkdir LLM::Tool::Mkdir} class implements
+  # The {LLM::Tool::Unix::Mkdir LLM::Tool::Unix::Mkdir} class implements
   # a tool that can create a tree of new directories.
   class Mkdir < self
-    require_relative "exec"
+    require_relative "../exec"
 
     name "mkdir"
     description "Create a new directory\n" \

@@ -3,7 +3,7 @@
 require "setup"
 require "tmpdir"
 require "llm/tools/bundle"
-require "llm/tools/exec"
+require "llm/tools/bundle"
 
 RSpec.describe LLM::Tool::Bundle do
   let(:tool) { described_class.new }

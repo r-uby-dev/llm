@@ -16,7 +16,7 @@ Older releases:
 ### LLM::Tool
 
 * **tools: add a `man` tool** <br>
-  [`LLM::Tool::Man`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Man.html)
+  [`LLM::Tool::Unix::Man`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Man.html)
   (`man`) reads a manual page and returns it as text, so an agent can look up
   a command or a function before it uses it. It spawns `man` with `-P cat`
   through
@@ -29,7 +29,7 @@ Older releases:
   `$MANPATH` is forwarded when it is set.
 
 * **tools: add an `apropos` tool** <br>
-  [`LLM::Tool::Apropos`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Apropos.html)
+  [`LLM::Tool::Unix::Apropos`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Apropos.html)
   (`apropos`) searches the manual page databases for one or more `keywords:`
   and returns the descriptions that match, the step an agent takes before it
   reads a page with `man`. Each keyword is an argument of its own, so two
@@ -39,7 +39,7 @@ Older releases:
   optional `max_bytes:`, and it rejects an empty keyword.
 
 * **tools: add a `find` tool** <br>
-  [`LLM::Tool::Find`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Find.html)
+  [`LLM::Tool::Unix::Find`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Find.html)
   (`find`) walks a file hierarchy and returns the paths that match, where
   `rg` searches the contents of the files it knows about, `dir-tree` shows
   the shape of a tree up to a depth, and `ls` lists one directory. It takes

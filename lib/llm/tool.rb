@@ -62,6 +62,14 @@ class LLM::Tool
   end
 
   ##
+  # Returns all unix-related tools
+  # @return [Array<Class<LLM::Tool::Unix>>]
+  def self.unix
+    require_relative "tools/unix" unless defined?(LLM::Tool::Unix)
+    LLM::Tool::Unix.subclasses
+  end
+
+  ##
   # Returns (or sets) the tool name
   # @param [String, nil] name The tool name
   # @return [String]

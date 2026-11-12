@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
-class LLM::Tool
+require_relative "../unix"
+
+class LLM::Tool::Unix
   ##
-  # The {LLM::Tool::Apropos LLM::Tool::Apropos} class implements
+  # The {LLM::Tool::Unix::Apropos LLM::Tool::Unix::Apropos} class implements
   # a tool that searches the manual page databases for keywords.
-  # It is the step before {LLM::Tool::Man} - an agent that does not
+  # It is the step before {LLM::Tool::Unix::Man} - an agent that does not
   # know the name of a page searches the descriptions for a word,
   # and reads the page the search names, eg
   # `apropos(keywords: ["socket"])`.
@@ -14,7 +16,7 @@ class LLM::Tool
   # a term carries the macro key syntax of `apropos(1)`, eg
   # `Va=optind`.
   class Apropos < self
-    require_relative "exec"
+    require_relative "../exec"
 
     name "apropos"
     description "Search the manual pages for one or more keywords\n" \

@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
-class LLM::Tool
+require_relative "../unix"
+
+class LLM::Tool::Unix
   ##
-  # The {LLM::Tool::Man LLM::Tool::Man} class implements
+  # The {LLM::Tool::Unix::Man LLM::Tool::Unix::Man} class implements
   # a tool that reads a manual page. The page is read as
   # text rather than opened in a pager, so it can be handed
   # to a model.
@@ -13,7 +15,7 @@ class LLM::Tool
   # the documentation of a command or a library function it
   # is about to use, eg `man(name: "printf", section: 3)`.
   class Man < self
-    require_relative "exec"
+    require_relative "../exec"
 
     name "man"
     description "Read a manual page\n" \

@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
 require "setup"
-require "llm/tools/apropos"
-require "llm/tools/exec"
+require "llm/tools/unix"
 
-RSpec.describe LLM::Tool::Apropos do
+RSpec.describe LLM::Tool::Unix::Apropos do
   let(:tool) { described_class.new }
   let(:shell) { instance_double(LLM::Tool::Exec) }
   let(:result) {

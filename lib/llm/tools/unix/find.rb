@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
-class LLM::Tool
+require_relative "../unix"
+
+class LLM::Tool::Unix
   ##
-  # The {LLM::Tool::Find LLM::Tool::Find} class implements a tool
+  # The {LLM::Tool::Unix::Find LLM::Tool::Unix::Find} class implements a tool
   # that walks a file hierarchy and returns the paths that match.
   #
   # It spawns `find` without a shell. The expression is built from
@@ -15,7 +17,7 @@ class LLM::Tool
   # {LLM::Tool::Exec} stops reading at `max_bytes:`, and the tool
   # returns at most `limit:` paths, and says when it cut the list.
   class Find < self
-    require_relative "exec"
+    require_relative "../exec"
 
     name "find"
     description "Walk a file hierarchy and return the paths that match\n" \

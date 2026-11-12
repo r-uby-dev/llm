@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
 require "setup"
-require "llm/tools/man"
-require "llm/tools/exec"
+require "llm/tools/unix"
 
-RSpec.describe LLM::Tool::Man do
+RSpec.describe LLM::Tool::Unix::Man do
   let(:tool) { described_class.new }
   let(:shell) { instance_double(LLM::Tool::Exec) }
   let(:result) { {ok: true, stdout: "PRINTF(3)\n", stderr: ""} }
