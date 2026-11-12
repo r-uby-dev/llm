@@ -1836,7 +1836,7 @@ runtime works. I think it is fair to say -
 based on when I last looked - that RubyLLM 
 is much better optimized for Rails and 
 this runtime is optimized for environments 
-that might only have a Ruby, the standard 
+that might only have Ruby, the standard 
 library and the filesystem but that's not
 to say you can't use the runtime with Rack,
 Rails, ActiveRecord and even Sequel.
