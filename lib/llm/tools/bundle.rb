@@ -16,7 +16,7 @@ class LLM::Tool
     parameter :arguments, Array[String], "one or more command arguments"
     parameter :timeout, Integer, "the maximum allowed time for the command to run (in seconds)"
     parameter :max_bytes, Integer, "max number of bytes to emit"
-    defaults arguments: [], timeout: 60, max_bytes: -> { Unix::Exec.max_bytes }
+    defaults arguments: [], timeout: 60, max_bytes: -> { Exec.max_bytes }
 
     ##
     # @return [LLM::Tool::BundleExec]
@@ -32,8 +32,8 @@ class LLM::Tool
     # @param [Integer] max_bytes
     #  Max number of bytes to emit
     # @return [Hash]
-    def call(arguments: [], timeout: 60, max_bytes: Unix::Exec.max_bytes)
-      Unix::Exec.new(env:).call(
+    def call(arguments: [], timeout: 60, max_bytes: Exec.max_bytes)
+      Exec.new(env:).call(
         command: "bundle",
         arguments:,
         timeout:,

@@ -17,7 +17,7 @@ class LLM::Tool
     parameter :timeout, Integer, "maximum runtime before timeout"
     parameter :max_bytes, Integer, "max number of bytes to emit"
     required %i[code]
-    defaults timeout: 15, max_bytes: -> { Unix::Exec.max_bytes }
+    defaults timeout: 15, max_bytes: -> { Exec.max_bytes }
 
     ##
     # @param [String] code
@@ -27,8 +27,8 @@ class LLM::Tool
     # @param [Integer] max_bytes
     #  Max bytes to emit
     # @return [Hash]
-    def call(code:, timeout: 15, max_bytes: Unix::Exec.max_bytes)
-      Unix::Exec.new.call(
+    def call(code:, timeout: 15, max_bytes: Exec.max_bytes)
+      Exec.new.call(
         command: RbConfig.ruby,
         arguments: ["-e", code],
         timeout:,
