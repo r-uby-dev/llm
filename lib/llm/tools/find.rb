@@ -12,7 +12,7 @@ class LLM::Tool
   # in macOS does not. Without `max_depth:` the arguments are POSIX.
   #
   # A walk can match a lot of paths, so the result is capped twice:
-  # `LLM::Tool::Exec` stops reading at `max_bytes:`, and the tool
+  # {LLM::Tool::Exec} stops reading at `max_bytes:`, and the tool
   # returns at most `limit:` paths, and says when it cut the list.
   class Find < self
     require_relative "exec"
@@ -28,7 +28,7 @@ class LLM::Tool
     parameter :limit, Integer, "the max number of paths to return"
     parameter :timeout, Integer, "the maximum allowed time for the command to run (in seconds)"
     parameter :max_bytes, Integer, "max number of bytes to emit"
-    defaults path: Dir.getwd, name: nil, type: nil, max_depth: nil, newer_than: nil,
+    defaults name: nil, type: nil, max_depth: nil, newer_than: nil,
              limit: 200, timeout: 5, max_bytes: -> { Exec.max_bytes }
 
     ##
