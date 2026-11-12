@@ -21,9 +21,6 @@ class LLM::Tool
   # @see LLM::Tool::Unix::Mkdir
   class Unix < self
     abstract!
-    require_relative "mkdir"
-
-    Mkdir = Class.new(LLM::Tool::Mkdir)
 
     require_relative "unix/apropos"
     require_relative "unix/find"
