@@ -121,7 +121,7 @@ end
 llm     = LLM.deepseek
 tools   = [*LLM::Tool.git, GetRepo]
 tracer  = LLM::Tracer.enhanced(llm)
-options = {oncurrency: :ractor, stream: StringIO.new, tracer:, tools:}
+options = {concurrency: :ractor, stream: StringIO.new, tracer:, tools:}
 
 agent = LLM::Agent.new(llm, options)
 agent.talk "clone the #{['mruby', 'llm.rb'].sample} repo into /tmp/repo"
