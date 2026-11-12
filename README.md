@@ -339,6 +339,34 @@ agent = LLM::Agent.new(llm, stream: $stdout, concurrency:)
 agent.talk "Find me an interesting Ruby project on GitHub", tools: mcp.tools
 ```
 
+##### builtin_tools.rb
+
+The runtime ships toolsets that cover
+different tasks in different contexts.
+The tools are loaded on-demand via a
+separate call to require and do not
+require optional dependencies (but the
+tool call itself might require external
+dependencies like `git`).
+
+For example, the "git" toolset uses the
+git binary to work within a git repository
+and it enables an agent to do all the things
+you would expect an agent to be able to do
+in a git repository.
+
+See [lib/llm/tools](lib/llm/tools) to learn
+about the other available builtin tools:
+
+```ruby
+require "llm"
+
+llm   = LLM.deepseek
+tools = [LLM::Tool.git, LLM::Tool::Pwd]
+agent = LLM::Agent.new(llm, tools:)
+agent.talk "tell me what authors this git repo has?", stream; $stdout
+```
+
 ##### files.rb
 
 OpenAI, DeepSeek, Google, and a select few other
