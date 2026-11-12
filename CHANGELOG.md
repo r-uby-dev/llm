@@ -13,10 +13,56 @@ Older releases:
 
 ## What's next
 
+Changes since `v19.1.1`.
+
+This release adds `LLM::Tool::Unix`, the superclass of the tools that
+work only on a unix-like system, and it moves `LLM::Tool::Mkdir` below
+it. It also adds `LLM::Tool.git`, `LLM::Tool.unix`, and three unix
+tools: `man`, `apropos` and `find`.
+
+### Breaking
+
+#### Migration
+
+| Old | New |
+|-----|-----|
+| `LLM::Tool::Mkdir` | `LLM::Tool::Unix::Mkdir` |
+| `require "llm/tools/mkdir"` | `require "llm/tools/unix/mkdir"` |
+
 ### LLM::Tool
 
+* **tools: add `LLM::Tool::Unix`** <br>
+  [`LLM::Tool::Unix`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix.html)
+  is the abstract superclass of the tools that work only on a unix-like
+  system, because they depend on a command Windows does not ship
+  (`apropos`, `find`, `man`, `mkdir`), or on a system facility that only
+  exists there. A tool that works anywhere - reading and writing a file,
+  changing directory, spawning a command - is not a unix tool even when
+  it is named after a unix command, so it stays at the top level, as
+  `LLM::Tool::Exec` does. The superclass is abstract, so it has no name
+  and it is not in `LLM::Tool.registry`.
+
+* **tools: `LLM::Tool::Mkdir` is `LLM::Tool::Unix::Mkdir`** <br>
+  [`LLM::Tool::Unix::Mkdir`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Mkdir.html)
+  is the name of the `mkdir` tool now. It lives at
+  `lib/llm/tools/unix/mkdir.rb`, so it is required with
+  `require "llm/tools/unix"` rather than `require "llm/tools/mkdir"`.
+
+* **tools: add `LLM::Tool.unix`** <br>
+  [`LLM::Tool.unix`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool.html#unix-class_method)
+  returns the unix tools, which are the subclasses of `LLM::Tool::Unix`.
+  It requires `llm/tools/unix` when it is called, unless the namespace is
+  loaded already, so the unix tools are not required up front.
+
+* **tools: add `LLM::Tool.git`** <br>
+  [`LLM::Tool.git`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool.html#git-class_method)
+  returns the git tools, which are the subclasses of
+  [`LLM::Tool::Git`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git.html).
+  It requires `llm/tools/git` when it is called, unless the namespace is
+  loaded already, so the git tools are not required up front.
+
 * **tools: add a `man` tool** <br>
-  [`LLM::Tool::Unix::Man`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Man.html)
+  [`LLM::Tool::Unix::Man`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Man.html)
   (`man`) reads a manual page and returns it as text, so an agent can look up
   a command or a function before it uses it. It spawns `man` with `-P cat`
   through
@@ -29,7 +75,7 @@ Older releases:
   `$MANPATH` is forwarded when it is set.
 
 * **tools: add an `apropos` tool** <br>
-  [`LLM::Tool::Unix::Apropos`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Apropos.html)
+  [`LLM::Tool::Unix::Apropos`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Apropos.html)
   (`apropos`) searches the manual page databases for one or more `keywords:`
   and returns the descriptions that match, the step an agent takes before it
   reads a page with `man`. Each keyword is an argument of its own, so two
@@ -39,7 +85,7 @@ Older releases:
   optional `max_bytes:`, and it rejects an empty keyword.
 
 * **tools: add a `find` tool** <br>
-  [`LLM::Tool::Unix::Find`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Find.html)
+  [`LLM::Tool::Unix::Find`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Find.html)
   (`find`) walks a file hierarchy and returns the paths that match, where
   `rg` searches the contents of the files it knows about, `dir-tree` shows
   the shape of a tree up to a depth, and `ls` lists one directory. It takes
