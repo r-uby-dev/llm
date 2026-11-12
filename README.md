@@ -351,9 +351,10 @@ dependencies like `git`).
 
 For example, the "git" toolset uses the
 git binary to work within a git repository
-and it enables an agent to do all the things
-you would expect an agent to be able to do
-in a git repository.
+and it enables an agent to clone repositories,
+pull changes, work with diffs and commits,
+plus much more. There is one tool per git
+sub-command.
 
 See [lib/llm/tools](lib/llm/tools) to learn
 about the other available builtin tools:
