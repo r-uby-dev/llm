@@ -10,7 +10,7 @@
   </a>
 </p>
 
-> An agentic runtime for system programmers, in Ruby.
+> An agentic runtime for system programmers - in Ruby.
 
 Welcome to the canonical llm.rb repository.
 
