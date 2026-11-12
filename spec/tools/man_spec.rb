@@ -65,6 +65,22 @@ RSpec.describe LLM::Tool::Man do
       tool.call(name: "printf", max_bytes: 100)
       expect(shell).to have_received(:call).with(hash_including(max_bytes: 100))
     end
+
+    it "collapses the overstrikes of a bold and an underlined character" do
+      allow(shell).to receive(:call)
+        .and_return({ok: true, stdout: "N\bNA\bAM\bME\bE\n", stderr: ""})
+      expect(tool.call(name: "printf")).to eq(
+        {ok: true, stdout: "NAME\n", stderr: ""}
+      )
+    end
+
+    it "leaves the result alone when the command failed" do
+      allow(shell).to receive(:call)
+        .and_return({ok: false, stdout: "", stderr: "no manual entry\n"})
+      expect(tool.call(name: "nope")).to eq(
+        {ok: false, stdout: "", stderr: "no manual entry\n"}
+      )
+    end
   end
 
   describe "environment" do
