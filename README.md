@@ -23,8 +23,8 @@ the 'async' gem (optional).
 Works with ActiveRecord, and Sequel.  
 Works with and without Rails.  
 
-It requires nothing but Ruby's standard library and it
-can be extended with optional, opt-in dependencies.
+It requires nothing but Ruby's standard library.  
+It can be extended with optional, opt-in dependencies.
 
 ## Install
 
