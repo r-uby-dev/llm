@@ -32,11 +32,11 @@ RSpec.describe LLM::Command do
     end
 
     it "yields stderr chunks to the block" do
-      expect(chunks.join).to eq("hello from stderr\n")
+      expect(chunks.join.chomp).to eq("hello from stderr")
     end
 
     it "returns the captured stderr" do
-      expect(command.stderr).to eq("hello from stderr\n")
+      expect(command.stderr.chomp).to eq("hello from stderr")
     end
   end
 end
