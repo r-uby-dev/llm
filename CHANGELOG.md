@@ -13,6 +13,34 @@ Older releases:
 
 ## What's next
 
+*No unreleased changes yet. Check back after the next release.*
+
+## v19.1.0
+
+Changes since `v19.0.1`.
+
+This is a feature release. It adds `LLM::Eval#filter`,
+`LLM::Agent#intercept` and `LLM::Agent#intercept_options`, two
+git tools (`git-clone` and `git-authors`), and a streaming rework
+of `LLM::Command`, whose `#stdout`, `#stderr` and `#spawn` yield
+each chunk as it is written and read stdout and stderr at the
+same time. It also defaults the OpenAI chat `model:` to
+`gpt-6-luna`, keeps the compactor, filter and intercept options
+out of the request body, and names the files under
+`lib/llm/tools` after the tools they define, in kebab-case, which
+changes the path a tool file is required by.
+
+### Breaking
+
+#### Migration
+
+| Old | New |
+|-----|-----|
+| `require "llm/tools/dir_tree"` | `require "llm/tools/dir-tree"` |
+| `require "llm/tools/read_file"` | `require "llm/tools/read-file"` |
+| `require "llm/tools/write_file"` | `require "llm/tools/write-file"` |
+| `require "llm/tools/not_found"` | `require "llm/tools/not-found"` |
+
 ### LLM::Eval
 
 * **eval: add `LLM::Eval#filter`** <br>
