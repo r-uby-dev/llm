@@ -187,6 +187,20 @@ module LLM::ActiveRecord
       end
 
       ##
+      # @see LLM::Agent#intercept
+      # @return [LLM::Intercept]
+      def intercept
+        __context__.intercept
+      end
+
+      ##
+      # @see LLM::Agent#intercept_options
+      # @return [Hash]
+      def intercept_options
+        __context__.intercept_options
+      end
+
+      ##
       # Returns the overall size of the context window.
       # @see LLM::Context#context_window
       # @return [Integer, nil]

@@ -13,7 +13,19 @@ Older releases:
 
 ## What's next
 
-*No unreleased changes yet. Check back after the next release.*
+### ORM
+
+* **orm: add `#intercept` and `#intercept_options` to the ActiveRecord wrappers** <br>
+  A record that `acts_as_llm` or `acts_as_agent` responds to
+  [`#intercept`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord/ActsAsLLM/InstanceMethods.html#intercept-instance_method)
+  and
+  [`#intercept_options`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord/ActsAsLLM/InstanceMethods.html#intercept_options-instance_method)
+  now, as it does to `#compactor` and `#compactor_options`. Both read
+  from the record's runtime, as
+  [`LLM::Agent#intercept`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#intercept-instance_method)
+  and
+  [`LLM::Agent#intercept_options`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#intercept_options-instance_method)
+  do.
 
 ## v19.1.0
 
