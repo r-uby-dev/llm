@@ -124,7 +124,7 @@ tracer  = LLM::Tracer.enhanced(llm)
 options = {concurrency: :ractor, stream: StringIO.new, tracer:, tools:}
 
 agent = LLM::Agent.new(llm, options)
-agent.talk "clone the #{['mruby', 'llm.rb'].sample} repo into /tmp/repo"
+agent.talk "bare clone the #{['mruby', 'llm.rb'].sample} repo into /tmp/repo"
 agent.talk "summarize recent changes from the repo"
 
 puts options[:stream].string
