@@ -54,6 +54,14 @@ class LLM::Tool
   end
 
   ##
+  # Returns all git-related tools
+  # @return [LLM::Tool<LLM::Tool::Git>]
+  def self.git
+    require_relative "tools/git" unless defined?(LLM::Tool::Git)
+    LLM::Tool::Git.subclasses
+  end
+
+  ##
   # Returns (or sets) the tool name
   # @param [String, nil] name The tool name
   # @return [String]
