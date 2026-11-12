@@ -90,7 +90,7 @@ the tool call(s) were cancelled.
 
 ##### helloworld.rb
 
-A classic "hello world" example. <br> The environment variable
+The environment variable
 `$DEEPSEEK_API_KEY` is assumed to have been set and reference
 a valid DeepSeek API key, otherwise you can provide a key explicitly
 (eg: `LLM.deepseek(key: ENV["MYKEY"])`) and you could swap
@@ -102,8 +102,8 @@ require "llm"
 
 class GetRepo < LLM::Tool
   name "get-repo"
-  description "finds a repo path to use with the git tools"
-  parameter :repo, Enum["r-uby-dev/llm", "ruby/ruby"], "the repo name"
+  description "discover clone URL for different repos"
+  parameter :repo, Enum["mruby", "llm.rb"], "the repo name"
   required %i[repo]
 
   def call(repo:)
@@ -113,8 +113,8 @@ class GetRepo < LLM::Tool
   private
 
   def repos
-    { "r-uby-dev/llm" => "/home/robert/projects/llm",
-      "ruby/ruby"     => "/home/robert/projects/ruby" }
+    {"mruby"=> "https://github.com/mruby/mruby",
+     "llm.rb" => "https://github.com/r-uby-dev/llm"}
   end
 end
 
@@ -124,8 +124,8 @@ tracer  = LLM::Tracer.enhanced(llm)
 options = {oncurrency: :ractor, stream: StringIO.new, tracer:, tools:}
 
 agent = LLM::Agent.new(llm, options)
-agent.talk "hello world"
-agent.talk "what's new in r-uby-dev/llm?"
+agent.talk "clone the #{['mruby', 'llm.rb'].sample} repo into /tmp/repo"
+agent.talk "summarize recent changes from the repo"
 
 puts options[:stream].string
 ```
