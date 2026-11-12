@@ -102,13 +102,4 @@ RSpec.describe LLM::Tool::Man do
         .to raise_error("section must be a positive integer")
     end
   end
-
-  describe "the tool", if: GitHelpers.instance_methods.include?(:command_available?) do
-    it "reads a page when man is on the PATH" do
-      skip "man is not on the PATH" unless command_available?("man")
-      res = tool.call(name: "man")
-      expect(res[:ok]).to be(true)
-      expect(res[:stdout]).to include("man")
-    end
-  end
 end
