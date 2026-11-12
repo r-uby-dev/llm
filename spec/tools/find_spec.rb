@@ -71,13 +71,9 @@ RSpec.describe LLM::Tool::Find do
     end
 
     it "passes every primary in a fixed order" do
+      arguments = [Dir.getwd, "-maxdepth", "3", "-type", "f", "-name", "*.rb", "-mmin", "-5", "-print"]
       tool.call(path: Dir.getwd, name: "*.rb", type: "f", max_depth: 3, newer_than: 5)
-      expect(shell).to have_received(:call).with(
-        hash_including(
-          arguments: [Dir.getwd, "-maxdepth", "3", "-type", "f", "-name", "*.rb",
-            "-mmin", "-5", "-print"]
-        )
-      )
+      expect(shell).to have_received(:call).with(hash_including(arguments:))
     end
 
     it "forwards the timeout" do
