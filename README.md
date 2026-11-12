@@ -361,6 +361,7 @@ about the other available builtin tools:
 
 ```ruby
 require "llm"
+require "llm/tools/pwd"
 
 llm   = LLM.deepseek
 tools = [LLM::Tool.git, LLM::Tool::Pwd]
