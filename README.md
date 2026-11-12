@@ -43,11 +43,8 @@ v20 is the recommended release.
 
 The v19 release is a smaller release that includes a 
 tiny eval framework that was authored for the [micro1](https://micro1.ai)
-hackathon.
-
-v18 includes [substational runtime improvements](changelog/v18.md) -
+hackathon. v18 includes [substational runtime improvements](changelog/v18.md) -
 especially for running tool calls on a [Ractor](https://docs.ruby-lang.org/en/4.0/Ractor.html).
-
 Requires Ruby4+, JSON v3, and the latest versions of 
 ActiveRecord|Sequel (optional).
 
