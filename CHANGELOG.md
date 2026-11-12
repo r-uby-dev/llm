@@ -13,6 +13,18 @@ Older releases:
 
 ## What's next
 
+*No unreleased changes yet. Check back after the next release.*
+
+## v19.1.1
+
+Changes since `v19.1.0`.
+
+This release adds `#intercept` and `#intercept_options` to the
+ActiveRecord wrappers, so a record that `acts_as_llm` or
+`acts_as_agent` responds to them the way it responds to
+`#compactor` and `#compactor_options`, reading both from the
+record's runtime.
+
 ### ORM
 
 * **orm: add `#intercept` and `#intercept_options` to the ActiveRecord wrappers** <br>
