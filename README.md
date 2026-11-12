@@ -113,7 +113,7 @@ class GetRepo < LLM::Tool
   private
 
   def repos
-    {"mruby"=> "https://github.com/mruby/mruby",
+    {"mruby"  => "https://github.com/mruby/mruby",
      "llm.rb" => "https://github.com/r-uby-dev/llm"}
   end
 end
