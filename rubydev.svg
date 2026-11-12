@@ -253,5 +253,5 @@
 
   <text class="tagline" x="280" y="204"
         font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-        text-anchor="middle" font-size="18" font-weight="650">An agentic runtime built in Ruby</text>
+        text-anchor="middle" font-size="18" font-weight="650">An agentic runtime for system programmers</text>
 </svg>
