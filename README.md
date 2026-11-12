@@ -99,23 +99,35 @@ deepseek for any of the other 14 providers as well
 
 ```ruby
 require "llm"
-require "stringio"
 
-class GetTime < LLM::Tool
-  name "get-time"
-  description "returns the current time"
+class GetRepo < LLM::Tool
+  name "get-repo"
+  description "finds a repo path to use with the git tools"
+  parameter :repo, Enum["r-uby-dev/llm", "ruby/ruby"], "the repo name"
+  required %i[repo]
 
-  def call
-    {now: Time.now}
+  def call(repo:)
+    {repo: repos[repo]}
+  end
+
+  private
+
+  def repos
+    { "r-uby-dev/llm" => "/home/robert/projects/llm",
+      "ruby/ruby"     => "/home/robert/projects/ruby" }
   end
 end
 
 llm     = LLM.deepseek
-options = {stream: $stdout, tools: [GetTime], concurrency: :ractor}
+tools   = [*LLM::Tool.git, GetRepo]
+tracer  = LLM::Tracer.enhanced(llm)
+options = {oncurrency: :ractor, stream: StringIO.new, tracer:, tools:}
 
 agent = LLM::Agent.new(llm, options)
 agent.talk "hello world"
-agent.talk "what time is it?"
+agent.talk "what's new in r-uby-dev/llm?"
+
+puts options[:stream].string
 ```
 
 ##### eval.rb
