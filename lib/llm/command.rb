@@ -84,7 +84,7 @@ class LLM::Command
   ##
   # Spawns a command
   # @return [LLM::Command]
-  def spawn
+  def spawn(&)
     return self if @spawned
     @in_r = input_pipe
     tap do
@@ -99,8 +99,8 @@ class LLM::Command
       @out.w.close
       @err.w.close
       @producer = Thread.new do
-        @stdout = read_limited(@out.r, @limit[:stdout])
-        @stderr = read_limited(@err.r, @limit[:stderr])
+        @stdout = read_limited(@out.r, @limit[:stdout], &)
+        @stderr = read_limited(@err.r, @limit[:stderr], &)
         @status = Process.waitpid2(@pid).last
       rescue Errno::ECHILD
         @status = failed_status
@@ -150,8 +150,8 @@ class LLM::Command
   ##
   # @return [String]
   #  Returns the contents of stdout
-  def stdout
-    spawn
+  def stdout(&)
+    spawn(&)
     consume
     @stdout
   end
@@ -159,8 +159,8 @@ class LLM::Command
   ##
   # @return [String]
   #  Returns the contents of stderr
-  def stderr
-    spawn
+  def stderr(&)
+    spawn(&)
     consume
     @stderr
   end
@@ -280,20 +280,25 @@ class LLM::Command
   # @param [Integer, nil] max
   # @return [String]
   def read_limited(io, max)
-    return io.read if max.nil?
-    buf = +""
-    remaining = max
-    while remaining > 0 && (chunk = io.read(remaining))
-      buf << chunk
-      remaining -= chunk.bytesize
+    buf, remaining, ex = [+"", max, nil]
+    loop do
+      chunk = io.readpartial(16_384)
+      begin
+        block_given? ? yield(chunk) : nil
+      rescue
+        ex = $!
+      end
+      if remaining.nil?
+        buf << chunk
+      elsif remaining > 0
+        captured = chunk.byteslice(0, remaining)
+        buf << captured
+        remaining -= captured.bytesize
+      end
+    rescue EOFError
+      break
     end
-    ##
-    # Drain whatever is left so the child can exit:
-    # the drained bytes are discarded, keeping memory
-    # bounded.
-    while (chunk = io.read(16_384))
-    end
-    buf
+    ex ? raise(ex) : buf
   end
 
   ##
