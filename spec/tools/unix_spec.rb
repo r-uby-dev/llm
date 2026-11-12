@@ -4,8 +4,11 @@ require "setup"
 require "llm/tools/unix"
 
 RSpec.describe LLM::Tool::Unix do
+  let(:subclasses) { described_class.subclasses }
+  let(:names) { subclasses.map(&:name) }
+
   describe ".abstract?" do
-    it "returns true for the base class" do
+    it "returns true for the namespace" do
       expect(described_class).to be_abstract
     end
 
@@ -15,40 +18,49 @@ RSpec.describe LLM::Tool::Unix do
   end
 
   describe ".name" do
-    it "returns nil for the base class" do
+    it "returns nil for the namespace" do
       expect(described_class.name).to be_nil
     end
   end
 
   describe ".registry" do
-    it "does not include the base class" do
+    it "does not include the namespace" do
       expect(LLM::Tool.registry).to_not include(described_class)
     end
   end
 
   describe ".subclasses" do
-    it "does not include the base class" do
-      expect(described_class.subclasses).to_not include(described_class)
+    it "does not include the namespace" do
+      expect(subclasses).to_not include(described_class)
     end
 
     it "returns the tools that depend on a unix command" do
-      expect(described_class.subclasses.map(&:name)).to contain_exactly(
-        "apropos", "find", "man", "mkdir"
-      )
+      expect(names).to contain_exactly("apropos", "find", "man", "mkdir")
     end
 
-    it "does not include tools that work on any platform" do
-      names = described_class.subclasses.map(&:name)
-      expect(names).to_not include("exec", "ls", "read-file", "write-file")
+    it "does not include exec" do
+      expect(names).to_not include("exec")
+    end
+
+    it "does not include ls" do
+      expect(names).to_not include("ls")
+    end
+
+    it "does not include read-file" do
+      expect(names).to_not include("read-file")
+    end
+
+    it "does not include write-file" do
+      expect(names).to_not include("write-file")
     end
   end
 
   describe "LLM::Tool.unix" do
     it "returns the unix tools" do
-      expect(LLM::Tool.unix).to match_array(described_class.subclasses)
+      expect(LLM::Tool.unix).to match_array(subclasses)
     end
 
-    it "returns tools that live under the unix namespace" do
+    it "returns only tools below the namespace" do
       expect(LLM::Tool.unix).to all(be <= described_class)
     end
   end

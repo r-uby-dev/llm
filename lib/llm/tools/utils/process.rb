@@ -27,9 +27,9 @@ module LLM::Tool::Utils
     end
 
     ##
-    # Spawn a command from a command and arguments,
-    # without going through a shell. The command's
-    # stdout and stderr are each capped at `max_bytes`.
+    # Builds a command from a command and arguments, without starting
+    # it, and without going through a shell. The command's stdout and
+    # stderr are each capped at `max_bytes`.
     # @param [String] command
     #  The command to run
     # @param [Array<String>] arguments
@@ -42,7 +42,7 @@ module LLM::Tool::Utils
     # @raise [ArgumentError]
     #  When `max_bytes` is nil
     # @return [LLM::Command]
-    def spawn(command:, arguments:, env: {}, max_bytes: self.class.max_bytes)
+    def command(command:, arguments:, env: {}, max_bytes: self.class.max_bytes)
       if Integer(max_bytes, exception: false).nil?
         raise ArgumentError, "max_bytes cannot be nil"
       end
@@ -51,7 +51,34 @@ module LLM::Tool::Utils
         .env(env)
         .arguments(*[*arguments])
         .limit(stdout: max_bytes, stderr: max_bytes)
-        .spawn
+    end
+
+    ##
+    # Spawns a command from a command and arguments.
+    # @param [String] command
+    #  The command to run
+    # @param [Array<String>] arguments
+    #  One or more arguments
+    # @param [Hash] env
+    #  Extra environment variables to set for the command
+    # @param [Integer] max_bytes
+    #  The max number of bytes to keep per stream
+    # @return [LLM::Command]
+    #  The spawned command
+    def spawn(command:, arguments:, env: {}, max_bytes: self.class.max_bytes)
+      run(command(command:, arguments:, env:, max_bytes:))
+    end
+
+    ##
+    # Starts a command. This is the one method to replace when the
+    # commands should run somewhere else - in a jail, in a container,
+    # on the far side of an ssh - and the command it is handed is
+    # complete: argv, env, byte limits and the directory it runs in.
+    # @param [LLM::Command] command
+    # @return [LLM::Command]
+    #  The spawned command
+    def run(command)
+      command.spawn
     end
 
     ##

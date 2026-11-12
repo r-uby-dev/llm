@@ -214,4 +214,23 @@ RSpec.describe LLM::Tool::Exec do
       end
     end
   end
+
+  describe "#run" do
+    it "spawns the command it is given" do
+      command = instance_double(LLM::Command, spawn: nil)
+      described_class.new.run(command)
+      expect(command).to have_received(:spawn)
+    end
+
+    it "is where #call starts the command" do
+      tool = described_class.new
+      ran = []
+      tool.define_singleton_method(:run) do |command|
+        ran << command
+        command.spawn
+      end
+      tool.call(command: RbConfig.ruby, arguments: ["-e", "print 'hi'"])
+      expect(ran.first.to_argv).to eq([RbConfig.ruby, "-e", "print 'hi'"])
+    end
+  end
 end
