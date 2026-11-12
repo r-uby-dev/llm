@@ -362,7 +362,7 @@ require "llm"
 require "llm/tools/pwd"
 
 llm   = LLM.deepseek
-tools = [LLM::Tool.git, LLM::Tool.unix, LLM::Tool::Pwd]
+tools = [*LLM::Tool.git, *LLM::Tool.unix, LLM::Tool::Pwd]
 agent = LLM::Agent.new(llm, tools:)
 agent.talk "tell me what authors this git repo has?", stream: $stdout
 ```
