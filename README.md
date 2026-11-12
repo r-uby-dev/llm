@@ -1834,7 +1834,7 @@ in Ruby should look like. I am generally
 systems-minded and it shows in how the
 runtime works. I think it is fair to say -
 based on when I last looked - that RubyLLM 
-is much better optimized for Rails and the
+is much better optimized for Rails and 
 this runtime is optimized for environments 
 that might only have a Ruby, the standard 
 library and the filesystem but that's not
