@@ -16,8 +16,9 @@ The runtime supports concurrent and parallel tool execution.
 15+ providers.  
 
 Parallel execution is provided by Ractor, and the
-fork system call. Concurrent execution is provided
-by Thread, Fiber, and the 'async' gem (optional).
+fork system call.  
+Concurrent execution is provided by Thread, Fiber, and 
+the 'async' gem (optional).
 
 Works with ActiveRecord, and Sequel.  
 Works with and without Rails.  
