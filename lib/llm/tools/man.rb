@@ -37,12 +37,13 @@ class LLM::Tool
     # @return [Hash]
     def call(name:, section: nil, timeout: 5, max_bytes: Exec.max_bytes)
       validate!(name:, section:)
-      Exec.new(env:).call(
+      res = Exec.new(env:).call(
         command: "man",
         arguments: ["-P", "cat", *[section, name].compact.map(&:to_s)],
         timeout:,
         max_bytes:
       )
+      res[:ok] ? res.merge(stdout: plain(res[:stdout])) : res
     end
 
     private
@@ -55,6 +56,17 @@ class LLM::Tool
     def env
       manpath = ENV["MANPATH"].to_s
       manpath.empty? ? {} : {"MANPATH" => manpath}
+    end
+
+    ##
+    # man writes a bold or an underlined character as the character,
+    # a backspace, and the character again, which a pager renders and
+    # a reader of the raw output does not. There is no pager here, so
+    # the overstrikes are collapsed to plain text.
+    # @param [String] text
+    # @return [String]
+    def plain(text)
+      text.to_s.gsub(/.\x08/, "")
     end
 
     ##
