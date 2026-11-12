@@ -10,28 +10,31 @@ RSpec.describe "LLM::Tool.NotFound" do
       fn.arguments = {}
     end
   end
+  let(:tool) { function.runner }
+  let(:sequential) { function.task(:sequential).wait }
+  let(:ractor) { function.task(:ractor).wait }
 
   describe "#call" do
     it "returns the error in band" do
-      expect(function.task(:sequential).wait).to be_error
+      expect(sequential).to be_error
     end
   end
 
   describe "under Ractor concurrency" do
     it "builds a class that can be made shareable" do
-      expect(Ractor.shareable?(Ractor.make_shareable(function.runner))).to be(true)
+      expect(Ractor.shareable?(Ractor.make_shareable(tool))).to be(true)
     end
 
     it "returns the error in band" do
-      expect(function.task(:ractor).wait).to be_error
+      expect(ractor).to be_error
     end
 
-    it "names the error after the missing tool" do
-      expect(function.task(:ractor).wait.value[:type]).to eq("LLM::NoSuchToolError")
+    it "raises NoSuchToolError" do
+      expect(ractor.value[:type]).to eq("LLM::NoSuchToolError")
     end
 
-    it "reports the tool name the model asked for" do
-      expect(function.task(:ractor).wait.value[:message]).to include("nope")
+    it "mentions the tool the model asked for" do
+      expect(ractor.value[:message]).to include("nope")
     end
   end
 end

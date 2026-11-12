@@ -4,18 +4,22 @@ require_relative "../unix"
 
 class LLM::Tool::Unix
   ##
-  # The {LLM::Tool::Unix::Find LLM::Tool::Unix::Find} class implements a tool
-  # that walks a file hierarchy and returns the paths that match.
+  # The {LLM::Tool::Unix::Find LLM::Tool::Unix::Find}
+  # class implements a tool that walks a file hierarchy
+  # and returns the paths that match.
   #
-  # It spawns `find` without a shell. The expression is built from
-  # `-maxdepth`, `-type`, `-name` and `-mmin`, and it targets the BSD
-  # `find` that FreeBSD ships, so `max_depth:` needs the `-maxdepth`
-  # extension that GNU find has as well, and that the older `find`
-  # in macOS does not. Without `max_depth:` the arguments are POSIX.
+  # It spawns `find` without a shell. The expression is
+  # built from `-maxdepth`, `-type`, `-name` and
+  # `-mmin`, and it targets the BSD `find` that FreeBSD
+  # ships, so `max_depth:` needs the `-maxdepth`
+  # extension that GNU find has as well, and that the
+  # older `find` in macOS does not. Without
+  # `max_depth:` the arguments are POSIX.
   #
-  # A walk can match a lot of paths, so the result is capped twice:
-  # {LLM::Tool::Exec} stops reading at `max_bytes:`, and the tool
-  # returns at most `limit:` paths, and says when it cut the list.
+  # A walk can match a lot of paths, so the result is
+  # capped twice: {LLM::Tool::Exec} stops reading at
+  # `max_bytes:`, and the tool returns at most `limit:`
+  # paths, and says when it cut the list.
   class Find < self
     require_relative "../exec"
 
@@ -37,7 +41,8 @@ class LLM::Tool::Unix
     # @param [String] path
     #  The directory the walk starts in
     # @param [String, nil] name
-    #  A glob that the last component of a path must match
+    #  A glob that the last component of a path must
+    #  match
     # @param [String, nil] type
     #  The kind of path to return - f, d or l
     # @param [Integer, nil] max_depth
@@ -47,7 +52,8 @@ class LLM::Tool::Unix
     # @param [Integer] limit
     #  The max number of paths to return
     # @param [Integer] timeout
-    #  The maximum allowed time for find to run, in seconds
+    #  The maximum allowed time for find to run, in
+    #  seconds
     # @param [Integer] max_bytes
     #  The max number of bytes to emit
     # @return [Hash]
@@ -66,8 +72,9 @@ class LLM::Tool::Unix
     private
 
     ##
-    # Builds the expression find is given. The path comes first, then
-    # the primaries, then the action `find` would imply anyway.
+    # Builds the expression find is given. The path
+    # comes first, then the primaries, then the action
+    # `find` would imply anyway.
     # @return [Array<String>]
     def arguments(path:, name:, type:, max_depth:, newer_than:)
       [
@@ -81,9 +88,10 @@ class LLM::Tool::Unix
     end
 
     ##
-    # Turns the paths find wrote, one per line, into a list. When there
-    # are more paths than the limit allows, the tool says so rather than
-    # pretending the list is complete.
+    # Turns the paths find wrote, one per line, into a
+    # list. When there are more paths than the limit
+    # allows, the tool says so rather than pretending
+    # the list is complete.
     # @param [Hash] res
     # @param [Integer] limit
     # @return [Hash]

@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 ##
-# Originally known as test-cmd.rb
-# See https://github.com/altruby/test-cmd.rb
+# Originally known as test-cmd.rb See
+# https://github.com/altruby/test-cmd.rb
 class LLM::Command
   require "rbconfig"
 
@@ -28,6 +28,7 @@ class LLM::Command
     @cmd = cmd
     @argv = argv.dup
     @env = nil
+    @cwd = nil
     @status = nil
     @spawned = false
     @stdout = ""
@@ -40,17 +41,69 @@ class LLM::Command
   # @param [Array<String, #to_s>] arguments
   #  Command-line arguments
   # @return [LLM::Command]
+  ##
+  # @param [Array<String, LLM::Command>] arguments
+  #  Command-line arguments. A {LLM::Command} in the
+  #  list is spliced into the arguments, so one command
+  #  can carry another.
+  # @example
+  #   jexec = LLM::Command.new("jexec")
+  #   ls = LLM::Command.new("ls").arguments("-l", "/")
+  #   jexec.arguments(*ls)
+  # @return [LLM::Command]
   def arguments(*arguments)
-    tap { @argv.concat(arguments) }
+    tap do
+      @argv.concat(arguments.flat_map { |arg| LLM::Command === arg ? arg.to_argv : [arg] })
+    end
   end
   alias_method :argv, :arguments
 
   ##
-  # @param [Hash{String => String}] env
-  #  Environment variables to set for the spawned command
+  # Returns the command and its arguments, so that
+  # another command can carry them.
+  # @example
+  #   LLM::Command.new("jexec", "-u", "root", "jail-1")
+  #     .arguments(*inner.to_argv)
+  # @return [Array<String>]
+  def to_argv
+    [@cmd, *@argv].map(&:to_s)
+  end
+  alias_method :to_a, :to_argv
+
+  ##
+  # @example
+  #   jexec = LLM::Command.new("jexec", "-u", "root", "jail-1")
+  #   ls = LLM::Command.new("ls").arguments("-l", "/").chdir("/tmp")
+  #   jexec.chain(ls).stdout { print it, "\n" }
+  # @param [LLM::Command] command
   # @return [LLM::Command]
-  def env(env)
+  def chain(command)
+    tap do
+      arguments(*command)
+      env(command.env) if command.env
+      chdir(command.cwd) if command.cwd
+      stdin(command.input) if command.input
+      limit(**command.limits)
+    end
+  end
+
+  ##
+  # @param [Hash{String => String}, nil] env
+  #  Environment variables to set for the spawned
+  #  command
+  # @return [Hash{String => String}, nil, LLM::Command]
+  def env(env = nil)
+    return @env if env.nil?
     tap { (@env ||= {}).merge!(env) }
+  end
+
+  ##
+  # Sets the working directory of the spawned command.
+  # @param [String] dir
+  #  The directory to run the command in
+  # @return [LLM::Command]
+  def chdir(dir)
+    tap { @cwd = dir }
   end
 
   ##
@@ -70,8 +123,9 @@ class LLM::Command
 
   ##
   # Limits how many bytes of each stream are captured.
-  # A stream output beyond the limit is discarded, keeping
-  # memory bounded even for a command that streams a lot.
+  # A stream output beyond the limit is discarded,
+  # keeping memory bounded even for a command that
+  # streams a lot.
   # @param [Integer, nil] stdout
   #  Max bytes of stdout to read, or nil for unlimited
   # @param [Integer, nil] stderr
@@ -93,7 +147,7 @@ class LLM::Command
       @pid = Process.spawn(
         envp,
         @cmd, *@argv.map(&:to_s),
-        {in: @in_r, out: @out.w, err: @err.w}
+        {in: @in_r, out: @out.w, err: @err.w, chdir: @cwd}.compact
       )
       @in_r.close unless @in_r.equal?(IO::NULL)
       @out.w.close
@@ -254,12 +308,30 @@ class LLM::Command
   end
   # @endgroup
 
+  protected
+
+  ##
+  # @return [String, nil]
+  attr_reader :cwd
+
+  ##
+  # @return [String, LLM::Command, nil]
+  def input
+    @stdin
+  end
+
+  ##
+  # @return [Hash]
+  def limits
+    @limit
+  end
+
   private
 
   ##
-  # Builds the environment passed to Process.spawn.
-  # The spawned process receives only the variables
-  # set with #env: every inherited variable is
+  # Builds the environment passed to Process.spawn. The
+  # spawned process receives only the variables set
+  # with #env: every inherited variable is
   # cleared, so an empty @env spawns with an empty
   # environment.
   # @return [Hash{String => String}]
@@ -281,9 +353,9 @@ class LLM::Command
 
   ##
   # Reads up to +max+ bytes from a stream, then drains
-  # the remainder so a child writing more than the limit
-  # does not block on a full pipe. When +max+ is nil the
-  # entire stream is read.
+  # the remainder so a child writing more than the
+  # limit does not block on a full pipe. When +max+ is
+  # nil the entire stream is read.
   # @param [IO] io
   # @param [Integer, nil] max
   # @return [String]
@@ -310,11 +382,11 @@ class LLM::Command
   end
 
   ##
-  # Returns a pipe pair used for the command's
-  # standard input. When no input is set, the child
-  # reads from IO::NULL. When the input is another
-  # command, the source command is spawned first and
-  # its stdout feeds the pipe.
+  # Returns a pipe pair used for the command's standard
+  # input. When no input is set, the child reads from
+  # IO::NULL. When the input is another command, the
+  # source command is spawned first and its stdout
+  # feeds the pipe.
   # @return [IO]
   #  A read end (IO::NULL or a pipe read end)
   def input_pipe
@@ -337,7 +409,8 @@ class LLM::Command
   end
 
   ##
-  # Returns a failed status that works across Unix and Windows.
+  # Returns a failed status that works across Unix and
+  # Windows.
   # @return [Process::Status]
   def failed_status
     ruby = [RbConfig.ruby, "-e", "exit 1"]
