@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 ##
-# Originally known as test-cmd.rb
-# See https://github.com/altruby/test-cmd.rb
+# Originally known as test-cmd.rb See
+# https://github.com/altruby/test-cmd.rb
 class LLM::Command
   require "rbconfig"
 
@@ -43,8 +43,9 @@ class LLM::Command
   # @return [LLM::Command]
   ##
   # @param [Array<String, LLM::Command>] arguments
-  #  Command-line arguments. A {LLM::Command} in the list is spliced
-  #  into the arguments, so one command can carry another.
+  #  Command-line arguments. A {LLM::Command} in the
+  #  list is spliced into the arguments, so one command
+  #  can carry another.
   # @example
   #   jexec = LLM::Command.new("jexec")
   #   ls = LLM::Command.new("ls").arguments("-l", "/")
@@ -58,8 +59,8 @@ class LLM::Command
   alias_method :argv, :arguments
 
   ##
-  # Returns the command and its arguments,
-  # so that another command can carry them.
+  # Returns the command and its arguments, so that
+  # another command can carry them.
   # @example
   #   LLM::Command.new("jexec", "-u", "root", "jail-1")
   #     .arguments(*inner.to_argv)
@@ -88,7 +89,8 @@ class LLM::Command
 
   ##
   # @param [Hash{String => String}, nil] env
-  #  Environment variables to set for the spawned command
+  #  Environment variables to set for the spawned
+  #  command
   # @return [Hash{String => String}, nil, LLM::Command]
   def env(env = nil)
     return @env if env.nil?
@@ -121,8 +123,9 @@ class LLM::Command
 
   ##
   # Limits how many bytes of each stream are captured.
-  # A stream output beyond the limit is discarded, keeping
-  # memory bounded even for a command that streams a lot.
+  # A stream output beyond the limit is discarded,
+  # keeping memory bounded even for a command that
+  # streams a lot.
   # @param [Integer, nil] stdout
   #  Max bytes of stdout to read, or nil for unlimited
   # @param [Integer, nil] stderr
@@ -326,9 +329,9 @@ class LLM::Command
   private
 
   ##
-  # Builds the environment passed to Process.spawn.
-  # The spawned process receives only the variables
-  # set with #env: every inherited variable is
+  # Builds the environment passed to Process.spawn. The
+  # spawned process receives only the variables set
+  # with #env: every inherited variable is
   # cleared, so an empty @env spawns with an empty
   # environment.
   # @return [Hash{String => String}]
@@ -350,9 +353,9 @@ class LLM::Command
 
   ##
   # Reads up to +max+ bytes from a stream, then drains
-  # the remainder so a child writing more than the limit
-  # does not block on a full pipe. When +max+ is nil the
-  # entire stream is read.
+  # the remainder so a child writing more than the
+  # limit does not block on a full pipe. When +max+ is
+  # nil the entire stream is read.
   # @param [IO] io
   # @param [Integer, nil] max
   # @return [String]
@@ -379,11 +382,11 @@ class LLM::Command
   end
 
   ##
-  # Returns a pipe pair used for the command's
-  # standard input. When no input is set, the child
-  # reads from IO::NULL. When the input is another
-  # command, the source command is spawned first and
-  # its stdout feeds the pipe.
+  # Returns a pipe pair used for the command's standard
+  # input. When no input is set, the child reads from
+  # IO::NULL. When the input is another command, the
+  # source command is spawned first and its stdout
+  # feeds the pipe.
   # @return [IO]
   #  A read end (IO::NULL or a pipe read end)
   def input_pipe
@@ -406,7 +409,8 @@ class LLM::Command
   end
 
   ##
-  # Returns a failed status that works across Unix and Windows.
+  # Returns a failed status that works across Unix and
+  # Windows.
   # @return [Process::Status]
   def failed_status
     ruby = [RbConfig.ruby, "-e", "exit 1"]

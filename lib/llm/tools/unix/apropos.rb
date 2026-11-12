@@ -4,17 +4,19 @@ require_relative "../unix"
 
 class LLM::Tool::Unix
   ##
-  # The {LLM::Tool::Unix::Apropos LLM::Tool::Unix::Apropos} class implements
-  # a tool that searches the manual page databases for keywords.
-  # It is the step before {LLM::Tool::Unix::Man} - an agent that does not
-  # know the name of a page searches the descriptions for a word,
-  # and reads the page the search names, eg
+  # The
+  # {LLM::Tool::Unix::Apropos LLM::Tool::Unix::Apropos}
+  # class implements a tool that searches the manual
+  # page databases for keywords. It is the step before
+  # {LLM::Tool::Unix::Man} - an agent that does not
+  # know the name of a page searches the descriptions
+  # for a word, and reads the page the search names, eg
   # `apropos(keywords: ["socket"])`.
   #
-  # The tool spawns `apropos` without a shell. Each keyword is a
-  # term of its own, so two keywords are matched with "or" unless
-  # a term carries the macro key syntax of `apropos(1)`, eg
-  # `Va=optind`.
+  # The tool spawns `apropos` without a shell. Each
+  # keyword is a term of its own, so two keywords are
+  # matched with "or" unless a term carries the macro
+  # key syntax of `apropos(1)`, eg `Va=optind`.
   class Apropos < self
     require_relative "../exec"
 
@@ -34,7 +36,8 @@ class LLM::Tool::Unix
     # @param [Integer, nil] section
     #  The section the manual pages belong to
     # @param [Integer] timeout
-    #  The maximum allowed time for apropos to run, in seconds
+    #  The maximum allowed time for apropos to run, in
+    #  seconds
     # @param [Integer] max_bytes
     #  The max number of bytes to emit
     # @return [Hash]
@@ -51,9 +54,10 @@ class LLM::Tool::Unix
     private
 
     ##
-    # The environment the command runs in. The environment of a
-    # spawned command is cleared, so $MANPATH is forwarded when
-    # it is set, and when it is not, apropos uses its own search path.
+    # The environment the command runs in. The
+    # environment of a spawned command is cleared, so
+    # $MANPATH is forwarded when it is set, and when it
+    # is not, apropos uses its own search path.
     # @return [Hash]
     def env
       manpath = ENV["MANPATH"].to_s

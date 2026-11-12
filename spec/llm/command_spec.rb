@@ -4,6 +4,12 @@ require "setup"
 require "rbconfig"
 
 RSpec.describe LLM::Command do
+  ##
+  # Windows has a letter-based format
+  # to represent the root of the disk
+  # (eg D:\)
+  let(:root) { Gem.win_platform? ? File.expand_path("/") : "/" }
+
   describe "#stdout" do
     let(:command) { described_class.new(RbConfig.ruby, "-e", "print 'hello from stdout'") }
     let(:chunks) { [] }
@@ -117,11 +123,11 @@ RSpec.describe LLM::Command do
     end
 
     context "when the chained command sets a working directory" do
-      let(:inner) { described_class.new("pwd").chdir("/") }
+      let(:inner) { described_class.new("pwd").chdir(root) }
       let(:command) { described_class.new(RbConfig.ruby, "-e", "print Dir.pwd").chain(inner) }
 
       it "carries the working directory of the chained command" do
-        expect(command.stdout).to eq("/")
+        expect(command.stdout).to eq(root)
       end
     end
 
@@ -136,10 +142,10 @@ RSpec.describe LLM::Command do
   end
 
   describe "#chdir" do
-    let(:command) { described_class.new(RbConfig.ruby, "-e", "print Dir.pwd").chdir("/") }
+    let(:command) { described_class.new(RbConfig.ruby, "-e", "print Dir.pwd").chdir(root) }
 
     it "runs the command in the directory it is given" do
-      expect(command.stdout).to eq("/")
+      expect(command.stdout).to eq(root)
     end
   end
 end

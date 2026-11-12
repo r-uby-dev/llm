@@ -4,8 +4,9 @@ require_relative "../unix"
 
 class LLM::Tool::Unix
   ##
-  # The {LLM::Tool::Unix::Mkdir LLM::Tool::Unix::Mkdir} class implements
-  # a tool that can create a tree of new directories.
+  # The {LLM::Tool::Unix::Mkdir LLM::Tool::Unix::Mkdir}
+  # class implements a tool that can create a tree of
+  # new directories.
   class Mkdir < self
     require_relative "../exec"
 
