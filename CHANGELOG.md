@@ -38,6 +38,13 @@ Older releases:
   `repository:` to clone, an optional `directory:` to clone into, which
   defaults to the name of the repository, and an optional `timeout:`.
 
+* **tools: add a `git-authors` tool** <br>
+  [`LLM::Tool::Git::Authors`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git/Authors.html)
+  (`git-authors`) returns the authors of a repository with the number of
+  commits each has made, the most commits first. It takes an optional
+  `path:`, which only counts the commits that touch the path, and an
+  optional `timeout:`.
+
 ### LLM::Agent
 
 * **agent: add `LLM::Agent#intercept` and `LLM::Agent#intercept_options`** <br>
@@ -64,6 +71,32 @@ Older releases:
   top-level fields of the request body, next to `model`. They configure
   the context's compactor, filter and intercept, as `compactor:`,
   `filter:` and `intercept:` do, and those are not sent either.
+
+### LLM::OpenAI
+
+* **openai: a chat request defaults to `gpt-6-luna`** <br>
+  [`LLM::OpenAI#default_model`](https://r.uby.dev/api-docs/llm.rb/LLM/OpenAI.html#default_model-instance_method)
+  returns `gpt-6-luna` now, where it returned `gpt-5.6-luna`, so a chat
+  request that is sent without a `model:` is sent as `gpt-6-luna`.
+
+### LLM::Command
+
+* **command: `LLM::Command#stdout` and `LLM::Command#stderr` take a block** <br>
+  [`LLM::Command#stdout`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#stdout-instance_method)
+  and
+  [`LLM::Command#stderr`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#stderr-instance_method)
+  yield each chunk of a stream to the block they are given as the command
+  writes it, and still return the stream once the command has exited.
+  [`LLM::Command#spawn`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#spawn-instance_method)
+  takes the same block. A chunk is yielded even after the `#limit` is
+  reached, and is dropped rather than stored, so a stream can be read
+  without being held in memory.
+
+* **command: stdout and stderr are read at the same time** <br>
+  A command's stdout and stderr are each read in a thread of their own
+  now, where stdout was read to its end before stderr was read, so a
+  command that writes more to stderr than a pipe holds, while it still
+  writes to stdout, no longer hangs.
 
 ## v19.0.1
 
