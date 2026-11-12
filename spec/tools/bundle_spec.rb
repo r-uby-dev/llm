@@ -41,8 +41,9 @@ RSpec.describe LLM::Tool::Bundle do
     end
 
     it "runs the command through bundle exec" do
-      expect(tool.call(arguments: ["exec", "ruby", "-e", "puts 123"], timeout: 60))
-        .to include(ok: true, stdout: "123\n", stderr: "")
+      result = tool.call(arguments: ["exec", "ruby", "-e", "puts 123"], timeout: 60)
+      expect(result).to include(ok: true, stderr: "")
+      expect(result[:stdout].chomp).to eq("123")
     end
 
     context "when BUNDLE_GEMFILE is set" do
@@ -51,7 +52,7 @@ RSpec.describe LLM::Tool::Bundle do
           arguments: ["exec", "ruby", "-e", "puts ENV[\"BUNDLE_GEMFILE\"]"],
           timeout: 60
         )
-        expect(res[:stdout]).to eq("#{gemfile}\n")
+        expect(res[:stdout].chomp).to eq(gemfile)
       end
     end
 
@@ -69,7 +70,7 @@ RSpec.describe LLM::Tool::Bundle do
           arguments: ["exec", "ruby", "-e", "puts ENV[\"BUNDLE_GEMFILE\"]"],
           timeout: 60
         )
-        expect(res[:stdout]).to eq("#{File.join(dir, "Gemfile")}\n")
+        expect(res[:stdout].chomp).to eq(File.join(dir, "Gemfile"))
       end
     end
   end

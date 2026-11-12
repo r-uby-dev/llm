@@ -6,18 +6,11 @@
 class LLM::Command
   require "rbconfig"
 
-  begin
-    require "pty"
-    HAS_PTY = true
-  rescue LoadError
-    HAS_PTY = false
-  end
-
   ##
   # @api private
   class Pipe < Struct.new(:r, :w)
     def self.pair
-      new(*HAS_PTY ? PTY.open : IO.pipe)
+      new(*IO.pipe)
     end
 
     def close
