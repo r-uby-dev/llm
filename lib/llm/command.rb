@@ -5,15 +5,19 @@
 # See https://github.com/altruby/test-cmd.rb
 class LLM::Command
   require "rbconfig"
-  require "pty"
+
+  begin
+    require "pty"
+    HAS_PTY = true
+  rescue LoadError
+    HAS_PTY = false
+  end
 
   ##
   # @api private
   class Pipe < Struct.new(:r, :w)
     def self.pair
-      new(*PTY.open)
-    rescue StandardError
-      new(*IO.pipe)
+      new(*HAS_PTY ? PTY.open : IO.pipe)
     end
 
     def close
