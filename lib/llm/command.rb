@@ -5,11 +5,14 @@
 # See https://github.com/altruby/test-cmd.rb
 class LLM::Command
   require "rbconfig"
+  require "pty"
 
   ##
   # @api private
   class Pipe < Struct.new(:r, :w)
     def self.pair
+      new(*PTY.open)
+    rescue StandardError
       new(*IO.pipe)
     end
 
@@ -295,7 +298,7 @@ class LLM::Command
         buf << captured
         remaining -= captured.bytesize
       end
-    rescue EOFError
+    rescue EOFError, Errno::EIO
       break
     end
     ex ? raise(ex) : buf
