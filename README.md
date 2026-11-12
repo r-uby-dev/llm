@@ -1893,6 +1893,28 @@ I'm aware of at least one production Rails deployment at
 a large-ish company.
 </details>
 
+
+<details>
+<summary>What about compared to RubyLLM?</summary>
+<br>
+
+It is like comparing an apple and an orange. 
+
+There is different mindsets behind both
+projects and each has their own unique perspective
+on what talking to a large language model
+in Ruby should look like. I am generally
+systems-minded and it shows in how the
+runtime works. I think it is fair to say -
+based on when I last looked - that RubyLLM 
+is much better optimized for Rails and the
+this runtime is optimized for environments 
+that might only have a Ruby, the standard 
+library and the filesystem but that's not
+to say you can't use the runtime with Rack,
+Rails, ActiveRecord and even Sequel.
+</details>
+
 ## License
 
 <center>
