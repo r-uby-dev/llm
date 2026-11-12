@@ -87,7 +87,7 @@ class LLM::Command
   ##
   # Spawns a command
   # @return [LLM::Command]
-  def spawn(&)
+  def spawn(&blk)
     return self if @spawned
     @in_r = input_pipe
     tap do
@@ -101,9 +101,17 @@ class LLM::Command
       @in_r.close unless @in_r.equal?(IO::NULL)
       @out.w.close
       @err.w.close
+      lock   = Mutex.new
+      reader = lambda do |pipe, limit|
+        read_limited(pipe, limit) do |chunk|
+          blk ? lock.synchronize { blk.call(chunk) } : nil
+        end
+      end
+      @stdout_reader = Thread.new { reader.call(@out.r, @limit[:stdout]) }
+      @stderr_reader = Thread.new { reader.call(@err.r, @limit[:stderr]) }
       @producer = Thread.new do
-        @stdout = read_limited(@out.r, @limit[:stdout], &)
-        @stderr = read_limited(@err.r, @limit[:stderr], &)
+        @stdout = @stdout_reader.value
+        @stderr = @stderr_reader.value
         @status = Process.waitpid2(@pid).last
       rescue Errno::ECHILD
         @status = failed_status

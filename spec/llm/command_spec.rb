@@ -22,6 +22,22 @@ RSpec.describe LLM::Command do
     end
   end
 
+  describe "reading both streams at once" do
+    let(:command) do
+      script = "STDERR.write('e' * 131_072); STDOUT.write('finished')"
+      described_class.new(RbConfig.ruby, "-e", script)
+    end
+
+    it "drains stderr while stdout stays open" do
+      expect(command.stderr.bytesize).to eq(131_072)
+    end
+
+    it "still captures stdout after the large stderr write" do
+      command.stderr
+      expect(command.stdout).to eq("finished")
+    end
+  end
+
   describe "#stderr" do
     let(:command) { described_class.new(RbConfig.ruby, "-e", "warn 'hello from stderr'") }
     let(:chunks) { [] }
