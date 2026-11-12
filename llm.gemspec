@@ -26,10 +26,20 @@ Gem::Specification.new do |spec|
 
   spec.summary = "An agentic runtime for system programmers - in Ruby."
   spec.description = <<~DESCRIPTION
-llm.rb is a runtime for building agentic AI applications
-on CRuby. It runs on Ruby's standard library by default,
-it supports concurrent and parallel tool execution and has
-a single coherent API that spans 15+ providers.
+  An agentic runtime for system programmers - in Ruby.
+
+  It supports concurrent and parallel tool execution.
+  15+ providers.
+
+  Parallel execution is provided by Ractor, and the
+  fork system call. Concurrent execution is provided
+  by Thread, Fiber, and the 'async' gem (optional).
+
+  Works with ActiveRecord, and Sequel.
+  Works with and without Rails.
+
+  It requires nothing but Ruby's standard library but it
+  can be extended with optional, opt-in dependencies.
 DESCRIPTION
 
   spec.license = "MIT"

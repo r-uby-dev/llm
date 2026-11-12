@@ -12,16 +12,18 @@
 
 > An agentic runtime for system programmers - in Ruby.
 
-Welcome to the canonical llm.rb repository.
+The runtime supports concurrent and parallel tool execution.  
+15+ providers.  
 
-llm.rb is a runtime for building agentic AI applications
-on CRuby. It runs on Ruby's standard library by default,
-it supports concurrent and parallel tool execution and has
-a single coherent API that spans 15+ providers. The README
-covers a lot of ground and the
-[changelog](CHANGELOG.md)
-tracks what has changed between releases.
+Parallel execution is provided by Ractor, and the  
+fork system call. Concurrent execution is provided  
+by Thread, Fiber, and the 'async' gem (optional).  
 
+Works with ActiveRecord, and Sequel.  
+Works with and without Rails.  
+
+It requires nothing but Ruby's standard library and it  
+can be extended with optional, opt-in dependencies.  
 
 ## Install
 
