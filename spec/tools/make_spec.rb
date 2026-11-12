@@ -16,7 +16,7 @@ RSpec.describe LLM::Tool::Unix::Make do
   describe ".function" do
     let(:params) { described_class.function.params }
 
-    it "defines the targets, directory, makefile, assignments and jobs params" do
+    it "defines every param a build takes" do
       expect(params.properties.keys).to contain_exactly(
         "targets", "directory", "makefile", "assignments", "jobs",
         "dry_run", "keep_going", "variable", "timeout", "max_bytes"
