@@ -10,7 +10,7 @@
   </a>
 </p>
 
-> [r.uby.dev](https://r.uby.dev/llm) project.
+> An agentic runtime for system programmers, in Ruby.
 
 Welcome to the canonical llm.rb repository.
 

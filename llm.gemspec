@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
                   "Anand Biju"].sort
   spec.email = ["robert@r.uby.dev"]
 
-  spec.summary = "An agentic runtime for Ruby"
+  spec.summary = "An agentic runtime for system programmers, in Ruby."
   spec.description = <<~DESCRIPTION
 llm.rb is a runtime for building agentic AI applications
 on CRuby. It runs on Ruby's standard library by default,
