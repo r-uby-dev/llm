@@ -45,11 +45,11 @@ The v19 release is a smaller release that includes a
 tiny eval framework that was authored for the [micro1](https://micro1.ai)
 hackathon.
 
-It builds on the v18 release, which 
-includes [substational runtime improvements](changelog/v18.md) -
+v18 includes [substational runtime improvements](changelog/v18.md) -
 especially for running tool calls on a [Ractor](https://docs.ruby-lang.org/en/4.0/Ractor.html).
-Like v18, it requires Ruby4+, JSON v3, and the latest
-versions of ActiveRecord|Sequel (optional).
+
+Requires Ruby4+, JSON v3, and the latest versions of 
+ActiveRecord|Sequel (optional).
 
 ```bash
 gem install llm.rb
