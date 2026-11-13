@@ -7,8 +7,8 @@ class LLM::Tool
   # A unix tool is a tool that works only on a
   # unix-like system. It depends on a command Windows
   # does not ship (`apropos`, `cat`, `cc`, `find`,
-  # `grep`, `make`, `man`, `mkdir`, `nm`), or on a
-  # system facility that only exists there.
+  # `grep`, `make`, `man`, `mkdir`, `nm`, `uname`), or on
+  # a system facility that only exists there.
   #
   # Tools that work anywhere - reading and writing
   # files, changing directory, spawning a command - are
@@ -27,6 +27,7 @@ class LLM::Tool
   # @see LLM::Tool::Unix::Man
   # @see LLM::Tool::Unix::Mkdir
   # @see LLM::Tool::Unix::Nm
+  # @see LLM::Tool::Unix::Uname
   class Unix < self
     abstract!
 
@@ -42,5 +43,6 @@ class LLM::Tool
     require_relative "unix/man"
     require_relative "unix/mkdir"
     require_relative "unix/nm"
+    require_relative "unix/uname"
   end
 end
