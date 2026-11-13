@@ -9,7 +9,10 @@ class LLM::Tool
   # not, or a facility that only exists there. `truss`
   # is the first: FreeBSD traces a process with it,
   # Linux traces with `strace` and macOS with `dtruss`,
-  # and the three do not share an argument vector.
+  # and the three do not share an argument vector. `pkg`
+  # is the second: it is how a BSD installs software
+  # from a repository, where the other systems have
+  # their own package managers.
   #
   # Tools that work anywhere are not BSD tools even when
   # they are named after a command that began there.
@@ -19,10 +22,12 @@ class LLM::Tool
   #
   # @abstract
   # @see LLM::Tool.freebsd
+  # @see LLM::Tool::BSD::PkgInstall
   # @see LLM::Tool::BSD::Truss
   class BSD < self
     abstract!
 
+    require_relative "bsd/pkg_install"
     require_relative "bsd/truss"
   end
 end
