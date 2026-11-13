@@ -63,6 +63,26 @@ RSpec.describe "plugin :agent" do
     end
   end
 
+  describe "#compactor and #compactor_options" do
+    it "reads them from the record's LLM::Agent" do
+      compactor = Class.new(LLM::Compactor::Null)
+      allow(record.unwrap!).to receive(:compactor).and_return(compactor)
+      allow(record.unwrap!).to receive(:compactor_options).and_return({threshold: 5})
+      expect(record.compactor).to be(compactor)
+      expect(record.compactor_options).to eq({threshold: 5})
+    end
+  end
+
+  describe "#intercept and #intercept_options" do
+    it "reads them from the record's LLM::Agent" do
+      intercept = LLM::Intercept::Null.new(record.llm)
+      allow(record.unwrap!).to receive(:intercept).and_return(intercept)
+      allow(record.unwrap!).to receive(:intercept_options).and_return({threshold: 5})
+      expect(record.intercept).to be(intercept)
+      expect(record.intercept_options).to eq({threshold: 5})
+    end
+  end
+
   it "forwards confirm to the internal agent class" do
     expect(agent.agent.confirm).to eq(["delete-file"])
   end

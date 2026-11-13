@@ -49,6 +49,73 @@ RSpec.describe "plugin :llm" do
     end
   end
 
+  describe "#compactor and #compactor_options" do
+    it "returns the Null compactor and empty options by default" do
+      expect(record.compactor).to be(LLM::Compactor::Null)
+      expect(record.compactor_options).to eq({})
+    end
+
+    context "when set_context gives a compactor and its options" do
+      let(:context) do
+        stub_const("SpecSequelCompactor", Class.new(LLM::Compactor::Null))
+        Class.new(model) do
+          plugin :llm
+
+          private
+
+          def set_provider
+            LLM.openai(key: "secret")
+          end
+
+          def set_context
+            {compactor: SpecSequelCompactor, compactor_options: {threshold: 5}}
+          end
+        end
+      end
+
+      it "returns them from the runtime" do
+        expect(record.compactor).to be(SpecSequelCompactor)
+        expect(record.compactor_options).to eq({threshold: 5})
+        record.compactor_options[:threshold] = 1
+        expect(record.compactor_options).to eq({threshold: 5})
+      end
+    end
+  end
+
+  describe "#intercept and #intercept_options" do
+    it "returns a Null intercept and empty options by default" do
+      expect(record.intercept).to be_a(LLM::Intercept::Null)
+      expect(record.intercept_options).to eq({})
+    end
+
+    context "when set_context gives an intercept and its options" do
+      let(:context) do
+        stub_const("SpecSequelIntercept", Class.new(LLM::Intercept::Null))
+        Class.new(model) do
+          plugin :llm
+
+          private
+
+          def set_provider
+            LLM.openai(key: "secret")
+          end
+
+          def set_context
+            {intercept: SpecSequelIntercept, intercept_options: {threshold: 5}}
+          end
+        end
+      end
+
+      it "returns them from the runtime" do
+        expect(record.intercept).to be_a(SpecSequelIntercept)
+        expect(record.intercept.options).to eq({threshold: 5})
+        expect(record.intercept_options).to eq({threshold: 5})
+        record.intercept_options[:threshold] = 1
+        expect(record.intercept_options).to eq({threshold: 5})
+      end
+    end
+  end
+
   context "with a live OpenAI completion",
           vcr: {cassette_name: "openai/chat/completion_contract"} do
     let(:context) do
