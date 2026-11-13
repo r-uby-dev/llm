@@ -300,6 +300,19 @@ Older releases:
   `<cwd>/Gemfile` when it was not, so bundle looks for a `Gemfile` in the
   directory the command runs in.
 
+### ORM
+
+* **orm: add `#compactor`, `#compactor_options`, `#intercept` and `#intercept_options` to the Sequel plugins** <br>
+  A record that uses `plugin :llm` or `plugin :agent` responds to
+  [`#compactor`](https://r.uby.dev/api-docs/llm.rb/LLM/Sequel/Plugin/InstanceMethods.html#compactor-instance_method),
+  [`#compactor_options`](https://r.uby.dev/api-docs/llm.rb/LLM/Sequel/Plugin/InstanceMethods.html#compactor_options-instance_method),
+  [`#intercept`](https://r.uby.dev/api-docs/llm.rb/LLM/Sequel/Plugin/InstanceMethods.html#intercept-instance_method)
+  and
+  [`#intercept_options`](https://r.uby.dev/api-docs/llm.rb/LLM/Sequel/Plugin/InstanceMethods.html#intercept_options-instance_method)
+  now, as a record that `acts_as_llm` or `acts_as_agent` does. All four
+  read from the record's runtime, an `LLM::Context` for `plugin :llm` and an
+  `LLM::Agent` for `plugin :agent`.
+
 ## v20.0.0
 
 Changes since `v19.1.1`.

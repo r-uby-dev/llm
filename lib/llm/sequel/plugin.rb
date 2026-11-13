@@ -226,6 +226,34 @@ module LLM::Sequel
     end
 
     ##
+    # @see LLM::Context#compactor
+    # @return [Class<LLM::Compactor>]
+    def compactor
+      __context__.compactor
+    end
+
+    ##
+    # @see LLM::Context#compactor_options
+    # @return [Hash]
+    def compactor_options
+      __context__.compactor_options
+    end
+
+    ##
+    # @see LLM::Context#intercept
+    # @return [LLM::Intercept]
+    def intercept
+      __context__.intercept
+    end
+
+    ##
+    # @see LLM::Context#intercept_options
+    # @return [Hash]
+    def intercept_options
+      __context__.intercept_options
+    end
+
+    ##
     # @see LLM::Context#pending_functions
     # @return [Array<LLM::Function>]
     def pending_functions
