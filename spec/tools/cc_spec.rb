@@ -48,6 +48,7 @@ RSpec.describe LLM::Tool::Unix::Cc do
       expect(tool).to have_received(:execute).with(
         command: "cc",
         arguments: ["foo.c"],
+        env: an_instance_of(::Hash),
         timeout: 120,
         max_bytes: described_class.max_bytes
       )
