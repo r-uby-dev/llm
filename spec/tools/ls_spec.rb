@@ -23,13 +23,19 @@ RSpec.describe LLM::Tool::Unix::Ls do
     end
 
     it "does not require a path" do
-      expect(described_class.required).to be_empty
+      expect(params.properties[:paths]).to_not be_required
     end
 
-    it "defines the sort orders as an enum" do
-      expect(params.properties[:sort].enum).to eq(
-        %w[name time size natural none]
-      )
+    it "defines the flags as booleans" do
+      expect(params.properties[:all]).to be_a(LLM::Schema::Boolean)
+      expect(params.properties[:almost_all]).to be_a(LLM::Schema::Boolean)
+      expect(params.properties[:long]).to be_a(LLM::Schema::Boolean)
+      expect(params.properties[:human]).to be_a(LLM::Schema::Boolean)
+      expect(params.properties[:classify]).to be_a(LLM::Schema::Boolean)
+      expect(params.properties[:inode]).to be_a(LLM::Schema::Boolean)
+      expect(params.properties[:recursive]).to be_a(LLM::Schema::Boolean)
+      expect(params.properties[:directory]).to be_a(LLM::Schema::Boolean)
+      expect(params.properties[:reverse]).to be_a(LLM::Schema::Boolean)
     end
   end
 
@@ -71,7 +77,7 @@ RSpec.describe LLM::Tool::Unix::Ls do
       expect(tool).to have_received(:exec).with(hash_including(arguments: ["-l"]))
     end
 
-    it "passes human as -h" do
+    it "passes human as -h beside -l" do
       tool.call(long: true, human: true)
       expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-h", "-l"]))
