@@ -8,7 +8,7 @@ RSpec.describe LLM::Tool::Unix::Cc do
   let(:result) { {ok: true, stdout: "", stderr: ""} }
 
   before do
-    allow(tool).to receive(:execute).and_return(result)
+    allow(tool).to receive(:exec).and_return(result)
   end
 
   describe ".function" do
@@ -45,7 +45,7 @@ RSpec.describe LLM::Tool::Unix::Cc do
   describe "#call" do
     it "compiles and links the source with no flags" do
       tool.call(sources: ["foo.c"])
-      expect(tool).to have_received(:execute).with(
+      expect(tool).to have_received(:exec).with(
         command: "cc",
         arguments: ["foo.c"],
         env: an_instance_of(::Hash),
@@ -56,79 +56,79 @@ RSpec.describe LLM::Tool::Unix::Cc do
 
     it "passes the sources in the order given" do
       tool.call(sources: %w[foo.c bar.c])
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: %w[foo.c bar.c]))
     end
 
     it "passes the output as -o" do
       tool.call(sources: ["foo.c"], output: "foo")
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-o", "foo", "foo.c"]))
     end
 
     it "passes the object stage as -c" do
       tool.call(sources: ["foo.c"], stage: "object")
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-c", "foo.c"]))
     end
 
     it "passes the assembly stage as -S" do
       tool.call(sources: ["foo.c"], stage: "assembly")
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-S", "foo.c"]))
     end
 
     it "passes the preprocess stage as -E" do
       tool.call(sources: ["foo.c"], stage: "preprocess")
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-E", "foo.c"]))
     end
 
     it "passes the syntax stage as -fsyntax-only" do
       tool.call(sources: ["foo.c"], stage: "syntax")
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-fsyntax-only", "foo.c"]))
     end
 
     it "passes the standard as -std=" do
       tool.call(sources: ["foo.c"], standard: "c17")
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-std=c17", "foo.c"]))
     end
 
     it "passes the optimization level as -O" do
       tool.call(sources: ["foo.c"], optimize: "2")
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-O2", "foo.c"]))
     end
 
     it "passes debug as -g" do
       tool.call(sources: ["foo.c"], debug: true)
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-g", "foo.c"]))
     end
 
     it "passes warnings as -Wall" do
       tool.call(sources: ["foo.c"], warnings: true)
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-Wall", "foo.c"]))
     end
 
     it "passes the defines as -D" do
       tool.call(sources: ["foo.c"], defines: ["FOO", "BAR=1"])
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-DFOO", "-DBAR=1", "foo.c"]))
     end
 
     it "passes the include directories as -I" do
       tool.call(sources: ["foo.c"], include_directories: ["include", "src"])
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-Iinclude", "-Isrc", "foo.c"]))
     end
 
     it "passes the libraries after the sources" do
       tool.call(sources: ["foo.c"], libraries: %w[m pthread], library_directories: ["/opt/lib"])
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["foo.c", "-L/opt/lib", "-lm", "-lpthread"]))
     end
 
@@ -143,17 +143,17 @@ RSpec.describe LLM::Tool::Unix::Cc do
         include_directories: ["include"], library_directories: ["/opt/lib"],
         libraries: ["m"]
       )
-      expect(tool).to have_received(:execute).with(hash_including(arguments:))
+      expect(tool).to have_received(:exec).with(hash_including(arguments:))
     end
 
     it "forwards the timeout" do
       tool.call(sources: ["foo.c"], timeout: 600)
-      expect(tool).to have_received(:execute).with(hash_including(timeout: 600))
+      expect(tool).to have_received(:exec).with(hash_including(timeout: 600))
     end
 
     it "passes the max bytes" do
       tool.call(sources: ["foo.c"], max_bytes: 100)
-      expect(tool).to have_received(:execute).with(hash_including(max_bytes: 100))
+      expect(tool).to have_received(:exec).with(hash_including(max_bytes: 100))
     end
 
     it "returns the result as it is when cc succeeded" do
@@ -162,7 +162,7 @@ RSpec.describe LLM::Tool::Unix::Cc do
 
     it "returns the result as it is when cc failed" do
       stderr = "foo.c:1:1: error: unknown type name 'foo'\n"
-      allow(tool).to receive(:execute).and_return({ok: false, stdout: "", stderr:})
+      allow(tool).to receive(:exec).and_return({ok: false, stdout: "", stderr:})
       expect(tool.call(sources: ["foo.c"])).to eq({ok: false, stdout: "", stderr:})
     end
   end
@@ -176,14 +176,14 @@ RSpec.describe LLM::Tool::Unix::Cc do
 
     it "passes an empty environment when none of the variables are set" do
       tool.call(sources: ["foo.c"])
-      expect(tool).to have_received(:execute).with(hash_including(env: {}))
+      expect(tool).to have_received(:exec).with(hash_including(env: {}))
     end
 
     it "forwards the variables that add to the include and library path" do
       allow(ENV).to receive(:[]).with("CPATH").and_return("/opt/include")
       allow(ENV).to receive(:[]).with("LIBRARY_PATH").and_return("/opt/lib")
       tool.call(sources: ["foo.c"])
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(env: {"CPATH" => "/opt/include", "LIBRARY_PATH" => "/opt/lib"}))
     end
   end

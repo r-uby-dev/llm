@@ -10,7 +10,7 @@ RSpec.describe LLM::Tool::Unix::Apropos do
   }
 
   before do
-    allow(tool).to receive(:execute).and_return(result)
+    allow(tool).to receive(:exec).and_return(result)
   end
 
   describe ".function" do
@@ -36,9 +36,9 @@ RSpec.describe LLM::Tool::Unix::Apropos do
   end
 
   describe "#call" do
-    it "runs apropos through #execute" do
+    it "runs apropos through #exec" do
       tool.call(keywords: %w[printf])
-      expect(tool).to have_received(:execute).with(
+      expect(tool).to have_received(:exec).with(
         command: "apropos",
         arguments: ["--", "printf"],
         env: an_instance_of(::Hash),
@@ -53,24 +53,24 @@ RSpec.describe LLM::Tool::Unix::Apropos do
 
     it "passes each keyword as a term of its own" do
       tool.call(keywords: %w[set uid])
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["--", "set", "uid"]))
     end
 
     it "passes the section as -s before the separator" do
       tool.call(keywords: %w[printf], section: 3)
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-s", "3", "--", "printf"]))
     end
 
     it "forwards the timeout" do
       tool.call(keywords: %w[printf], timeout: 9)
-      expect(tool).to have_received(:execute).with(hash_including(timeout: 9))
+      expect(tool).to have_received(:exec).with(hash_including(timeout: 9))
     end
 
     it "passes the max bytes" do
       tool.call(keywords: %w[printf], max_bytes: 100)
-      expect(tool).to have_received(:execute).with(hash_including(max_bytes: 100))
+      expect(tool).to have_received(:exec).with(hash_including(max_bytes: 100))
     end
   end
 
@@ -82,13 +82,13 @@ RSpec.describe LLM::Tool::Unix::Apropos do
     it "passes an empty environment when $MANPATH is not set" do
       allow(ENV).to receive(:[]).with("MANPATH").and_return(nil)
       tool.call(keywords: %w[printf])
-      expect(tool).to have_received(:execute).with(hash_including(env: {}))
+      expect(tool).to have_received(:exec).with(hash_including(env: {}))
     end
 
     it "forwards $MANPATH when it is set" do
       allow(ENV).to receive(:[]).with("MANPATH").and_return("/opt/man")
       tool.call(keywords: %w[printf])
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(env: {"MANPATH" => "/opt/man"}))
     end
   end
