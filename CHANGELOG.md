@@ -13,7 +13,218 @@ Older releases:
 
 ## What's next
 
-Nothing yet.
+### Breaking
+
+#### Migration
+
+| Old | New |
+|-----|-----|
+| `LLM::Tool::Exec.max_bytes(n)`, which capped every tool that spawns a command | `LLM::Tool::Exec.max_bytes(n)` for `exec` alone, and `max_bytes` on the tool class itself, eg `LLM::Tool::Unix::Man.max_bytes(n)` |
+
+### LLM::Command
+
+* **command: add `LLM::Command#chain`** <br>
+  [`LLM::Command#chain`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#chain-instance_method)
+  runs one command through another: it splices the chained command's argv
+  onto its own, and takes its environment, its working directory, its standard
+  input and its stream limits, so
+  `jexec.chain(ls).stdout { print it }` is `ls` printing the listing that
+  `jexec` sees inside the jail.
+
+* **command: add `LLM::Command#chdir`** <br>
+  [`LLM::Command#chdir`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#chdir-instance_method)
+  sets the directory the command is spawned in, which is passed to
+  `Process.spawn` as `chdir:`. A command that is not given one runs in the
+  working directory of the process that spawns it.
+
+* **command: add `LLM::Command#to_argv`** <br>
+  [`LLM::Command#to_argv`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#to_argv-instance_method)
+  returns the command and its arguments as an array of strings, so one command
+  can be handed to another, and `#to_a` is its alias.
+
+* **command: `LLM::Command#arguments` splices a command** <br>
+  [`LLM::Command#arguments`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#arguments-instance_method)
+  splices a command it is given into the argument list, so
+  `jexec.arguments(*ls)` and `jexec.arguments(*ls.to_argv)` build the same
+  argv.
+
+* **command: `LLM::Command#env` returns the environment when it is given no argument** <br>
+  [`LLM::Command#env`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#env-instance_method)
+  returns the environment the command was given now, where it required an
+  argument. With an argument it still merges the variables into the
+  environment, which is how `#chain` takes the environment of the command it
+  chains.
+
+### LLM::Tool
+
+* **tools: add `LLM::Tool::BSD`** <br>
+  [`LLM::Tool::BSD`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/BSD.html)
+  is the abstract superclass of the tools that work only on a BSD: a command
+  FreeBSD ships and the other systems do not, or a facility that only exists
+  there. `truss` is the first - Linux traces a process with `strace` and
+  macOS with `dtruss`, and the three do not share an argument vector - and
+  `pkg` is the second, so the tools below it are named after the subcommand,
+  `pkg-search` before `pkg-install`. It is abstract, so it has no name and it
+  is not in `LLM::Tool.registry`.
+
+* **tools: add `LLM::Tool.freebsd`** <br>
+  [`LLM::Tool.freebsd`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool.html#freebsd-class_method)
+  returns the BSD tools, which are the subclasses of `LLM::Tool::BSD`. It
+  requires `llm/tools/bsd` when it is called, unless the namespace is loaded
+  already, so the BSD tools are not required up front.
+
+* **tools: every tool that spawns a command reaches the process through `#run`** <br>
+  [`LLM::Tool::Utils::Process#run`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Utils/Process.html#run-instance_method)
+  starts a command for every builtin tool that spawns one, where a tool used
+  to build an
+  [`LLM::Tool::Exec`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Exec.html)
+  and call `#call` on it. The command it is handed is complete - argv,
+  environment, byte limits and the directory it runs in - so a tool that
+  replaces `#run`, to run a command in a jail, in a container or on the far
+  side of an ssh, replaces it for every command the tool runs.
+
+* **tools: add `LLM::Tool::Utils::Process#exec`** <br>
+  [`LLM::Tool::Utils::Process#exec`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Utils/Process.html#exec-instance_method)
+  spawns a command, waits for it within a timeout, and returns
+  `{ok:, stdout:, stderr:, duration:}`, with a `note:` when the timeout
+  killed it. The body was `LLM::Tool::Exec#call`, which calls it now, so every
+  tool that spawns a command runs the same body and `exec` is what they call.
+
+* **tools: each tool that spawns a command has a `max_bytes` of its own** <br>
+  A tool that includes `LLM::Tool::Utils::Process` has a `max_bytes` class
+  method now, and the streams it captures are capped at that number, 75,000
+  bytes by default. It was one knob on `LLM::Tool::Exec`, which capped every
+  tool, so the tool that reads more of a command's output than another is
+  configured on its own class instead.
+
+* **tools: add a `make` tool** <br>
+  [`LLM::Tool::Unix::Make`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Make.html)
+  (`make`) runs a build, the loop an agent runs after it edits a file: run
+  it, read the failure, fix it, run it again. It spawns `make` without a
+  shell and builds the argv itself as
+  `[-C dir] [-f makefile] [-j n] [-n] [-k] [-V var] [NAME=value...] [targets...]`,
+  so the directory, the targets, the variables and the flags arrive as
+  parameters. It takes an optional `directory:`, which must exist,
+  `makefile:`, `jobs:`, which must be a positive integer, `dry_run:` (`-n`),
+  `keep_going:` (`-k`), `variable:` (`-V`, bmake) and `assignments:` of
+  `NAME=value` pairs, and it rejects an assignment that is not a pair and a
+  target that begins with `-`. Every flag but `-V` is shared by BSD make and
+  GNU make, and `timeout:` is 120 seconds by default.
+
+* **tools: add a `cat` tool** <br>
+  [`LLM::Tool::Unix::Cat`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Cat.html)
+  (`cat`) concatenates files and returns what they hold, and it prints more
+  than one file in a single call where `read-file` reads one and returns its
+  lines beside a line number. It builds the argv as
+  `[-E] [-n] [-s] [-T] [-v] -- paths...`, so `number:` numbers the lines,
+  `squeeze_blank:` collapses a run of empty lines, and `show_ends:`,
+  `show_tabs:` and `show_nonprinting:` make trailing whitespace, hard tabs
+  and control characters visible. It requires one or more `paths:`, and it
+  rejects an empty path and a path of `-`, which would read the standard
+  input and block.
+
+* **tools: add a `cc` tool** <br>
+  [`LLM::Tool::Unix::Cc`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Cc.html)
+  (`cc`) compiles C and C++ sources, and a failed compile reaches the model
+  with the stderr and the exit status that explain it. It builds the argv as
+  `[stage] [-std=] [-O] [-g] [-Wall] [-D...] [-I...] [-o out] sources... [-L...] [-l...]`,
+  with the sources before the libraries, because the linker reads them in
+  the order it is given them. `stage:` is one of `link`, `object`,
+  `assembly`, `preprocess` or `syntax`, which is `-fsyntax-only` and builds
+  nothing, and the schema enumerates the stages and the optimization levels
+  (`0` to `3`, `s`, `fast`, `g`). It requires one or more `sources:`, and it
+  takes an optional `output:`, `standard:`, `optimize:`, `debug:` (`-g`),
+  `warnings:` (`-Wall`), `defines:` (`-D`), `include_directories:` (`-I`),
+  `library_directories:` (`-L`) and `libraries:` (`-l`). The variables that
+  add to the include path, the library path and the temporary directory are
+  forwarded when they are set, and `timeout:` is 120 seconds by default.
+
+* **tools: add an `nm` tool** <br>
+  [`LLM::Tool::Unix::Nm`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Nm.html)
+  (`nm`) lists the symbols of an object file, an archive or an executable,
+  the tool that reads the failure a link produced: `undefined:` (`-u`) lists
+  the symbols an archive refers to and does not define, and `external:`
+  (`-g`) the ones an object exports. It takes one or more `paths:` after
+  `--`, and `demangle:` (`-C`), `dynamic:` (`-D`), `file_name:` (`-A`),
+  `size:` (`-S`), `numeric_sort:` (`-n`) and `portable:` (`-P`, one symbol
+  per line). It rejects a path of `-`, which would read the standard input
+  and block.
+
+* **tools: add a `pwd` tool** <br>
+  [`LLM::Tool::Unix::Pwd`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Pwd.html)
+  (`pwd`) prints the working directory of the command, `-L` by default for
+  the logical path and `-P` when `physical: true` for the physical one, with
+  every symbolic link resolved. It forwards `$PWD` when it is set, because
+  `-L` reads it and a spawned command inherits `$PATH` and nothing else;
+  without it `pwd -L` falls back to the physical path. `LLM::Tool::Pwd` is
+  untouched and still returns `Dir.getwd`, and both tools are named `pwd`,
+  so the registry, which keys on the name, resolves `pwd` to this one where
+  both are loaded.
+
+* **tools: add a `truss` tool** <br>
+  [`LLM::Tool::BSD::Truss`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/BSD/Truss.html)
+  (`truss`) traces the system calls of a process on FreeBSD. It traces a
+  `command:` with its `arguments:`, or a running `pid:`, and one of the two
+  is required while the two together are rejected. `follow:` (`-f`) traces
+  the children the process forks, `count:` (`-c`) swaps the individual calls
+  for a summary of the time, count and errors of each, `signals:` (`-S` when
+  it is false) shows the signals, `output:` (`-o`) writes the trace to a
+  file, and `string_size:` (`-s`) is how many characters a string is shown
+  with. The trace arrives through stderr unless `output:` names a file.
+
+* **tools: add a `pkg-install` tool** <br>
+  [`LLM::Tool::BSD::PkgInstall`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/BSD/PkgInstall.html)
+  (`pkg-install`) installs packages on FreeBSD with `pkg install`. It always
+  passes `-y`: the command asks for confirmation before it changes anything,
+  and a spawned process has nobody to confirm the prompt, so a run without
+  it would sit until the timeout killed it. `dry_run:` (`-n`) prints the
+  work-list of the packages to install, upgrade and delete, in dependency
+  order, without touching the system. It requires one or more `packages:`,
+  and it takes an optional `no_repo_update:` (`-U`), `quiet:` (`-q`),
+  `force:` (`-f`), `no_scripts:` (`-I`), `local_only:` (`-l`), `automatic:`
+  (`-A`), `autoremove:` (`--autoremove`), `repositories:` (`-r`) and
+  `match:` of `exact`, `case-sensitive`, `glob`, `case-insensitive` or
+  `regex`, which the schema enumerates. `timeout:` is 300 seconds by
+  default.
+
+* **tools: add a `pkg-search` tool** <br>
+  [`LLM::Tool::BSD::PkgSearch`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/BSD/PkgSearch.html)
+  (`pkg-search`) searches the package repositories of FreeBSD, the question
+  that comes before `pkg-install`: a model told to add a program does not
+  know which package provides it, and `field:` of `comment-description`
+  finds a package by what it does where the default finds one by what it is
+  called. It takes a `pattern:` and an optional `field:`, `match:` of
+  `regex`, `exact` or `glob`, `case_sensitive:`, `modifiers:` (`-Q`),
+  `repositories:` (`-r`), `quiet:` (`-q`) and `no_repo_update:` (`-U`), and
+  `raw:` (`-R`) with `raw_format:` of `yaml`, `json`, `json-compact` or
+  `ucl` prints the whole manifest of each match. A `raw_format:` that is
+  given without `raw:` is rejected.
+
+* **tools: the git tools pass `-C` only when `cwd:` is given** <br>
+  Each tool that
+  [`LLM::Tool::Git`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git.html)
+  provides builds `git [-C <cwd>] ...` now, where it passed `-C Dir.getwd`
+  on every call, so a call that names no `cwd:` runs git in the working
+  directory of the command rather than in the working directory of this
+  process.
+
+* **tools: `rg` searches the working directory of the command** <br>
+  [`LLM::Tool::Rg`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Rg.html)
+  leaves `path:` out of the argument vector when it is not given, where it
+  passed `Dir.getwd`, so the search runs in the working directory of the
+  command.
+
+* **tools: `find` walks the working directory of the command** <br>
+  [`LLM::Tool::Unix::Find`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Find.html)
+  leaves `path:` out of the argument vector when it is not given, where it
+  passed `Dir.getwd`, so the walk starts in the working directory of the
+  command.
+
+* **tools: `bundle` forwards `$BUNDLE_GEMFILE` and nothing else** <br>
+  [`LLM::Tool::Bundle`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Bundle.html)
+  sets `BUNDLE_GEMFILE` only when the variable is set, where it set it to
+  `<cwd>/Gemfile` when it was not, so bundle looks for a `Gemfile` in the
+  directory the command runs in.
 
 ## v20.0.0
 
