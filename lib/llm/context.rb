@@ -128,7 +128,7 @@ module LLM
     #   to a generated UUIDv7 otherwise.
     # @option params [Class<LLM::Compactor>, nil] :compactor
     #   A compactor class to use for context compaction. Defaults to
-    #   {LLM::Compactor::Null}.
+    #   {LLM::Compactor::Auto}.
     # @option params [Hash] :compactor_options
     #   Options passed to the compactor's `call` method. Defaults to `{}`.
     # @option params [Class<LLM::MessageFilter>, nil] :filter
@@ -156,7 +156,7 @@ module LLM
       extra = @params.slice(:model, :tools).merge!(ctx: self, tracer:)
       @params[:stream] = LLM::Stream.try(@params[:stream], extra:)
       @compactor = {
-        klass: params.delete(:compactor) || LLM::Compactor::Null,
+        klass: params.delete(:compactor) || LLM::Compactor::Auto,
         options: params.delete(:compactor_options) || {}
       }
       @filter = {
