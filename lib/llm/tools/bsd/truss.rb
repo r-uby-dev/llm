@@ -14,7 +14,8 @@ class LLM::Tool::BSD
   # the kernel refuse. `truss` writes the trace to the
   # standard error unless `output:` names a file, so the
   # trace arrives through the stderr of
-  # {LLM::Tool::Exec} like any other diagnostic.
+  # {LLM::Tool::Utils::Process#execute} like any other
+  # diagnostic.
   #
   # `-f` follows the children the process forks, which
   # is how a shell script or a program that spawns a
@@ -28,8 +29,6 @@ class LLM::Tool::BSD
   # has `dtruss`, and neither of them takes these
   # arguments.
   class Truss < self
-    require_relative "../exec"
-
     name "truss"
     description "Trace the system calls of a process (FreeBSD)\n" \
                 "This command (truss) is spawned without a shell"
@@ -45,7 +44,7 @@ class LLM::Tool::BSD
     parameter :max_bytes, Integer, "max number of bytes to emit"
     defaults command: nil, arguments: [], pid: nil, follow: false, count: false,
              signals: true, output: nil, string_size: nil, timeout: 60,
-             max_bytes: -> { Exec.max_bytes }
+             max_bytes: -> { max_bytes }
 
     ##
     # @param [String, nil] command
@@ -76,9 +75,9 @@ class LLM::Tool::BSD
     # @return [Hash]
     def call(command: nil, arguments: [], pid: nil, follow: false, count: false,
              signals: true, output: nil, string_size: nil, timeout: 60,
-             max_bytes: Exec.max_bytes)
+             max_bytes: self.class.max_bytes)
       validate!(command:, pid:, output:, string_size:)
-      Exec.new.call(
+      execute(
         command: "truss",
         arguments: arguments(
           command:, arguments:, pid:, follow:, count:, signals:, output:, string_size:

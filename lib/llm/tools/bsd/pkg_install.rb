@@ -29,19 +29,17 @@ class LLM::Tool::BSD
   # and `autoremove:` (`--autoremove`) are the pair that
   # decides whether a dependency is garbage afterwards.
   #
-  # The result of {LLM::Tool::Exec} is returned as it is,
-  # so `pkg: No packages available to install matching
-  # 'foo' have been found in the repositories` reaches the
-  # model with the exit status that carries it. The tool
-  # mutates the system and needs write access to the
-  # package database, so the user it runs as decides
-  # whether it works at all; the read-only questions -
-  # what a package depends on, which package installed a
-  # file, what a repository has - are `pkg info`, `pkg
-  # query`, `pkg which` and `pkg search`.
+  # The result of {LLM::Tool::Utils::Process#execute} is
+  # returned as it is, so `pkg: No packages available to
+  # install matching 'foo' have been found in the
+  # repositories` reaches the model with the exit status
+  # that carries it. The tool mutates the system and needs
+  # write access to the package database, so the user it
+  # runs as decides whether it works at all; the read-only
+  # questions - what a package depends on, which package
+  # installed a file, what a repository has - are `pkg
+  # info`, `pkg query`, `pkg which` and `pkg search`.
   class PkgInstall < self
-    require_relative "../exec"
-
     ##
     # The matching modes, keyed by the name a model asks
     # for. `exact` is how pkg matches a name when no flag
@@ -75,7 +73,7 @@ class LLM::Tool::BSD
     defaults dry_run: false, no_repo_update: false, quiet: false, force: false,
              no_scripts: false, automatic: false, autoremove: false, local_only: false,
              match: "exact", repositories: [], timeout: 300,
-             max_bytes: -> { Exec.max_bytes }
+             max_bytes: -> { max_bytes }
 
     ##
     # @param [Array<String>] packages
@@ -109,9 +107,9 @@ class LLM::Tool::BSD
     # @return [Hash]
     def call(packages:, dry_run: false, no_repo_update: false, quiet: false, force: false,
              no_scripts: false, automatic: false, autoremove: false, local_only: false,
-             match: "exact", repositories: [], timeout: 300, max_bytes: Exec.max_bytes)
+             match: "exact", repositories: [], timeout: 300, max_bytes: self.class.max_bytes)
       validate!(packages:, match:, repositories:)
-      Exec.new.call(
+      execute(
         command: "pkg",
         arguments: arguments(
           packages:, dry_run:, no_repo_update:, quiet:, force:, no_scripts:,
