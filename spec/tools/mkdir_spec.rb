@@ -5,11 +5,10 @@ require "llm/tools/unix"
 
 RSpec.describe LLM::Tool::Unix::Mkdir do
   let(:tool) { described_class.new }
-  let(:shell) { instance_double(LLM::Tool::Exec) }
   let(:result) { {ok: true, stdout: "", stderr: ""} }
 
   before do
-    allow(LLM::Tool::Exec).to receive(:new).and_return(shell)
+    allow(tool).to receive(:exec).and_return(result)
   end
 
   describe ".function" do
@@ -25,20 +24,16 @@ RSpec.describe LLM::Tool::Unix::Mkdir do
   end
 
   describe "#call" do
-    before do
-      allow(shell).to receive(:call).and_return(result)
-    end
-
-    it "runs mkdir through the exec tool" do
+    it "runs mkdir through #exec" do
       tool.call(path: "/tmp/new-dir")
-      expect(shell).to have_received(:call).with(
+      expect(tool).to have_received(:exec).with(
         command: "mkdir",
         arguments: ["-p", "/tmp/new-dir"],
-        max_bytes: LLM::Tool::Exec.max_bytes
+        max_bytes: described_class.max_bytes
       )
     end
 
-    it "returns the exec result" do
+    it "returns the result" do
       expect(tool.call(path: "/tmp/new-dir")).to eq(result)
     end
   end

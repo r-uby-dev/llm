@@ -32,14 +32,13 @@ class LLM::Tool::BSD
   # picks `yaml` (its default), `json`, `json-compact` or
   # `ucl`; the compact JSON is one line per package and
   # the shape that parses without a second thought. The
-  # result of {LLM::Tool::Exec} is returned as it is.
+  # result of {LLM::Tool::Utils::Process#exec} is returned
+  # as it is.
   #
   # It is read-only, but `no_repo_update:` (`-U`) still
   # matters: without it `pkg` updates the repository
   # catalogue over the network before it searches.
   class PkgSearch < self
-    require_relative "../exec"
-
     ##
     # The fields a pattern is matched against, as `-S`
     # names them.
@@ -83,7 +82,7 @@ class LLM::Tool::BSD
     required %i[pattern]
     defaults field: nil, match: "regex", case_sensitive: true, modifiers: [],
              repositories: [], raw: false, raw_format: nil, quiet: false,
-             no_repo_update: false, timeout: 120, max_bytes: -> { Exec.max_bytes }
+             no_repo_update: false, timeout: 120, max_bytes: -> { max_bytes }
 
     ##
     # @param [String] pattern
@@ -117,9 +116,9 @@ class LLM::Tool::BSD
     # @return [Hash]
     def call(pattern:, field: nil, match: "regex", case_sensitive: true, modifiers: [],
              repositories: [], raw: false, raw_format: nil, quiet: false,
-             no_repo_update: false, timeout: 120, max_bytes: Exec.max_bytes)
+             no_repo_update: false, timeout: 120, max_bytes: self.class.max_bytes)
       validate!(pattern:, field:, match:, raw:, raw_format:, modifiers:, repositories:)
-      Exec.new.call(
+      exec(
         command: "pkg",
         arguments: arguments(
           pattern:, field:, match:, case_sensitive:, modifiers:, repositories:,

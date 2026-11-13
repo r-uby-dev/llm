@@ -54,7 +54,7 @@ RSpec.describe LLM::Tool::Git do
   }.each do |name, arguments|
     describe name.to_s do
       let(:tool_class) { described_class.const_get(name) }
-      let(:executor) { instance_double(LLM::Tool::Exec) }
+      let(:tool) { tool_class.new }
       let(:exec_result) { {ok: true, stdout: "", stderr: ""} }
 
       it "exposes an optional timeout defaulting to five seconds" do
@@ -62,22 +62,37 @@ RSpec.describe LLM::Tool::Git do
         expect(params.properties[:timeout].default).to eq(5)
       end
 
-      it "passes the default timeout to Exec" do
-        allow(LLM::Tool::Exec).to receive(:new).with(env: {}).and_return(executor)
-        expect(executor).to receive(:call)
-          .with(command: "git", arguments: an_instance_of(Array), timeout: 5)
-          .and_return(exec_result)
-        tool_class.new.call(**arguments)
+      it "does not default the directory to the cwd of this process" do
+        expect(tool_class.function.params.properties[:cwd].default).to be_nil
       end
 
-      it "passes an explicit timeout to Exec" do
-        allow(LLM::Tool::Exec).to receive(:new).with(env: {}).and_return(executor)
-        expect(executor).to receive(:call)
-          .with(command: "git", arguments: an_instance_of(Array), timeout: 19)
+      it "passes the default timeout to #exec" do
+        expect(tool).to receive(:exec)
+          .with(command: "git", arguments: an_instance_of(Array), env: {}, timeout: 5)
           .and_return(exec_result)
-        tool_class.new.call(**arguments, timeout: 19)
+        tool.call(**arguments)
+      end
+
+      it "passes an explicit timeout to #exec" do
+        expect(tool).to receive(:exec)
+          .with(command: "git", arguments: an_instance_of(Array), env: {}, timeout: 19)
+          .and_return(exec_result)
+        tool.call(**arguments, timeout: 19)
+      end
+
+      it "passes no directory when none is given" do
+        seen = nil
+        allow(tool).to receive(:exec) { |**kwargs| seen = kwargs; exec_result }
+        tool.call(**arguments)
+        expect(seen[:arguments].first).to_not eq("-C")
+      end
+
+      it "passes the directory as -C when one is given" do
+        seen = nil
+        allow(tool).to receive(:exec) { |**kwargs| seen = kwargs; exec_result }
+        tool.call(**arguments, cwd: "/tmp")
+        expect(seen[:arguments].first(2)).to eq(["-C", "/tmp"])
       end
     end
   end
-
 end

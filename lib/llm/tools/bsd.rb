@@ -30,6 +30,9 @@ class LLM::Tool
   class BSD < self
     abstract!
 
+    require_relative "utils/process"
+    include LLM::Tool::Utils::Process
+
     require_relative "bsd/pkg_install"
     require_relative "bsd/pkg_search"
     require_relative "bsd/truss"

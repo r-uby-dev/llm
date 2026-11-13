@@ -4,10 +4,11 @@ class LLM::Tool
   ##
   # The {LLM::Tool::Rg LLM::Tool::Rg} class implements
   # a frontend to the popular 'rg' tool. The tool can
-  # recursively search the current working directory
-  # for one or more patterns.
+  # recursively search the working directory for one or
+  # more patterns.
   class Rg < self
-    require_relative "exec"
+    require_relative "utils/process"
+    include LLM::Tool::Utils::Process
 
     name "rg"
     description "Search the current directory for lines matching a pattern\n" \
@@ -18,20 +19,20 @@ class LLM::Tool
     parameter :max_count, Integer, "the max number of results per file"
     parameter :max_bytes, Integer, "the max number of bytes to return"
     required %i[patterns]
-    defaults path: Dir.getwd, timeout: 5, max_count: 10, max_bytes: -> { Exec.max_bytes }
+    defaults path: nil, timeout: 5, max_count: 10, max_bytes: -> { max_bytes }
 
     ##
     # @param [Array<String>] patterns
-    # @param [String] path
+    # @param [String, nil] path
     # @param [Integer] timeout
     # @param [Integer] max_count
     # @param [Integer] max_bytes
     # @return [Hash]
-    def call(patterns:, path: Dir.getwd, timeout: 5, max_count: 10, max_bytes: Exec.max_bytes)
+    def call(patterns:, path: nil, timeout: 5, max_count: 10, max_bytes: self.class.max_bytes)
       validate!(patterns:, path:, max_count:)
-      Exec.new.call(
+      exec(
         command: "rg",
-        arguments: ["-m", max_count, *[*patterns].flat_map { ["-e", _1] }, path],
+        arguments: ["-m", max_count, *[*patterns].flat_map { ["-e", _1] }, *[path].compact],
         timeout:,
         max_bytes:
       )

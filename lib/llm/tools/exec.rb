@@ -7,9 +7,7 @@ class LLM::Tool
   # directly and indirectly, and multiple other llm.rb
   # tools are built on top of this one.
   class Exec < self
-    require_relative "utils"
     require_relative "utils/process"
-    include Utils
     include Utils::Process
 
     name "exec"
@@ -20,20 +18,6 @@ class LLM::Tool
     parameter :max_bytes, Integer, "max number of bytes to emit"
     required %i[command]
     defaults timeout: 60, max_bytes: :max_bytes
-
-    ##
-    # Returns (or sets) the advisory maximum number of bytes
-    # this tool returns to the model.
-    # @param [Integer, nil] bytes
-    #  When given, sets the maximum
-    # @return [Integer]
-    def self.max_bytes(bytes = UNDEFINED)
-      if bytes.equal?(UNDEFINED)
-        @max_bytes || 75_000
-      else
-        @max_bytes = bytes
-      end
-    end
 
     ##
     # @param [Hash] env
@@ -56,26 +40,7 @@ class LLM::Tool
     #  the max number of bytes to emit
     # @return [Hash]
     def call(command:, arguments: [], timeout: 60, max_bytes: self.class.max_bytes)
-      startat = now
-      spawned = spawn(command:, arguments:, env:, max_bytes:)
-      killed = catch(:kill) { [wait(command: spawned, timeout:), nil].last }
-      if spawned.not_found?
-        {ok: false, error: "command '#{command}' was not found on this system"}
-      else
-        {ok: spawned.success?,
-        stdout: truncate(spawned.stdout, max_bytes:),
-        stderr: truncate(spawned.stderr, max_bytes:),
-        duration: "#{(now - startat).round(1)} seconds",
-        note: killed ? "The command was killed after "            \
-                       "exceeding the #{timeout}s timeout. "      \
-                       "stdout and stderr are what it produced "  \
-                       "before it was killed and both streams "   \
-                       "are probably incomplete." : nil
-        }.compact
-      end
-    rescue LLM::Interrupt
-      spawned.kill! if spawned&.running?
-      raise
+      exec(command:, arguments:, env:, timeout:, max_bytes:)
     end
 
     private

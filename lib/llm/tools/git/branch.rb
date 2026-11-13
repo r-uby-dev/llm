@@ -21,11 +21,16 @@ class LLM::Tool::Git
     #  When a branch name is required and not given
     # @param [Integer] timeout
     #  The maximum time to allow git to run, in seconds
+    # @param [String, nil] cwd
+    #  The directory git runs in
     # @return [Hash]
-    def call(action: "list", name: nil, timeout: DEFAULT_TIMEOUT, cwd: Dir.getwd)
-      Exec
-        .new(env:)
-        .call(command: "git", arguments: ["-C", cwd, *parse!(action:, name:)], timeout:)
+    def call(action: "list", name: nil, timeout: DEFAULT_TIMEOUT, cwd: nil)
+      exec(
+        command: "git",
+        arguments: [*chdir(cwd), *parse!(action:, name:)],
+        env:,
+        timeout:
+      )
     end
 
     private

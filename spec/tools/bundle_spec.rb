@@ -3,7 +3,6 @@
 require "setup"
 require "tmpdir"
 require "llm/tools/bundle"
-require "llm/tools/bundle"
 
 RSpec.describe LLM::Tool::Bundle do
   let(:tool) { described_class.new }
@@ -29,8 +28,8 @@ RSpec.describe LLM::Tool::Bundle do
       expect(params.properties[:timeout].default).to eq(60)
     end
 
-    it "defaults max_bytes to Exec.max_bytes" do
-      expect(params.properties[:max_bytes].default).to eq(LLM::Tool::Exec.max_bytes)
+    it "defaults max_bytes to the max_bytes of the tool" do
+      expect(params.properties[:max_bytes].default).to eq(described_class.max_bytes)
     end
   end
 
@@ -65,7 +64,7 @@ RSpec.describe LLM::Tool::Bundle do
         ENV["BUNDLE_GEMFILE"] = original
       end
 
-      it "defaults to a Gemfile in the cwd and passes it to the command" do
+      it "leaves it to bundle to find a Gemfile in the cwd of the command" do
         res = tool.call(
           arguments: ["exec", "ruby", "-e", "puts ENV[\"BUNDLE_GEMFILE\"]"],
           timeout: 60

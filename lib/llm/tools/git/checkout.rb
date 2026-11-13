@@ -24,11 +24,16 @@ class LLM::Tool::Git
     #  An optional path to restore from ref
     # @param [Integer] timeout
     #  The maximum time to allow git to run, in seconds
+    # @param [String, nil] cwd
+    #  The directory git runs in
     # @return [Hash]
-    def call(ref:, create: false, path: nil, timeout: DEFAULT_TIMEOUT, cwd: Dir.getwd)
-      Exec
-        .new(env:)
-        .call(command: "git", arguments: ["-C", cwd, *parse!(ref:, create:, path:)], timeout:)
+    def call(ref:, create: false, path: nil, timeout: DEFAULT_TIMEOUT, cwd: nil)
+      exec(
+        command: "git",
+        arguments: [*chdir(cwd), *parse!(ref:, create:, path:)],
+        env:,
+        timeout:
+      )
     end
 
     private

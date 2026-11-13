@@ -26,8 +26,6 @@ class LLM::Tool::Unix
   # when a Makefile misbehaves ("what would you run" is
   # the first, and `dry_run:` is how it is asked).
   class Make < self
-    require_relative "../exec"
-
     name "make"
     description "Run make and return its output\n" \
                 "This command (make) is spawned without a shell"
@@ -43,7 +41,7 @@ class LLM::Tool::Unix
     parameter :max_bytes, Integer, "max number of bytes to emit"
     defaults targets: [], directory: nil, makefile: nil, assignments: [],
              jobs: nil, dry_run: false, keep_going: false, variable: nil,
-             timeout: 120, max_bytes: -> { Exec.max_bytes }
+             timeout: 120, max_bytes: -> { max_bytes }
 
     ##
     # @param [Array<String>] targets
@@ -72,9 +70,9 @@ class LLM::Tool::Unix
     # @return [Hash]
     def call(targets: [], directory: nil, makefile: nil, assignments: [], jobs: nil,
              dry_run: false, keep_going: false, variable: nil,
-             timeout: 120, max_bytes: Exec.max_bytes)
+             timeout: 120, max_bytes: self.class.max_bytes)
       validate!(directory:, jobs:, variable:, assignments:, targets:)
-      Exec.new.call(
+      exec(
         command: "make",
         arguments: arguments(
           directory:, makefile:, jobs:, dry_run:, keep_going:, variable:, assignments:, targets:

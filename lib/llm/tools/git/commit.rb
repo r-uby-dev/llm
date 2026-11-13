@@ -25,11 +25,16 @@ class LLM::Tool::Git
     #  When all: and paths: are given together
     # @param [Integer] timeout
     #  The maximum time to allow git to run, in seconds
+    # @param [String, nil] cwd
+    #  The directory git runs in
     # @return [Hash]
-    def call(message:, paths: [], all: false, timeout: DEFAULT_TIMEOUT, cwd: Dir.getwd)
-      Exec
-        .new(env:)
-        .call(command: "git", arguments: ["-C", cwd, *parse!(message:, paths:, all:)], timeout:)
+    def call(message:, paths: [], all: false, timeout: DEFAULT_TIMEOUT, cwd: nil)
+      exec(
+        command: "git",
+        arguments: [*chdir(cwd), *parse!(message:, paths:, all:)],
+        env:,
+        timeout:
+      )
     end
 
     private

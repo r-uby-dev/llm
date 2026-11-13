@@ -17,14 +17,19 @@ class LLM::Tool::Git
     #  An optional path
     # @param [Integer] timeout
     #  The maximum time to allow git to run, in seconds
+    # @param [String, nil] cwd
+    #  The directory git runs in
     # @return [Hash]
     #  A hash whose `authors` key holds an array of hashes, and
     #  each of those has a `name`, an `email`, and a `commits`
     #  count, with the most commits first
-    def call(path: nil, timeout: DEFAULT_TIMEOUT, cwd: Dir.getwd)
-      res = Exec
-        .new(env:)
-        .call(command: "git", arguments: ["-C", cwd, *parse!(path:)], timeout:)
+    def call(path: nil, timeout: DEFAULT_TIMEOUT, cwd: nil)
+      res = exec(
+        command: "git",
+        arguments: [*chdir(cwd), *parse!(path:)],
+        env:,
+        timeout:
+      )
       return res unless res[:ok]
       {authors: authors(res[:stdout])}
     end

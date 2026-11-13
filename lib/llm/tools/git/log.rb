@@ -22,11 +22,16 @@ class LLM::Tool::Git
     #  The maximum number of commits to return
     # @param [Integer] timeout
     #  The maximum time to allow git to run, in seconds
+    # @param [String, nil] cwd
+    #  The directory git runs in
     # @return [Hash]
-    def call(rev: "HEAD", path: nil, max_count: 10, timeout: DEFAULT_TIMEOUT, cwd: Dir.getwd)
-      Exec
-        .new(env:)
-        .call(command: "git", arguments: ["-C", cwd, *parse!(rev:, path:, max_count:)], timeout:)
+    def call(rev: "HEAD", path: nil, max_count: 10, timeout: DEFAULT_TIMEOUT, cwd: nil)
+      exec(
+        command: "git",
+        arguments: [*chdir(cwd), *parse!(rev:, path:, max_count:)],
+        env:,
+        timeout:
+      )
     end
 
     private

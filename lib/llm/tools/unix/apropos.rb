@@ -18,8 +18,6 @@ class LLM::Tool::Unix
   # matched with "or" unless a term carries the macro
   # key syntax of `apropos(1)`, eg `Va=optind`.
   class Apropos < self
-    require_relative "../exec"
-
     name "apropos"
     description "Search the manual pages for one or more keywords\n" \
                 "This command (apropos) is spawned without a shell"
@@ -28,7 +26,7 @@ class LLM::Tool::Unix
     parameter :timeout, Integer, "the maximum allowed time for the command to run (in seconds)"
     parameter :max_bytes, Integer, "max number of bytes to emit"
     required %i[keywords]
-    defaults section: nil, timeout: 5, max_bytes: -> { Exec.max_bytes }
+    defaults section: nil, timeout: 5, max_bytes: -> { max_bytes }
 
     ##
     # @param [Array<String>] keywords
@@ -41,11 +39,12 @@ class LLM::Tool::Unix
     # @param [Integer] max_bytes
     #  The max number of bytes to emit
     # @return [Hash]
-    def call(keywords:, section: nil, timeout: 5, max_bytes: Exec.max_bytes)
+    def call(keywords:, section: nil, timeout: 5, max_bytes: self.class.max_bytes)
       validate!(keywords:, section:)
-      Exec.new(env:).call(
+      exec(
         command: "apropos",
         arguments: [*section_arguments(section), "--", *keywords],
+        env:,
         timeout:,
         max_bytes:
       )

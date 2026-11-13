@@ -5,12 +5,10 @@ require "llm/tools/unix"
 
 RSpec.describe LLM::Tool::Unix::Nm do
   let(:tool) { described_class.new }
-  let(:shell) { instance_double(LLM::Tool::Exec) }
   let(:result) { {ok: true, stdout: "0000000000000000 T main\n", stderr: ""} }
 
   before do
-    allow(LLM::Tool::Exec).to receive(:new).and_return(shell)
-    allow(shell).to receive(:call).and_return(result)
+    allow(tool).to receive(:exec).and_return(result)
   end
 
   describe ".function" do
@@ -40,65 +38,65 @@ RSpec.describe LLM::Tool::Unix::Nm do
   describe "#call" do
     it "lists the symbols with no flags" do
       tool.call(paths: ["foo.o"])
-      expect(shell).to have_received(:call).with(
+      expect(tool).to have_received(:exec).with(
         command: "nm",
         arguments: ["--", "foo.o"],
         timeout: 30,
-        max_bytes: LLM::Tool::Exec.max_bytes
+        max_bytes: described_class.max_bytes
       )
     end
 
     it "passes the paths in the order given" do
       tool.call(paths: %w[foo.o libfoo.a])
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["--", "foo.o", "libfoo.a"]))
     end
 
     it "passes undefined as -u" do
       tool.call(paths: ["libfoo.a"], undefined: true)
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-u", "--", "libfoo.a"]))
     end
 
     it "passes external as -g" do
       tool.call(paths: ["libfoo.a"], external: true)
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-g", "--", "libfoo.a"]))
     end
 
     it "passes demangle as -C" do
       tool.call(paths: ["libfoo.a"], demangle: true)
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-C", "--", "libfoo.a"]))
     end
 
     it "passes dynamic as -D" do
       tool.call(paths: ["./foo"], dynamic: true)
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-D", "--", "./foo"]))
     end
 
     it "passes file name as -A" do
       tool.call(paths: ["foo.o"], file_name: true)
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-A", "--", "foo.o"]))
     end
 
     it "passes size as -S" do
       tool.call(paths: ["foo.o"], size: true)
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-S", "--", "foo.o"]))
     end
 
     it "passes numeric sort as -n" do
       tool.call(paths: ["foo.o"], numeric_sort: true)
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-n", "--", "foo.o"]))
     end
 
     it "passes portable as -P" do
       tool.call(paths: ["foo.o"], portable: true)
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-P", "--", "foo.o"]))
     end
 
@@ -108,17 +106,17 @@ RSpec.describe LLM::Tool::Unix::Nm do
         paths: ["foo.o"], undefined: true, external: true, demangle: true,
         dynamic: true, file_name: true, size: true, numeric_sort: true, portable: true
       )
-      expect(shell).to have_received(:call).with(hash_including(arguments:))
+      expect(tool).to have_received(:exec).with(hash_including(arguments:))
     end
 
     it "forwards the timeout" do
       tool.call(paths: ["foo.o"], timeout: 5)
-      expect(shell).to have_received(:call).with(hash_including(timeout: 5))
+      expect(tool).to have_received(:exec).with(hash_including(timeout: 5))
     end
 
     it "passes the max bytes" do
       tool.call(paths: ["foo.o"], max_bytes: 100)
-      expect(shell).to have_received(:call).with(hash_including(max_bytes: 100))
+      expect(tool).to have_received(:exec).with(hash_including(max_bytes: 100))
     end
 
     it "returns the result as it is when nm succeeded" do
@@ -127,7 +125,7 @@ RSpec.describe LLM::Tool::Unix::Nm do
 
     it "returns the result as it is when nm failed" do
       stderr = "nm: 'foo.o': No such file or directory\n"
-      allow(shell).to receive(:call).and_return({ok: false, stdout: "", stderr:})
+      allow(tool).to receive(:exec).and_return({ok: false, stdout: "", stderr:})
       expect(tool.call(paths: ["foo.o"])).to eq({ok: false, stdout: "", stderr:})
     end
   end

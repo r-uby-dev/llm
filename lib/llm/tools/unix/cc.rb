@@ -27,9 +27,9 @@ class LLM::Tool::Unix
   # not given, `object` writes a `.o`, `assembly` a `.s`,
   # `preprocess` a `.i`, and `syntax` builds nothing at all,
   # which is the quick check after an edit. The result of
-  # {LLM::Tool::Exec} is returned as it is, so a compiler
-  # diagnostic reaches the model with the stderr and the
-  # exit status that carry it.
+  # {LLM::Tool::Utils::Process#exec} is returned as it is,
+  # so a compiler diagnostic reaches the model with the
+  # stderr and the exit status that carry it.
   #
   # A source that begins with `-` is rejected, so a source
   # is never read as a flag, and so is an empty list of
@@ -37,8 +37,6 @@ class LLM::Tool::Unix
   # `-D` and `-l` with nothing after them would eat the
   # argument that follows.
   class Cc < self
-    require_relative "../exec"
-
     ##
     # The stage flags, keyed by the name of the stage a
     # model asks for. A stage of `link` runs every stage,
@@ -93,7 +91,7 @@ class LLM::Tool::Unix
     defaults output: nil, stage: "link", standard: nil, optimize: nil, debug: false,
              warnings: false, defines: [], include_directories: [],
              library_directories: [], libraries: [],
-             timeout: 120, max_bytes: -> { Exec.max_bytes }
+             timeout: 120, max_bytes: -> { max_bytes }
 
     ##
     # @param [Array<String>] sources
@@ -130,17 +128,18 @@ class LLM::Tool::Unix
     def call(sources:, output: nil, stage: "link", standard: nil, optimize: nil,
              debug: false, warnings: false, defines: [], include_directories: [],
              library_directories: [], libraries: [], timeout: 120,
-             max_bytes: Exec.max_bytes)
+             max_bytes: self.class.max_bytes)
       validate!(
         sources:, output:, stage:, standard:, optimize:, defines:,
         include_directories:, library_directories:, libraries:
       )
-      Exec.new(env:).call(
+      exec(
         command: "cc",
         arguments: arguments(
           sources:, output:, stage:, standard:, optimize:, debug:, warnings:,
           defines:, include_directories:, library_directories:, libraries:
         ),
+        env:,
         timeout:,
         max_bytes:
       )
