@@ -54,6 +54,14 @@ class LLM::Tool
   end
 
   ##
+  # Returns all BSD-related tools
+  # @return [Array<Class<LLM::Tool::BSD>>]
+  def self.freebsd
+    require_relative "tools/bsd" unless defined?(LLM::Tool::BSD)
+    LLM::Tool::BSD.subclasses
+  end
+
+  ##
   # Returns all git-related tools
   # @return [LLM::Tool<LLM::Tool::Git>]
   def self.git
