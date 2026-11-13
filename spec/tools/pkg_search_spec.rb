@@ -8,7 +8,7 @@ RSpec.describe LLM::Tool::BSD::PkgSearch do
   let(:result) { {ok: true, stdout: "zsh-5.9  The Z shell\n", stderr: ""} }
 
   before do
-    allow(tool).to receive(:execute).and_return(result)
+    allow(tool).to receive(:exec).and_return(result)
   end
 
   describe ".function" do
@@ -45,7 +45,7 @@ RSpec.describe LLM::Tool::BSD::PkgSearch do
   describe "#call" do
     it "searches the names with no flags" do
       tool.call(pattern: "zsh")
-      expect(tool).to have_received(:execute).with(
+      expect(tool).to have_received(:exec).with(
         command: "pkg",
         arguments: ["search", "zsh"],
         timeout: 120,
@@ -55,31 +55,31 @@ RSpec.describe LLM::Tool::BSD::PkgSearch do
 
     it "passes the field as -S" do
       tool.call(pattern: "shell", field: "comment-description")
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["search", "-S", "comment-description", "shell"]))
     end
 
     it "passes the exact match as -e" do
       tool.call(pattern: "zsh", match: "exact")
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["search", "-e", "zsh"]))
     end
 
     it "passes the glob match as -g" do
       tool.call(pattern: "zsh*", match: "glob")
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["search", "-g", "zsh*"]))
     end
 
     it "passes -i when the case does not matter" do
       tool.call(pattern: "Zsh", case_sensitive: false)
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["search", "-i", "Zsh"]))
     end
 
     it "passes each modifier as -Q" do
       tool.call(pattern: "zsh", modifiers: %w[full depends-on])
-      expect(tool).to have_received(:execute).with(
+      expect(tool).to have_received(:exec).with(
         hash_including(
           arguments: ["search", "-Q", "full", "-Q", "depends-on", "zsh"]
         )
@@ -88,7 +88,7 @@ RSpec.describe LLM::Tool::BSD::PkgSearch do
 
     it "passes each repository as -r" do
       tool.call(pattern: "zsh", repositories: %w[FreeBSD local])
-      expect(tool).to have_received(:execute).with(
+      expect(tool).to have_received(:exec).with(
         hash_including(
           arguments: ["search", "-r", "FreeBSD", "-r", "local", "zsh"]
         )
@@ -97,7 +97,7 @@ RSpec.describe LLM::Tool::BSD::PkgSearch do
 
     it "passes raw as -R and the format as --raw-format" do
       tool.call(pattern: "zsh", raw: true, raw_format: "json-compact")
-      expect(tool).to have_received(:execute).with(
+      expect(tool).to have_received(:exec).with(
         hash_including(
           arguments: ["search", "-R", "--raw-format", "json-compact", "zsh"]
         )
@@ -106,19 +106,19 @@ RSpec.describe LLM::Tool::BSD::PkgSearch do
 
     it "leaves the flags out when nothing but a pattern is given" do
       tool.call(pattern: "zsh")
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["search", "zsh"]))
     end
 
     it "passes quiet as -q" do
       tool.call(pattern: "zsh", quiet: true)
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["search", "-q", "zsh"]))
     end
 
     it "passes no_repo_update as -U" do
       tool.call(pattern: "zsh", no_repo_update: true)
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["search", "-U", "zsh"]))
     end
 
@@ -132,17 +132,17 @@ RSpec.describe LLM::Tool::BSD::PkgSearch do
         modifiers: ["size"], repositories: ["FreeBSD"], raw: true,
         raw_format: "yaml", quiet: true, no_repo_update: true
       )
-      expect(tool).to have_received(:execute).with(hash_including(arguments:))
+      expect(tool).to have_received(:exec).with(hash_including(arguments:))
     end
 
     it "forwards the timeout" do
       tool.call(pattern: "zsh", timeout: 10)
-      expect(tool).to have_received(:execute).with(hash_including(timeout: 10))
+      expect(tool).to have_received(:exec).with(hash_including(timeout: 10))
     end
 
     it "passes the max bytes" do
       tool.call(pattern: "zsh", max_bytes: 100)
-      expect(tool).to have_received(:execute).with(hash_including(max_bytes: 100))
+      expect(tool).to have_received(:exec).with(hash_including(max_bytes: 100))
     end
 
     it "returns the result as it is when the search matched" do
@@ -151,7 +151,7 @@ RSpec.describe LLM::Tool::BSD::PkgSearch do
 
     it "returns the result as it is when the search failed" do
       stderr = "pkg: Repository FreeBSD cannot be opened. 'pkg update' required\n"
-      allow(tool).to receive(:execute).and_return({ok: false, stdout: "", stderr:})
+      allow(tool).to receive(:exec).and_return({ok: false, stdout: "", stderr:})
       expect(tool.call(pattern: "zsh")).to eq({ok: false, stdout: "", stderr:})
     end
   end

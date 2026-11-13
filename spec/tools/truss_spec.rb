@@ -8,7 +8,7 @@ RSpec.describe LLM::Tool::BSD::Truss do
   let(:result) { {ok: true, stdout: "", stderr: "open(3,...)\n"} }
 
   before do
-    allow(tool).to receive(:execute).and_return(result)
+    allow(tool).to receive(:exec).and_return(result)
   end
 
   describe ".function" do
@@ -35,7 +35,7 @@ RSpec.describe LLM::Tool::BSD::Truss do
   describe "#call" do
     it "traces the command with no flags" do
       tool.call(command: "./boot")
-      expect(tool).to have_received(:execute).with(
+      expect(tool).to have_received(:exec).with(
         command: "truss",
         arguments: ["./boot"],
         timeout: 60,
@@ -45,43 +45,43 @@ RSpec.describe LLM::Tool::BSD::Truss do
 
     it "passes the arguments after the command" do
       tool.call(command: "./boot", arguments: ["-v", "--dry-run"])
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["./boot", "-v", "--dry-run"]))
     end
 
     it "passes follow as -f" do
       tool.call(command: "./sh", follow: true)
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-f", "./sh"]))
     end
 
     it "passes count as -c" do
       tool.call(command: "./boot", count: true)
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-c", "./boot"]))
     end
 
     it "passes -S when the signals are not wanted" do
       tool.call(command: "./boot", signals: false)
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-S", "./boot"]))
     end
 
     it "passes the output as -o" do
       tool.call(command: "./boot", output: "trace.out")
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-o", "trace.out", "./boot"]))
     end
 
     it "passes the string size as -s" do
       tool.call(command: "./boot", string_size: 64)
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-s", "64", "./boot"]))
     end
 
     it "traces a pid when there is no command" do
       tool.call(pid: 34)
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-p", "34"]))
     end
 
@@ -91,17 +91,17 @@ RSpec.describe LLM::Tool::BSD::Truss do
         command: "./boot", arguments: ["-v"], follow: true, count: true,
         signals: false, output: "trace.out", string_size: 64
       )
-      expect(tool).to have_received(:execute).with(hash_including(arguments:))
+      expect(tool).to have_received(:exec).with(hash_including(arguments:))
     end
 
     it "forwards the timeout" do
       tool.call(command: "./boot", timeout: 5)
-      expect(tool).to have_received(:execute).with(hash_including(timeout: 5))
+      expect(tool).to have_received(:exec).with(hash_including(timeout: 5))
     end
 
     it "passes the max bytes" do
       tool.call(command: "./boot", max_bytes: 100)
-      expect(tool).to have_received(:execute).with(hash_including(max_bytes: 100))
+      expect(tool).to have_received(:exec).with(hash_including(max_bytes: 100))
     end
 
     it "returns the result as it is when the trace succeeded" do
@@ -110,7 +110,7 @@ RSpec.describe LLM::Tool::BSD::Truss do
 
     it "returns the result as it is when the command failed" do
       stderr = "execve(0x...,0x...,0x...) ERR#2 'No such file or directory'\n"
-      allow(tool).to receive(:execute).and_return({ok: false, stdout: "", stderr:})
+      allow(tool).to receive(:exec).and_return({ok: false, stdout: "", stderr:})
       expect(tool.call(command: "./boot")).to eq({ok: false, stdout: "", stderr:})
     end
   end
