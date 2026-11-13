@@ -33,6 +33,11 @@ RSpec.describe LLM::Tool::Unix::Cc do
       expect(params.properties[:warnings]).to be_a(LLM::Schema::Boolean)
     end
 
+    it "constrains the stage and the optimization level to their values" do
+      expect(params.properties[:stage].enum).to eq(described_class::STAGES.keys)
+      expect(params.properties[:optimize].enum).to eq(described_class::OPTIMIZATIONS)
+    end
+
     it "defaults the stage to link and the timeout to 120 seconds" do
       expect(params.properties[:stage].default).to eq("link")
       expect(params.properties[:timeout].default).to eq(120)
