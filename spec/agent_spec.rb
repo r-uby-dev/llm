@@ -682,9 +682,9 @@ RSpec.describe LLM::Agent do
   end
 
   describe "#compactor and #compactor_options" do
-    it "defaults to LLM::Compactor::Null with no options" do
+    it "defaults to LLM::Compactor::Auto with no options" do
       agent = described_class.new(provider)
-      expect(agent.compactor).to eq(LLM::Compactor::Null)
+      expect(agent.compactor).to eq(LLM::Compactor::Auto)
       expect(agent.compactor_options).to eq({})
     end
 
