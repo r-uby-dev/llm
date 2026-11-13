@@ -41,7 +41,6 @@ RSpec.describe LLM::Tool::Unix::Apropos do
       expect(tool).to have_received(:execute).with(
         command: "apropos",
         arguments: ["--", "printf"],
-        env: {},
         timeout: 5,
         max_bytes: described_class.max_bytes
       )
