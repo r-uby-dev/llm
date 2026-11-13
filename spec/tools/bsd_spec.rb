@@ -35,7 +35,9 @@ RSpec.describe LLM::Tool::BSD do
     end
 
     it "returns the tools that depend on a BSD facility" do
-      expect(names).to contain_exactly("pkg-install", "pkg-search", "sh", "sockstat", "truss")
+      expect(names).to contain_exactly(
+        "pkg-install", "pkg-search", "procstat", "sh", "sockstat", "truss"
+      )
     end
 
     it "does not include a unix tool" do
