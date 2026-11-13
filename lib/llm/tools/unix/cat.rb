@@ -30,7 +30,7 @@ class LLM::Tool::Unix
   # is a list of no paths.
   #
   # The output of a file can be more than a model can
-  # read, so {LLM::Tool::Utils::Process#execute} stops
+  # read, so {LLM::Tool::Utils::Process#exec} stops
   # reading at `max_bytes:` and says that it truncated.
   class Cat < self
     name "cat"
@@ -73,7 +73,7 @@ class LLM::Tool::Unix
              show_tabs: false, show_nonprinting: false,
              timeout: 5, max_bytes: self.class.max_bytes)
       validate!(paths:)
-      execute(
+      exec(
         command: "cat",
         arguments: arguments(
           paths:, number:, squeeze_blank:, show_ends:, show_tabs:, show_nonprinting:

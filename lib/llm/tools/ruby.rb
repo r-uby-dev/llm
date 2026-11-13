@@ -29,7 +29,7 @@ class LLM::Tool
     #  Max bytes to emit
     # @return [Hash]
     def call(code:, timeout: 15, max_bytes: self.class.max_bytes)
-      execute(
+      exec(
         command: RbConfig.ruby,
         arguments: ["-e", code],
         timeout:,

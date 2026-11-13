@@ -23,7 +23,7 @@ class LLM::Tool::Unix
   # that begins with `-` is read as a path, and a path of
   # `-` is rejected because nm reads the standard input
   # for it and would block. The result of
-  # {LLM::Tool::Utils::Process#execute} is returned as it
+  # {LLM::Tool::Utils::Process#exec} is returned as it
   # is.
   class Nm < self
     name "nm"
@@ -74,7 +74,7 @@ class LLM::Tool::Unix
              file_name: false, size: false, numeric_sort: false, portable: false,
              timeout: 30, max_bytes: self.class.max_bytes)
       validate!(paths:)
-      execute(
+      exec(
         command: "nm",
         arguments: arguments(
           paths:, undefined:, external:, demangle:, dynamic:, file_name:,

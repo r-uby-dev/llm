@@ -30,7 +30,7 @@ class LLM::Tool
     # @return [Hash]
     def call(patterns:, path: nil, timeout: 5, max_count: 10, max_bytes: self.class.max_bytes)
       validate!(patterns:, path:, max_count:)
-      execute(
+      exec(
         command: "rg",
         arguments: ["-m", max_count, *[*patterns].flat_map { ["-e", _1] }, *[path].compact],
         timeout:,

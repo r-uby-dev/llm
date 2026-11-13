@@ -62,7 +62,7 @@ class LLM::Tool::Unix
     def call(path: nil, name: nil, type: nil, max_depth: nil, newer_than: nil,
              limit: 200, timeout: 5, max_bytes: self.class.max_bytes)
       validate!(path:, max_depth:, newer_than:, limit:)
-      res = execute(
+      res = exec(
         command: "find",
         arguments: arguments(path:, name:, type:, max_depth:, newer_than:),
         timeout:,

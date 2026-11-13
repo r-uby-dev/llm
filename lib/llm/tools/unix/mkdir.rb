@@ -20,7 +20,7 @@ class LLM::Tool::Unix
     # @param [String] path
     # @return [Hash]
     def call(path:, max_bytes: self.class.max_bytes)
-      execute(command: "mkdir", arguments: ["-p", path], max_bytes:)
+      exec(command: "mkdir", arguments: ["-p", path], max_bytes:)
     end
   end
 end

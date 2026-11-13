@@ -41,7 +41,7 @@ class LLM::Tool::Unix
     # @return [Hash]
     def call(keywords:, section: nil, timeout: 5, max_bytes: self.class.max_bytes)
       validate!(keywords:, section:)
-      execute(
+      exec(
         command: "apropos",
         arguments: [*section_arguments(section), "--", *keywords],
         env:,

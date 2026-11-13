@@ -14,7 +14,7 @@ class LLM::Tool::BSD
   # the kernel refuse. `truss` writes the trace to the
   # standard error unless `output:` names a file, so the
   # trace arrives through the stderr of
-  # {LLM::Tool::Utils::Process#execute} like any other
+  # {LLM::Tool::Utils::Process#exec} like any other
   # diagnostic.
   #
   # `-f` follows the children the process forks, which
@@ -77,7 +77,7 @@ class LLM::Tool::BSD
              signals: true, output: nil, string_size: nil, timeout: 60,
              max_bytes: self.class.max_bytes)
       validate!(command:, pid:, output:, string_size:)
-      execute(
+      exec(
         command: "truss",
         arguments: arguments(
           command:, arguments:, pid:, follow:, count:, signals:, output:, string_size:

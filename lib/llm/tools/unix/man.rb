@@ -39,7 +39,7 @@ class LLM::Tool::Unix
     # @return [Hash]
     def call(name:, section: nil, timeout: 5, max_bytes: self.class.max_bytes)
       validate!(name:, section:)
-      res = execute(
+      res = exec(
         command: "man",
         arguments: ["-P", "cat", *[section, name].compact.map(&:to_s)],
         env:,
