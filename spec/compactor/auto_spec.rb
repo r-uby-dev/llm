@@ -152,7 +152,17 @@ RSpec.describe LLM::Compactor::Auto do
 
       it "emits the compaction lifecycle callbacks" do
         compactor.call
-        expect(events).to eq([[:start, compactor], [:finish, compactor]])
+        expect(events.map(&:first)).to eq([:start, :finish])
+      end
+
+      it "emits them from the truncation it delegated to" do
+        compactor.call
+        expect(events.map(&:last)).to all(be_a(LLM::Compactor::Truncate))
+      end
+
+      it "does not emit them when there is nothing to compact" do
+        compactor.call(compact_when: "90%")
+        expect(events).to be_empty
       end
     end
   end
