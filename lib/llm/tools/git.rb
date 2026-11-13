@@ -19,17 +19,19 @@ class LLM::Tool
     abstract!
     DEFAULT_TIMEOUT = 5
 
+    require_relative "utils/process"
+    include LLM::Tool::Utils::Process
+
     ##
     # @param [LLM::Tool::Git] klass
     # @return [void]
     def self.inherited(klass)
       klass.parameter :cwd,
                       String,
-                      "The current working directory"
+                      "the directory git runs in (default is the working directory of the command)"
       super
     end
 
-    require_relative "exec"
     require_relative "git/log"
     require_relative "git/diff"
     require_relative "git/show"
@@ -44,8 +46,23 @@ class LLM::Tool
 
     private
 
+    ##
+    # @return [Hash]
     def env
       {}
+    end
+
+    ##
+    # The arguments that tell git which directory to run in.
+    #
+    # Without one, git runs in the working directory of the
+    # command, which is not necessarily the working directory
+    # of this process - a command that runs in a jail, for
+    # example, has a working directory of its own.
+    # @param [String, nil] cwd
+    # @return [Array<String>]
+    def chdir(cwd)
+      cwd ? ["-C", cwd] : []
     end
   end
 end

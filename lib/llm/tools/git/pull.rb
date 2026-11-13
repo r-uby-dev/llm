@@ -20,11 +20,16 @@ class LLM::Tool::Git
     #  An optional branch, which requires a remote
     # @param [Integer] timeout
     #  The maximum time to allow git to run, in seconds
+    # @param [String, nil] cwd
+    #  The directory git runs in
     # @return [Hash]
-    def call(remote: nil, branch: nil, timeout: DEFAULT_TIMEOUT, cwd: Dir.getwd)
-      Exec
-        .new(env:)
-        .call(command: "git", arguments: ["-C", cwd, *parse!(remote:, branch:)], timeout:)
+    def call(remote: nil, branch: nil, timeout: DEFAULT_TIMEOUT, cwd: nil)
+      execute(
+        command: "git",
+        arguments: [*chdir(cwd), *parse!(remote:, branch:)],
+        env:,
+        timeout:
+      )
     end
 
     private

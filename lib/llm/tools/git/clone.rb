@@ -22,11 +22,16 @@ class LLM::Tool::Git
     #  to the name of the repository
     # @param [Integer] timeout
     #  The maximum time to allow git to run, in seconds
+    # @param [String, nil] cwd
+    #  The directory git runs in
     # @return [Hash]
-    def call(repository:, directory: nil, timeout: DEFAULT_TIMEOUT, cwd: Dir.getwd)
-      Exec
-        .new(env:)
-        .call(command: "git", arguments: ["-C", cwd, *parse!(repository:, directory:)], timeout:)
+    def call(repository:, directory: nil, timeout: DEFAULT_TIMEOUT, cwd: nil)
+      execute(
+        command: "git",
+        arguments: [*chdir(cwd), *parse!(repository:, directory:)],
+        env:,
+        timeout:
+      )
     end
 
     private

@@ -23,11 +23,16 @@ class LLM::Tool::Git
     #  Whether to show a diffstat instead of a patch
     # @param [Integer] timeout
     #  The maximum time to allow git to run, in seconds
+    # @param [String, nil] cwd
+    #  The directory git runs in
     # @return [Hash]
-    def call(rev: "HEAD", path: nil, stat: false, timeout: DEFAULT_TIMEOUT, cwd: Dir.getwd)
-      Exec
-        .new(env:)
-        .call(command: "git", arguments: ["-C", cwd, *parse!(rev:, path:, stat:)], timeout:)
+    def call(rev: "HEAD", path: nil, stat: false, timeout: DEFAULT_TIMEOUT, cwd: nil)
+      execute(
+        command: "git",
+        arguments: [*chdir(cwd), *parse!(rev:, path:, stat:)],
+        env:,
+        timeout:
+      )
     end
 
     private
