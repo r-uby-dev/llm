@@ -67,7 +67,7 @@ class LLM::Tool::BSD
     parameter :automatic, Boolean, "mark the packages as automatically installed (-A)"
     parameter :autoremove, Boolean, "remove the orphaned dependencies afterwards (--autoremove)"
     parameter :local_only, Boolean, "install from local archives and skip the repositories (-l)"
-    parameter :match, String, "how names match: exact, case-sensitive, glob, case-insensitive or regex"
+    parameter :match, Enum[*MATCHES.keys], "how the names match"
     parameter :repositories, Array[String], "install from these repositories only (-r)"
     parameter :timeout, Integer, "the maximum allowed time for the command to run (in seconds)"
     parameter :max_bytes, Integer, "max number of bytes to emit"
@@ -99,8 +99,7 @@ class LLM::Tool::BSD
     # @param [Boolean] local_only
     #  Install from local archives and skip the repositories
     # @param [String] match
-    #  How the names match: `exact`, `case-sensitive`,
-    #  `glob`, `case-insensitive` or `regex`
+    #  How the names match, one of {MATCHES}
     # @param [Array<String>] repositories
     #  Install from these repositories only
     # @param [Integer] timeout

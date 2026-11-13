@@ -33,6 +33,10 @@ RSpec.describe LLM::Tool::BSD::PkgInstall do
       expect(params.properties[:autoremove]).to be_a(LLM::Schema::Boolean)
     end
 
+    it "constrains the match to its values" do
+      expect(params.properties[:match].enum).to eq(described_class::MATCHES.keys)
+    end
+
     it "defaults the match to exact and the timeout to 300 seconds" do
       expect(params.properties[:match].default).to eq("exact")
       expect(params.properties[:timeout].default).to eq(300)

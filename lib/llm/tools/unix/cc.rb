@@ -78,9 +78,9 @@ class LLM::Tool::Unix
                 "This command (cc) is spawned without a shell"
     parameter :sources, Array[String], "the source files to compile, in the order given"
     parameter :output, String, "the file to write the output to (a.out when linking)"
-    parameter :stage, String, "the stage to stop at: link, object, assembly, preprocess or syntax"
+    parameter :stage, Enum[*STAGES.keys], "the stage to stop at"
     parameter :standard, String, "the language standard to compile for (eg c17, gnu11, c++20)"
-    parameter :optimize, String, "the optimization level: 0, 1, 2, 3, s, fast or g"
+    parameter :optimize, Enum[*OPTIMIZATIONS], "the optimization level"
     parameter :debug, Boolean, "generate debug information (-g)"
     parameter :warnings, Boolean, "report the warnings (-Wall)"
     parameter :defines, Array[String], "macros to define, as NAME or NAME=value (-D)"
@@ -103,14 +103,12 @@ class LLM::Tool::Unix
     #  given, a link writes `a.out` and the other stages
     #  write beside the source
     # @param [String] stage
-    #  The stage to stop at: `link`, `object`, `assembly`,
-    #  `preprocess` or `syntax`
+    #  The stage to stop at, one of {STAGES}
     # @param [String, nil] standard
     #  The language standard to compile for, eg `c17`,
     #  `gnu11` or `c++20`
     # @param [String, nil] optimize
-    #  The optimization level: `0`, `1`, `2`, `3`, `s`,
-    #  `fast` or `g`
+    #  The optimization level, one of {OPTIMIZATIONS}
     # @param [Boolean] debug
     #  Generate debug information
     # @param [Boolean] warnings
