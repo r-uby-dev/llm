@@ -69,14 +69,13 @@ class LLM::Tool::BSD
     description "Search the package repositories with pkg search (FreeBSD)\n" \
                 "This command (pkg) is spawned without a shell"
     parameter :pattern, String, "the pattern to search for"
-    parameter :field, String, "the field to search: pkg-name, name, origin, comment, " \
-                              "comment-description or description (-S)"
-    parameter :match, String, "how the pattern matches: regex, exact or glob"
+    parameter :field, Enum[*FIELDS], "the field the pattern is matched against (-S)"
+    parameter :match, Enum[*MATCHES.keys], "how the pattern matches"
     parameter :case_sensitive, Boolean, "match case sensitively (-i turns this off)"
     parameter :modifiers, Array[String], "fields to add to each match, eg full, depends-on or size (-Q)"
     parameter :repositories, Array[String], "search these repositories only (-r)"
     parameter :raw, Boolean, "print the whole manifest of each match (-R)"
-    parameter :raw_format, String, "the format of a raw manifest: json, json-compact, ucl or yaml"
+    parameter :raw_format, Enum[*FORMATS], "the format of a raw manifest"
     parameter :quiet, Boolean, "print less, without the label of each match (-q)"
     parameter :no_repo_update, Boolean, "do not update the repository catalogue first (-U)"
     parameter :timeout, Integer, "the maximum allowed time for the command to run (in seconds)"
@@ -90,10 +89,11 @@ class LLM::Tool::BSD
     # @param [String] pattern
     #  The pattern to search for
     # @param [String, nil] field
-    #  The field to search: `pkg-name`, `name`, `origin`,
-    #  `comment`, `comment-description` or `description`
+    #  The field the pattern is matched against, one of
+    #  {FIELDS}
     # @param [String] match
-    #  How the pattern matches: `regex`, `exact` or `glob`
+    #  How the pattern matches, one of `regex`, `exact` or
+    #  `glob`
     # @param [Boolean] case_sensitive
     #  Match case sensitively
     # @param [Array<String>] modifiers
@@ -104,8 +104,7 @@ class LLM::Tool::BSD
     # @param [Boolean] raw
     #  Print the whole manifest of each match
     # @param [String, nil] raw_format
-    #  The format of a raw manifest: `json`,
-    #  `json-compact`, `ucl` or `yaml`
+    #  The format of a raw manifest, one of {FORMATS}
     # @param [Boolean] quiet
     #  Print less, without the label of each match
     # @param [Boolean] no_repo_update
