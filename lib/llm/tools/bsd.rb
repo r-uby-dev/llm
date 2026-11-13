@@ -16,10 +16,14 @@ class LLM::Tool
   # named after the subcommands that answer a question -
   # `pkg search` before `pkg install`. `sockstat` is the
   # third: FreeBSD lists the open sockets with it, Linux
-  # with `ss` and macOS with `lsof -i`. `sh` is the
-  # fourth: it is FreeBSD's shell, a POSIX sh with a few
-  # Berkeley extensions, and it is the one command here
-  # that takes a script instead of an argv.
+  # with `ss` and macOS with `lsof -i`. `procstat` is the
+  # fourth: it is how a process is explained, from the
+  # binary behind a pid to the file descriptors it holds,
+  # and Linux answers the same questions with `ls`
+  # walking `/proc` while macOS has no equivalent. `sh`
+  # is the fifth: it is FreeBSD's shell, a POSIX sh with
+  # a few Berkeley extensions, and it is the one command
+  # here that takes a script instead of an argv.
   #
   # Tools that work anywhere are not BSD tools even when
   # they are named after a command that began there.
@@ -31,6 +35,7 @@ class LLM::Tool
   # @see LLM::Tool.freebsd
   # @see LLM::Tool::BSD::PkgInstall
   # @see LLM::Tool::BSD::PkgSearch
+  # @see LLM::Tool::BSD::Procstat
   # @see LLM::Tool::BSD::Sh
   # @see LLM::Tool::BSD::SockStat
   # @see LLM::Tool::BSD::Truss
@@ -42,6 +47,7 @@ class LLM::Tool
 
     require_relative "bsd/pkg_install"
     require_relative "bsd/pkg_search"
+    require_relative "bsd/procstat"
     require_relative "bsd/sh"
     require_relative "bsd/sockstat"
     require_relative "bsd/truss"
