@@ -6,11 +6,10 @@ require "llm/tools/ruby"
 
 RSpec.describe LLM::Tool::Ruby do
   let(:tool) { described_class.new }
-  let(:shell) { instance_double(LLM::Tool::Exec) }
   let(:result) { {ok: true, stdout: "3\n", stderr: ""} }
 
   before do
-    allow(LLM::Tool::Exec).to receive(:new).and_return(shell)
+    allow(tool).to receive(:execute).and_return(result)
   end
 
   describe ".function" do
@@ -26,27 +25,23 @@ RSpec.describe LLM::Tool::Ruby do
   end
 
   describe "#call" do
-    before do
-      allow(shell).to receive(:call).and_return(result)
-    end
-
-    it "runs ruby through a shell tool" do
+    it "runs ruby through #execute" do
       tool.call(code: "puts 1 + 2")
-      expect(shell).to have_received(:call).with(
+      expect(tool).to have_received(:execute).with(
         command: RbConfig.ruby,
         arguments: ["-e", "puts 1 + 2"],
         timeout: 15,
-        max_bytes: LLM::Tool::Exec.max_bytes
+        max_bytes: described_class.max_bytes
       )
     end
 
-    it "returns the shell result" do
+    it "returns the result" do
       expect(tool.call(code: "puts 1")).to eq(result)
     end
 
     it "forwards the timeout" do
       tool.call(code: "puts 1", timeout: 5)
-      expect(shell).to have_received(:call).with(hash_including(timeout: 5))
+      expect(tool).to have_received(:execute).with(hash_including(timeout: 5))
     end
   end
 end
