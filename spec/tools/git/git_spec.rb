@@ -31,11 +31,11 @@ RSpec.describe LLM::Tool::Git do
       expect(LLM::Tool.subclasses).to_not include(described_class)
     end
 
-    it "returns the eleven git tools" do
+    it "returns the twelve git tools" do
       expect(described_class.subclasses.map(&:name)).to contain_exactly(
         "git-authors", "git-branch", "git-checkout", "git-clone", "git-commit",
-        "git-diff", "git-log", "git-ls-files", "git-pull", "git-show",
-        "git-status"
+        "git-diff", "git-grep", "git-log", "git-ls-files", "git-pull",
+        "git-show", "git-status"
       )
     end
   end
@@ -46,6 +46,7 @@ RSpec.describe LLM::Tool::Git do
     Clone: {repository: "https://example.com/example.git"},
     Commit: {message: "example"},
     Diff: {},
+    Grep: {pattern: "example"},
     Log: {},
     LsFiles: {},
     Pull: {},
