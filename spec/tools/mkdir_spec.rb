@@ -8,7 +8,7 @@ RSpec.describe LLM::Tool::Unix::Mkdir do
   let(:result) { {ok: true, stdout: "", stderr: ""} }
 
   before do
-    allow(tool).to receive(:execute).and_return(result)
+    allow(tool).to receive(:exec).and_return(result)
   end
 
   describe ".function" do
@@ -24,9 +24,9 @@ RSpec.describe LLM::Tool::Unix::Mkdir do
   end
 
   describe "#call" do
-    it "runs mkdir through #execute" do
+    it "runs mkdir through #exec" do
       tool.call(path: "/tmp/new-dir")
-      expect(tool).to have_received(:execute).with(
+      expect(tool).to have_received(:exec).with(
         command: "mkdir",
         arguments: ["-p", "/tmp/new-dir"],
         max_bytes: described_class.max_bytes

@@ -8,7 +8,7 @@ RSpec.describe LLM::Tool::Unix::Man do
   let(:result) { {ok: true, stdout: "PRINTF(3)\n", stderr: ""} }
 
   before do
-    allow(tool).to receive(:execute).and_return(result)
+    allow(tool).to receive(:exec).and_return(result)
   end
 
   describe ".function" do
@@ -30,9 +30,9 @@ RSpec.describe LLM::Tool::Unix::Man do
   end
 
   describe "#call" do
-    it "runs man through #execute" do
+    it "runs man through #exec" do
       tool.call(name: "printf")
-      expect(tool).to have_received(:execute).with(
+      expect(tool).to have_received(:exec).with(
         command: "man",
         arguments: ["-P", "cat", "printf"],
         env: an_instance_of(::Hash),
@@ -47,22 +47,22 @@ RSpec.describe LLM::Tool::Unix::Man do
 
     it "passes the section before the name" do
       tool.call(name: "printf", section: 3)
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(arguments: ["-P", "cat", "3", "printf"]))
     end
 
     it "forwards the timeout" do
       tool.call(name: "printf", timeout: 9)
-      expect(tool).to have_received(:execute).with(hash_including(timeout: 9))
+      expect(tool).to have_received(:exec).with(hash_including(timeout: 9))
     end
 
     it "passes the max bytes" do
       tool.call(name: "printf", max_bytes: 100)
-      expect(tool).to have_received(:execute).with(hash_including(max_bytes: 100))
+      expect(tool).to have_received(:exec).with(hash_including(max_bytes: 100))
     end
 
     it "collapses the overstrikes of a bold and an underlined character" do
-      allow(tool).to receive(:execute)
+      allow(tool).to receive(:exec)
         .and_return({ok: true, stdout: "N\bNA\bAM\bME\bE\n", stderr: ""})
       expect(tool.call(name: "printf")).to eq(
         {ok: true, stdout: "NAME\n", stderr: ""}
@@ -70,7 +70,7 @@ RSpec.describe LLM::Tool::Unix::Man do
     end
 
     it "leaves the result alone when the command failed" do
-      allow(tool).to receive(:execute)
+      allow(tool).to receive(:exec)
         .and_return({ok: false, stdout: "", stderr: "no manual entry\n"})
       expect(tool.call(name: "nope")).to eq(
         {ok: false, stdout: "", stderr: "no manual entry\n"}
@@ -86,13 +86,13 @@ RSpec.describe LLM::Tool::Unix::Man do
     it "passes an empty environment when $MANPATH is not set" do
       allow(ENV).to receive(:[]).with("MANPATH").and_return(nil)
       tool.call(name: "printf")
-      expect(tool).to have_received(:execute).with(hash_including(env: {}))
+      expect(tool).to have_received(:exec).with(hash_including(env: {}))
     end
 
     it "forwards $MANPATH when it is set" do
       allow(ENV).to receive(:[]).with("MANPATH").and_return("/opt/man")
       tool.call(name: "printf")
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(env: {"MANPATH" => "/opt/man"}))
     end
   end
