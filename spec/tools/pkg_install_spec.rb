@@ -5,12 +5,10 @@ require "llm/tools/bsd"
 
 RSpec.describe LLM::Tool::BSD::PkgInstall do
   let(:tool) { described_class.new }
-  let(:shell) { instance_double(LLM::Tool::Exec) }
   let(:result) { {ok: true, stdout: "Updating catalogue...\n", stderr: ""} }
 
   before do
-    allow(LLM::Tool::Exec).to receive(:new).and_return(shell)
-    allow(shell).to receive(:call).and_return(result)
+    allow(tool).to receive(:execute).and_return(result)
   end
 
   describe ".function" do
@@ -46,83 +44,83 @@ RSpec.describe LLM::Tool::BSD::PkgInstall do
   describe "#call" do
     it "installs the package without a prompt" do
       tool.call(packages: ["zsh"])
-      expect(shell).to have_received(:call).with(
+      expect(tool).to have_received(:execute).with(
         command: "pkg",
         arguments: ["install", "-y", "zsh"],
         timeout: 300,
-        max_bytes: LLM::Tool::Exec.max_bytes
+        max_bytes: described_class.max_bytes
       )
     end
 
     it "passes the packages in the order given" do
       tool.call(packages: %w[zsh git])
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:execute)
         .with(hash_including(arguments: ["install", "-y", "zsh", "git"]))
     end
 
     it "passes dry_run as -n" do
       tool.call(packages: ["zsh"], dry_run: true)
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:execute)
         .with(hash_including(arguments: ["install", "-n", "-y", "zsh"]))
     end
 
     it "passes no_repo_update as -U" do
       tool.call(packages: ["zsh"], no_repo_update: true)
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:execute)
         .with(hash_including(arguments: ["install", "-U", "-y", "zsh"]))
     end
 
     it "passes quiet as -q" do
       tool.call(packages: ["zsh"], quiet: true)
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:execute)
         .with(hash_including(arguments: ["install", "-q", "-y", "zsh"]))
     end
 
     it "passes force as -f" do
       tool.call(packages: ["zsh"], force: true)
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:execute)
         .with(hash_including(arguments: ["install", "-f", "-y", "zsh"]))
     end
 
     it "passes no_scripts as -I" do
       tool.call(packages: ["zsh"], no_scripts: true)
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:execute)
         .with(hash_including(arguments: ["install", "-I", "-y", "zsh"]))
     end
 
     it "passes automatic as -A" do
       tool.call(packages: ["zsh"], automatic: true)
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:execute)
         .with(hash_including(arguments: ["install", "-A", "-y", "zsh"]))
     end
 
     it "passes autoremove as --autoremove" do
       tool.call(packages: ["zsh"], autoremove: true)
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:execute)
         .with(hash_including(arguments: ["install", "--autoremove", "-y", "zsh"]))
     end
 
     it "passes local_only as -l" do
       tool.call(packages: ["./zsh-5.9.txz"], local_only: true)
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:execute)
         .with(hash_including(arguments: ["install", "-l", "-y", "./zsh-5.9.txz"]))
     end
 
     it "passes the glob match as -g" do
       tool.call(packages: ["zsh*"], match: "glob")
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:execute)
         .with(hash_including(arguments: ["install", "-y", "-g", "zsh*"]))
     end
 
     it "passes the regex match as -x" do
       tool.call(packages: ["^zsh-[0-9]+"], match: "regex")
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:execute)
         .with(hash_including(arguments: ["install", "-y", "-x", "^zsh-[0-9]+"]))
     end
 
     it "passes each repository as -r" do
       tool.call(packages: ["zsh"], repositories: %w[FreeBSD local])
-      expect(shell).to have_received(:call).with(
+      expect(tool).to have_received(:execute).with(
         hash_including(
           arguments: ["install", "-y", "-r", "FreeBSD", "-r", "local", "zsh"]
         )
@@ -139,17 +137,17 @@ RSpec.describe LLM::Tool::BSD::PkgInstall do
         force: true, no_scripts: true, automatic: true, autoremove: true,
         local_only: true, match: "glob", repositories: ["FreeBSD"]
       )
-      expect(shell).to have_received(:call).with(hash_including(arguments:))
+      expect(tool).to have_received(:execute).with(hash_including(arguments:))
     end
 
     it "forwards the timeout" do
       tool.call(packages: ["zsh"], timeout: 600)
-      expect(shell).to have_received(:call).with(hash_including(timeout: 600))
+      expect(tool).to have_received(:execute).with(hash_including(timeout: 600))
     end
 
     it "passes the max bytes" do
       tool.call(packages: ["zsh"], max_bytes: 100)
-      expect(shell).to have_received(:call).with(hash_including(max_bytes: 100))
+      expect(tool).to have_received(:execute).with(hash_including(max_bytes: 100))
     end
 
     it "returns the result as it is when the install succeeded" do
@@ -159,7 +157,7 @@ RSpec.describe LLM::Tool::BSD::PkgInstall do
     it "returns the result as it is when the install failed" do
       stderr = "pkg: No packages available to install matching 'foo' have been found " \
                "in the repositories\n"
-      allow(shell).to receive(:call).and_return({ok: false, stdout: "", stderr:})
+      allow(tool).to receive(:execute).and_return({ok: false, stdout: "", stderr:})
       expect(tool.call(packages: ["foo"])).to eq({ok: false, stdout: "", stderr:})
     end
   end
