@@ -80,11 +80,18 @@ RSpec.describe LLM::Tool::Git do
         tool.call(**arguments, timeout: 19)
       end
 
-      it "passes -C only when a directory is given" do
-        expect(tool).to receive(:execute)
-          .with(hash_including(arguments: ["-C", "/tmp"] + an_instance_of(Array).and(satisfy(&:any?))))
-          .and_return(exec_result)
+      it "passes no directory when none is given" do
+        seen = nil
+        allow(tool).to receive(:execute) { |**kwargs| seen = kwargs; exec_result }
+        tool.call(**arguments)
+        expect(seen[:arguments].first).to_not eq("-C")
+      end
+
+      it "passes the directory as -C when one is given" do
+        seen = nil
+        allow(tool).to receive(:execute) { |**kwargs| seen = kwargs; exec_result }
         tool.call(**arguments, cwd: "/tmp")
+        expect(seen[:arguments].first(2)).to eq(["-C", "/tmp"])
       end
     end
   end
