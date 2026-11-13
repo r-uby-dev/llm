@@ -29,6 +29,9 @@ class LLM::Tool
   class Unix < self
     abstract!
 
+    require_relative "utils/process"
+    include LLM::Tool::Utils::Process
+
     require_relative "unix/apropos"
     require_relative "unix/cat"
     require_relative "unix/cc"

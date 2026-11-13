@@ -16,17 +16,19 @@ class LLM::Tool::Unix
   # older `find` in macOS does not. Without
   # `max_depth:` the arguments are POSIX.
   #
+  # Without `path:` the walk starts in the working
+  # directory of the command, which is not necessarily
+  # the working directory of this process.
+  #
   # A walk can match a lot of paths, so the result is
-  # capped twice: {LLM::Tool::Exec} stops reading at
+  # capped twice: the command stops writing at
   # `max_bytes:`, and the tool returns at most `limit:`
   # paths, and says when it cut the list.
   class Find < self
-    require_relative "../exec"
-
     name "find"
     description "Walk a file hierarchy and return the paths that match\n" \
                 "This command (find) is spawned without a shell"
-    parameter :path, String, "the directory the walk starts in (default is cwd)"
+    parameter :path, String, "the directory the walk starts in (default is the working directory of the command)"
     parameter :name, String, "a glob the last component of a path must match (eg '*.rb')"
     parameter :type, Enum["f", "d", "l"], "the kind of path to return: f (file), d (directory), l (link)"
     parameter :max_depth, Integer, "how many levels below path to descend"
@@ -34,11 +36,11 @@ class LLM::Tool::Unix
     parameter :limit, Integer, "the max number of paths to return"
     parameter :timeout, Integer, "the maximum allowed time for the command to run (in seconds)"
     parameter :max_bytes, Integer, "max number of bytes to emit"
-    defaults name: nil, type: nil, max_depth: nil, newer_than: nil,
-             limit: 200, timeout: 5, max_bytes: -> { Exec.max_bytes }
+    defaults name: nil, type: nil, max_depth: nil, newer_than: nil, path: nil,
+             limit: 200, timeout: 5, max_bytes: -> { max_bytes }
 
     ##
-    # @param [String] path
+    # @param [String, nil] path
     #  The directory the walk starts in
     # @param [String, nil] name
     #  A glob that the last component of a path must
@@ -57,10 +59,10 @@ class LLM::Tool::Unix
     # @param [Integer] max_bytes
     #  The max number of bytes to emit
     # @return [Hash]
-    def call(path: Dir.getwd, name: nil, type: nil, max_depth: nil, newer_than: nil,
-             limit: 200, timeout: 5, max_bytes: Exec.max_bytes)
+    def call(path: nil, name: nil, type: nil, max_depth: nil, newer_than: nil,
+             limit: 200, timeout: 5, max_bytes: self.class.max_bytes)
       validate!(path:, max_depth:, newer_than:, limit:)
-      res = Exec.new.call(
+      res = execute(
         command: "find",
         arguments: arguments(path:, name:, type:, max_depth:, newer_than:),
         timeout:,
@@ -73,12 +75,12 @@ class LLM::Tool::Unix
 
     ##
     # Builds the expression find is given. The path
-    # comes first, then the primaries, then the action
-    # `find` would imply anyway.
+    # comes first when one is given, then the primaries,
+    # then the action `find` would imply anyway.
     # @return [Array<String>]
     def arguments(path:, name:, type:, max_depth:, newer_than:)
       [
-        path,
+        *[path].compact,
         *(max_depth ? ["-maxdepth", max_depth.to_s] : []),
         *(type ? ["-type", type] : []),
         *(name ? ["-name", name] : []),
@@ -105,9 +107,9 @@ class LLM::Tool::Unix
     ##
     # @api private
     def validate!(path:, max_depth:, newer_than:, limit:)
-      if path == "/"
+      if path && path == "/"
         raise RuntimeError, "you can't search from the root of the filesystem"
-      elsif !Dir.exist?(path)
+      elsif path && !Dir.exist?(path)
         raise RuntimeError, "path does not exist: #{path}"
       elsif max_depth && (!(::Integer === max_depth) || max_depth.negative?)
         raise RuntimeError, "max_depth must be a non-negative integer"

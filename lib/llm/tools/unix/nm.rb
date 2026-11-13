@@ -23,10 +23,9 @@ class LLM::Tool::Unix
   # that begins with `-` is read as a path, and a path of
   # `-` is rejected because nm reads the standard input
   # for it and would block. The result of
-  # {LLM::Tool::Exec} is returned as it is.
+  # {LLM::Tool::Utils::Process#execute} is returned as it
+  # is.
   class Nm < self
-    require_relative "../exec"
-
     name "nm"
     description "List the symbols of an object file, an archive or an executable\n" \
                 "This command (nm) is spawned without a shell"
@@ -44,7 +43,7 @@ class LLM::Tool::Unix
     required %i[paths]
     defaults undefined: false, external: false, demangle: false, dynamic: false,
              file_name: false, size: false, numeric_sort: false, portable: false,
-             timeout: 30, max_bytes: -> { Exec.max_bytes }
+             timeout: 30, max_bytes: -> { max_bytes }
 
     ##
     # @param [Array<String>] paths
@@ -73,9 +72,9 @@ class LLM::Tool::Unix
     # @return [Hash]
     def call(paths:, undefined: false, external: false, demangle: false, dynamic: false,
              file_name: false, size: false, numeric_sort: false, portable: false,
-             timeout: 30, max_bytes: Exec.max_bytes)
+             timeout: 30, max_bytes: self.class.max_bytes)
       validate!(paths:)
-      Exec.new.call(
+      execute(
         command: "nm",
         arguments: arguments(
           paths:, undefined:, external:, demangle:, dynamic:, file_name:,

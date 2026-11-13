@@ -16,8 +16,6 @@ class LLM::Tool::Unix
   # library function it is about to use, eg
   # `man(name: "printf", section: 3)`.
   class Man < self
-    require_relative "../exec"
-
     name "man"
     description "Read a manual page\n" \
                 "This command (man) is spawned without a shell"
@@ -26,7 +24,7 @@ class LLM::Tool::Unix
     parameter :timeout, Integer, "the maximum allowed time for the command to run (in seconds)"
     parameter :max_bytes, Integer, "max number of bytes to emit"
     required %i[name]
-    defaults section: nil, timeout: 5, max_bytes: -> { Exec.max_bytes }
+    defaults section: nil, timeout: 5, max_bytes: -> { max_bytes }
 
     ##
     # @param [String] name
@@ -39,11 +37,12 @@ class LLM::Tool::Unix
     # @param [Integer] max_bytes
     #  The max number of bytes to emit
     # @return [Hash]
-    def call(name:, section: nil, timeout: 5, max_bytes: Exec.max_bytes)
+    def call(name:, section: nil, timeout: 5, max_bytes: self.class.max_bytes)
       validate!(name:, section:)
-      res = Exec.new(env:).call(
+      res = execute(
         command: "man",
         arguments: ["-P", "cat", *[section, name].compact.map(&:to_s)],
+        env:,
         timeout:,
         max_bytes:
       )

@@ -30,11 +30,9 @@ class LLM::Tool::Unix
   # is a list of no paths.
   #
   # The output of a file can be more than a model can
-  # read, so {LLM::Tool::Exec} stops reading at
-  # `max_bytes:` and says that it truncated.
+  # read, so {LLM::Tool::Utils::Process#execute} stops
+  # reading at `max_bytes:` and says that it truncated.
   class Cat < self
-    require_relative "../exec"
-
     name "cat"
     description "Concatenate files and print them\n" \
                 "This command (cat) is spawned without a shell"
@@ -49,7 +47,7 @@ class LLM::Tool::Unix
     required %i[paths]
     defaults number: false, squeeze_blank: false, show_ends: false,
              show_tabs: false, show_nonprinting: false,
-             timeout: 5, max_bytes: -> { Exec.max_bytes }
+             timeout: 5, max_bytes: -> { max_bytes }
 
     ##
     # @param [Array<String>] paths
@@ -73,9 +71,9 @@ class LLM::Tool::Unix
     # @return [Hash]
     def call(paths:, number: false, squeeze_blank: false, show_ends: false,
              show_tabs: false, show_nonprinting: false,
-             timeout: 5, max_bytes: Exec.max_bytes)
+             timeout: 5, max_bytes: self.class.max_bytes)
       validate!(paths:)
-      Exec.new.call(
+      execute(
         command: "cat",
         arguments: arguments(
           paths:, number:, squeeze_blank:, show_ends:, show_tabs:, show_nonprinting:
