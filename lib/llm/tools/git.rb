@@ -15,6 +15,7 @@ class LLM::Tool
   # @see LLM::Tool::Git::Pull
   # @see LLM::Tool::Git::Clone
   # @see LLM::Tool::Git::Authors
+  # @see LLM::Tool::Git::Grep
   class Git < self
     abstract!
     DEFAULT_TIMEOUT = 5
@@ -43,6 +44,7 @@ class LLM::Tool
     require_relative "git/pull"
     require_relative "git/clone"
     require_relative "git/authors"
+    require_relative "git/grep"
 
     private
 
