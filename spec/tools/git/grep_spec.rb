@@ -34,64 +34,64 @@ RSpec.describe LLM::Tool::Git::Grep do
 
   describe "#call" do
     it "finds a line in a tracked file" do
-      File.write("greeting.txt", "hello\n")
-      git!("add", "greeting.txt")
-      git!("commit", "-m", "add greeting.txt")
-      expect(tool.call(pattern: "hello")[:stdout]).to eq("greeting.txt:hello\n")
+      File.write("marker.txt", "xyzzy\n")
+      git!("add", "marker.txt")
+      git!("commit", "-m", "add marker.txt")
+      expect(tool.call(pattern: "xyzzy")[:stdout]).to eq("marker.txt:xyzzy\n")
     end
 
     it "does not search an untracked file" do
-      File.write("loose.txt", "hello\n")
-      expect(tool.call(pattern: "hello")[:stdout]).to eq("")
+      File.write("loose.txt", "xyzzy\n")
+      expect(tool.call(pattern: "xyzzy")[:stdout]).to eq("")
     end
 
     it "searches an untracked file as well when asked" do
-      File.write("loose.txt", "hello\n")
-      expect(tool.call(pattern: "hello", untracked: true)[:stdout])
-        .to include("loose.txt:hello")
+      File.write("loose.txt", "xyzzy\n")
+      expect(tool.call(pattern: "xyzzy", untracked: true)[:stdout])
+        .to include("loose.txt:xyzzy")
     end
 
     it "searches the index rather than the working tree with cached" do
-      File.write("greeting.txt", "hello\n")
-      git!("add", "greeting.txt")
-      git!("commit", "-m", "add greeting.txt")
-      File.write("greeting.txt", "goodbye\n")
-      expect(tool.call(pattern: "hello", cached: true)[:stdout])
-        .to eq("greeting.txt:hello\n")
+      File.write("marker.txt", "xyzzy\n")
+      git!("add", "marker.txt")
+      git!("commit", "-m", "add marker.txt")
+      File.write("marker.txt", "plugh\n")
+      expect(tool.call(pattern: "xyzzy", cached: true)[:stdout])
+        .to eq("marker.txt:xyzzy\n")
     end
 
     it "limits the search to a pathspec" do
       FileUtils.mkdir_p("lib")
-      File.write("lib/a.rb", "hello\n")
-      File.write("hello.txt", "hello\n")
-      git!("add", "lib/a.rb", "hello.txt")
-      git!("commit", "-m", "add a.rb and hello.txt")
-      expect(tool.call(pattern: "hello", paths: ["lib"])[:stdout])
-        .to eq("lib/a.rb:hello\n")
+      File.write("lib/a.rb", "xyzzy\n")
+      File.write("marker.txt", "xyzzy\n")
+      git!("add", "lib/a.rb", "marker.txt")
+      git!("commit", "-m", "add a.rb and marker.txt")
+      expect(tool.call(pattern: "xyzzy", paths: ["lib"])[:stdout])
+        .to eq("lib/a.rb:xyzzy\n")
     end
 
     it "ignores case when asked" do
-      File.write("greeting.txt", "Hello\n")
-      git!("add", "greeting.txt")
-      git!("commit", "-m", "add greeting.txt")
-      expect(tool.call(pattern: "hello", ignore_case: true)[:stdout])
-        .to eq("greeting.txt:Hello\n")
+      File.write("marker.txt", "Xyzzy\n")
+      git!("add", "marker.txt")
+      git!("commit", "-m", "add marker.txt")
+      expect(tool.call(pattern: "xyzzy", ignore_case: true)[:stdout])
+        .to eq("marker.txt:Xyzzy\n")
     end
 
     it "shows only the file names with files_with_matches" do
-      File.write("greeting.txt", "hello\n")
-      git!("add", "greeting.txt")
-      git!("commit", "-m", "add greeting.txt")
-      expect(tool.call(pattern: "hello", files_with_matches: true)[:stdout])
-        .to eq("greeting.txt\n")
+      File.write("marker.txt", "xyzzy\n")
+      git!("add", "marker.txt")
+      git!("commit", "-m", "add marker.txt")
+      expect(tool.call(pattern: "xyzzy", files_with_matches: true)[:stdout])
+        .to eq("marker.txt\n")
     end
 
     it "counts the matching lines with count" do
-      File.write("greeting.txt", "hello\nhello\n")
-      git!("add", "greeting.txt")
-      git!("commit", "-m", "add greeting.txt")
-      expect(tool.call(pattern: "hello", count: true)[:stdout])
-        .to eq("greeting.txt:2\n")
+      File.write("marker.txt", "xyzzy\nxyzzy\n")
+      git!("add", "marker.txt")
+      git!("commit", "-m", "add marker.txt")
+      expect(tool.call(pattern: "xyzzy", count: true)[:stdout])
+        .to eq("marker.txt:2\n")
     end
   end
 
