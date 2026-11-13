@@ -33,14 +33,8 @@ class LLM::Tool::Unix
       case
       when name.empty? then raise LLM::Error, "'name' must not be empty"
       when name.include?("/") then raise LLM::Error, "'name' must be a command name: #{name}"
-      else [*(__send__(:concat, all)), "--", name].compact
+      else all ? ["--all", "--", name] : ["--", name]
       end
-    end
-
-    ##
-    # @api private
-    def concat(all)
-      all ? ["--all"] : nil
     end
   end
 end
