@@ -2,39 +2,47 @@
 
 class LLM::Tool
   ##
-  # The {LLM::Tool::Ruby LLM::Tool::Ruby} tool
-  # evaluates a string of Ruby code by spawning
-  # a Ruby process with `-e` option.
+  # The {LLM::Tool::Ruby} class implements a tool that
+  # evaluates Ruby code with the `ruby` command. It is
+  # a tool an LLM can not use by accident.
+  #
+  # @note
+  #  The evaluated code runs with the permissions of the
+  #  process, which is to say it can do anything the
+  #  process can do. The code is handed to `ruby -e` and
+  #  `-e` only ever takes one argument, so nothing that
+  #  follows it can be read as another option.
   class Ruby < self
-    require "rbconfig"
-    require "llm/core_ext/rbconfig"
-    require_relative "utils/process"
-    include LLM::Tool::Utils::Process
-
     name "ruby"
-    description "Runs a string of ruby code\n" \
-                "This command (ruby) is spawned without a shell"
-    parameter :code, String, "a string of ruby code"
-    parameter :timeout, Integer, "maximum runtime before timeout"
-    parameter :max_bytes, Integer, "max number of bytes to emit"
+    description "Evaluate Ruby code with the ruby command"
+    parameter :code, String, "the Ruby code to evaluate"
+    parameter :stdin, String, "data to write to the standard input of the code"
+    parameter :timeout, Integer, "the maximum allowed time for the code to run (in seconds)"
     required %i[code]
-    defaults timeout: 15, max_bytes: -> { max_bytes }
+    defaults stdin: nil, timeout: 60
 
     ##
     # @param [String] code
-    #  Ruby code
+    #  The Ruby code to evaluate
+    # @param [String, nil] stdin
+    #  Data to write to the standard input of the code
     # @param [Integer] timeout
-    #  Runtime timeout
-    # @param [Integer] max_bytes
-    #  Max bytes to emit
+    #  The maximum time to allow the code to run, in seconds
     # @return [Hash]
-    def call(code:, timeout: 15, max_bytes: self.class.max_bytes)
-      execute(
-        command: RbConfig.ruby,
-        arguments: ["-e", code],
-        timeout:,
-        max_bytes:
-      )
+    def call(code:, stdin: nil, timeout: 60)
+      exec(command: "ruby", arguments: [*parse!(code:)], timeout:)
+    end
+
+    private
+
+    ##
+    # @api private
+    def parse!(code:)
+      if code.empty?
+        raise LLM::Error, "'code' must not be empty"
+      else
+        ["-e", code]
+      end
     end
   end
 end

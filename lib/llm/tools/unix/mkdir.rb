@@ -1,26 +1,42 @@
 # frozen_string_literal: true
 
-require_relative "../unix"
-
 class LLM::Tool::Unix
   ##
-  # The {LLM::Tool::Unix::Mkdir LLM::Tool::Unix::Mkdir}
-  # class implements a tool that can create a tree of
-  # new directories.
+  # The {LLM::Tool::Unix::Mkdir} class implements
+  # a tool that creates a directory.
   class Mkdir < self
     name "mkdir"
-    description "Create a new directory\n" \
-                "This command (mkdir) is spawned without a shell"
-    parameter :path, String, "the path to the directory"
-    parameter :max_bytes, Integer, "max number of bytes to emit"
+    description "Create a directory"
+    parameter :path, String, "the directory to create"
+    parameter :parents, Boolean, "create missing parents, and do not fail if the directory exists"
+    parameter :timeout, Integer, "the maximum allowed time for mkdir to run (in seconds)"
     required %i[path]
-    defaults max_bytes: -> { max_bytes }
+    defaults parents: false, timeout: DEFAULT_TIMEOUT
 
     ##
     # @param [String] path
+    #  The directory to create
+    # @param [Boolean] parents
+    #  Whether to create missing parents
+    # @param [Integer] timeout
+    #  The maximum time to allow mkdir to run, in seconds
     # @return [Hash]
-    def call(path:, max_bytes: self.class.max_bytes)
-      execute(command: "mkdir", arguments: ["-p", path], max_bytes:)
+    def call(path:, parents: false, timeout: DEFAULT_TIMEOUT)
+      exec(command: "mkdir", arguments: [*parse!(path:, parents:)], timeout:)
+    end
+
+    private
+
+    ##
+    # @api private
+    def parse!(path:, parents:)
+      if path.empty?
+        raise LLM::Error, "'path' must not be empty"
+      elsif parents
+        ["-p", "--", path]
+      else
+        ["--", path]
+      end
     end
   end
 end
