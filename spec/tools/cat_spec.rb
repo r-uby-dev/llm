@@ -23,8 +23,8 @@ RSpec.describe LLM::Tool::Unix::Cat do
       )
     end
 
-    it "requires the paths" do
-      expect(params.required).to eq(%w[paths])
+    it "marks the paths param as required" do
+      expect(params.properties[:paths]).to be_required
     end
 
     it "defines the flags as booleans" do
