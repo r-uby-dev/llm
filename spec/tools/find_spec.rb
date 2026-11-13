@@ -5,12 +5,10 @@ require "llm/tools/unix"
 
 RSpec.describe LLM::Tool::Unix::Find do
   let(:tool) { described_class.new }
-  let(:shell) { instance_double(LLM::Tool::Exec) }
   let(:result) { {ok: true, stdout: "lib/llm.rb\nlib/llm/tool.rb\n", stderr: ""} }
 
   before do
-    allow(LLM::Tool::Exec).to receive(:new).and_return(shell)
-    allow(shell).to receive(:call).and_return(result)
+    allow(tool).to receive(:execute).and_return(result)
   end
 
   describe ".function" do
@@ -26,63 +24,67 @@ RSpec.describe LLM::Tool::Unix::Find do
         "timeout", "max_bytes"
       )
     end
+
+    it "does not default the path to the cwd of this process" do
+      expect(params.properties[:path].default).to be_nil
+    end
   end
 
   describe "#call" do
     it "walks the path with no primaries" do
       tool.call(path: Dir.getwd)
-      expect(shell).to have_received(:call).with(
+      expect(tool).to have_received(:execute).with(
         command: "find",
         arguments: [Dir.getwd, "-print"],
         timeout: 5,
-        max_bytes: LLM::Tool::Exec.max_bytes
+        max_bytes: described_class.max_bytes
       )
     end
 
-    it "walks the cwd by default" do
+    it "leaves the path out so find walks the cwd of the command" do
       tool.call
-      expect(shell).to have_received(:call)
-        .with(hash_including(arguments: [Dir.getwd, "-print"]))
+      expect(tool).to have_received(:execute)
+        .with(hash_including(arguments: ["-print"]))
     end
 
     it "passes the name as a glob" do
       tool.call(path: Dir.getwd, name: "*.rb")
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:execute)
         .with(hash_including(arguments: [Dir.getwd, "-name", "*.rb", "-print"]))
     end
 
     it "passes the type" do
       tool.call(path: Dir.getwd, type: "d")
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:execute)
         .with(hash_including(arguments: [Dir.getwd, "-type", "d", "-print"]))
     end
 
     it "passes the max depth" do
       tool.call(path: Dir.getwd, max_depth: 2)
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:execute)
         .with(hash_including(arguments: [Dir.getwd, "-maxdepth", "2", "-print"]))
     end
 
     it "passes the age as an mmin primary" do
       tool.call(path: Dir.getwd, newer_than: 60)
-      expect(shell).to have_received(:call)
+      expect(tool).to have_received(:execute)
         .with(hash_including(arguments: [Dir.getwd, "-mmin", "-60", "-print"]))
     end
 
     it "passes every primary in a fixed order" do
       arguments = [Dir.getwd, "-maxdepth", "3", "-type", "f", "-name", "*.rb", "-mmin", "-5", "-print"]
       tool.call(path: Dir.getwd, name: "*.rb", type: "f", max_depth: 3, newer_than: 5)
-      expect(shell).to have_received(:call).with(hash_including(arguments:))
+      expect(tool).to have_received(:execute).with(hash_including(arguments:))
     end
 
     it "forwards the timeout" do
       tool.call(path: Dir.getwd, timeout: 9)
-      expect(shell).to have_received(:call).with(hash_including(timeout: 9))
+      expect(tool).to have_received(:execute).with(hash_including(timeout: 9))
     end
 
     it "passes the max bytes" do
       tool.call(path: Dir.getwd, max_bytes: 100)
-      expect(shell).to have_received(:call).with(hash_including(max_bytes: 100))
+      expect(tool).to have_received(:execute).with(hash_including(max_bytes: 100))
     end
 
     it "returns the paths" do
@@ -98,7 +100,7 @@ RSpec.describe LLM::Tool::Unix::Find do
     end
 
     it "returns the result as it is when find failed" do
-      allow(shell).to receive(:call)
+      allow(tool).to receive(:execute)
         .and_return({ok: false, stdout: "", stderr: "find: nope: No such file\n"})
       expect(tool.call(path: Dir.getwd)).to eq(
         {ok: false, stdout: "", stderr: "find: nope: No such file\n"}
