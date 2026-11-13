@@ -8,7 +8,7 @@ RSpec.describe LLM::Tool::Rg do
   let(:result) { {ok: true, stdout: "match\n", stderr: ""} }
 
   before do
-    allow(tool).to receive(:execute).and_return(result)
+    allow(tool).to receive(:exec).and_return(result)
   end
 
   describe ".function" do
@@ -28,9 +28,9 @@ RSpec.describe LLM::Tool::Rg do
   end
 
   describe "#call" do
-    it "runs rg through #execute" do
+    it "runs rg through #exec" do
       tool.call(patterns: %w[foo bar])
-      expect(tool).to have_received(:execute).with(
+      expect(tool).to have_received(:exec).with(
         command: "rg",
         arguments: ["-m", 10, "-e", "foo", "-e", "bar"],
         timeout: 5,
@@ -44,25 +44,25 @@ RSpec.describe LLM::Tool::Rg do
 
     it "forwards the timeout" do
       tool.call(patterns: %w[foo], timeout: 9)
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(timeout: 9))
     end
 
     it "forwards the path" do
       tool.call(patterns: %w[foo], path: "/tmp")
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(command: "rg", arguments: ["-m", 10, "-e", "foo", "/tmp"]))
     end
 
     it "passes a custom max count" do
       tool.call(patterns: %w[foo], max_count: 5)
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(command: "rg", arguments: ["-m", 5, "-e", "foo"]))
     end
 
     it "passes the max chars" do
       tool.call(patterns: %w[foo], max_bytes: 100)
-      expect(tool).to have_received(:execute)
+      expect(tool).to have_received(:exec)
         .with(hash_including(max_bytes: 100))
     end
   end

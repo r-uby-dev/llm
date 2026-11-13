@@ -9,7 +9,7 @@ RSpec.describe LLM::Tool::Ruby do
   let(:result) { {ok: true, stdout: "3\n", stderr: ""} }
 
   before do
-    allow(tool).to receive(:execute).and_return(result)
+    allow(tool).to receive(:exec).and_return(result)
   end
 
   describe ".function" do
@@ -25,9 +25,9 @@ RSpec.describe LLM::Tool::Ruby do
   end
 
   describe "#call" do
-    it "runs ruby through #execute" do
+    it "runs ruby through #exec" do
       tool.call(code: "puts 1 + 2")
-      expect(tool).to have_received(:execute).with(
+      expect(tool).to have_received(:exec).with(
         command: RbConfig.ruby,
         arguments: ["-e", "puts 1 + 2"],
         timeout: 15,
@@ -41,7 +41,7 @@ RSpec.describe LLM::Tool::Ruby do
 
     it "forwards the timeout" do
       tool.call(code: "puts 1", timeout: 5)
-      expect(tool).to have_received(:execute).with(hash_including(timeout: 5))
+      expect(tool).to have_received(:exec).with(hash_including(timeout: 5))
     end
   end
 end

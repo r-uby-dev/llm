@@ -85,7 +85,6 @@ module LLM::Tool::Utils
       spawned.kill! if spawned&.running?
       raise
     end
-    alias_method :execute, :exec
 
     ##
     # This method waits for a command to finish
