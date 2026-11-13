@@ -200,6 +200,80 @@ Older releases:
   `ucl` prints the whole manifest of each match. A `raw_format:` that is
   given without `raw:` is rejected.
 
+* **tools: add an `ls` tool** <br>
+  [`LLM::Tool::Unix::Ls`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Ls.html)
+  (`ls`) spawns `ls` without a shell and returns the listing as its stdout. It
+  builds the argv as
+  `[-A] [-F] [-R] [-a] [-d] [-h] [-i] [-l] [sort] [-r] [-- paths...]`, so
+  `all:` (`-a`), `almost_all:` (`-A`), `long:` (`-l`), `human:` (`-h`),
+  `classify:` (`-F`), `inode:` (`-i`), `recursive:` (`-R`), `directory:`
+  (`-d`) and `reverse:` (`-r`) are flags, and `sort:` is one of `name`,
+  `time` (`-t`), `size` (`-S`), `natural` (`-v`) or `none` (`-f`). It takes an
+  optional `paths:`, which follows `--` so a path that begins with `-` stays a
+  path, and it rejects an empty path. There is no `-1` and no color, because
+  the output of a spawned command is never a terminal, and `timeout:` is 5
+  seconds by default.
+  [`LLM::Tool::Ls`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Ls.html)
+  is untouched and still returns its listing from `Dir.glob`, and both tools
+  are named `ls`, so the registry, which keys on the name, resolves `ls` to
+  this one where both are loaded.
+
+* **tools: add a `sh` tool** <br>
+  [`LLM::Tool::BSD::Sh`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/BSD/Sh.html)
+  (`sh`) runs a script as one operand of `sh -c`, so the pipes, the chaining
+  and the directory changes of `cd /usr/src && make -j8` happen inside one
+  process, where the per-command tools need a tool per step. It takes the
+  `script:` to run, which is required and is rejected when it is empty, when
+  it is only whitespace, and when it holds a NUL character, and it takes the
+  flags of sh(1) in front of it: `errexit:` (`-e`), `nounset:` (`-u`),
+  `noexec:` (`-n`), `xtrace:` (`-x`), `verbose:` (`-v`), `noclobber:` (`-C`),
+  `noglob:` (`-f`), `physical:` (`-P`) and `pipefail:` (`-o pipefail`).
+  Nothing is re-parsed on the way in, so the quoting is the script's business,
+  and `timeout:` is 30 seconds by default, so a loop that would not end is
+  killed instead of hanging the run.
+
+* **tools: add a `uname` tool** <br>
+  [`LLM::Tool::Unix::Uname`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Uname.html)
+  (`uname`) reports what the system is. It sticks to the POSIX options, which
+  mean the same thing on FreeBSD, Linux and macOS: `kernel:` (`-s`),
+  `nodename:` (`-n`), `release:` (`-r`), `version:` (`-v`), `machine:` (`-m`)
+  and `all:` (`-a`), which is the five of them at once and is passed on its
+  own. The FreeBSD extensions are left out on purpose - `-p` and `-i` mean
+  something else on Linux, and `-K`, `-U` and `-b` exist on FreeBSD alone - so
+  a model that needs them asks a BSD tool. With no flag at all `uname` prints
+  the kernel name, and `timeout:` is 5 seconds by default.
+
+* **tools: add a `grep` tool** <br>
+  [`LLM::Tool::Unix::Grep`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Grep.html)
+  (`grep`) searches files for a pattern, the POSIX fallback for `rg`, which
+  needs a port where the base system ships `grep`. It sticks to the options
+  POSIX defines, and the extensions are absent: no recursion, no context, no
+  `-o`, no `-w` and no `--include`, so a recursive search is `find` beside
+  this tool. It requires a `pattern:`, which goes to `-e` so a pattern that
+  begins with `-` stays a pattern, and one or more `paths:`, which follow
+  `--`, and it rejects an empty pattern, which would select every line. The
+  flags are `extended:` (`-E`), `fixed:` (`-F`), `ignore_case:` (`-i`),
+  `invert:` (`-v`), `line:` (`-x`), `count:` (`-c`), `files_with_matches:`
+  (`-l`), `line_number:` (`-n`), `byte_offset:` (`-b`), `quiet:` (`-q`) and
+  `no_messages:` (`-s`), and `extended:` with `fixed:` together is rejected.
+  A search that matches nothing exits `1`, which comes back as `ok: false`
+  with an empty stdout rather than an error. `timeout:` is 30 seconds by
+  default.
+
+* **tools: add a `git-grep` tool** <br>
+  [`LLM::Tool::Git::Grep`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git/Grep.html)
+  (`git-grep`) searches the files git knows about for a `pattern:`, which is
+  the required parameter. It builds the argv as
+  `git -C <cwd> grep <flags> -e <pattern> [<rev>] [-- pathspec...]`, so
+  `rev:` names the tree or commit to search, where the default is the working
+  tree, and `paths:` are the pathspecs that narrow the search. `cached:`
+  (`--cached`) searches the index instead of the working tree, `untracked:`
+  (`--untracked`) searches the files git does not track yet, and the flags are
+  `ignore_case:` (`-i`), `word:` (`-w`), `invert:` (`-v`), `extended:`
+  (`-E`), `fixed:` (`-F`), `line_number:` (`-n`), `files_with_matches:`
+  (`-l`) and `count:` (`-c`). An empty pattern, `extended:` with `fixed:`,
+  `cached:` with `untracked:`, and an empty path are rejected.
+
 * **tools: the git tools pass `-C` only when `cwd:` is given** <br>
   Each tool that
   [`LLM::Tool::Git`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git.html)
