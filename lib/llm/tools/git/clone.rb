@@ -26,7 +26,7 @@ class LLM::Tool::Git
     #  The directory git runs in
     # @return [Hash]
     def call(repository:, directory: nil, timeout: DEFAULT_TIMEOUT, cwd: nil)
-      execute(
+      exec(
         command: "git",
         arguments: [*chdir(cwd), *parse!(repository:, directory:)],
         env:,

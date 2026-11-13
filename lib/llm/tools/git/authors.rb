@@ -24,7 +24,7 @@ class LLM::Tool::Git
     #  each of those has a `name`, an `email`, and a `commits`
     #  count, with the most commits first
     def call(path: nil, timeout: DEFAULT_TIMEOUT, cwd: nil)
-      res = execute(
+      res = exec(
         command: "git",
         arguments: [*chdir(cwd), *parse!(path:)],
         env:,

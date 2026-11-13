@@ -40,7 +40,7 @@ class LLM::Tool
     #  the max number of bytes to emit
     # @return [Hash]
     def call(command:, arguments: [], timeout: 60, max_bytes: self.class.max_bytes)
-      execute(command:, arguments:, env:, timeout:, max_bytes:)
+      exec(command:, arguments:, env:, timeout:, max_bytes:)
     end
 
     private

@@ -29,7 +29,7 @@ class LLM::Tool::Git
     #  The directory git runs in
     # @return [Hash]
     def call(message:, paths: [], all: false, timeout: DEFAULT_TIMEOUT, cwd: nil)
-      execute(
+      exec(
         command: "git",
         arguments: [*chdir(cwd), *parse!(message:, paths:, all:)],
         env:,

@@ -12,7 +12,7 @@ module LLM::Tool::Utils
   # particular. A tool that replaces {#run} - to run its
   # command in a jail, in a container, or on the far side of
   # an ssh - replaces it for every command it runs, because
-  # {#execute} builds a complete command and hands it to that
+  # {#exec} builds a complete command and hands it to that
   # one method.
   module Process
     include LLM::Tool::Utils
@@ -63,7 +63,7 @@ module LLM::Tool::Utils
     #  The max number of bytes to keep per stream. It
     #  defaults to the including tool's `max_bytes`
     # @return [Hash]
-    def execute(command:, arguments: [], env: {}, timeout: 60, max_bytes: self.class.max_bytes)
+    def exec(command:, arguments: [], env: {}, timeout: 60, max_bytes: self.class.max_bytes)
       startat = now
       spawned = spawn(command:, arguments:, env:, max_bytes:)
       killed = catch(:kill) { [wait(command: spawned, timeout:), nil].last }
