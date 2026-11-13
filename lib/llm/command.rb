@@ -38,10 +38,6 @@ class LLM::Command
   end
 
   ##
-  # @param [Array<String, #to_s>] arguments
-  #  Command-line arguments
-  # @return [LLM::Command]
-  ##
   # @param [Array<String, LLM::Command>] arguments
   #  Command-line arguments. A {LLM::Command} in the
   #  list is spliced into the arguments, so one command
