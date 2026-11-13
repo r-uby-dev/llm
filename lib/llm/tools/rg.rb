@@ -2,76 +2,52 @@
 
 class LLM::Tool
   ##
-  # The {LLM::Tool::Rg} class implements a tool that
-  # searches for a pattern. It uses ripgrep when it is
-  # installed and falls back to `grep -R` when it is not.
-  #
-  # `grep` does not search the same files by default. It
-  # follows symlinks, and it does not honor ignore files,
-  # so the two engines can disagree about which files are
-  # searched.
+  # The {LLM::Tool::Rg LLM::Tool::Rg} class implements
+  # a frontend to the popular 'rg' tool. The tool can
+  # recursively search the working directory for one or
+  # more patterns.
   class Rg < self
+    require_relative "utils/process"
+    include LLM::Tool::Utils::Process
+
     name "rg"
-    description "Search for a pattern across files"
-    parameter :pattern, String, "the pattern to search for"
-    parameter :path, String, "the file or directory to search"
-    parameter :glob, String, "only search files that match this glob"
-    parameter :ignore_case, Boolean, "ignore case when matching"
-    parameter :fixed_strings, Boolean, "treat the pattern as a literal string"
-    parameter :timeout, Integer, "the maximum allowed time for the search to run (in seconds)"
-    required %i[pattern]
-    defaults path: ".", glob: nil, ignore_case: false, fixed_strings: false, timeout: 60
+    description "Search the current directory for lines matching a pattern\n" \
+                "This command (rg) is spawned without a shell"
+    parameter :patterns, Array[String], "one or more search patterns"
+    parameter :path, String, "the path where the search is performed (default is cwd)"
+    parameter :timeout, Integer, "the number of seconds to wait before cancelling the action"
+    parameter :max_count, Integer, "the max number of results per file"
+    parameter :max_bytes, Integer, "the max number of bytes to return"
+    required %i[patterns]
+    defaults path: nil, timeout: 5, max_count: 10, max_bytes: -> { max_bytes }
 
     ##
-    # @param [String] pattern
-    #  The pattern to search for
-    # @param [String] path
-    #  The file or directory to search
-    # @param [String, nil] glob
-    #  An optional glob
-    # @param [Boolean] ignore_case
-    #  Whether to ignore case
-    # @param [Boolean] fixed_strings
-    #  Whether the pattern is a literal string
+    # @param [Array<String>] patterns
+    # @param [String, nil] path
     # @param [Integer] timeout
-    #  The maximum time to allow the search to run, in seconds
+    # @param [Integer] max_count
+    # @param [Integer] max_bytes
     # @return [Hash]
-    def call(pattern:, path: ".", glob: nil, ignore_case: false, fixed_strings: false, timeout: 60)
-      if ripgrep?
-        exec(command: "rg", arguments: [*rg_arguments(pattern:, path:, glob:, ignore_case:, fixed_strings:)], timeout:)
-      else
-        exec(command: "grep", arguments: [*grep_arguments(pattern:, path:, glob:, ignore_case:, fixed_strings:)], timeout:)
-      end
+    def call(patterns:, path: nil, timeout: 5, max_count: 10, max_bytes: self.class.max_bytes)
+      validate!(patterns:, path:, max_count:)
+      execute(
+        command: "rg",
+        arguments: ["-m", max_count, *[*patterns].flat_map { ["-e", _1] }, *[path].compact],
+        timeout:,
+        max_bytes:
+      )
     end
 
     private
 
-    ##
-    # @api private
-    def ripgrep?
-      @ripgrep = system("rg", "--version", out: File::NULL, err: File::NULL) if @ripgrep.nil?
-      @ripgrep
-    end
-
-    ##
-    # @api private
-    def rg_arguments(pattern:, path:, glob:, ignore_case:, fixed_strings:)
-      arguments = ["--line-number", "--no-heading", "--color=never"]
-      arguments << "--ignore-case" if ignore_case
-      arguments << "--fixed-strings" if fixed_strings
-      arguments << "--glob" << glob if glob
-      arguments << "--" << pattern << path
-      arguments
-    end
-
-    ##
-    # @api private
-    def grep_arguments(pattern:, path:, glob:, ignore_case:, fixed_strings:)
-      arguments = ["-R", "-n", "-H"]
-      arguments << "-i" if ignore_case
-      arguments << "-F" if fixed_strings
-      include = glob ? ["--include", glob] : []
-      arguments + include + ["--", pattern, path]
+    def validate!(patterns:, path:, max_count:)
+      if !(::Integer === max_count) || max_count.zero? || max_count.negative?
+        raise RuntimeError, "max_count must be a positive integer"
+      elsif path == "/"
+        raise RuntimeError, "you can't search from the root of the filesystem"
+      elsif patterns == ["."]
+        raise RuntimeError, "narrow your search"
+      end
     end
   end
 end
