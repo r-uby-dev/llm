@@ -32,6 +32,12 @@ RSpec.describe LLM::Tool::BSD::PkgSearch do
       expect(params.properties[:case_sensitive]).to be_a(LLM::Schema::Boolean)
     end
 
+    it "constrains the option fields to a fixed set of values" do
+      expect(params.properties[:field].enum).to eq(described_class::FIELDS)
+      expect(params.properties[:match].enum).to eq(%w[regex exact glob])
+      expect(params.properties[:raw_format].enum).to eq(described_class::FORMATS)
+    end
+
     it "defaults the match to regex and the timeout to 120 seconds" do
       expect(params.properties[:match].default).to eq("regex")
       expect(params.properties[:timeout].default).to eq(120)
