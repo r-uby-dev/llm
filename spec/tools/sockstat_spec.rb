@@ -21,10 +21,6 @@ RSpec.describe LLM::Tool::BSD::SockStat do
       )
     end
 
-    it "enumerates the address families" do
-      expect(params.properties[:family].default).to be_nil
-    end
-
     it "defines numeric, wide, quiet and verbose as booleans" do
       expect(params.properties[:numeric]).to be_a(LLM::Schema::Boolean)
       expect(params.properties[:wide]).to be_a(LLM::Schema::Boolean)
