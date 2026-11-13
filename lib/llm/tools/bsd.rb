@@ -12,7 +12,9 @@ class LLM::Tool
   # and the three do not share an argument vector. `pkg`
   # is the second: it is how a BSD installs software
   # from a repository, where the other systems have
-  # their own package managers.
+  # their own package managers, so the tools below it are
+  # named after the subcommands that answer a question -
+  # `pkg search` before `pkg install`.
   #
   # Tools that work anywhere are not BSD tools even when
   # they are named after a command that began there.
@@ -23,11 +25,13 @@ class LLM::Tool
   # @abstract
   # @see LLM::Tool.freebsd
   # @see LLM::Tool::BSD::PkgInstall
+  # @see LLM::Tool::BSD::PkgSearch
   # @see LLM::Tool::BSD::Truss
   class BSD < self
     abstract!
 
     require_relative "bsd/pkg_install"
+    require_relative "bsd/pkg_search"
     require_relative "bsd/truss"
   end
 end
