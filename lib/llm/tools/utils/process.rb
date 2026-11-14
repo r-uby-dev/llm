@@ -82,7 +82,7 @@ module LLM::Tool::Utils
         }.compact
       end
     rescue LLM::Interrupt
-      spawned.kill! if spawned&.running?
+      spawned&.running? ? command.graceful_exit : nil
       raise
     end
 
@@ -103,7 +103,7 @@ module LLM::Tool::Utils
       start = now
       while command.running? || status_unavailable?(command)
         if now - start > timeout
-          command.kill!
+          command.graceful_exit
           throw(:kill, true)
         end
         sleep 0.01
@@ -175,10 +175,6 @@ module LLM::Tool::Utils
 
     ##
     # Whether a command has not been reaped yet.
-    #
-    # `success?` returns nil until the status exists, and a command that
-    # was never found is the one case where it never will: there was
-    # nothing to reap, and `not_found?` is the answer the caller wants.
     # @param [LLM::Command] command
     # @return [Boolean]
     def status_unavailable?(command)

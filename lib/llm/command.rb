@@ -251,10 +251,26 @@ class LLM::Command
 
   ##
   # Sends SIGKILL to a running command
+  # @raise [SystemCallError]
   # @return [void]
-  def kill!
-    return unless alive?
-    Process.kill("SIGKILL", @pid)
+  def hard_exit!
+    alive? ? signal("SIGKILL") : nil
+  end
+
+  ##
+  # Sends SIGTERM to a running command
+  # @raise [SystemCallError]
+  # @return [void]
+  def graceful_exit
+    alive? ? signal("SIGTERM") : nil
+  end
+
+  ##
+  # @param [Integer, String] sig
+  # @raise [SystemCallError]
+  # @return [void]
+  def signal(sig)
+    Process.kill(sig, @pid)
   end
 
   ##
