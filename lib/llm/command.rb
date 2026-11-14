@@ -270,7 +270,9 @@ class LLM::Command
   # @raise [SystemCallError]
   # @return [void]
   def signal(sig)
-    Process.kill(sig, @pid)
+    noterm = Gem.win_platform?
+    (noterm and sig.to_s == "SIGTERM") ? Process.kill("SIGKILL", @pid) :
+                                         Process.kill(sig, @pid)
   end
 
   ##
