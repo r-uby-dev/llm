@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require "setup"
-require "llm/tools/bsd"
+require "llm/tools/freebsd"
 
-RSpec.describe LLM::Tool::BSD::Truss do
+RSpec.describe LLM::Tool::FreeBSD::Truss do
   let(:tool) { described_class.new }
   let(:result) { {ok: true, stdout: "", stderr: "open(3,...)\n"} }
 

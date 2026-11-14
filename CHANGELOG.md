@@ -57,8 +57,8 @@ Older releases:
 
 ### LLM::Tool
 
-* **tools: add `LLM::Tool::BSD`** <br>
-  [`LLM::Tool::BSD`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/BSD.html)
+* **tools: add `LLM::Tool::FreeBSD`** <br>
+  [`LLM::Tool::FreeBSD`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/BSD.html)
   is the abstract superclass of the tools that work only on a BSD: a command
   FreeBSD ships and the other systems do not, or a facility that only exists
   there. `truss` is the first - Linux traces a process with `strace` and
@@ -69,7 +69,7 @@ Older releases:
 
 * **tools: add `LLM::Tool.freebsd`** <br>
   [`LLM::Tool.freebsd`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool.html#freebsd-class_method)
-  returns the BSD tools, which are the subclasses of `LLM::Tool::BSD`. It
+  returns the BSD tools, which are the subclasses of `LLM::Tool::FreeBSD`. It
   requires `llm/tools/bsd` when it is called, unless the namespace is loaded
   already, so the BSD tools are not required up front.
 
@@ -162,7 +162,7 @@ Older releases:
   both are loaded.
 
 * **tools: add a `truss` tool** <br>
-  [`LLM::Tool::BSD::Truss`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/BSD/Truss.html)
+  [`LLM::Tool::FreeBSD::Truss`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/BSD/Truss.html)
   (`truss`) traces the system calls of a process on FreeBSD. It traces a
   `command:` with its `arguments:`, or a running `pid:`, and one of the two
   is required while the two together are rejected. `follow:` (`-f`) traces
@@ -173,7 +173,7 @@ Older releases:
   with. The trace arrives through stderr unless `output:` names a file.
 
 * **tools: add a `pkg-install` tool** <br>
-  [`LLM::Tool::BSD::PkgInstall`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/BSD/PkgInstall.html)
+  [`LLM::Tool::FreeBSD::PkgInstall`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/BSD/PkgInstall.html)
   (`pkg-install`) installs packages on FreeBSD with `pkg install`. It always
   passes `-y`: the command asks for confirmation before it changes anything,
   and a spawned process has nobody to confirm the prompt, so a run without
@@ -188,7 +188,7 @@ Older releases:
   default.
 
 * **tools: add a `pkg-search` tool** <br>
-  [`LLM::Tool::BSD::PkgSearch`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/BSD/PkgSearch.html)
+  [`LLM::Tool::FreeBSD::PkgSearch`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/BSD/PkgSearch.html)
   (`pkg-search`) searches the package repositories of FreeBSD, the question
   that comes before `pkg-install`: a model told to add a program does not
   know which package provides it, and `field:` of `comment-description`
@@ -219,7 +219,7 @@ Older releases:
   this one where both are loaded.
 
 * **tools: add a `sh` tool** <br>
-  [`LLM::Tool::BSD::Sh`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/BSD/Sh.html)
+  [`LLM::Tool::FreeBSD::Sh`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/BSD/Sh.html)
   (`sh`) runs a script as one operand of `sh -c`, so the pipes, the chaining
   and the directory changes of `cd /usr/src && make -j8` happen inside one
   process, where the per-command tools need a tool per step. It takes the

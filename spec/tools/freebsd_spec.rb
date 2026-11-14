@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require "setup"
-require "llm/tools/bsd"
+require "llm/tools/freebsd"
 
-RSpec.describe LLM::Tool::BSD do
+RSpec.describe LLM::Tool::FreeBSD do
   let(:subclasses) { described_class.subclasses }
   let(:names) { subclasses.map(&:name) }
 
@@ -13,7 +13,7 @@ RSpec.describe LLM::Tool::BSD do
     end
 
     it "returns false for a tool below it" do
-      expect(LLM::Tool::BSD::Truss).to_not be_abstract
+      expect(LLM::Tool::FreeBSD::Truss).to_not be_abstract
     end
   end
 

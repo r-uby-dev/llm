@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
-require_relative "../bsd"
+require_relative "../freebsd"
 
-class LLM::Tool::BSD
+class LLM::Tool::FreeBSD
   ##
-  # The {LLM::Tool::BSD::PkgSearch LLM::Tool::BSD::PkgSearch}
+  # The {LLM::Tool::FreeBSD::PkgSearch LLM::Tool::FreeBSD::PkgSearch}
   # class implements a tool that searches the package
   # repositories.
   #
   # It is the question that comes before
-  # {LLM::Tool::BSD::PkgInstall}: a model that is told to
+  # {LLM::Tool::FreeBSD::PkgInstall}: a model that is told to
   # add a program does not know the name of the package
   # that provides it, and `pkg search -S comment-description`
   # finds a package by what it does where `-S pkg-name`

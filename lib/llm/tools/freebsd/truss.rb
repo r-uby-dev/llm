@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require_relative "../bsd"
+require_relative "../freebsd"
 
-class LLM::Tool::BSD
+class LLM::Tool::FreeBSD
   ##
-  # The {LLM::Tool::BSD::Truss LLM::Tool::BSD::Truss}
+  # The {LLM::Tool::FreeBSD::Truss LLM::Tool::FreeBSD::Truss}
   # class implements a tool that traces the system calls
   # of a process.
   #

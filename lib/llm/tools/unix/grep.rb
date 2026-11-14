@@ -19,7 +19,7 @@ class LLM::Tool::Unix
   # `-w`, no filename headers (`-h`/`-H`), no
   # `--include`. A recursive search is {LLM::Tool::Unix::Find}
   # and this tool, or one script given to
-  # {LLM::Tool::BSD::Sh}.
+  # {LLM::Tool::FreeBSD::Sh}.
   #
   # The pattern is passed as the operand of `-e`, so a
   # pattern that begins with `-` is a pattern, and the

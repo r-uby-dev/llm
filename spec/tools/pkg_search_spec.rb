@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require "setup"
-require "llm/tools/bsd"
+require "llm/tools/freebsd"
 
-RSpec.describe LLM::Tool::BSD::PkgSearch do
+RSpec.describe LLM::Tool::FreeBSD::PkgSearch do
   let(:tool) { described_class.new }
   let(:result) { {ok: true, stdout: "zsh-5.9  The Z shell\n", stderr: ""} }
 

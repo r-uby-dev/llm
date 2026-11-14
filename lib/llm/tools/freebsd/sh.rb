@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require_relative "../bsd"
+require_relative "../freebsd"
 
-class LLM::Tool::BSD
+class LLM::Tool::FreeBSD
   ##
-  # The {LLM::Tool::BSD::Sh LLM::Tool::BSD::Sh} class
+  # The {LLM::Tool::FreeBSD::Sh LLM::Tool::FreeBSD::Sh} class
   # implements a tool that runs a shell script.
   #
   # It spawns `sh` with the whole script as the single

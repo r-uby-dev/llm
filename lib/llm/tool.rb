@@ -55,10 +55,10 @@ class LLM::Tool
 
   ##
   # Returns all BSD-related tools
-  # @return [Array<Class<LLM::Tool::BSD>>]
+  # @return [Array<Class<LLM::Tool::FreeBSD>>]
   def self.freebsd
-    require_relative "tools/bsd" unless defined?(LLM::Tool::BSD)
-    LLM::Tool::BSD.subclasses
+    require_relative "tools/freebsd" unless defined?(LLM::Tool::FreeBSD)
+    LLM::Tool::FreeBSD.subclasses
   end
 
   ##

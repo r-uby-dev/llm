@@ -3,7 +3,7 @@
 require "setup"
 require "llm/tools/git"
 require "llm/tools/unix"
-require "llm/tools/bsd"
+require "llm/tools/freebsd"
 require "llm/tools/bundle"
 require "llm/tools/rg"
 require "llm/tools/ruby"
@@ -33,10 +33,9 @@ tools = {
   LLM::Tool::Unix::Man => {name: "printf"},
   LLM::Tool::Unix::Mkdir => {path: "a-directory"},
   LLM::Tool::Unix::Nm => {paths: ["foo.o"]},
-  LLM::Tool::BSD::PkgInstall => {packages: ["zsh"]},
-  LLM::Tool::BSD::PkgSearch => {pattern: "zsh"},
-  LLM::Tool::BSD::ProcStat => {pids: [1]},
-  LLM::Tool::BSD::Truss => {command: "ls"},
+  LLM::Tool::FreeBSD::PkgInstall => {packages: ["zsh"]},
+  LLM::Tool::FreeBSD::PkgSearch => {pattern: "zsh"},
+  LLM::Tool::FreeBSD::Truss => {command: "ls"},
   LLM::Tool::Bundle => {},
   LLM::Tool::Rg => {patterns: ["foo"]},
   LLM::Tool::Ruby => {code: "1"}

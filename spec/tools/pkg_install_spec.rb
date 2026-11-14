@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require "setup"
-require "llm/tools/bsd"
+require "llm/tools/freebsd"
 
-RSpec.describe LLM::Tool::BSD::PkgInstall do
+RSpec.describe LLM::Tool::FreeBSD::PkgInstall do
   let(:tool) { described_class.new }
   let(:result) { {ok: true, stdout: "Updating catalogue...\n", stderr: ""} }
 

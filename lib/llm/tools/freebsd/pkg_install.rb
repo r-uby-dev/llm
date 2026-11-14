@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require_relative "../bsd"
+require_relative "../freebsd"
 
-class LLM::Tool::BSD
+class LLM::Tool::FreeBSD
   ##
-  # The {LLM::Tool::BSD::PkgInstall LLM::Tool::BSD::PkgInstall}
+  # The {LLM::Tool::FreeBSD::PkgInstall LLM::Tool::FreeBSD::PkgInstall}
   # class implements a tool that installs packages.
   #
   # It spawns `pkg` with `install` as its first argument,
