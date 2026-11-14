@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require "setup"
-require "llm/tools/bsd"
+require "llm/tools/freebsd"
 
-RSpec.describe LLM::Tool::BSD::ProcStat do
+RSpec.describe LLM::Tool::FreeBSD::ProcStat do
   let(:tool) { described_class.new }
   let(:result) { {ok: true, stdout: " PID COMM\n  1 init\n", stderr: ""} }
 

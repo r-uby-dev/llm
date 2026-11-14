@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require "setup"
-require "llm/tools/bsd"
+require "llm/tools/freebsd"
 
-RSpec.describe LLM::Tool::BSD::SockStat do
+RSpec.describe LLM::Tool::FreeBSD::SockStat do
   let(:tool) { described_class.new }
   let(:result) { {ok: true, stdout: "USER COMMAND PID FD PROTO LOCAL ADDRESS\n", stderr: ""} }
 

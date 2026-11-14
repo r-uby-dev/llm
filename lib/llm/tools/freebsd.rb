@@ -30,7 +30,9 @@ class LLM::Tool
   # @see LLM::Tool.freebsd
   # @see LLM::Tool::FreeBSD::PkgInstall
   # @see LLM::Tool::FreeBSD::PkgSearch
+  # @see LLM::Tool::FreeBSD::ProcStat
   # @see LLM::Tool::FreeBSD::Sh
+  # @see LLM::Tool::FreeBSD::SockStat
   # @see LLM::Tool::FreeBSD::Truss
   class FreeBSD < self
     abstract!
@@ -40,7 +42,9 @@ class LLM::Tool
 
     require_relative "freebsd/pkg_install"
     require_relative "freebsd/pkg_search"
+    require_relative "freebsd/proc_stat"
     require_relative "freebsd/sh"
+    require_relative "freebsd/sockstat"
     require_relative "freebsd/truss"
   end
 end

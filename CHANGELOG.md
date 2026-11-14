@@ -70,7 +70,7 @@ Older releases:
 * **tools: add `LLM::Tool.freebsd`** <br>
   [`LLM::Tool.freebsd`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool.html#freebsd-class_method)
   returns the BSD tools, which are the subclasses of `LLM::Tool::FreeBSD`. It
-  requires `llm/tools/bsd` when it is called, unless the namespace is loaded
+  requires `llm/tools/freebsd` when it is called, unless the namespace is loaded
   already, so the BSD tools are not required up front.
 
 * **tools: every tool that spawns a command reaches the process through `#run`** <br>

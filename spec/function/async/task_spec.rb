@@ -39,6 +39,19 @@ RSpec.describe LLM::Function::Async::Task do
     end
   end
 
+  let(:handling) do
+    started = self.started
+    Class.new(LLM::Tool) do
+      name "handling"
+      define_method(:call) do
+        started << :in_call
+        loop { sleep 0.01 }
+      rescue LLM::Interrupt
+        {"ok" => true, "interrupted" => true}
+      end
+    end
+  end
+
   let(:cleaning) do
     started, cleaned = self.started, self.cleaned
     Class.new(LLM::Tool) do
@@ -214,7 +227,7 @@ RSpec.describe LLM::Function::Async::Task do
   end
 
   describe "a tool that handles the interrupt" do
-    let(:tool) { rescuing }
+    let(:tool) { handling }
 
     before do
       task.spawn

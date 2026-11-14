@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require_relative "../bsd"
+require_relative "../freebsd"
 
-class LLM::Tool::BSD
+class LLM::Tool::FreeBSD
   ##
-  # The {LLM::Tool::BSD::ProcStat LLM::Tool::BSD::ProcStat}
+  # The {LLM::Tool::FreeBSD::ProcStat LLM::Tool::FreeBSD::ProcStat}
   # class implements a tool that displays detailed process
   # information.
   #

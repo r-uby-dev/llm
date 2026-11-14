@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require_relative "../bsd"
+require_relative "../freebsd"
 
-class LLM::Tool::BSD
+class LLM::Tool::FreeBSD
   ##
-  # The {LLM::Tool::BSD::SockStat LLM::Tool::BSD::SockStat}
+  # The {LLM::Tool::FreeBSD::SockStat LLM::Tool::FreeBSD::SockStat}
   # class implements a tool that lists the open sockets.
   #
   # It is the question behind a port that is already in
