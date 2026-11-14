@@ -19,6 +19,7 @@ Older releases:
 
 | Old | New |
 |-----|-----|
+| `LLM::Command#kill!` | `LLM::Command#hard_exit!` |
 | `LLM::Tool::Exec.max_bytes(n)`, which capped every tool that spawns a command | `LLM::Tool::Exec.max_bytes(n)` for `exec` alone, and `max_bytes` on the tool class itself, eg `LLM::Tool::Unix::Man.max_bytes(n)` |
 
 ### LLM::Command
@@ -55,23 +56,42 @@ Older releases:
   environment, which is how `#chain` takes the environment of the command it
   chains.
 
+* **command: add `LLM::Command#graceful_exit`** <br>
+  [`LLM::Command#graceful_exit`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#graceful_exit-instance_method)
+  sends SIGTERM to a running command, so it exits the way a command expects to:
+  it closes what it opened and writes what it holds, where `#hard_exit!` drops
+  it. It returns `nil` when the command is not running, and it raises
+  `SystemCallError` when the signal can't be delivered.
+
+* **command: add `LLM::Command#hard_exit!`** <br>
+  [`LLM::Command#hard_exit!`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#hard_exit!-instance_method)
+  sends SIGKILL to a running command, the signal that can't be caught, and
+  returns `nil` when the command is not running. It replaces `#kill!`, which
+  sent the same signal.
+
+* **command: add `LLM::Command#signal`** <br>
+  [`LLM::Command#signal`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#signal-instance_method)
+  sends the signal it is given to the command's process, by name or by number
+  (`#signal("SIGHUP")`, `#signal(1)`), which is how `#graceful_exit` and
+  `#hard_exit!` send theirs.
+
 ### LLM::Tool
 
 * **tools: add `LLM::Tool::FreeBSD`** <br>
-  [`LLM::Tool::FreeBSD`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/BSD.html)
-  is the abstract superclass of the tools that work only on a BSD: a command
+  [`LLM::Tool::FreeBSD`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/FreeBSD.html)
+  is the abstract superclass of the tools that work only on FreeBSD: a command
   FreeBSD ships and the other systems do not, or a facility that only exists
-  there. `truss` is the first - Linux traces a process with `strace` and
-  macOS with `dtruss`, and the three do not share an argument vector - and
-  `pkg` is the second, so the tools below it are named after the subcommand,
-  `pkg-search` before `pkg-install`. It is abstract, so it has no name and it
-  is not in `LLM::Tool.registry`.
+  there. `truss` is the first - Linux traces a process with `strace` and macOS
+  with `dtruss`, and the three do not share an argument vector - `pkg` is the
+  second, so the tools below it are named after the subcommand, `pkg-search`
+  before `pkg-install`, and `sockstat`, `procstat` and `sh` are the rest. It is
+  abstract, so it has no name and it is not in `LLM::Tool.registry`.
 
 * **tools: add `LLM::Tool.freebsd`** <br>
   [`LLM::Tool.freebsd`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool.html#freebsd-class_method)
-  returns the BSD tools, which are the subclasses of `LLM::Tool::FreeBSD`. It
-  requires `llm/tools/freebsd` when it is called, unless the namespace is loaded
-  already, so the BSD tools are not required up front.
+  returns the FreeBSD tools, which are the subclasses of `LLM::Tool::FreeBSD`.
+  It requires `llm/tools/freebsd` when it is called, unless the namespace is
+  loaded already, so the FreeBSD tools are not required up front.
 
 * **tools: every tool that spawns a command reaches the process through `#run`** <br>
   [`LLM::Tool::Utils::Process#run`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Utils/Process.html#run-instance_method)
@@ -89,6 +109,14 @@ Older releases:
   `{ok:, stdout:, stderr:, duration:}`, with a `note:` when the timeout
   killed it. The body was `LLM::Tool::Exec#call`, which calls it now, so every
   tool that spawns a command runs the same body and `exec` is what they call.
+
+* **tools: a command that outlives its timeout exits with SIGTERM** <br>
+  A command that a tool spawns is asked to exit with SIGTERM when it outlives
+  its `timeout:`, and when the run is interrupted, where the timeout sent
+  SIGKILL. The request goes through
+  [`LLM::Command#graceful_exit`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#graceful_exit-instance_method),
+  so a command closes what it opened and writes what it holds before it is
+  dropped, and the `note:` the timeout adds still says it was killed.
 
 * **tools: each tool that spawns a command has a `max_bytes` of its own** <br>
   A tool that includes `LLM::Tool::Utils::Process` has a `max_bytes` class
@@ -162,7 +190,7 @@ Older releases:
   both are loaded.
 
 * **tools: add a `truss` tool** <br>
-  [`LLM::Tool::FreeBSD::Truss`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/BSD/Truss.html)
+  [`LLM::Tool::FreeBSD::Truss`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/FreeBSD/Truss.html)
   (`truss`) traces the system calls of a process on FreeBSD. It traces a
   `command:` with its `arguments:`, or a running `pid:`, and one of the two
   is required while the two together are rejected. `follow:` (`-f`) traces
@@ -172,8 +200,42 @@ Older releases:
   file, and `string_size:` (`-s`) is how many characters a string is shown
   with. The trace arrives through stderr unless `output:` names a file.
 
+* **tools: add a `procstat` tool** <br>
+  [`LLM::Tool::FreeBSD::ProcStat`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/FreeBSD/ProcStat.html)
+  (`procstat`) displays detailed process information on FreeBSD, the question
+  that follows a process nobody can explain: the binary behind a pid, the
+  command line it was started with, the environment it inherited, the files it
+  holds open, the memory it maps and the threads it runs. `command:` picks the
+  subcommand, one of fifteen - `basic` by default, then `args`, `binary`,
+  `environment`, `credentials`, `files`, `signals`, `tsignals`, `threads`,
+  `vm`, `rlimit`, `rusage`, `auxv`, `cpuset` and `kstack` - and it goes out as
+  the flag that stands for it, so `files` is `procstat -f` and `credentials`
+  is `procstat -s`. It asks about the processes in `pids:`, or about every
+  process with `all:` (`-a`), where the two are mutually exclusive and one of
+  them is required. `headers:` keeps the header line of the table, where `-h`
+  turns it off, and three flags belong to one subcommand each: `capabilities:`
+  (`-C`) needs `files`, `signal_numbers:` (`-n`) needs `signals` or
+  `tsignals`, and `per_thread:` (`-H`) needs `rusage`, so one of them is
+  rejected on any other subcommand rather than ignored. `timeout:` is 30
+  seconds by default.
+
+* **tools: add a `sockstat` tool** <br>
+  [`LLM::Tool::FreeBSD::SockStat`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/FreeBSD/SockStat.html)
+  (`sockstat`) lists the open sockets of FreeBSD, the question behind a port
+  that is already in use: the user, the command and the pid behind each socket,
+  with the local and the foreign address beside them. `family:` (`-4`, `-6`,
+  `-u`) picks Internet, IPv6 or local, and `state:` (`-l`, `-c`) picks the
+  sockets that listen or the ones that are connected, so the schema offers one
+  of each rather than two flags that contradict. `ports:` and `protocols:` are
+  joined into the comma-separated list `-p` and `-P` take, where a port is `22`
+  or `8000-8100` and a protocol is a name, and a `jail:` that is empty or
+  begins with `-` is rejected. `numeric:` (`-n`) leaves a uid as a number,
+  `wide:` (`-w`) sizes the columns to the widest value, `quiet:` (`-q`) drops
+  the header line and `verbose:` (`-v`) prints more, and `timeout:` is 10
+  seconds by default.
+
 * **tools: add a `pkg-install` tool** <br>
-  [`LLM::Tool::FreeBSD::PkgInstall`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/BSD/PkgInstall.html)
+  [`LLM::Tool::FreeBSD::PkgInstall`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/FreeBSD/PkgInstall.html)
   (`pkg-install`) installs packages on FreeBSD with `pkg install`. It always
   passes `-y`: the command asks for confirmation before it changes anything,
   and a spawned process has nobody to confirm the prompt, so a run without
@@ -188,7 +250,7 @@ Older releases:
   default.
 
 * **tools: add a `pkg-search` tool** <br>
-  [`LLM::Tool::FreeBSD::PkgSearch`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/BSD/PkgSearch.html)
+  [`LLM::Tool::FreeBSD::PkgSearch`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/FreeBSD/PkgSearch.html)
   (`pkg-search`) searches the package repositories of FreeBSD, the question
   that comes before `pkg-install`: a model told to add a program does not
   know which package provides it, and `field:` of `comment-description`
@@ -219,7 +281,7 @@ Older releases:
   this one where both are loaded.
 
 * **tools: add a `sh` tool** <br>
-  [`LLM::Tool::FreeBSD::Sh`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/BSD/Sh.html)
+  [`LLM::Tool::FreeBSD::Sh`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/FreeBSD/Sh.html)
   (`sh`) runs a script as one operand of `sh -c`, so the pipes, the chaining
   and the directory changes of `cd /usr/src && make -j8` happen inside one
   process, where the per-command tools need a tool per step. It takes the
