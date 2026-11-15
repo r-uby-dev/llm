@@ -29,7 +29,7 @@ class LLM::Tool::FreeBSD
   # has `dtruss`, and neither of them takes these
   # arguments.
   class Truss < self
-    name "truss"
+    name "freebsd-truss"
     description "Trace the system calls of a process (FreeBSD)\n" \
                 "This command (truss) is spawned without a shell"
     parameter :command, String, "the program to run and trace"

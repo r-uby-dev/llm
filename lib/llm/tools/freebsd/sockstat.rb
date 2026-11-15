@@ -64,7 +64,7 @@ class LLM::Tool::FreeBSD
     # @return [Regexp]
     PROTOCOL = /\A[a-zA-Z0-9]+\z/
 
-    name "sockstat"
+    name "freebsd-sockstat"
     description "List the open sockets with sockstat (FreeBSD)\n" \
                 "This command (sockstat) is spawned without a shell"
     parameter :family, Enum[*FAMILIES.keys], "list only sockets of this address family (-4, -6, -u)"

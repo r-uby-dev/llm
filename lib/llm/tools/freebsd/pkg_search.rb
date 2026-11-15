@@ -64,7 +64,7 @@ class LLM::Tool::FreeBSD
     # @return [Array<String>]
     FORMATS = %w[json json-compact ucl yaml].freeze
 
-    name "pkg-search"
+    name "freebsd-pkg-search"
     description "Search the package repositories with pkg search (FreeBSD)\n" \
                 "This command (pkg) is spawned without a shell"
     parameter :pattern, String, "the pattern to search for"
