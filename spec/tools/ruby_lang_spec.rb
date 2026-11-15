@@ -40,4 +40,14 @@ RSpec.describe LLM::Tool::RubyLang do
       )
     end
   end
+
+  describe "LLM::Tool.rubylang" do
+    it "returns the ruby-lang.org tools" do
+      expect(LLM::Tool.rubylang).to match_array(subclasses)
+    end
+
+    it "returns only tools below the namespace" do
+      expect(LLM::Tool.rubylang).to all(be <= described_class)
+    end
+  end
 end
