@@ -351,6 +351,12 @@ agent.talk "Find me an interesting Ruby project on GitHub", tools: mcp.tools
 
 ##### builtin_tools.rb
 
+<details>
+<summary>Show GIF</summary>
+<img src="builtintools.gif" alt="evals gif"/>
+</details>
+
+
 The runtime ships toolsets that cover
 different tasks in different contexts.
 The tools are loaded on-demand via a
