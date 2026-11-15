@@ -42,7 +42,7 @@ class LLM::Tool
 
     require_relative "freebsd/pkg_install"
     require_relative "freebsd/pkg_search"
-    require_relative "freebsd/proc_stat"
+    require_relative "freebsd/proc-stat"
     require_relative "freebsd/sh"
     require_relative "freebsd/sockstat"
     require_relative "freebsd/truss"
