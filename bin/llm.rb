@@ -64,6 +64,7 @@ def help
   warn "  -c STRATEGY               Concurrency strategy for tool calls (eg thread, async, fork)"
   warn "  -n TRANSPORT              HTTP transports - net-http (default), and net-http-persistent"
   warn "  -x TIMEOUT                The default read timeout (in seconds)"
+  warn "  -f PATH                   The file where the session is stored (default: ~/.llm.rb)"
   warn "  -t                        Temporary session that doesn't persist to disk"
   warn "  -v                        Print version information"
   warn "  -h                        Show this help"
@@ -75,6 +76,7 @@ def help
   warn "  #{prog} -n net-http-persistent  # pool HTTP connections"
   warn "  #{prog} -c thread               # run tool calls on a separate thread"
   warn "  #{prog} -x 900                  # read timeout of 15mins"
+  warn "  #{prog} -f session.json         # store the session in session.json"
   warn "  #{prog} -h                      # this help"
   warn ""
 end
@@ -204,6 +206,13 @@ def main(argv)
         exit 0
       when '-t'
         temp = true
+      when '-f'
+        file = argv.shift
+        if file.nil?
+          warn "llm.rb: -f switch requires an argument"
+          help
+          exit 1
+        end
       when '-c'
         concurrency = argv.shift
         if concurrency.nil?
@@ -289,8 +298,9 @@ def main(argv)
     # the current working directory to a session file,
     # and where the session file is stored in
     # `~/.llm.rb/<provider>/<uuid>.json`.
-    # This can be skipped with the `-t` option.
-    if temp.nil?
+    # This can be skipped with the `-t` option, and
+    # the `-f` option names the session file directly.
+    if temp.nil? and file.nil?
       home   = File.join(Dir.home, ".llm.rb")
       file   = File.join(home, "#{llm.name}.json")
       parent = File.join(home, llm.name.to_s)
@@ -306,6 +316,10 @@ def main(argv)
       end
       data[Dir.getwd] ||= File.join(parent, "#{SecureRandom.uuid}.json")
       File.binwrite file, JSON.pretty_generate(data)
+      path = data[Dir.getwd]
+    elsif file
+      FileUtils.mkdir_p(File.dirname(file))
+      path = file
     end
 
     if model
@@ -320,7 +334,6 @@ def main(argv)
     ##
     # Let's go!
     concurrency ||= :ractor
-    path   = temp ? nil : data[Dir.getwd]
     params = agent_opts.merge(model:, path:, concurrency:, tools: LLM::Tool.subclasses)
     agent  = LLM::Agent.new(llm, params)
     agent.console
