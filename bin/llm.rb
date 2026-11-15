@@ -207,8 +207,8 @@ def main(argv)
       when '-t'
         temp = true
       when '-f'
-        session = argv.shift
-        if session.nil?
+        file = argv.shift
+        if file.nil?
           warn "llm.rb: -f switch requires an argument"
           help
           exit 1
@@ -299,8 +299,8 @@ def main(argv)
     # and where the session file is stored in
     # `~/.llm.rb/<provider>/<uuid>.json`.
     # This can be skipped with the `-t` option, and
-    # the `-f` option names a session file directly.
-    if temp.nil? and session.nil?
+    # the `-f` option names the session file directly.
+    if temp.nil? and file.nil?
       home   = File.join(Dir.home, ".llm.rb")
       file   = File.join(home, "#{llm.name}.json")
       parent = File.join(home, llm.name.to_s)
@@ -316,8 +316,10 @@ def main(argv)
       end
       data[Dir.getwd] ||= File.join(parent, "#{SecureRandom.uuid}.json")
       File.binwrite file, JSON.pretty_generate(data)
-    elsif session
-      FileUtils.mkdir_p(File.dirname(session))
+      path = data[Dir.getwd]
+    elsif file
+      FileUtils.mkdir_p(File.dirname(file))
+      path = file
     end
 
     if model
@@ -332,7 +334,6 @@ def main(argv)
     ##
     # Let's go!
     concurrency ||= :ractor
-    path   = session || (temp ? nil : data[Dir.getwd])
     params = agent_opts.merge(model:, path:, concurrency:, tools: LLM::Tool.subclasses)
     agent  = LLM::Agent.new(llm, params)
     agent.console
