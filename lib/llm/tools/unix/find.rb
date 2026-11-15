@@ -25,7 +25,7 @@ class LLM::Tool::Unix
   # `max_bytes:`, and the tool returns at most `limit:`
   # paths, and says when it cut the list.
   class Find < self
-    name "find"
+    name "unix-find"
     description "Walk a file hierarchy and return the paths that match\n" \
                 "This command (find) is spawned without a shell"
     parameter :path, String, "the directory the walk starts in (default is the working directory of the command)"

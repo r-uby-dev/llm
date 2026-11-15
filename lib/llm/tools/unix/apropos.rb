@@ -18,7 +18,7 @@ class LLM::Tool::Unix
   # matched with "or" unless a term carries the macro
   # key syntax of `apropos(1)`, eg `Va=optind`.
   class Apropos < self
-    name "apropos"
+    name "unix-apropos"
     description "Search the manual pages for one or more keywords\n" \
                 "This command (apropos) is spawned without a shell"
     parameter :keywords, Array[String], "one or more keywords to search for"

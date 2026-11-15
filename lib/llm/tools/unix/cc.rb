@@ -71,7 +71,7 @@ class LLM::Tool::Unix
       TMPDIR TEMP TMP
     ].freeze
 
-    name "cc"
+    name "unix-cc"
     description "Compile C and C++ sources with cc\n" \
                 "This command (cc) is spawned without a shell"
     parameter :sources, Array[String], "the source files to compile, in the order given"
