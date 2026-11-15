@@ -70,6 +70,14 @@ class LLM::Tool
   end
 
   ##
+  # Returns all ruby-lang.org tools
+  # @return [Array<Class<LLM::Tool::RubyLang>>]
+  def self.rubylang
+    require_relative "tools/ruby-lang" unless defined?(LLM::Tool::RubyLang)
+    LLM::Tool::RubyLang.subclasses
+  end
+
+  ##
   # Returns all unix-related tools
   # @return [Array<Class<LLM::Tool::Unix>>]
   def self.unix
