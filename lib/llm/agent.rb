@@ -965,13 +965,13 @@ module LLM
     # Runs the tool loop
     # @api private
     def run_loop(prompt, params, target)
-      params = {}.merge!(params)
       run = proc do
         talk = @ctx.method(target)
         max = params.key?(:tool_budget) ? params.delete(:tool_budget) : @tool_budget
         max = Integer(max) if max
         stream = params[:stream] || @ctx.params[:stream]
         params[:stream] = LLM::Stream.try(stream, extra: {concurrency:})
+        params = {}.merge!(params)
         res = talk.call(apply_instructions(prompt), params)
         params = params.except(:with)
         spent = 0
