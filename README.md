@@ -374,9 +374,10 @@ require "llm"
 require "llm/tools/pwd"
 
 llm   = LLM.deepseek
-tools = [*LLM::Tool.git, *LLM::Tool.unix, LLM::Tool::Pwd]
-agent = LLM::Agent.new(llm, tools:)
-agent.talk "tell me what authors this git repo has?", stream: $stdout
+tools = [*LLM::Tool.git, *LLM::Tool.unix, *LLM::Tool.rubylang, LLM::Tool::Pwd]
+agent = LLM::Agent.new(llm, stream: $stdot, tools:)
+agent.talk "are we in a git repo?"
+agent.talk "what's happening on the ruby-lang bug tracker?"
 ```
 
 ##### files.rb
