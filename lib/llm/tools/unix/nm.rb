@@ -26,7 +26,7 @@ class LLM::Tool::Unix
   # {LLM::Tool::Utils::Process#exec} is returned as it
   # is.
   class Nm < self
-    name "nm"
+    name "unix-nm"
     description "List the symbols of an object file, an archive or an executable\n" \
                 "This command (nm) is spawned without a shell"
     parameter :paths, Array[String], "the object files, archives or executables to read"

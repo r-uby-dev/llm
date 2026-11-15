@@ -36,9 +36,14 @@ RSpec.describe LLM::Tool::Unix do
 
     it "returns the tools that depend on a unix command" do
       expect(names).to contain_exactly(
-        "apropos", "cat", "cc", "find", "grep", "ls", "make", "man", "mkdir",
-        "nm", "pwd", "uname"
+        "unix-apropos", "unix-cat", "unix-cc", "unix-find", "unix-grep",
+        "unix-ls", "unix-make", "unix-man", "unix-mkdir", "unix-nm",
+        "unix-pwd", "unix-uname"
       )
+    end
+
+    it "prefixes every name with unix-" do
+      expect(names).to all(start_with("unix-"))
     end
 
     it "does not include exec" do

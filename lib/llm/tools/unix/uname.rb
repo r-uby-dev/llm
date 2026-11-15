@@ -33,7 +33,7 @@ class LLM::Tool::Unix
   # {LLM::Tool::Utils::Process#exec} is returned as it
   # is.
   class Uname < self
-    name "uname"
+    name "unix-uname"
     description "Report what the system is (POSIX)\n" \
                 "This command (uname) is spawned without a shell"
     parameter :kernel, Boolean, "the name of the operating system implementation (-s)"
