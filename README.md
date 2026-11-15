@@ -90,6 +90,11 @@ the tool call(s) were cancelled.
 
 ##### helloworld.rb
 
+<details>
+<summary>Show GIF</summary>
+<img src="helloworld.gif" alt="hello world"/>
+</details>
+
 The environment variable
 `$DEEPSEEK_API_KEY` is assumed to have been set and reference
 a valid DeepSeek API key, otherwise you can provide a key explicitly
@@ -134,7 +139,7 @@ puts options[:stream].string
 
 <details>
 <summary>Show GIF</summary>
-<img src="evals.gif" alt="evals gif"/>
+<img src="evals.gif" alt="micro1 evals"/>
 </details>
 
 An eval is like a unit test but for your agent. The runtime
@@ -353,7 +358,7 @@ agent.talk "Find me an interesting Ruby project on GitHub", tools: mcp.tools
 
 <details>
 <summary>Show GIF</summary>
-<img src="builtintools.gif" alt="evals gif"/>
+<img src="builtintools.gif" alt="builtin tools"/>
 </details>
 
 
