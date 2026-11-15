@@ -1957,7 +1957,7 @@ a large-ish company.
     </td>
     <td align="right" valign="middle" width="128">
       <a title="what's up doc" href="https://www.youtube.com/watch?v=bojx9BDpJks">
-        <img src="bugsbunny1.jpg" width="128" alt="what's up doc">
+        <img src="raphael-128.png" width="128" alt="what's up doc">
       </a>
     </td>
   </tr>
