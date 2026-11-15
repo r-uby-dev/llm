@@ -21,6 +21,7 @@ Older releases:
 |-----|-----|
 | `LLM::Command#kill!` | `LLM::Command#hard_exit!` |
 | `LLM::Tool::Exec.max_bytes(n)`, which capped every tool that spawns a command | `LLM::Tool::Exec.max_bytes(n)` for `exec` alone, and `max_bytes` on the tool class itself, eg `LLM::Tool::Unix::Man.max_bytes(n)` |
+| `require "llm/tools/freebsd/proc_stat"` | `require "llm/tools/freebsd/proc-stat"` |
 
 ### LLM::Command
 
@@ -75,6 +76,13 @@ Older releases:
   (`#signal("SIGHUP")`, `#signal(1)`), which is how `#graceful_exit` and
   `#hard_exit!` send theirs.
 
+* **command: `LLM::Command#signal` sends SIGKILL on Windows instead of SIGTERM** <br>
+  [`LLM::Command#signal`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#signal-instance_method)
+  sends SIGKILL to the command's process when it is given `"SIGTERM"` on Windows,
+  which has no SIGTERM to deliver, so `#graceful_exit` ends a command there
+  instead of raising. Every other signal, and `"SIGTERM"` on every other system,
+  is sent unchanged.
+
 ### LLM::Tool
 
 * **tools: add `LLM::Tool::FreeBSD`** <br>
@@ -92,6 +100,78 @@ Older releases:
   returns the FreeBSD tools, which are the subclasses of `LLM::Tool::FreeBSD`.
   It requires `llm/tools/freebsd` when it is called, unless the namespace is
   loaded already, so the FreeBSD tools are not required up front.
+
+* **tools: add `LLM::Tool::RubyLang`** <br>
+  [`LLM::Tool::RubyLang`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/RubyLang.html)
+  is the abstract superclass of the tools that read bugs.ruby-lang.org, the
+  Redmine that Ruby tracks its bugs, its features and its backports in, over the
+  REST API every Redmine has: a path, a `.json` extension, and query parameters
+  that Redmine calls filters. It talks to the host with `Net::HTTP` over TLS, one
+  client per tool instance, and `#get` returns `{ok:, status:, body:}` when
+  Redmine responds with a 2xx, or `{ok: false, status:, error:}` when it does
+  not, so a tool hands a failed request to the model rather than raising.
+  Only the public endpoints are below it, because the write endpoints want an API
+  key, and it is abstract, so it has no name and it is not in
+  `LLM::Tool.registry`.
+
+* **tools: add `LLM::Tool.rubylang`** <br>
+  [`LLM::Tool.rubylang`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool.html#rubylang-class_method)
+  returns the ruby-lang.org tools, which are the subclasses of
+  `LLM::Tool::RubyLang`. It requires `llm/tools/ruby-lang` when it is called,
+  unless the namespace is loaded already, so the ruby-lang.org tools are not
+  required up front.
+
+* **tools: add a `ruby-lang-issues` tool** <br>
+  [`LLM::Tool::RubyLang::Issues`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/RubyLang/Issues.html)
+  (`ruby-lang-issues`) lists the issues on bugs.ruby-lang.org with
+  `GET /issues.json`, the search that comes before the issue a model was given no
+  number for. `status:` is `open`, `closed` or `*` for either, and it is `open`
+  by default so the live bugs are not buried under the closed ones, `subject:`
+  matches a substring of the title, and `project_id:` and `tracker_id:` are the
+  ids the projects tool returns, while `author_id:` and `assigned_to_id:` name a
+  person by id.
+  `sort:` is a field and a direction (`updated_on:desc` by default), `include:`
+  names the parts to read beside each issue, `limit:` is 25 by default and at
+  most 100, and `offset:` walks the pages. It rejects a status that is not one of
+  the three, an empty subject, an id that is not a positive integer, an include
+  Redmine does not know, a sort that is not a field followed by a direction, and
+  a limit outside 1 to 100.
+
+* **tools: add a `ruby-lang-issue` tool** <br>
+  [`LLM::Tool::RubyLang::Issue`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/RubyLang/Issue.html)
+  (`ruby-lang-issue`) reads one issue by number with `GET /issues/:id.json`, the
+  call that follows a number somebody quoted. It requires the `id:` of the issue,
+  and `include:` takes `journals`, where a note and the field changes beside it
+  arrive together: what was written, and the status, the assignee and the
+  backport that were changed under it. It also takes `attachments`, `relations`,
+  `children`, `changesets`, `allowed_statuses` and `watchers`, and it rejects an
+  id that is not a positive integer and an include it does not know. The
+  description and the notes are returned as Redmine markup, and a private issue
+  and an issue that does not exist are both a 404 to an anonymous caller.
+
+* **tools: add a `ruby-lang-projects` tool** <br>
+  [`LLM::Tool::RubyLang::Projects`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/RubyLang/Projects.html)
+  (`ruby-lang-projects`) lists the projects on bugs.ruby-lang.org with
+  `GET /projects.json`, the tree an issue listing is narrowed by: Ruby is the
+  root and its subprojects are where the issues sit, so a `project_id:` comes
+  from here. `include:` takes `trackers`, which is where the id a `tracker_id:`
+  filter wants comes from, and `issue_categories`, `enabled_modules`,
+  `time_entry_activities` and `issue_custom_fields` beside it. A project is
+  returned with an identifier and an id, and the two are not the same thing: the
+  identifier is the slug in a URL and the id is the number a filter takes.
+  `limit:` is 100 by default and at most 100, and `offset:` walks the pages. It
+  rejects an unknown include, a limit outside 1 to 100 and a negative offset.
+
+* **tools: add a `ruby-lang-search` tool** <br>
+  [`LLM::Tool::RubyLang::Search`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/RubyLang/Search.html)
+  (`ruby-lang-search`) searches bugs.ruby-lang.org with Redmine's own index,
+  `GET /search.json`, which reads the descriptions and the journals as well as
+  the titles, where an issue listing filters the fields. It requires the
+  `query:`, and `scope:` is one of `issues` (the default), `news`, `documents`,
+  `changesets`, `wiki`, `messages` or `all`. `titles_only:` narrows the search to
+  what a title says, `limit:` is 25 by default and at most 100, and `offset:`
+  walks the pages. It rejects an empty query, an unknown scope, a limit outside
+  1 to 100 and a negative offset.
 
 * **tools: every tool that spawns a command reaches the process through `#run`** <br>
   [`LLM::Tool::Utils::Process#run`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Utils/Process.html#run-instance_method)
@@ -218,6 +298,12 @@ Older releases:
   `tsignals`, and `per_thread:` (`-H`) needs `rusage`, so one of them is
   rejected on any other subcommand rather than ignored. `timeout:` is 30
   seconds by default.
+
+* **tools: the `procstat` tool's file is `proc-stat.rb`** <br>
+  The file that defines `LLM::Tool::FreeBSD::ProcStat` is
+  `lib/llm/tools/freebsd/proc-stat.rb` now, where it was `proc_stat.rb`, so the
+  tool is required with `require "llm/tools/freebsd/proc-stat"`. The class and
+  its behavior are unchanged.
 
 * **tools: add a `sockstat` tool** <br>
   [`LLM::Tool::FreeBSD::SockStat`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/FreeBSD/SockStat.html)
