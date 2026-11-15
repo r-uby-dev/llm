@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "net/http"
+require "openssl"
 require "json"
 require "uri"
 
@@ -34,8 +35,8 @@ class LLM::Tool
   # A response is returned to the model as it comes: `ok:`
   # says whether Redmine answered with a 2xx, `body:` is
   # the parsed JSON when it did, and `error:` is the status
-  # and the first of the body when it did not. It is the
-  # same shape {LLM::Tool::Utils::Process#exec} has, so a
+  # and the head of the body when it did not. It is close
+  # to the shape {LLM::Tool::Utils::Process#exec} has, so a
   # model reads a failed request and a failed command the
   # same way.
   #
@@ -102,7 +103,7 @@ class LLM::Tool
         {ok: false, status: response.code.to_i, error: failure(response)}
       end
     rescue JSON::ParserError
-      {ok: false, error: "the response was not JSON", status: response&.code&.to_i}
+      {ok: false, status: response&.code&.to_i, error: "the response was not JSON"}
     rescue Timeout::Error, SocketError, SystemCallError, OpenSSL::SSL::SSLError => ex
       {ok: false, error: "#{ex.class}: #{ex.message}"}
     end

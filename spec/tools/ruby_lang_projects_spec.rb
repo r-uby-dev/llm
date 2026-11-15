@@ -22,7 +22,7 @@ RSpec.describe LLM::Tool::RubyLang::Projects do
     it "passes the page" do
       tool.call(limit: 10, offset: 20)
       expect(tool).to have_received(:get)
-        .with(anything, hash_including(limit: 10, offset: 20), anything)
+        .with(anything, hash_including(limit: 10, offset: 20), timeout: 30)
     end
 
     it "returns the result as it is" do

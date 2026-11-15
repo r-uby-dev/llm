@@ -38,7 +38,7 @@ RSpec.describe LLM::Tool::RubyLang::Search do
     it "passes the scope and the titles_only flag" do
       tool.call(query: "GC", scope: "wiki", titles_only: true)
       expect(tool).to have_received(:get)
-        .with(anything, hash_including(scope: "wiki", titles_only: true), anything)
+        .with(anything, hash_including(scope: "wiki", titles_only: true), timeout: 30)
     end
 
     it "returns the result as it is" do

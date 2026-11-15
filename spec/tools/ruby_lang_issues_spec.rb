@@ -47,7 +47,7 @@ RSpec.describe LLM::Tool::RubyLang::Issues do
     it "matches the subject as a substring" do
       tool.call(subject: "Ractor")
       expect(tool).to have_received(:get)
-        .with(anything, hash_including(subject: "~Ractor"), anything)
+        .with(anything, hash_including(subject: "~Ractor"), timeout: 30)
     end
 
     it "passes the status, the tracker and the assignee" do
@@ -55,20 +55,20 @@ RSpec.describe LLM::Tool::RubyLang::Issues do
       expect(tool).to have_received(:get).with(
         anything,
         hash_including(status_id: "*", tracker_id: 1, assigned_to_id: 2),
-        anything
+        timeout: 30
       )
     end
 
     it "passes the page" do
       tool.call(limit: 100, offset: 200)
       expect(tool).to have_received(:get)
-        .with(anything, hash_including(limit: 100, offset: 200), anything)
+        .with(anything, hash_including(limit: 100, offset: 200), timeout: 30)
     end
 
     it "passes the journals as include" do
       tool.call(include: ["journals"])
       expect(tool).to have_received(:get)
-        .with(anything, hash_including(include: ["journals"]), anything)
+        .with(anything, hash_including(include: ["journals"]), timeout: 30)
     end
 
     it "returns the result as it is" do
