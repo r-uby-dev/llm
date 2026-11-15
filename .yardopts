@@ -1,1 +1,1 @@
--m markdown -M redcarpet --hide-void-return --no-private --files CHANGELOG.md,rubydev.svg,helloworld.gif,evals.gif,builtintools.gif
+-m markdown -M redcarpet --hide-void-return --no-private --files CHANGELOG.md
