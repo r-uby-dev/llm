@@ -264,6 +264,18 @@ RSpec.describe LLM::Context do
         end
       end
 
+      context "when given a tool return" do
+        let(:tool_return) { LLM::Function::Return.new("call_1", "tool", {ok: true}) }
+
+        before do
+          allow(ctx).to receive(:talk).with(tool_return).and_return(response)
+        end
+
+        it "does not append the file attachment to the return" do
+          expect(ctx.ask(tool_return, with: "screen.png")).to eq(response)
+        end
+      end
+
       context "when given file attachments" do
         let(:tempfile) do
           Tempfile.new(["llmrb", ".pdf"]).tap do |file|

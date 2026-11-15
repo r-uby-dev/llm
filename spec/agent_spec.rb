@@ -1028,7 +1028,7 @@ RSpec.describe LLM::Agent do
       allow(provider).to receive(:responses).and_return(responses)
       tool.calls = 0
       expect(responses).to receive(:create).and_return(*returns)
-      agent.talk("hello", tool_budget:)
+      agent.ask("hello", with: "screen.png", tool_budget:)
     end
 
     context "when the tool budget is spent" do

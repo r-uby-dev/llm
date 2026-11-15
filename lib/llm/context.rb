@@ -281,7 +281,7 @@ module LLM
     def ask(prompt, options = {}, &block)
       options = {with: nil, stream: nil}.merge!(options || {})
       with, stream = options.values_at(:with, :stream)
-      prompt = with ? [prompt, [*with].map { local_file(_1) }] : prompt
+      prompt = [prompt, [*with].map { local_file(_1) }] if with
       target = if block
         blk = block.dup
         blk.singleton_class.alias_method(:<<, :call)
