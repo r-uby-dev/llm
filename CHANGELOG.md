@@ -22,6 +22,7 @@ Older releases:
 | `LLM::Command#kill!` | `LLM::Command#hard_exit!` |
 | `LLM::Tool::Exec.max_bytes(n)`, which capped every tool that spawns a command | `LLM::Tool::Exec.max_bytes(n)` for `exec` alone, and `max_bytes` on the tool class itself, eg `LLM::Tool::Unix::Man.max_bytes(n)` |
 | `require "llm/tools/freebsd/proc_stat"` | `require "llm/tools/freebsd/proc-stat"` |
+| `LLM::Tool::Unix` tool names, eg `man`, `apropos`, `find` and `mkdir` | `unix-man`, `unix-apropos`, `unix-find` and `unix-mkdir` |
 
 ### LLM::Command
 
@@ -85,21 +86,42 @@ Older releases:
 
 ### LLM::Tool
 
+* **tools: every tool below `LLM::Tool::Unix` is prefixed with `unix-`** <br>
+  Each tool that
+  [`LLM::Tool::Unix`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix.html)
+  provides registers under a name that begins with `unix-` now, so `man` is
+  `unix-man` and `mkdir` is `unix-mkdir`. `LLM::Tool.registry` is keyed on the
+  name, and `pwd` and `ls` were the two names it could not keep apart:
+  `LLM::Tool::Pwd` and `LLM::Tool::Unix::Pwd` both registered as `pwd`, so
+  whichever loaded last shadowed the other, and
+  `LLM::Tool.find_by_name!("pwd")` returned one of the two at random. The class
+  names, the argument vectors and the results are unchanged, and so is
+  `LLM::Tool.unix`.
+
 * **tools: add `LLM::Tool::FreeBSD`** <br>
   [`LLM::Tool::FreeBSD`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/FreeBSD.html)
   is the abstract superclass of the tools that work only on FreeBSD: a command
   FreeBSD ships and the other systems do not, or a facility that only exists
   there. `truss` is the first - Linux traces a process with `strace` and macOS
   with `dtruss`, and the three do not share an argument vector - `pkg` is the
-  second, so the tools below it are named after the subcommand, `pkg-search`
-  before `pkg-install`, and `sockstat`, `procstat` and `sh` are the rest. It is
-  abstract, so it has no name and it is not in `LLM::Tool.registry`.
+  second, so the tools below it are named after the subcommand,
+  `freebsd-pkg-search` before `freebsd-pkg-install`, and `freebsd-sockstat`,
+  `freebsd-procstat` and `freebsd-sh` are the rest. It is abstract, so it has
+  no name and it is not in `LLM::Tool.registry`.
 
 * **tools: add `LLM::Tool.freebsd`** <br>
   [`LLM::Tool.freebsd`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool.html#freebsd-class_method)
   returns the FreeBSD tools, which are the subclasses of `LLM::Tool::FreeBSD`.
   It requires `llm/tools/freebsd` when it is called, unless the namespace is
   loaded already, so the FreeBSD tools are not required up front.
+
+* **tools: every tool below `LLM::Tool::FreeBSD` is prefixed with `freebsd-`** <br>
+  Each tool that `LLM::Tool::FreeBSD` provides registers under a name that
+  begins with `freebsd-` now, so `truss` is `freebsd-truss` and `sh` is
+  `freebsd-sh`. Nothing collides today, but `sh` is the next `pwd`/`ls`: a
+  generic top-level shell tool would register under the same name, so the
+  prefix keeps the two namespaces apart. The class names, the argument vectors
+  and the results are unchanged, and so is `LLM::Tool.freebsd`.
 
 * **tools: add `LLM::Tool::RubyLang`** <br>
   [`LLM::Tool::RubyLang`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/RubyLang.html)
@@ -205,10 +227,10 @@ Older releases:
   tool, so the tool that reads more of a command's output than another is
   configured on its own class instead.
 
-* **tools: add a `make` tool** <br>
+* **tools: add a `unix-make` tool** <br>
   [`LLM::Tool::Unix::Make`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Make.html)
-  (`make`) runs a build, the loop an agent runs after it edits a file: run
-  it, read the failure, fix it, run it again. It spawns `make` without a
+  (`unix-make`) runs a build, the loop an agent runs after it edits a file:
+  run it, read the failure, fix it, run it again. It spawns `make` without a
   shell and builds the argv itself as
   `[-C dir] [-f makefile] [-j n] [-n] [-k] [-V var] [NAME=value...] [targets...]`,
   so the directory, the targets, the variables and the flags arrive as
@@ -219,11 +241,11 @@ Older releases:
   target that begins with `-`. Every flag but `-V` is shared by BSD make and
   GNU make, and `timeout:` is 120 seconds by default.
 
-* **tools: add a `cat` tool** <br>
+* **tools: add a `unix-cat` tool** <br>
   [`LLM::Tool::Unix::Cat`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Cat.html)
-  (`cat`) concatenates files and returns what they hold, and it prints more
-  than one file in a single call where `read-file` reads one and returns its
-  lines beside a line number. It builds the argv as
+  (`unix-cat`) concatenates files and returns what they hold, and it prints
+  more than one file in a single call where `read-file` reads one and returns
+  its lines beside a line number. It builds the argv as
   `[-E] [-n] [-s] [-T] [-v] -- paths...`, so `number:` numbers the lines,
   `squeeze_blank:` collapses a run of empty lines, and `show_ends:`,
   `show_tabs:` and `show_nonprinting:` make trailing whitespace, hard tabs
@@ -231,10 +253,10 @@ Older releases:
   rejects an empty path and a path of `-`, which would read the standard
   input and block.
 
-* **tools: add a `cc` tool** <br>
+* **tools: add a `unix-cc` tool** <br>
   [`LLM::Tool::Unix::Cc`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Cc.html)
-  (`cc`) compiles C and C++ sources, and a failed compile reaches the model
-  with the stderr and the exit status that explain it. It builds the argv as
+  (`unix-cc`) compiles C and C++ sources, and a failed compile reaches the
+  model with the stderr and the exit status that explain it. It builds the argv as
   `[stage] [-std=] [-O] [-g] [-Wall] [-D...] [-I...] [-o out] sources... [-L...] [-l...]`,
   with the sources before the libraries, because the linker reads them in
   the order it is given them. `stage:` is one of `link`, `object`,
@@ -247,46 +269,46 @@ Older releases:
   add to the include path, the library path and the temporary directory are
   forwarded when they are set, and `timeout:` is 120 seconds by default.
 
-* **tools: add an `nm` tool** <br>
+* **tools: add a `unix-nm` tool** <br>
   [`LLM::Tool::Unix::Nm`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Nm.html)
-  (`nm`) lists the symbols of an object file, an archive or an executable,
-  the tool that reads the failure a link produced: `undefined:` (`-u`) lists
-  the symbols an archive refers to and does not define, and `external:`
-  (`-g`) the ones an object exports. It takes one or more `paths:` after
-  `--`, and `demangle:` (`-C`), `dynamic:` (`-D`), `file_name:` (`-A`),
-  `size:` (`-S`), `numeric_sort:` (`-n`) and `portable:` (`-P`, one symbol
-  per line). It rejects a path of `-`, which would read the standard input
-  and block.
+  (`unix-nm`) lists the symbols of an object file, an archive or an
+  executable, the tool that reads the failure a link produced: `undefined:`
+  (`-u`) lists the symbols an archive refers to and does not define, and
+  `external:` (`-g`) the ones an object exports. It takes one or more
+  `paths:` after `--`, and `demangle:` (`-C`), `dynamic:` (`-D`), `file_name:`
+  (`-A`), `size:` (`-S`), `numeric_sort:` (`-n`) and `portable:` (`-P`, one
+  symbol per line). It rejects a path of `-`, which would read the standard
+  input and block.
 
-* **tools: add a `pwd` tool** <br>
+* **tools: add a `unix-pwd` tool** <br>
   [`LLM::Tool::Unix::Pwd`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Pwd.html)
-  (`pwd`) prints the working directory of the command, `-L` by default for
-  the logical path and `-P` when `physical: true` for the physical one, with
-  every symbolic link resolved. It forwards `$PWD` when it is set, because
-  `-L` reads it and a spawned command inherits `$PATH` and nothing else;
-  without it `pwd -L` falls back to the physical path. `LLM::Tool::Pwd` is
-  untouched and still returns `Dir.getwd`, and both tools are named `pwd`,
-  so the registry, which keys on the name, resolves `pwd` to this one where
-  both are loaded.
+  (`unix-pwd`) prints the working directory of the command, `-L` by default
+  for the logical path and `-P` when `physical: true` for the physical one,
+  with every symbolic link resolved. It forwards `$PWD` when it is set,
+  because `-L` reads it and a spawned command inherits `$PATH` and nothing
+  else; without it `pwd -L` falls back to the physical path. `LLM::Tool::Pwd`
+  is untouched and still returns `Dir.getwd`, and it keeps the name `pwd`,
+  where this tool takes `unix-pwd`, so the registry, which keys on the name,
+  keeps the two apart.
 
-* **tools: add a `truss` tool** <br>
+* **tools: add a `freebsd-truss` tool** <br>
   [`LLM::Tool::FreeBSD::Truss`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/FreeBSD/Truss.html)
-  (`truss`) traces the system calls of a process on FreeBSD. It traces a
-  `command:` with its `arguments:`, or a running `pid:`, and one of the two
-  is required while the two together are rejected. `follow:` (`-f`) traces
-  the children the process forks, `count:` (`-c`) swaps the individual calls
-  for a summary of the time, count and errors of each, `signals:` (`-S` when
-  it is false) shows the signals, `output:` (`-o`) writes the trace to a
+  (`freebsd-truss`) traces the system calls of a process on FreeBSD. It
+  traces a `command:` with its `arguments:`, or a running `pid:`, and one of
+  the two is required while the two together are rejected. `follow:` (`-f`)
+  traces the children the process forks, `count:` (`-c`) swaps the individual
+  calls for a summary of the time, count and errors of each, `signals:` (`-S`
+  when it is false) shows the signals, `output:` (`-o`) writes the trace to a
   file, and `string_size:` (`-s`) is how many characters a string is shown
   with. The trace arrives through stderr unless `output:` names a file.
 
-* **tools: add a `procstat` tool** <br>
+* **tools: add a `freebsd-procstat` tool** <br>
   [`LLM::Tool::FreeBSD::ProcStat`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/FreeBSD/ProcStat.html)
-  (`procstat`) displays detailed process information on FreeBSD, the question
-  that follows a process nobody can explain: the binary behind a pid, the
-  command line it was started with, the environment it inherited, the files it
-  holds open, the memory it maps and the threads it runs. `command:` picks the
-  subcommand, one of fifteen - `basic` by default, then `args`, `binary`,
+  (`freebsd-procstat`) displays detailed process information on FreeBSD, the
+  question that follows a process nobody can explain: the binary behind a pid,
+  the command line it was started with, the environment it inherited, the
+  files it holds open, the memory it maps and the threads it runs. `command:`
+  picks the subcommand, one of fifteen - `basic` by default, then `args`, `binary`,
   `environment`, `credentials`, `files`, `signals`, `tsignals`, `threads`,
   `vm`, `rlimit`, `rusage`, `auxv`, `cpuset` and `kstack` - and it goes out as
   the flag that stands for it, so `files` is `procstat -f` and `credentials`
@@ -299,18 +321,18 @@ Older releases:
   rejected on any other subcommand rather than ignored. `timeout:` is 30
   seconds by default.
 
-* **tools: the `procstat` tool's file is `proc-stat.rb`** <br>
+* **tools: the `freebsd-procstat` tool's file is `proc-stat.rb`** <br>
   The file that defines `LLM::Tool::FreeBSD::ProcStat` is
   `lib/llm/tools/freebsd/proc-stat.rb` now, where it was `proc_stat.rb`, so the
   tool is required with `require "llm/tools/freebsd/proc-stat"`. The class and
   its behavior are unchanged.
 
-* **tools: add a `sockstat` tool** <br>
+* **tools: add a `freebsd-sockstat` tool** <br>
   [`LLM::Tool::FreeBSD::SockStat`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/FreeBSD/SockStat.html)
-  (`sockstat`) lists the open sockets of FreeBSD, the question behind a port
-  that is already in use: the user, the command and the pid behind each socket,
-  with the local and the foreign address beside them. `family:` (`-4`, `-6`,
-  `-u`) picks Internet, IPv6 or local, and `state:` (`-l`, `-c`) picks the
+  (`freebsd-sockstat`) lists the open sockets of FreeBSD, the question behind
+  a port that is already in use: the user, the command and the pid behind each
+  socket, with the local and the foreign address beside them. `family:` (`-4`,
+  `-6`, `-u`) picks Internet, IPv6 or local, and `state:` (`-l`, `-c`) picks the
   sockets that listen or the ones that are connected, so the schema offers one
   of each rather than two flags that contradict. `ports:` and `protocols:` are
   joined into the comma-separated list `-p` and `-P` take, where a port is `22`
@@ -320,13 +342,13 @@ Older releases:
   the header line and `verbose:` (`-v`) prints more, and `timeout:` is 10
   seconds by default.
 
-* **tools: add a `pkg-install` tool** <br>
+* **tools: add a `freebsd-pkg-install` tool** <br>
   [`LLM::Tool::FreeBSD::PkgInstall`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/FreeBSD/PkgInstall.html)
-  (`pkg-install`) installs packages on FreeBSD with `pkg install`. It always
-  passes `-y`: the command asks for confirmation before it changes anything,
-  and a spawned process has nobody to confirm the prompt, so a run without
-  it would sit until the timeout killed it. `dry_run:` (`-n`) prints the
-  work-list of the packages to install, upgrade and delete, in dependency
+  (`freebsd-pkg-install`) installs packages on FreeBSD with `pkg install`. It
+  always passes `-y`: the command asks for confirmation before it changes
+  anything, and a spawned process has nobody to confirm the prompt, so a run
+  without it would sit until the timeout killed it. `dry_run:` (`-n`) prints
+  the work-list of the packages to install, upgrade and delete, in dependency
   order, without touching the system. It requires one or more `packages:`,
   and it takes an optional `no_repo_update:` (`-U`), `quiet:` (`-q`),
   `force:` (`-f`), `no_scripts:` (`-I`), `local_only:` (`-l`), `automatic:`
@@ -335,23 +357,24 @@ Older releases:
   `regex`, which the schema enumerates. `timeout:` is 300 seconds by
   default.
 
-* **tools: add a `pkg-search` tool** <br>
+* **tools: add a `freebsd-pkg-search` tool** <br>
   [`LLM::Tool::FreeBSD::PkgSearch`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/FreeBSD/PkgSearch.html)
-  (`pkg-search`) searches the package repositories of FreeBSD, the question
-  that comes before `pkg-install`: a model told to add a program does not
-  know which package provides it, and `field:` of `comment-description`
-  finds a package by what it does where the default finds one by what it is
-  called. It takes a `pattern:` and an optional `field:`, `match:` of
+  (`freebsd-pkg-search`) searches the package repositories of FreeBSD, the
+  question that comes before `freebsd-pkg-install`: a model told to add a
+  program does not know which package provides it, and `field:` of
+  `comment-description` finds a package by what it does where the default
+  finds one by what it is called. It takes a `pattern:` and an optional
+  `field:`, `match:` of
   `regex`, `exact` or `glob`, `case_sensitive:`, `modifiers:` (`-Q`),
   `repositories:` (`-r`), `quiet:` (`-q`) and `no_repo_update:` (`-U`), and
   `raw:` (`-R`) with `raw_format:` of `yaml`, `json`, `json-compact` or
   `ucl` prints the whole manifest of each match. A `raw_format:` that is
   given without `raw:` is rejected.
 
-* **tools: add an `ls` tool** <br>
+* **tools: add an `unix-ls` tool** <br>
   [`LLM::Tool::Unix::Ls`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Ls.html)
-  (`ls`) spawns `ls` without a shell and returns the listing as its stdout. It
-  builds the argv as
+  (`unix-ls`) spawns `ls` without a shell and returns the listing as its
+  stdout. It builds the argv as
   `[-A] [-F] [-R] [-a] [-d] [-h] [-i] [-l] [sort] [-r] [-- paths...]`, so
   `all:` (`-a`), `almost_all:` (`-A`), `long:` (`-l`), `human:` (`-h`),
   `classify:` (`-F`), `inode:` (`-i`), `recursive:` (`-R`), `directory:`
@@ -362,15 +385,15 @@ Older releases:
   the output of a spawned command is never a terminal, and `timeout:` is 5
   seconds by default.
   [`LLM::Tool::Ls`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Ls.html)
-  is untouched and still returns its listing from `Dir.glob`, and both tools
-  are named `ls`, so the registry, which keys on the name, resolves `ls` to
-  this one where both are loaded.
+  is untouched and still returns its listing from `Dir.glob`, and it keeps the
+  name `ls`, where this tool takes `unix-ls`, so the registry, which keys on
+  the name, keeps the two apart.
 
-* **tools: add a `sh` tool** <br>
+* **tools: add a `freebsd-sh` tool** <br>
   [`LLM::Tool::FreeBSD::Sh`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/FreeBSD/Sh.html)
-  (`sh`) runs a script as one operand of `sh -c`, so the pipes, the chaining
-  and the directory changes of `cd /usr/src && make -j8` happen inside one
-  process, where the per-command tools need a tool per step. It takes the
+  (`freebsd-sh`) runs a script as one operand of `sh -c`, so the pipes, the
+  chaining and the directory changes of `cd /usr/src && make -j8` happen inside
+  one process, where the per-command tools need a tool per step. It takes the
   `script:` to run, which is required and is rejected when it is empty, when
   it is only whitespace, and when it holds a NUL character, and it takes the
   flags of sh(1) in front of it: `errexit:` (`-e`), `nounset:` (`-u`),
@@ -380,24 +403,25 @@ Older releases:
   and `timeout:` is 30 seconds by default, so a loop that would not end is
   killed instead of hanging the run.
 
-* **tools: add a `uname` tool** <br>
+* **tools: add a `unix-uname` tool** <br>
   [`LLM::Tool::Unix::Uname`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Uname.html)
-  (`uname`) reports what the system is. It sticks to the POSIX options, which
-  mean the same thing on FreeBSD, Linux and macOS: `kernel:` (`-s`),
+  (`unix-uname`) reports what the system is. It sticks to the POSIX options,
+  which mean the same thing on FreeBSD, Linux and macOS: `kernel:` (`-s`),
   `nodename:` (`-n`), `release:` (`-r`), `version:` (`-v`), `machine:` (`-m`)
   and `all:` (`-a`), which is the five of them at once and is passed on its
   own. The FreeBSD extensions are left out on purpose - `-p` and `-i` mean
   something else on Linux, and `-K`, `-U` and `-b` exist on FreeBSD alone - so
-  a model that needs them asks a BSD tool. With no flag at all `uname` prints
-  the kernel name, and `timeout:` is 5 seconds by default.
+  a model that needs them asks a FreeBSD tool. With no flag at all `uname`
+  prints the kernel name, and `timeout:` is 5 seconds by default.
 
-* **tools: add a `grep` tool** <br>
+* **tools: add a `unix-grep` tool** <br>
   [`LLM::Tool::Unix::Grep`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Grep.html)
-  (`grep`) searches files for a pattern, the POSIX fallback for `rg`, which
-  needs a port where the base system ships `grep`. It sticks to the options
-  POSIX defines, and the extensions are absent: no recursion, no context, no
-  `-o`, no `-w` and no `--include`, so a recursive search is `find` beside
-  this tool. It requires a `pattern:`, which goes to `-e` so a pattern that
+  (`unix-grep`) searches files for a pattern, the POSIX fallback for `rg`,
+  which needs a port where the base system ships `grep`. It sticks to the
+  options POSIX defines, and the extensions are absent: no recursion, no
+  context, no `-o`, no `-w` and no `--include`, so a recursive search is
+  `unix-find` beside this tool. It requires a `pattern:`, which goes to `-e`
+  so a pattern that
   begins with `-` stays a pattern, and one or more `paths:`, which follow
   `--`, and it rejects an empty pattern, which would select every line. The
   flags are `extended:` (`-E`), `fixed:` (`-F`), `ignore_case:` (`-i`),
@@ -436,7 +460,7 @@ Older releases:
   passed `Dir.getwd`, so the search runs in the working directory of the
   command.
 
-* **tools: `find` walks the working directory of the command** <br>
+* **tools: `unix-find` walks the working directory of the command** <br>
   [`LLM::Tool::Unix::Find`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Find.html)
   leaves `path:` out of the argument vector when it is not given, where it
   passed `Dir.getwd`, so the walk starts in the working directory of the
