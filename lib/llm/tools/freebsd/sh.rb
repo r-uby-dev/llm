@@ -38,7 +38,7 @@ class LLM::Tool::FreeBSD
   # is, and `timeout:` is what stops a loop that would
   # not end on its own.
   class Sh < self
-    name "sh"
+    name "freebsd-sh"
     description "Run a script with sh (FreeBSD)\n" \
                 "This command (sh) is given its script with -c"
     parameter :script, String, "the script to run, as one string (-c)"

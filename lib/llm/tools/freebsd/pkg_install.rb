@@ -53,7 +53,7 @@ class LLM::Tool::FreeBSD
       "regex" => ["-x"]
     }.freeze
 
-    name "pkg-install"
+    name "freebsd-pkg-install"
     description "Install packages with pkg install (FreeBSD)\n" \
                 "This command (pkg) is spawned without a shell"
     parameter :packages, Array[String], "the packages to install, by name, origin or archive path"
