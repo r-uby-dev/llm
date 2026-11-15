@@ -94,7 +94,7 @@ class LLM::Tool::FreeBSD
       "kstack" => ["-k"]
     }.freeze
 
-    name "procstat"
+    name "freebsd-procstat"
     description "Display detailed process information with procstat (FreeBSD)\n" \
                 "This command (procstat) is spawned without a shell"
     parameter :command, Enum[*COMMANDS.keys], "the subcommand to ask, eg files, vm or credentials"
