@@ -371,13 +371,18 @@ about the other available builtin tools:
 
 ```ruby
 require "llm"
-require "llm/tools/pwd"
 
-llm   = LLM.deepseek
-tools = [*LLM::Tool.git, *LLM::Tool.unix, *LLM::Tool.rubylang, LLM::Tool::Pwd]
-agent = LLM::Agent.new(llm, stream: $stdot, tools:)
+llm         = LLM.deepseek
+tracer      = LLM::Tracer.enhanced(llm)
+stream      = StringIO.new
+concurrency = :ractor
+tools       = [*LLM::Tool.git, *LLM::Tool.unix, *LLM::Tool.rubylang]
+
+agent  = LLM::Agent.new(llm, tracer:, stream:, concurrency:, tools:)
 agent.talk "are we in a git repo?"
 agent.talk "what's happening on the ruby-lang bug tracker?"
+
+puts stream.string
 ```
 
 ##### files.rb
