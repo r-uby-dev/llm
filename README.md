@@ -378,7 +378,7 @@ stream      = StringIO.new
 concurrency = :ractor
 tools       = [*LLM::Tool.git, *LLM::Tool.unix, *LLM::Tool.rubylang]
 
-agent  = LLM::Agent.new(llm, tracer:, stream:, concurrency:, tools:)
+agent = LLM::Agent.new(llm, tracer:, stream:, concurrency:, tools:)
 agent.talk "are we in a git repo?"
 agent.talk "what's happening on the ruby-lang bug tracker?"
 
