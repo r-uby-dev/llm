@@ -26,7 +26,7 @@ class LLM::Tool::Unix
   # when a Makefile misbehaves ("what would you run" is
   # the first, and `dry_run:` is how it is asked).
   class Make < self
-    name "make"
+    name "unix-make"
     description "Run make and return its output\n" \
                 "This command (make) is spawned without a shell"
     parameter :targets, Array[String], "the targets to build (default is the first target)"

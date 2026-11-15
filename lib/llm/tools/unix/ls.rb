@@ -50,7 +50,7 @@ class LLM::Tool::Unix
       "none" => ["-f"]
     }.freeze
 
-    name "ls"
+    name "unix-ls"
     description "List directory contents\n" \
                 "This command (ls) is spawned without a shell"
     parameter :paths, Array[String], "the files and directories to list (default is the working directory)"

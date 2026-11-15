@@ -36,7 +36,7 @@ class LLM::Tool::Unix
   # {LLM::Tool::Utils::Process#exec} is returned as it
   # is otherwise.
   class Grep < self
-    name "grep"
+    name "unix-grep"
     description "Search files for a pattern (POSIX)\n" \
                 "This command (grep) is spawned without a shell"
     parameter :pattern, String, "the pattern to search for (given to -e)"
