@@ -30,7 +30,8 @@ class LLM::Intercept
     # @return (see LLM::Intercept#call)
     def call(function:, **opts)
       @intercepts.each do |intercept|
-        intercept = intercept.new(llm).tap { _1.instance_variable_set(:@context, context) }
+        intercept = (Class === intercept ? intercept.new(llm) : intercept)
+        intercept.instance_variable_set(:@context, context)
         result = intercept.call(function:, **opts)
         return result if LLM::Function::Return === result
       end
