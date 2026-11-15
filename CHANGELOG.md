@@ -22,11 +22,11 @@ Changes since `v20.0.0`.
 This is a major release. The tool registry is namespaced: every tool
 below `LLM::Tool::Unix` registers with a `unix-` prefix and every tool
 below the new `LLM::Tool::FreeBSD` with a `freebsd-`, which retires the
-`pwd`/`ls` collision and renames eight existing tools. It adds the
+`pwd`/`ls` collision and renames four existing tools. It adds the
 `LLM::Tool::RubyLang` family (`ruby-lang-issues`, `ruby-lang-issue`,
 `ruby-lang-projects`, `ruby-lang-search`), the FreeBSD family
 (`freebsd-truss`, `freebsd-pkg-search`, `freebsd-pkg-install`,
-`freebsd-sockstat`, `freebsd-procstat`, `freebsd-sh`), five unix
+`freebsd-sockstat`, `freebsd-procstat`, `freebsd-sh`), eight unix
 tools and `git-grep`. `LLM::Command` grows `#chain`, `#chdir`,
 `#to_argv`, `#graceful_exit`, `#hard_exit!` and `#signal`, every
 command-spawning tool routes through `LLM::Tool::Utils::Process#run`
