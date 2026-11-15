@@ -8,7 +8,7 @@ class LLM::Tool::Unix
   # class implements a tool that can create a tree of
   # new directories.
   class Mkdir < self
-    name "mkdir"
+    name "unix-mkdir"
     description "Create a new directory\n" \
                 "This command (mkdir) is spawned without a shell"
     parameter :path, String, "the path to the directory"

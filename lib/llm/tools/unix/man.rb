@@ -16,7 +16,7 @@ class LLM::Tool::Unix
   # library function it is about to use, eg
   # `man(name: "printf", section: 3)`.
   class Man < self
-    name "man"
+    name "unix-man"
     description "Read a manual page\n" \
                 "This command (man) is spawned without a shell"
     parameter :name, String, "the name of the manual page (eg 'printf')"

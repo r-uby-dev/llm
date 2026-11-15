@@ -29,7 +29,7 @@ class LLM::Tool::Unix
   # question with `Dir.getwd` and spawns nothing; this
   # tool is the command, for the model that asks for it.
   class Pwd < self
-    name "pwd"
+    name "unix-pwd"
     description "Print the current working directory\n" \
                 "This command (pwd) is spawned without a shell"
     parameter :physical, Boolean, "resolve symbolic links and print the physical path (-P)"

@@ -33,7 +33,7 @@ class LLM::Tool::Unix
   # read, so {LLM::Tool::Utils::Process#exec} stops
   # reading at `max_bytes:` and says that it truncated.
   class Cat < self
-    name "cat"
+    name "unix-cat"
     description "Concatenate files and print them\n" \
                 "This command (cat) is spawned without a shell"
     parameter :paths, Array[String], "the files to print, in the order given"
