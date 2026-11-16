@@ -76,14 +76,14 @@ RSpec.describe LLM::Tool::Unix::HonggFuzz do
     it "drops the placeholder and passes -s when the input arrives on stdin" do
       tool.call(command: "djpeg", stdin: true)
       expect(tool).to have_received(:exec).with(
-        hash_including(arguments: ["-q", "-v", "-s", "--", "djpeg"])
+        hash_including(arguments: ["-s", "-q", "-v", "--", "djpeg"])
       )
     end
 
     it "keeps the arguments it is given when the input arrives on stdin" do
       tool.call(command: "djpeg", stdin: true, arguments: ["-outfile", "out.pnm"])
       expect(tool).to have_received(:exec).with(
-        hash_including(arguments: ["-q", "-v", "-s", "--", "djpeg", "-outfile", "out.pnm"])
+        hash_including(arguments: ["-s", "-q", "-v", "--", "djpeg", "-outfile", "out.pnm"])
       )
     end
 
