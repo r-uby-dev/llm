@@ -1956,8 +1956,8 @@ a large-ish company.
       </p>
     </td>
     <td align="right" valign="middle" width="128">
-      <a title="what's up doc" href="https://www.youtube.com/watch?v=bojx9BDpJks">
-        <img src="raphael-128.png" width="128" alt="what's up doc">
+      <a title="what's up doc" href="https://r.uby.dev">
+        <img src="raphael-128.png" width="128" alt="powered by r.uby.dev">
       </a>
     </td>
   </tr>
