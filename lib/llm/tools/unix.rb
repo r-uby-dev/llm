@@ -8,8 +8,8 @@ class LLM::Tool
   # unix-like system. It depends on a command Windows
   # does not ship (`apropos`, `cat`, `cc`, `find`,
   # `grep`, `ls`, `make`, `man`, `mkdir`, `nm`, `pwd`,
-  # `uname`), or on a system facility that only
-  # exists there.
+  # `uname`, `valgrind`), or on a system facility that
+  # only exists there.
   #
   # Tools that work anywhere - reading and writing
   # files, changing directory, spawning a command - are
@@ -31,6 +31,7 @@ class LLM::Tool
   # @see LLM::Tool::Unix::Nm
   # @see LLM::Tool::Unix::Pwd
   # @see LLM::Tool::Unix::Uname
+  # @see LLM::Tool::Unix::Valgrind
   class Unix < self
     abstract!
 
@@ -49,5 +50,6 @@ class LLM::Tool
     require_relative "unix/nm"
     require_relative "unix/pwd"
     require_relative "unix/uname"
+    require_relative "unix/valgrind"
   end
 end

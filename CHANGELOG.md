@@ -13,7 +13,16 @@ Older releases:
 
 ## What's next
 
-*No unreleased changes yet. Check back after the next release.*
+* **unix: add `LLM::Tool::Unix::Valgrind`** <br>
+  [`LLM::Tool::Unix::Valgrind`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Valgrind.html)
+  runs a program under `valgrind` and returns the report it wrote to stderr. It
+  builds the argument vector itself - `--tool=`, the memcheck options,
+  `--error-exitcode=`, `--`, the program, then the arguments of the program - and
+  it forwards $VALGRIND_LIB, $VALGRIND_OPTS and $DEBUGINFOD_URLS. It is the tool
+  that reads the failure `unix-cc` and `unix-nm` cannot see: an invalid read, an
+  invalid write, an uninitialised value or a leak. It defaults to memcheck, to a
+  nonzero `--error-exitcode` so a report arrives as a failed tool call, and to a
+  300 second timeout because valgrind is slow.
 
 ## v21.0.0
 

@@ -38,7 +38,7 @@ RSpec.describe LLM::Tool::Unix do
       expect(names).to contain_exactly(
         "unix-apropos", "unix-cat", "unix-cc", "unix-find", "unix-grep",
         "unix-ls", "unix-make", "unix-man", "unix-mkdir", "unix-nm",
-        "unix-pwd", "unix-uname"
+        "unix-pwd", "unix-uname", "unix-valgrind"
       )
     end
 
