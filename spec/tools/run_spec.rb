@@ -29,6 +29,7 @@ tools = {
   LLM::Tool::Unix::Cat => {paths: ["file.txt"]},
   LLM::Tool::Unix::Cc => {sources: ["foo.c"]},
   LLM::Tool::Unix::Find => {},
+  LLM::Tool::Unix::HonggFuzz => {command: "ls"},
   LLM::Tool::Unix::Make => {},
   LLM::Tool::Unix::Man => {name: "printf"},
   LLM::Tool::Unix::Mkdir => {path: "a-directory"},
