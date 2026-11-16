@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "lib/llm/version"
+require "./lib/llm/version"
 
 Gem::Specification.new do |spec|
   spec.name = "llm.rb"
@@ -23,6 +23,12 @@ Gem::Specification.new do |spec|
                   "Badri Vishal Pandey",
                   "Anand Biju"].sort
   spec.email = ["robert@r.uby.dev"]
+
+  spec.post_install_message = "\n\n"                       \
+                              "Learn more about what "     \
+                              "the llm.rb runtime can "    \
+                              "do at:\nhttps://r.uby.dev"  \
+                              "\n\n"
 
   spec.summary = "An agentic runtime for system programmers - in Ruby."
   spec.description = <<~DESCRIPTION
