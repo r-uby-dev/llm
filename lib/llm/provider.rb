@@ -598,14 +598,18 @@ class LLM::Provider
   ##
   # @return [LLM::Object]
   def weakmaps
-    if thread["llm.#{name}.weakmaps"]
-      thread["llm.#{name}.weakmaps"]
+    key = "llm.#{name}.weakmaps"
+    if thread.thread_variable_get(key)
+      thread.thread_variable_get(key)
     else
       weakmaps = LLM::Object.from(
         tracer: ObjectSpace::WeakMap.new,
         header: ObjectSpace::WeakKeyMap.new
       )
-      thread["llm.#{name}.weakmaps"] = weakmaps
+      # Thread#[] is fiber-local; scoped headers must survive fiber hops on
+      # async schedulers while remaining isolated between OS threads.
+      thread.thread_variable_set(key, weakmaps)
+      weakmaps
     end
   end
 end
