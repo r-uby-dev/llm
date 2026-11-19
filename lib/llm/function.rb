@@ -228,7 +228,7 @@ class LLM::Function
   # @note
   #  A parameter type that is given as a proc is resolved when the
   #  parameters are rendered rather than here, so a tool can say
-  #  `parameter :fruit, proc { Enum[Fruit.keys] }` and ask the model
+  #  `parameter :fruit, proc { Enum[*Fruit.keys] }` and ask the model
   #  for what is available at the time of the call.
   # @param [Hash, nil] p
   #  Optional set of params to set
