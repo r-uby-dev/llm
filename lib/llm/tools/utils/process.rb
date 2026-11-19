@@ -18,6 +18,12 @@ module LLM::Tool::Utils
     include LLM::Tool::Utils
 
     ##
+    # @return [Float]
+    #  The seconds between a signal and a reading
+    #  of whether it was enough.
+    GRACE = 0.5
+
+    ##
     # Gives the class that includes this module a `max_bytes`
     # of its own.
     # @param [Class] base
@@ -82,7 +88,7 @@ module LLM::Tool::Utils
         }.compact
       end
     rescue LLM::Interrupt
-      spawned&.running? ? command.graceful_exit : nil
+      kill(spawned) if spawned&.running?
       raise
     end
 
@@ -103,11 +109,34 @@ module LLM::Tool::Utils
       start = now
       while command.running? || status_unavailable?(command)
         if now - start > timeout
-          command.graceful_exit
+          terminate!(command)
           throw(:kill, true)
         end
         sleep 0.01
       end
+    end
+
+    ##
+    # Ends a command that outlived its timeout.
+    #
+    # SIGTERM is the polite request, and it is enough for
+    # anything that means to stop - but a debugger, a
+    # process stopped under a tracer, or a program with a
+    # TERM handler of its own will ignore it, and then
+    # nothing reaps the child. The caller goes on to read
+    # its status and its output, and both wait for the
+    # child to be reaped, so a command that ignores SIGTERM
+    # would hold the tool that is waiting on it forever.
+    #
+    # SIGKILL after a grace period is what makes `timeout`
+    # a bound rather than a suggestion.
+    # @param [LLM::Command] command
+    # @return [void]
+    def terminate!(command)
+      command.graceful_exit
+      return if command.wait(GRACE)
+      command.hard_exit!
+      command.wait(GRACE)
     end
 
     ##
