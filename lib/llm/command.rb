@@ -12,10 +12,6 @@ class LLM::Command
 
   ##
   # @api private
-  CONSUME = 5.0
-
-  ##
-  # @api private
   class Pipe < Struct.new(:r, :w)
     def self.pair
       new(*IO.pipe)
@@ -320,6 +316,14 @@ class LLM::Command
     noterm = Gem.win_platform?
     (noterm and sig.to_s == "SIGTERM") ? Process.kill("SIGKILL", signal_pid) :
                                          Process.kill(sig, signal_pid)
+  rescue Errno::ESRCH
+    ##
+    # The process is already gone, which is what the
+    # signal was for. It is a race a caller cannot
+    # avoid: the command exits between the decision to
+    # stop it and the signal itself, and "stop it" is
+    # not an error when it has already stopped.
+    nil
   end
 
   ##
@@ -509,7 +513,6 @@ class LLM::Command
     end
     r
   end
-
   ##
   # Blocks until the spawned command has finished, its
   # output has been read, and its exit status captured.
@@ -517,8 +520,7 @@ class LLM::Command
   # @return [void]
   def consume
     return unless @producer&.alive?
-    @producer.join(CONSUME) ? nil :
-                             [hard_exit!, @producer.join(CONSUME)]
+    @producer.join
   end
 
   ##

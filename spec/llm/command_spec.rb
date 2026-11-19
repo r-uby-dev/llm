@@ -261,6 +261,22 @@ RSpec.describe LLM::Command do
   end
 
   ##
+  # A command is allowed to take its time. `consume` gave
+  # it five seconds and killed it for outliving them, and
+  # a clone, a pkg install or a build outlives five
+  # seconds - which is a command killed in the middle of
+  # its work, reported as an error it never made.
+  describe "a command that takes its time" do
+    let(:command) do
+      described_class.new(RbConfig.ruby, "-e", "sleep 5.5; print 'done'")
+    end
+
+    it "is not killed for taking it" do
+      expect(command.stdout).to eq("done")
+    end
+  end
+
+  ##
   # A timeout signals the command, and a command that
   # started something else is not stopped by being
   # stopped: the group it leads has to take the signal,
