@@ -174,16 +174,17 @@ class LLM::Command
       @out.w.close
       @err.w.close
       lock   = Mutex.new
-      reader = lambda do |pipe, limit, tail|
-        read_limited(pipe, limit, tail) do |chunk|
+      @stdout_buf, @stderr_buf = +"", +""
+      reader = lambda do |pipe, limit, tail, buf|
+        read_limited(pipe, limit, tail, buf) do |chunk|
           blk ? lock.synchronize { blk.call(chunk) } : nil
         end
       end
       @stdout_reader = Thread.new do
-        reader.call(@out.r, @limit[:stdout], @tail[:stdout])
+        reader.call(@out.r, @limit[:stdout], @tail[:stdout], @stdout_buf)
       end
       @stderr_reader = Thread.new do
-        reader.call(@err.r, @limit[:stderr], @tail[:stderr])
+        reader.call(@err.r, @limit[:stderr], @tail[:stderr], @stderr_buf)
       end
       @producer = Thread.new do
         begin
@@ -191,8 +192,8 @@ class LLM::Command
         rescue Errno::ECHILD
           @status = failed_status
         end
-        @stdout = settle(@stdout_reader, @out.r)
-        @stderr = settle(@stderr_reader, @err.r)
+        @stdout = settle(@stdout_reader, @out.r, @stdout_buf, @tail[:stdout])
+        @stderr = settle(@stderr_reader, @err.r, @stderr_buf, @tail[:stderr])
       end
     end
   rescue Errno::ENOENT => ex
@@ -432,12 +433,12 @@ class LLM::Command
   # @param [Thread] reader
   # @param [IO] io
   # @return [String]
-  def settle(reader, io)
-    reader.join(GRACE)
-    io.close unless io.closed?
-    reader.value
-  rescue StandardError
-    ""
+  def settle(reader, io, buf, tail = nil)
+    if reader.join(GRACE).nil?
+      io.closed? ? nil : io.close
+      reader.kill
+    end
+    tail ? text(buf) : buf
   end
 
   ##
@@ -457,8 +458,8 @@ class LLM::Command
   # @param [Integer, nil] max
   # @param [Integer, nil] tail
   # @return [String]
-  def read_limited(io, max, tail = nil)
-    buf, remaining, ex = [+"", max, nil]
+  def read_limited(io, max, tail = nil, buf = +"")
+    remaining, ex = [max, nil]
     loop do
       chunk = io.readpartial(16_384)
       begin
@@ -473,7 +474,7 @@ class LLM::Command
         buf << captured
         remaining -= captured.bytesize
       end
-      buf = buf.byteslice(-tail, tail) if tail and buf.bytesize > tail
+      buf.replace(buf.byteslice(-tail, tail)) if tail and buf.bytesize > tail
     rescue EOFError, Errno::EIO, IOError
       break
     end
