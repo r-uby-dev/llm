@@ -198,6 +198,69 @@ RSpec.describe LLM::Command do
   end
 
   ##
+  # A command says what went wrong last, so the bytes a
+  # caller keeps have to be the ones at the end. The
+  # stream is still read to the end, because a child
+  # writing into a pipe nobody reads is a child that
+  # blocks - the bound is on what is held, not on what
+  # is read.
+  describe "#tail" do
+    let(:script) { "print 'a' * 1000, 'THE END'" }
+    let(:command) { described_class.new(RbConfig.ruby, "-e", script) }
+
+    context "when the output is longer than the tail" do
+      before { command.tail(stdout: 20) }
+
+      it "keeps the last bytes rather than the first" do
+        expect(command.stdout).to end_with("THE END")
+      end
+
+      it "keeps no more than the tail" do
+        expect(command.stdout.bytesize).to eq(20)
+      end
+    end
+
+    context "when the output is shorter than the tail" do
+      before { command.tail(stdout: 5_000) }
+
+      it "keeps all of it" do
+        expect(command.stdout).to eq("a" * 1000 + "THE END")
+      end
+    end
+
+    ##
+    # Six bytes off the end of "éééEND": the cut lands
+    # inside the first é, which leaves a byte that is not
+    # a character - and a string like that is one a JSON
+    # encoder refuses.
+    context "when the tail cuts through a character" do
+      let(:script) { "print 'é' * 100, 'END'" }
+
+      before { command.tail(stdout: 6) }
+
+      it "answers with text a JSON encoder accepts" do
+        expect(command.stdout.valid_encoding?).to be(true)
+      end
+    end
+
+    context "when both streams are tailed" do
+      let(:script) do
+        "STDOUT.write('o' * 100); STDERR.write('e' * 100); print 'done'"
+      end
+
+      before { command.tail(stdout: 10, stderr: 10) }
+
+      it "tails stdout" do
+        expect(command.stdout).to eq("o" * 6 + "done")
+      end
+
+      it "tails stderr" do
+        expect(command.stderr).to eq("e" * 10)
+      end
+    end
+  end
+
+  ##
   # A timeout signals the command, and a command that
   # started something else is not stopped by being
   # stopped: the group it leads has to take the signal,

@@ -39,6 +39,7 @@ class LLM::Command
     @stderr = ""
     @enoent = false
     @limit = {stdout: nil, stderr: nil}
+    @tail = {stdout: nil, stderr: nil}
   end
 
   ##
@@ -136,6 +137,21 @@ class LLM::Command
   end
 
   ##
+  # Keeps the last n bytes of each stream, rather than the
+  # first n that {#limit} keeps.
+  # @param [Integer, nil] stdout
+  #  Max bytes of stdout to keep, or nil for everything
+  # @param [Integer, nil] stderr
+  #  Max bytes of stderr to keep, or nil for everything
+  # @return [LLM::Command]
+  def tail(stdout: nil, stderr: nil)
+    tap do
+      @tail = {stdout:, stderr:}
+      @limit = {stdout: nil, stderr: nil}
+    end
+  end
+
+  ##
   # Spawns a command
   # @return [LLM::Command]
   def spawn(&blk)
@@ -154,13 +170,17 @@ class LLM::Command
       @out.w.close
       @err.w.close
       lock   = Mutex.new
-      reader = lambda do |pipe, limit|
-        read_limited(pipe, limit) do |chunk|
+      reader = lambda do |pipe, limit, tail|
+        read_limited(pipe, limit, tail) do |chunk|
           blk ? lock.synchronize { blk.call(chunk) } : nil
         end
       end
-      @stdout_reader = Thread.new { reader.call(@out.r, @limit[:stdout]) }
-      @stderr_reader = Thread.new { reader.call(@err.r, @limit[:stderr]) }
+      @stdout_reader = Thread.new do
+        reader.call(@out.r, @limit[:stdout], @tail[:stdout])
+      end
+      @stderr_reader = Thread.new do
+        reader.call(@err.r, @limit[:stderr], @tail[:stderr])
+      end
       @producer = Thread.new do
         begin
           @status = Process.waitpid2(@pid).last
@@ -404,10 +424,19 @@ class LLM::Command
   # the remainder so a child writing more than the
   # limit does not block on a full pipe. When +max+ is
   # nil the entire stream is read.
+  #
+  # With +tail+ the last that many bytes are kept
+  # instead of the first +max+: the stream is still
+  # read to the end, and the buffer is cut back after
+  # every chunk, so a command that prints for an hour
+  # is held in the memory of its tail rather than in
+  # the memory of its output.
+  #
   # @param [IO] io
   # @param [Integer, nil] max
+  # @param [Integer, nil] tail
   # @return [String]
-  def read_limited(io, max)
+  def read_limited(io, max, tail = nil)
     buf, remaining, ex = [+"", max, nil]
     loop do
       chunk = io.readpartial(16_384)
@@ -423,10 +452,18 @@ class LLM::Command
         buf << captured
         remaining -= captured.bytesize
       end
+      buf = buf.byteslice(-tail, tail) if tail and buf.bytesize > tail
     rescue EOFError, Errno::EIO, IOError
       break
     end
-    ex ? raise(ex) : buf
+    ex ? raise(ex) : (tail ? text(buf) : buf)
+  end
+
+  ##
+  # @param [String] buf
+  # @return [String]
+  def text(buf)
+    buf.dup.force_encoding(Encoding::UTF_8).scrub
   end
 
   ##
