@@ -2,6 +2,7 @@
 
 require "setup"
 require "rbconfig"
+require "timeout"
 
 RSpec.describe LLM::Command do
   ##
@@ -146,6 +147,70 @@ RSpec.describe LLM::Command do
 
     it "runs the command in the directory it is given" do
       expect(command.stdout).to eq(root)
+    end
+  end
+
+  ##
+  # A command is over when its child has been reaped, and
+  # not when every pipe it handed out has closed. A child
+  # it started keeps the pipe open, and reading that as
+  # "still running" is how a command that finished holds
+  # a caller forever.
+  describe "a child the command left behind" do
+    let(:script) do
+      "Process.spawn(RbConfig.ruby, '-e', 'sleep 5'); print 'hi'"
+    end
+    let(:command) { described_class.new(RbConfig.ruby, "-e", script) }
+
+    before { command.spawn }
+
+    it "does not wait for the pipe that child is holding" do
+      expect { Timeout.timeout(2) { command.status } }.not_to raise_error
+    end
+
+    it "hands back the status of the command itself" do
+      expect(Timeout.timeout(2) { command.status }.success?).to be(true)
+    end
+
+    it "still returns what the command wrote" do
+      expect(Timeout.timeout(2) { command.stdout }).to eq("hi")
+    end
+
+    it "does not call itself running" do
+      Timeout.timeout(2) { command.status }
+      expect(command.running?).to be(false)
+    end
+  end
+
+  ##
+  # The pipe holds 64 KiB and the child that reads it is
+  # spawned after this, so an input larger than that was
+  # written to nobody and blocked the spawn.
+  describe "standard input larger than a pipe" do
+    let(:command) do
+      described_class.new(RbConfig.ruby, "-e", "print $stdin.read")
+                     .stdin("x" * 300_000)
+    end
+
+    it "writes all of it" do
+      expect(Timeout.timeout(5) { command.stdout.bytesize }).to eq(300_000)
+    end
+  end
+
+  ##
+  # A timeout signals the command, and a command that
+  # started something else is not stopped by being
+  # stopped: the group it leads has to take the signal,
+  # or the child it left runs on with its pipes.
+  describe "#graceful_exit" do
+    let(:script) { "Process.spawn(RbConfig.ruby, '-e', 'sleep 30'); sleep 30" }
+    let(:command) { described_class.new(RbConfig.ruby, "-e", script) }
+
+    before { command.spawn }
+
+    it "stops the programs the command started as well" do
+      command.graceful_exit
+      expect { Timeout.timeout(5) { command.status } }.not_to raise_error
     end
   end
 end

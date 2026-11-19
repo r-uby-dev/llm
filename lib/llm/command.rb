@@ -8,6 +8,10 @@ class LLM::Command
 
   ##
   # @api private
+  GRACE = 0.5
+
+  ##
+  # @api private
   class Pipe < Struct.new(:r, :w)
     def self.pair
       new(*IO.pipe)
@@ -142,8 +146,9 @@ class LLM::Command
       @out, @err = Pipe.pair, Pipe.pair
       @pid = Process.spawn(
         envp,
-        @cmd, *@argv.map(&:to_s),
-        {in: @in_r, out: @out.w, err: @err.w, chdir: @cwd}.compact
+        @cmd,
+        *@argv.map(&:to_s),
+        options
       )
       @in_r.close unless @in_r.equal?(IO::NULL)
       @out.w.close
@@ -157,22 +162,22 @@ class LLM::Command
       @stdout_reader = Thread.new { reader.call(@out.r, @limit[:stdout]) }
       @stderr_reader = Thread.new { reader.call(@err.r, @limit[:stderr]) }
       @producer = Thread.new do
-        @stdout = @stdout_reader.value
-        @stderr = @stderr_reader.value
-        @status = Process.waitpid2(@pid).last
-      rescue Errno::ECHILD
-        @status = failed_status
-      ensure
-        @out.r.close
-        @err.r.close
+        begin
+          @status = Process.waitpid2(@pid).last
+        rescue Errno::ECHILD
+          @status = failed_status
+        end
+        @stdout = settle(@stdout_reader, @out.r)
+        @stderr = settle(@stderr_reader, @err.r)
       end
     end
   rescue Errno::ENOENT => ex
     @stderr = ex.message
     @enoent = true
     ##
-    # Close the read end of any input pipe so a pending
-    # writer thread does not block forever.
+    # Close the read end of any input pipe
+    # so a pending writer thread does not
+    # block forever.
     @in_r.close unless @in_r.equal?(IO::NULL)
     @status = failed_status
     self
@@ -245,7 +250,7 @@ class LLM::Command
   # @return [Boolean]
   #  Returns true when a command is running
   def alive?
-    @producer&.alive?
+    @spawned && @status.nil?
   end
   alias_method :running?, :alive?
 
@@ -271,8 +276,14 @@ class LLM::Command
   # @return [void]
   def signal(sig)
     noterm = Gem.win_platform?
-    (noterm and sig.to_s == "SIGTERM") ? Process.kill("SIGKILL", @pid) :
-                                         Process.kill(sig, @pid)
+    (noterm and sig.to_s == "SIGTERM") ? Process.kill("SIGKILL", signal_pid) :
+                                         Process.kill(sig, signal_pid)
+  end
+
+  ##
+  # @return [Integer].
+  def signal_pid
+    Gem.win_platform? ? @pid : -@pid
   end
 
   ##
@@ -366,6 +377,29 @@ class LLM::Command
   end
 
   ##
+  # The options the command is spawned with.
+  # @return [Hash]
+  def options
+    opts = {in: @in_r, out: @out.w, err: @err.w, chdir: @cwd}.compact
+    Gem.win_platform? ? opts : opts.merge(pgroup: true)
+  end
+
+  ##
+  # Waits for a reader to finish, and
+  # stops waiting once the command it
+  # belongs to is over.
+  # @param [Thread] reader
+  # @param [IO] io
+  # @return [String]
+  def settle(reader, io)
+    reader.join(GRACE)
+    io.close unless io.closed?
+    reader.value
+  rescue StandardError
+    ""
+  end
+
+  ##
   # Reads up to +max+ bytes from a stream, then drains
   # the remainder so a child writing more than the
   # limit does not block on a full pipe. When +max+ is
@@ -389,7 +423,7 @@ class LLM::Command
         buf << captured
         remaining -= captured.bytesize
       end
-    rescue EOFError, Errno::EIO
+    rescue EOFError, Errno::EIO, IOError
       break
     end
     ex ? raise(ex) : buf
@@ -407,8 +441,13 @@ class LLM::Command
     return IO::NULL if @stdin.nil?
     data = self.class === @stdin ? @stdin.stdout : @stdin.to_s
     r, w = IO.pipe
-    w.write(data)
-    w.close
+    Thread.new do
+      w.write(data)
+    rescue Errno::EPIPE, IOError
+      nil
+    ensure
+      w.close unless w.closed?
+    end
     r
   end
 
