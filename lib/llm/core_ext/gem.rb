@@ -29,7 +29,7 @@ module LLM::Gem
 
   ##
   # @return [Boolean]
-  def self.win_platform?
+  def win_platform?
     RUNNING_WIN
   end
 
