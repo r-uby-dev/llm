@@ -5,6 +5,12 @@ require_relative "rbconfig"
 ##
 # Ractor-safe Gem methods.
 module LLM::Gem
+  RUNNING_WIN = begin
+    host = RbConfig::RACTOR_CONFIG["host_os"]
+    (WIN_PATTERNS.find { host =~ it } != nil)
+  end
+  private_constant :RUNNING_WIN
+
   ##
   # @return [String]
   def default_bindir
@@ -24,12 +30,7 @@ module LLM::Gem
   ##
   # @return [Boolean]
   def self.win_platform?
-    if @@win_platform.nil?
-      host = RbConfig::RACTOR_CONFIG["host_os"]
-      @@win_platform = (WIN_PATTERNS.find { host =~ it } != nil)
-    else
-      @@win_platform
-    end
+    RUNNING_WIN
   end
 
   ::Gem.singleton_class.prepend(self)
