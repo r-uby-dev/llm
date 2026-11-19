@@ -48,6 +48,27 @@ RSpec.describe LLM::Tool::Exec do
       end
     end
 
+    ##
+    # SIGTERM is a request. A command that installs a
+    # handler of its own - a tracer, a server, anything
+    # with a shutdown hook - ignores it, and then the
+    # timeout is only as good as the process's manners.
+    # The escalation to SIGKILL is what makes it a bound.
+    context "when the command ignores SIGTERM" do
+      let(:script) { "Signal.trap('TERM') {}; sleep 30" }
+
+      it "kills the command anyway" do
+        now = Time.now
+        tool.call(command: RbConfig.ruby, arguments: ["-e", script], timeout: 0.1)
+        expect((Time.now - now) < 3).to be(true)
+      end
+
+      it "says it was killed" do
+        res = tool.call(command: RbConfig.ruby, arguments: ["-e", script], timeout: 0.1)
+        expect(res[:note]).to include("The command was killed after")
+      end
+    end
+
     context "when given arguments" do
       before do
         allow(command).to receive(:env).and_return(command)

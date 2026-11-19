@@ -102,6 +102,13 @@ module LLM
   @registry = {}
 
   ##
+  # Returns the time via a monotonic clock
+  # @return [Numeric]
+  def now
+    Process.clock_gettime(Process::CLOCK_MONOTONIC)
+  end
+
+  ##
   # @param [Hash] opts
   #  MCP client options
   # @option opts [Hash, nil] :stdio

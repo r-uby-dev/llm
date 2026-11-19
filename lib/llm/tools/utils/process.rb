@@ -88,7 +88,7 @@ module LLM::Tool::Utils
         }.compact
       end
     rescue LLM::Interrupt
-      kill(spawned) if spawned&.running?
+      terminate!(spawned) if spawned&.running?
       raise
     end
 

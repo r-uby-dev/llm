@@ -276,4 +276,25 @@ RSpec.describe LLM::Command do
       expect { Timeout.timeout(5) { command.status } }.not_to raise_error
     end
   end
+
+  ##
+  # `#wait` is how a tool asks whether a signal landed. It
+  # has to give up on its own: the process it is waiting on
+  # is one that may never answer.
+  describe "#wait" do
+    let(:command) { described_class.new(RbConfig.ruby, "-e", "sleep 30") }
+
+    before { command.spawn }
+
+    after { command.hard_exit! }
+
+    it "returns false when the command outlives the seconds" do
+      expect(command.wait(0.1)).to be(false)
+    end
+
+    it "returns true once the command is reaped" do
+      command.hard_exit!
+      expect(command.wait(5)).to be(true)
+    end
+  end
 end

@@ -12,6 +12,10 @@ class LLM::Command
 
   ##
   # @api private
+  CONSUME = 5.0
+
+  ##
+  # @api private
   class Pipe < Struct.new(:r, :w)
     def self.pair
       new(*IO.pipe)
@@ -270,9 +274,26 @@ class LLM::Command
   # @return [Boolean]
   #  Returns true when a command is running
   def alive?
-    @spawned && @status.nil?
+    @spawned and @status.nil?
   end
   alias_method :running?, :alive?
+
+  ##
+  # Waits, up to +seconds+, for the command to
+  # be reaped.
+  # @return [Boolean]
+  #  Returns true when the command has been reaped
+  def wait(seconds)
+    deadline = LLM.now + seconds
+    while alive?
+      action = (LLM.now > deadline ? :break : :continue)
+      case action
+      when :continue then sleep(0.01)
+      when :break then return false
+      end
+    end
+    true
+  end
 
   ##
   # Sends SIGKILL to a running command
@@ -495,7 +516,8 @@ class LLM::Command
   # @return [void]
   def consume
     return unless @producer&.alive?
-    @producer.join
+    @producer.join(CONSUME) ? nil :
+                             [hard_exit!, @producer.join(CONSUME)]
   end
 
   ##
