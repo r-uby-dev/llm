@@ -24,6 +24,120 @@ Older releases:
   nonzero `--error-exitcode` so a report arrives as a failed tool call, and to a
   300 second timeout because valgrind is slow.
 
+* **unix: add `LLM::Tool::Unix::HonggFuzz`** <br>
+  [`LLM::Tool::Unix::HonggFuzz`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/HonggFuzz.html)
+  (`unix-honggfuzz`) fuzzes a program with honggfuzz, where `unix-valgrind` runs
+  one input and honggfuzz hunts for the input that breaks it: it mutates a
+  corpus and runs the program on what it produces. It spawns `honggfuzz`
+  without a shell and builds the argument vector itself - the flags, then `--`,
+  then the program and the arguments the program is fuzzed with - so a flag of
+  the program is never read as a flag of honggfuzz. honggfuzz tells the program
+  where the mutated input is by replacing `___FILE___` in its arguments, which
+  is why `arguments:` defaults to that placeholder; with `stdin: true` (`-s`)
+  the input arrives on stdin instead, and the default is dropped rather than
+  left as a path the program would receive. honggfuzz runs until it is killed,
+  so every call is bounded by `timeout:`, 120 seconds by default, or by
+  `iterations:` (`-N`, unlimited at 0), and a killed run returns the log it
+  wrote before it died. `nullify_stdio:` (`-q`) and `plain:` (`-v`) are on by
+  default so the log is not buried in the program's own output and is returned
+  without the ANSI escape sequences honggfuzz draws with, and the crashes and
+  the report are read afterwards from `workspace:` (`-W`) and `report:` (`-R`).
+
+* **command: add `LLM::Command#tail`** <br>
+  [`LLM::Command#tail`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#tail-instance_method)
+  keeps the last n bytes of each stream rather than the first n, so
+  `LLM::Command.new("ls").tail(stdout: 123, stderr: 456)` returns the end of
+  the output, which is where a command says what went wrong. The stream is
+  still read to its end, because a child that writes into a pipe nobody reads
+  blocks on it, and the buffer is cut back after every chunk, so the bound is
+  on what is held rather than on what is read. A stream that is tailed is
+  returned as text with the invalid bytes scrubbed, so a cut that lands inside
+  a character is a string a JSON encoder accepts.
+
+* **command: `LLM::Command#limit` is `LLM::Command#head`** <br>
+  [`LLM::Command#head`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#head-instance_method)
+  keeps the first n bytes of each stream and is what `#limit` was. `#limit` is
+  its alias, so a call that uses either name is capped the same way.
+
+* **command: add `LLM::Command#streams`** <br>
+  [`LLM::Command#streams`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#streams-instance_method)
+  returns what the command has written so far, as `{stdout:, stderr:}`, without
+  waiting for it to finish. It is what a caller reads from a command it killed,
+  where `#stdout` and `#stderr` block on a producer that may be waiting for a
+  child the signal never reached.
+
+* **command: add `LLM::Command#wait`** <br>
+  [`LLM::Command#wait`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#wait-instance_method)
+  waits, up to the seconds it is given, for the command to be reaped, and
+  returns true when it was, or false when the seconds ran out. It is how a
+  caller asks whether a signal it sent was enough without joining a child that
+  may never exit.
+
+* **command: a signal reaches the programs the command started** <br>
+  [`LLM::Command#signal`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#signal-instance_method)
+  sends its signal to the process group of the spawned command on every system
+  but Windows, where it signalled the command alone, so a signal reaches the
+  programs a command started rather than the command by itself.
+
+* **command: a signal that lands on a command that already exited is not an error** <br>
+  [`LLM::Command#signal`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#signal-instance_method)
+  returns `nil` when the process is gone, where it raised `Errno::ESRCH`. A
+  command exits between the decision to stop it and the signal itself, and
+  stopping a command that has stopped already is what the signal was for.
+
+* **tools: a command that ignores SIGTERM is killed anyway** <br>
+  [`LLM::Tool::Utils::Process#terminate!`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Utils/Process.html#terminate!-instance_method)
+  sends SIGTERM to a command that outlives its `timeout:`, waits half a second,
+  and sends SIGKILL when the command is still running. A debugger, a process
+  under a tracer, and a program with a TERM handler of its own ignore the
+  request, and a tool that waits on one of them reads a status and an output
+  that wait for the child to be reaped - so the escalation is what makes
+  `timeout:` a bound rather than a suggestion.
+
+* **tools: a tool keeps the last `max_bytes` of a command's output** <br>
+  [`LLM::Tool::Utils::Process#exec`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Utils/Process.html#exec-instance_method)
+  caps each stream at the tool's `max_bytes` from the end now, where it kept the
+  bytes at the front: a command says what went wrong last, so the end of the
+  stream is the part a model is handed. The stream is still read to its end, so
+  the cap bounds what a tool holds without bounding what it reads, and what the
+  tool returns is within the cap already, so the marker that said the output
+  was truncated is not added.
+
+* **schema: `LLM::Schema::Enum` raises when a value is a collection** <br>
+  [`LLM::Schema::Enum`](https://r.uby.dev/api-docs/llm.rb/LLM/Schema/Enum.html)
+  raises when it is given an array or a hash as a value, so `Enum[Fruit.keys]`
+  - the splat that was left out - is rejected where it used to build an enum
+  whose one value was a collection, and the message names the splat that was
+  missing.
+
+* **core: add `LLM.now`** <br>
+  [`LLM.now`](https://r.uby.dev/api-docs/llm.rb/LLM.html#now-class_method)
+  returns the time from a monotonic clock, so a duration is measured against a
+  clock that does not jump when the system clock is adjusted. It is the clock
+  [`LLM::Command#wait`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#wait-instance_method)
+  measures its deadline with.
+
+* **function: a tool that raises what is not a `StandardError` returns the error** <br>
+  [`LLM::Function#call`](https://r.uby.dev/api-docs/llm.rb/LLM/Function.html#call-instance_method)
+  returns an error to the model when the tool it ran raises an exception that
+  does not descend from `StandardError`, where that exception escaped the call
+  and took the caller with it. `LLM::Interrupt` is the one exception that is
+  raised still, because a call that was cancelled is not a call that failed.
+
+* **async: add `LLM::TaskError`** <br>
+  [`LLM::TaskError`](https://r.uby.dev/api-docs/llm.rb/LLM/TaskError.html) is
+  the error a task returns when it ends without a response - the tool pushed
+  nothing, and the reactor is gone - so
+  [`LLM::Function::Async::Task#wait`](https://r.uby.dev/api-docs/llm.rb/LLM/Function/Async/Task.html#wait-instance_method)
+  returns that error rather than waiting on a queue nothing will push to.
+
+* **async: a task does not stop a reactor it shares** <br>
+  [`LLM::Function::Async::Task#wait`](https://r.uby.dev/api-docs/llm.rb/LLM/Function/Async/Task.html#wait-instance_method)
+  stops the reactor the task ran on when the task owns it, and leaves it
+  running when the task is one of a group, where it stopped the reactor its
+  siblings were still running on. A group stops the reactor once its last task
+  has returned.
+
 ## v21.0.0
 
 Changes since `v20.0.0`.
