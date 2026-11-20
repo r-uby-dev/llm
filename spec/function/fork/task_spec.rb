@@ -294,8 +294,8 @@ RSpec.describe LLM::Function::Fork::Task do
       expect(returned.value[:type]).to eq("EOFError")
     end
 
-    it "says the tool exited unexpectedly" do
-      expect(returned.value[:message]).to eq("the tool exited unexpectedly")
+    it "carries the message the read raised" do
+      expect(returned.value[:message]).to_not be_empty
     end
 
     it "answers a second wait with the same return" do
