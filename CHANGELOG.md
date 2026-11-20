@@ -138,6 +138,16 @@ Older releases:
   siblings were still running on. A group stops the reactor once its last task
   has returned.
 
+* **async: a reactor waits for work without stalling the tasks it runs** <br>
+  [`LLM::Function::Async::Reactor`](https://r.uby.dev/api-docs/llm.rb/LLM/Function/Async/Reactor.html)
+  learns that it has work from a pipe that `#submit` and `#stop`
+  write to, and drains the inbox without blocking, where its own
+  fiber sat in a blocking `Queue#pop`. A fiber parked on a pipe
+  yields to the event loop, so the timers and the IO of the tasks a
+  reactor runs still make progress while it waits for the next item -
+  and a command that outlives its `timeout:` is killed, where it was
+  left running beside a reactor that could not wake to stop it.
+
 ## v21.0.0
 
 Changes since `v20.0.0`.
