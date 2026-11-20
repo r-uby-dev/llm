@@ -13,6 +13,27 @@ Older releases:
 
 ## What's next
 
+*No unreleased changes yet. Check back after the next release.*
+
+## v21.1.0
+
+Changes since `v21.0.0`.
+
+This is a feature release. It adds two unix tools - `unix-valgrind` and
+`unix-honggfuzz` - and `LLM::Command` gains `#tail`, `#streams` and
+`#wait`, renames `#limit` to `#head`, signals the process group so a
+signal reaches the programs the command started, and treats a signal
+that lands on a command that has exited as a no-op. Tools keep the tail
+of a command's output within `max_bytes` and escalate SIGTERM to
+SIGKILL, `LLM.now` measures a duration against a monotonic clock,
+`LLM::Schema::Enum` raises when a value is a collection, and
+`LLM::Function#call` turns an exception that is not a `StandardError`
+into an error return. The async layer gains `LLM::TaskError`, a reactor
+that wakes on a pipe rather than a blocking `Queue#pop`, and a task that
+no longer stops a reactor it shares, while
+`LLM::Function::Task#report!` tells the tracer how a task ended and
+`LLM::Stream#on_tool_return` fires as each tool returns.
+
 * **unix: add `LLM::Tool::Unix::Valgrind`** <br>
   [`LLM::Tool::Unix::Valgrind`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Unix/Valgrind.html)
   runs a program under `valgrind` and returns the report it wrote to stderr. It
