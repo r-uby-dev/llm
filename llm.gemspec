@@ -24,12 +24,6 @@ Gem::Specification.new do |spec|
                   "Anand Biju"].sort
   spec.email = ["robert@r.uby.dev"]
 
-  spec.post_install_message = "\n\n"                       \
-                              "Learn more about what "     \
-                              "the llm.rb runtime can "    \
-                              "do at:\nhttps://r.uby.dev"  \
-                              "\n\n"
-
   spec.summary = "An agentic runtime for system programmers - in Ruby."
   spec.description = <<~DESCRIPTION
   An agentic runtime for system programmers - in Ruby.
