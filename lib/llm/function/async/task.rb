@@ -89,16 +89,20 @@ module LLM::Function::Async
             @window.running!
             @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
             r = function.call
+            @value = r
             @queue << r
             pushed = true
           rescue LLM::Interrupt => ex
+            @value = ex
             @queue << ex
             pushed = true
           rescue Exception => ex
+            @value = ex
             @queue << ex
             pushed = true
           ensure
             @finished_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+            report!(@value) if @value
             ex = LLM::TaskError.new("the task ended without a response")
             @queue << @function.error(ex:)
             @window.finished!

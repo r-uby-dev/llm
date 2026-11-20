@@ -48,8 +48,10 @@ class LLM::Stream
     # @return [Array<LLM::Function::Return>]
     def wait
       returns, tasks = @items.shift(@items.length).partition { LLM::Function::Return === _1 }
-      results = wait_tasks(tasks)
-      returns.concat fire_hooks(tasks, results)
+      tasks.each do |task|
+        task.on_return = ->(val) { @stream&.on_tool_return(task.function, val) }
+      end
+      returns.concat wait_tasks(tasks)
     end
     alias_method :value, :wait
 
@@ -66,12 +68,5 @@ class LLM::Stream
       tasks.map { results[_1] }
     end
 
-    def fire_hooks(tasks, results)
-      results.each_with_index do |result, idx|
-        tool = tasks[idx]&.function
-        @stream.on_tool_return(tool, result) if tool
-      end
-      results
-    end
   end
 end

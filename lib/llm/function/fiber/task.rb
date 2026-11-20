@@ -101,11 +101,15 @@ module LLM::Function::Fiber
             # the tool's own `rescue` never saw the interrupt.
             @window.running!
             @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-            @queue << function.call
+            @value = function.call
+            @queue << @value
           rescue LLM::Interrupt => ex
+            @value = ex
             @queue << ex
           ensure
             @finished_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+            @value ||= $!
+            report!(@value) if @value
             ##
             # The tool has answered, so a cancel that arrives from here on
             # asks nothing - which is the no-op a cancel that arrives once

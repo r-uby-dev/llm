@@ -72,6 +72,7 @@ class LLM::Function
       @ractor = build_task(@resultp)
       @ractor.monitor(@exitp)
       watch_exit
+      @receiver = ::Thread.new { receive! }
       if @cancelled
         @cancelled = false
         interrupt!
@@ -88,9 +89,6 @@ class LLM::Function
 
     ##
     # Tells the tool to stop.
-    #
-    # A cancel that arrives before `spawn` is remembered and
-    # delivered by it.
     # @return [nil]
     def interrupt!
       if @ractor
@@ -111,20 +109,10 @@ class LLM::Function
     # @return [LLM::Function::Return]
     def wait
       return @intercepted if intercepted?
-      @result ||= begin
-        spawn unless @resultp
-        _, ready = Ractor.select(@resultp)
-        if ready == EXITED
-          Return.new(@id, @name, {error: true, type: "ractor ended without result"})
-        else
-          _, id, name, value, @finished_at = ready
-          if Hash === value and value[:interrupt] and value[:cookie] == @cookie
-            LLM::Interrupt.new
-          else
-            Return.new(id, name, value)
-          end
-        end
-      end
+      spawn unless @resultp
+      @receiver&.join
+      @result ||= LLM::Object.from(unbox: @value)
+      @result.unbox
     end
     alias_method :value, :wait
 
@@ -145,6 +133,26 @@ class LLM::Function
       Ractor.new(*vars) do |*vars|
         LLM::Function::Ractor::Job.new(*vars).call
       end
+    end
+
+    ##
+    # @return [void]
+    def receive!
+      _, ready = Ractor.select(@resultp)
+      @value = if ready == EXITED
+                 Return.new(@id, @name, {error: true, type: "ractor ended without result"})
+               else
+                 _, id, name, value, @finished_at = ready
+                 if Hash === value and value[:interrupt] and value[:cookie] == @cookie
+                   LLM::Interrupt.new
+                 else
+                   Return.new(id, name, value)
+                 end
+               end
+    rescue ::Ractor::Error => ex
+      @value = @function.return(error: true, type: ex.class.name, message: ex.message)
+    ensure
+      report!(@value) if @value
     end
 
     ##

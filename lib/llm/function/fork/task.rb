@@ -73,6 +73,7 @@ class LLM::Function
       @ch.control.r.close
       @ch.result.w.close
       @spawned = true
+      @receiver = ::Thread.new { receive! }
       self
     end
 
@@ -137,27 +138,9 @@ class LLM::Function
       return @intercepted if intercepted?
       return @result.unbox if @result
       spawn unless @spawned
-      kind, data, @finished_at = @ch.result.recv
-      @result = case kind
-                when :interrupt then LLM::Object.from(unbox: LLM::Interrupt.new)
-                when :result then LLM::Object.from(unbox: Return.new(data[:id], data[:name], data[:value]))
-                else raise ArgumentError, "unknown fork message: #{kind.inspect}"
-                end
-      reap
+      @receiver&.join
+      @result = LLM::Object.from(unbox: @value)
       @result.unbox
-    rescue EOFError
-      ##
-      # Stored in `@result` so a second wait is
-      # given the same return as the first call.
-      reap
-      val = @function.return(error: true, type: EOFError.name, message: "the tool exited unexpectedly")
-      @result = LLM::Object.from(unbox: val)
-      @result.unbox
-    ensure
-      if @intercepted.nil?
-        reap
-        [@ch.control, @ch.result].each { _1.close unless _1.closed? } if @ch
-      end
     end
     alias_method :value, :wait
 
@@ -185,12 +168,23 @@ class LLM::Function
     end
 
     ##
-    # Waits for the child, once.
-    #
-    # It is `reap` rather than a bare `waitpid` because the call appears three
-    # times - the answer, the ending above, and the `ensure` - and a child can
-    # only be reaped once.
     # @return [void]
+    def receive!
+      kind, data, @finished_at = @ch.result.recv
+      @value = case kind
+               when :interrupt then LLM::Interrupt.new
+               when :result then Return.new(data[:id], data[:name], data[:value])
+               else raise ArgumentError, "unknown fork message: #{kind.inspect}"
+               end
+    rescue EOFError
+      @value = @function.error(ex: $!)
+    rescue => ex
+      @value = @function.error(ex: $!)
+    ensure
+      reap
+      report!(@value) if @value
+    end
+
     def reap
       return if @waited || @intercepted || !@pid
       ::Process.waitpid(@pid)

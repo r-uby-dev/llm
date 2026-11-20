@@ -328,8 +328,12 @@ RSpec.describe LLM::Stream do
             expect(result_ids).to eq(expected_ids)
           end
 
-          it "emits tool return callbacks in enqueue order" do
-            expect(stream.events).to eq(expected_ids.map { [it, it] })
+          it "emits a tool return callback for each tool" do
+            expect(stream.events.map(&:first)).to contain_exactly(*expected_ids)
+          end
+
+          it "emits each tool return callback once" do
+            expect(stream.events.size).to eq(expected_ids.size)
           end
         end
       end

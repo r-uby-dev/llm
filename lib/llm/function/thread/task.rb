@@ -65,9 +65,11 @@ module LLM::Function::Thread
         ::Thread.new { @window.interrupt! } if @cancelled
         @window.running!
         @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-        function.call
+        @value = function.call
       ensure
         @finished_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        @value ||= $!
+        report!(@value) if @value
         ##
         # The window closes before the hook runs, so a cancel that arrives
         # once the call has returned finds nothing to interrupt - which is

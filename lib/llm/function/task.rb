@@ -96,7 +96,28 @@ class LLM::Function
     alias_method :value, :wait
 
     ##
-    # @abstract
+    # Called with the value a task ended with.
+    # @return [Proc, nil]
+    attr_writer :on_return
+
+    ##
+    # Tells the tracer how the task ended, once.
+    # @param [LLM::Function::Return, LLM::Interrupt] val
+    # @return [void]
+    def report!(val)
+      return if @reported
+      @reported = true
+      if LLM::Interrupt === val
+        tracer&.on_tool_interrupt(ex: val, span:, started_at:, finished_at:)
+      elsif LLM::Function::Return === val and val.error?
+        tracer&.on_tool_error(ex: val, span:, started_at:, finished_at:)
+      else
+        tracer&.on_tool_finish(result: val, span:, started_at:, finished_at:)
+      end
+      @on_return&.call(val)
+      nil
+    end
+
     # @return [Class]
     def group_class
       raise NotImplementedError
