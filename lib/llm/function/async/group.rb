@@ -20,6 +20,7 @@ module LLM::Function::Async
     def spawn
       @tasks.each do |task|
         task.reactor = @reactor
+        task.shared!
         task.spawn
       end
       nil

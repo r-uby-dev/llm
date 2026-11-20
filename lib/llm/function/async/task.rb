@@ -159,10 +159,18 @@ module LLM::Function::Async
         @alive = false
         @result.unbox
       ensure
-        @reactor&.stop
+        @reactor&.stop unless @shared
       end
     end
     alias_method :value, :wait
+
+    def shared!
+      @shared = true
+    end
+
+    def group_class
+      LLM::Function::Async::Group
+    end
 
     private
 
@@ -175,12 +183,6 @@ module LLM::Function::Async
         break @return.error(ex: $!) unless @reactor&.thread&.alive?
         sleep 0.01
       end
-    end
-
-    ##
-    # @return [Class]
-    def group_class
-      LLM::Function::Async::Group
     end
   end
 end
