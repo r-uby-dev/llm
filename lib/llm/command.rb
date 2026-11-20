@@ -248,6 +248,18 @@ class LLM::Command
     consume
     @stderr
   end
+
+  ##
+  # What the command has written so far,
+  # without waiting for it to finish.
+  # @return [Hash{Symbol => String}]
+  def streams
+    LLM::Object.from({
+      stdout: @tail[:stdout] ? text(@stdout_buf || +"") : (@stdout_buf || +""),
+      stderr: @tail[:stderr] ? text(@stderr_buf || +"") : (@stderr_buf || +"")
+    })
+  end
+
   # @endgroup
 
   ##
