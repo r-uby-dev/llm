@@ -84,7 +84,8 @@ class LLM::Command
       env(command.env) if command.env
       chdir(command.cwd) if command.cwd
       stdin(command.input) if command.input
-      limit(**command.limits)
+      head(**command.instance_variable_get(:@head))
+      tail(**command.instance_variable_get(:@tail))
     end
   end
 
@@ -406,14 +407,6 @@ class LLM::Command
   # @return [String, LLM::Command, nil]
   def input
     @stdin
-  end
-
-  ##
-  # The byte limits of each stream, kept so a command
-  # can carry the limits of the command it chains.
-  # @return [Hash]
-  def limits
-    @head
   end
 
   private

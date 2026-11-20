@@ -74,13 +74,13 @@ RSpec.describe LLM::Tool::Exec do
         allow(command).to receive(:env).and_return(command)
         allow(command).to receive(:arguments).and_return(command)
         allow(command).to receive(:spawn).and_return(command)
-        allow(command).to receive(:limit).and_return(command)
+        allow(command).to receive(:tail).and_return(command)
         allow(LLM::Command).to receive(:new).and_return(command)
         tool.call(command: "echo", arguments: ["hi"])
       end
 
       it "limits stdout and stderr by max_bytes" do
-        expect(command).to have_received(:limit).with(
+        expect(command).to have_received(:tail).with(
           stdout: LLM::Tool::Exec.max_bytes,
           stderr: LLM::Tool::Exec.max_bytes
         )
@@ -108,7 +108,7 @@ RSpec.describe LLM::Tool::Exec do
         allow(command).to receive(:env).and_return(command)
         allow(command).to receive(:arguments).and_return(command)
         allow(command).to receive(:spawn).and_return(command)
-        allow(command).to receive(:limit).and_return(command)
+        allow(command).to receive(:tail).and_return(command)
         allow(LLM::Command).to receive(:new).and_return(command)
         allow(command).to receive(:running?).and_return(true, false)
         allow(command).to receive(:success?).and_return(true)
@@ -128,7 +128,7 @@ RSpec.describe LLM::Tool::Exec do
         allow(command).to receive(:env).and_return(command)
         allow(command).to receive(:arguments).and_return(command)
         allow(command).to receive(:spawn).and_return(command)
-        allow(command).to receive(:limit).and_return(command)
+        allow(command).to receive(:tail).and_return(command)
         allow(LLM::Command).to receive(:new).and_return(command)
         described_class.new(env: {"FOO" => "bar"}).call(command: "echo", arguments: ["hi"])
       end
