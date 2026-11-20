@@ -19,13 +19,9 @@ module LLM::Tool::Utils
 
     ##
     # @return [Float]
-    #  The seconds between a signal and a reading
-    #  of whether it was enough.
     GRACE = 0.5
 
     ##
-    # Gives the class that includes this module a `max_bytes`
-    # of its own.
     # @param [Class] base
     # @return [void]
     def self.included(base)
@@ -70,19 +66,15 @@ module LLM::Tool::Utils
     #  defaults to the including tool's `max_bytes`
     # @return [Hash]
     def exec(command:, arguments: [], env: {}, timeout: 60, max_bytes: self.class.max_bytes)
+      cmd     = command(command:, arguments:, env:, max_bytes:)
       startat = now
-      spawned = spawn(command:, arguments:, env:, max_bytes:)
+      spawned = nil
+      spawned = run(cmd)
       killed = catch(:kill) { [wait(command: spawned, timeout:), nil].last }
       if spawned.not_found?
         {ok: false, error: "command '#{command}' was not found on this system"}
       else
-        ##
-        # A command that was killed is read without
-        # joining it: its producer may be waiting for a
-        # child the signal never reached, and reading
-        # `stdout` is what turns "killed at the timeout"
-        # into "never returned".
-        captured = killed ? spawned.output :
+        captured = killed ? spawned.streams :
                             {stdout: spawned.stdout, stderr: spawned.stderr}
         {ok: killed ? false : spawned.success?,
          stdout: truncate(captured[:stdout], max_bytes:),
@@ -96,27 +88,11 @@ module LLM::Tool::Utils
         }.compact
       end
     rescue LLM::Interrupt
-      terminate!(spawned) if spawned&.running?
+      [cmd, spawned].compact.each { it.running? ? terminate!(it) : nil }
       raise
     end
 
     ##
-    # Waits for a command to finish, within the timeout,
-    # and throws `:kill` when it does not.
-    #
-    # It asks only what answers without waiting.
-    # `success?` is not one of those: it joins the
-    # producer, and a producer that is stuck - a child
-    # that will not die, a pipe a descendant is holding -
-    # is a join that never returns. The timeout is the
-    # answer to exactly that, so it cannot be checked
-    # behind a call that waits.
-    # @note
-    #  When the timeout expires this method
-    #  will throw `:kill` rather than raise
-    #  an exception.
-    # @raise [UncaughtThrowError]
-    #  When the throw does not have a catch.
     # @param [LLM::Command] command
     # @param [Integer] timeout
     # @return [void]
@@ -132,26 +108,14 @@ module LLM::Tool::Utils
     end
 
     ##
-    # Ends a command that outlived its timeout.
-    #
-    # SIGTERM is the polite request, and it is enough for
-    # anything that means to stop - but a debugger, a
-    # process stopped under a tracer, or a program with a
-    # TERM handler of its own will ignore it, and then
-    # nothing reaps the child. The caller goes on to read
-    # its status and its output, and both wait for the
-    # child to be reaped, so a command that ignores SIGTERM
-    # would hold the tool that is waiting on it forever.
-    #
-    # SIGKILL after a grace period is what makes `timeout`
-    # a bound rather than a suggestion.
     # @param [LLM::Command] command
     # @return [void]
     def terminate!(command)
       command.graceful_exit
-      return if command.wait(GRACE)
-      command.hard_exit!
-      command.wait(GRACE)
+      unless command.wait(GRACE)
+        command.hard_exit!
+        command.wait(GRACE)
+      end
     end
 
     ##
@@ -178,7 +142,7 @@ module LLM::Tool::Utils
         .new(command)
         .env(env)
         .arguments(*[*arguments])
-        .limit(stdout: max_bytes, stderr: max_bytes)
+        .tail(stdout: max_bytes, stderr: max_bytes)
     end
 
     ##

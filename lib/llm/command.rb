@@ -38,7 +38,7 @@ class LLM::Command
     @stdout = ""
     @stderr = ""
     @enoent = false
-    @limit = {stdout: nil, stderr: nil}
+    @head = {stdout: nil, stderr: nil}
     @tail = {stdout: nil, stderr: nil}
   end
 
@@ -132,9 +132,10 @@ class LLM::Command
   # @param [Integer, nil] stderr
   #  Max bytes of stderr to read, or nil for unlimited
   # @return [LLM::Command]
-  def limit(stdout: nil, stderr: nil)
-    tap { @limit = {stdout:, stderr:} }
+  def head(stdout: nil, stderr: nil)
+    tap { @head = {stdout:, stderr:} }
   end
+  alias_method :limit, :head
 
   ##
   # Keeps the last n bytes of each stream, rather than the
@@ -147,7 +148,7 @@ class LLM::Command
   def tail(stdout: nil, stderr: nil)
     tap do
       @tail = {stdout:, stderr:}
-      @limit = {stdout: nil, stderr: nil}
+      @head = {stdout: nil, stderr: nil}
     end
   end
 
@@ -177,10 +178,10 @@ class LLM::Command
         end
       end
       @stdout_reader = Thread.new do
-        reader.call(@out.r, @limit[:stdout], @tail[:stdout], @stdout_buf)
+        reader.call(@out.r, @head[:stdout], @tail[:stdout], @stdout_buf)
       end
       @stderr_reader = Thread.new do
-        reader.call(@err.r, @limit[:stderr], @tail[:stderr], @stderr_buf)
+        reader.call(@err.r, @head[:stderr], @tail[:stderr], @stderr_buf)
       end
       @producer = Thread.new do
         begin
@@ -211,6 +212,8 @@ class LLM::Command
     spawn
     consume
     @status
+  ensure
+    abandon!
   end
 
   ##
@@ -238,6 +241,8 @@ class LLM::Command
     spawn(&)
     consume
     @stdout
+  ensure
+    abandon!
   end
 
   ##
@@ -247,11 +252,11 @@ class LLM::Command
     spawn(&)
     consume
     @stderr
+  ensure
+    abandon!
   end
 
   ##
-  # What the command has written so far,
-  # without waiting for it to finish.
   # @return [Hash{Symbol => String}]
   def streams
     LLM::Object.from({
@@ -404,9 +409,11 @@ class LLM::Command
   end
 
   ##
+  # The byte limits of each stream, kept so a command
+  # can carry the limits of the command it chains.
   # @return [Hash]
   def limits
-    @limit
+    @head
   end
 
   private
@@ -525,6 +532,16 @@ class LLM::Command
     end
     r
   end
+
+  ##
+  # Kills the child when the caller is unwinding
+  # @return [void]
+  def abandon!
+    return if $!.nil?
+    graceful_exit
+    hard_exit!
+  end
+
   ##
   # Blocks until the spawned command has finished, its
   # output has been read, and its exit status captured.
