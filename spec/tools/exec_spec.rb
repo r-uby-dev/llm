@@ -110,10 +110,15 @@ RSpec.describe LLM::Tool::Exec do
         allow(command).to receive(:spawn).and_return(command)
         allow(command).to receive(:limit).and_return(command)
         allow(LLM::Command).to receive(:new).and_return(command)
-        allow(command).to receive(:success?).and_return(nil, true)
+        allow(command).to receive(:running?).and_return(true, false)
+        allow(command).to receive(:success?).and_return(true)
       end
 
-      it "waits for a status rather than reading nil" do
+      ##
+      # The loop asks only what does not wait, so a
+      # command that is still running is waited for
+      # rather than read as a nil status.
+      it "waits for the command to be reaped" do
         expect(result).to include(ok: true)
       end
     end

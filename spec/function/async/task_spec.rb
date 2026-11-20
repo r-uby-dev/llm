@@ -292,4 +292,34 @@ RSpec.describe LLM::Function::Async::Task do
       expect(second).to equal(interrupted)
     end
   end
+
+  ##
+  # A tool answers; it does not take the reactor down. A
+  # tool that raises what is not a StandardError used to
+  # escape both rescues on the way out, leaving the
+  # queue empty - and `wait` blocked on it for an answer
+  # that could never come.
+  describe "a tool that raises what is not a StandardError" do
+    let(:raising) do
+      Class.new(LLM::Tool) do
+        name "raising"
+        define_method(:call) { raise NotImplementedError, "not a StandardError" }
+      end
+    end
+
+    let(:task) do
+      raising.function.dup.tap do |fn|
+        fn.id = "call_1"
+        fn.arguments = {}
+      end.task(:async).tap { |task| task.reactor = reactor }
+    end
+
+    it "answers rather than leaving the caller waiting" do
+      expect(within { task.wait }.error?).to be(true)
+    end
+
+    it "answers with what was raised" do
+      expect(within { task.wait }.to_h[:value][:type]).to eq("NotImplementedError")
+    end
+  end
 end

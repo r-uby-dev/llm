@@ -82,18 +82,12 @@ module LLM
   RactorError = Class.new(Error)
 
   ##
-  # When a fiber tool's scheduler cannot hold a cancel until the tool starts.
-  #
-  # A cancel that arrives before a call opens is issued at the call's first
-  # instruction, and only a scheduler that implements `fiber_interrupt` can
-  # be asked for a raise from there - it schedules the raise rather than
-  # issuing it. A scheduler that cannot is told so, rather than delivering
-  # the cancel before the call and never running the tool.
-  #
-  # **Name it in full.** Ruby has a `FiberError` of its own, so a bare
-  # `FiberError` in a rescue written outside this namespace is core's rather
-  # than this one.
+  # Fiber-related errors
   FiberError = Class.new(Error)
+
+  ##
+  # Task-related errors
+  TaskError = Class.new(Error)
 
   ##
   # When a tool call cannot be mapped to a local tool

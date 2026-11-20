@@ -76,9 +76,17 @@ module LLM::Tool::Utils
       if spawned.not_found?
         {ok: false, error: "command '#{command}' was not found on this system"}
       else
-        {ok: spawned.success?,
-         stdout: truncate(spawned.stdout, max_bytes:),
-         stderr: truncate(spawned.stderr, max_bytes:),
+        ##
+        # A command that was killed is read without
+        # joining it: its producer may be waiting for a
+        # child the signal never reached, and reading
+        # `stdout` is what turns "killed at the timeout"
+        # into "never returned".
+        captured = killed ? spawned.output :
+                            {stdout: spawned.stdout, stderr: spawned.stderr}
+        {ok: killed ? false : spawned.success?,
+         stdout: truncate(captured[:stdout], max_bytes:),
+         stderr: truncate(captured[:stderr], max_bytes:),
          duration: "#{(now - startat).round(1)} seconds",
          note: killed ? "The command was killed after "            \
                         "exceeding the #{timeout}s timeout. "      \
@@ -93,9 +101,16 @@ module LLM::Tool::Utils
     end
 
     ##
-    # This method waits for a command to finish
-    # but within timeout. A timeout that expires
-    # will throw back to the caller.
+    # Waits for a command to finish, within the timeout,
+    # and throws `:kill` when it does not.
+    #
+    # It asks only what answers without waiting.
+    # `success?` is not one of those: it joins the
+    # producer, and a producer that is stuck - a child
+    # that will not die, a pipe a descendant is holding -
+    # is a join that never returns. The timeout is the
+    # answer to exactly that, so it cannot be checked
+    # behind a call that waits.
     # @note
     #  When the timeout expires this method
     #  will throw `:kill` rather than raise
@@ -107,7 +122,7 @@ module LLM::Tool::Utils
     # @return [void]
     def wait(command:, timeout:)
       start = now
-      while command.running? || status_unavailable?(command)
+      while command.running?
         if now - start > timeout
           terminate!(command)
           throw(:kill, true)
@@ -201,14 +216,6 @@ module LLM::Tool::Utils
     end
 
     private
-
-    ##
-    # Whether a command has not been reaped yet.
-    # @param [LLM::Command] command
-    # @return [Boolean]
-    def status_unavailable?(command)
-      command.success?.nil? and !command.not_found?
-    end
 
   end
 end

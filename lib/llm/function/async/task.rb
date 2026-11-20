@@ -68,7 +68,7 @@ module LLM::Function::Async
     # `StandardError`.
     # @return [nil]
     def spawn
-      @span  = @tracer&.on_tool_start(
+      @span = @tracer&.on_tool_start(
         id: @function.id,
         name: @function.name,
         arguments: @function.arguments,
@@ -82,39 +82,25 @@ module LLM::Function::Async
         @task = task
         @scheduler = Fiber.scheduler
         @window = LLM::Function::Window.new(scheduler: @scheduler, fiber: task.fiber)
-        ##
-        # A cancel that arrived before this block ran. There is nothing to
-        # ask for yet, so the ask is recorded and issued when the call opens
-        # - which is the transition the window alerts, and the only place
-        # that can, since this fiber is the one that will be running the
-        # tool.
         @window.interrupt!(wait: false) if @cancelled
         task.defer_cancel do
+          pushed = false
           begin
             @window.running!
-            ##
-            # The 'function.call' method call will rescue
-            # subclasses of StandardError and turn it into
-            # a LLM::Function::Return object. An LLM::Interrupt
-            # escapes this method call, and it is rescued
-            # here and pushed onto the queue.
             @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
             @queue << function.call
+            pushed = true
           rescue LLM::Interrupt => ex
             @queue << ex
+            pushed = true
+          rescue Exception => ex
+            @queue << ex
+            pushed = true
           ensure
             @finished_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-            ##
-            # The tool has answered, so a cancel that arrives from here on
-            # asks nothing - which is the no-op a cancel that arrives once
-            # the call has returned is.
+            ex = LLM::TaskError.new("the task ended without a response")
+            @queue << @function.error(ex:)
             @window.finished!
-            ##
-            # The hook runs on the reactor's thread rather than on the one
-            # that cancelled. See the note on
-            # `LLM::Function::Thread::Task#spawn` for why it cannot run
-            # before the call's frame has ended, and what the window's
-            # `interrupted?` means.
             function.interrupt! if @window.interrupted?
           end
         end
@@ -169,7 +155,7 @@ module LLM::Function::Async
       return @result.unbox if @result
       begin
         spawn unless @queue
-        @result = LLM::Object.from(unbox: @queue.pop)
+        @result = LLM::Object.from(unbox: pop)
         @alive = false
         @result.unbox
       ensure
@@ -177,6 +163,19 @@ module LLM::Function::Async
       end
     end
     alias_method :value, :wait
+
+    private
+
+    ##
+    # @return [LLM::Function::Return, LLM::Interrupt]
+    def pop
+      loop do
+        break @queue.pop(true)
+      rescue ThreadError
+        break @return.error(ex: $!) unless @reactor&.thread&.alive?
+        sleep 0.01
+      end
+    end
 
     ##
     # @return [Class]
