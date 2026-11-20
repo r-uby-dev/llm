@@ -148,6 +148,23 @@ Older releases:
   and a command that outlives its `timeout:` is killed, where it was
   left running beside a reactor that could not wake to stop it.
 
+* **function: add `LLM::Function::Task#report!`** <br>
+  [`LLM::Function::Task#report!`](https://r.uby.dev/api-docs/llm.rb/LLM/Function/Task.html#report!-instance_method)
+  tells the tracer how a task ended - `on_tool_interrupt` for an interrupt,
+  `on_tool_error` for an error return, `on_tool_finish` for the rest - and
+  calls the hook `#on_return=` was given with the same value. It reports once,
+  so a second call is a no-op, and the report comes from the task itself, so a
+  task that is waited on alone tells the tracer too, where only a group did.
+
+* **stream: `LLM::Stream#on_tool_return` fires as each tool returns** <br>
+  [`LLM::Stream#on_tool_return`](https://r.uby.dev/api-docs/llm.rb/LLM/Stream.html#on_tool_return-instance_method)
+  is called when the task that ran the tool ends, so a turn's tools are
+  reported in the order they returned rather than in the order they were
+  queued. A task reports the tool it ran once, so a group that waits on it
+  does not report it twice, and a fork or a ractor task reports as its child
+  ends - before the caller waits, where every tool was reported after all of
+  them had been waited on.
+
 ## v21.0.0
 
 Changes since `v20.0.0`.
