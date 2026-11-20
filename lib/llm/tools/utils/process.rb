@@ -66,29 +66,30 @@ module LLM::Tool::Utils
     #  defaults to the including tool's `max_bytes`
     # @return [Hash]
     def exec(command:, arguments: [], env: {}, timeout: 60, max_bytes: self.class.max_bytes)
-      cmd     = command(command:, arguments:, env:, max_bytes:)
+      cmd = command(command:, arguments:, env:, max_bytes:)
       startat = now
       spawned = nil
       spawned = run(cmd)
       killed = catch(:kill) { [wait(command: spawned, timeout:), nil].last }
-      if spawned.not_found?
+      if killed
+        streams = spawned.streams
+        {ok: false,
+         stdout: truncate(streams[:stdout], max_bytes:),
+         stderr: truncate(streams[:stderr], max_bytes:),
+         duration: "#{(now - startat).round(1)} seconds",
+         note: "The command was killed after exceeding the #{timeout}s timeout. " \
+               "stdout and stderr are what it produced before it was killed " \
+               "and both streams are probably incomplete."}
+      elsif spawned.not_found?
         {ok: false, error: "command '#{command}' was not found on this system"}
       else
-        captured = killed ? spawned.streams :
-                            {stdout: spawned.stdout, stderr: spawned.stderr}
-        {ok: killed ? false : spawned.success?,
-         stdout: truncate(captured[:stdout], max_bytes:),
-         stderr: truncate(captured[:stderr], max_bytes:),
-         duration: "#{(now - startat).round(1)} seconds",
-         note: killed ? "The command was killed after "            \
-                        "exceeding the #{timeout}s timeout. "      \
-                        "stdout and stderr are what it produced "  \
-                        "before it was killed and both streams "   \
-                        "are probably incomplete." : nil
-        }.compact
+        {ok: spawned.success?,
+         stdout: truncate(spawned.stdout, max_bytes:),
+         stderr: truncate(spawned.stderr, max_bytes:),
+         duration: "#{(now - startat).round(1)} seconds"}
       end
     rescue LLM::Interrupt
-      [cmd, spawned].compact.each { it.running? ? terminate!(it) : nil }
+      [cmd, spawned].compact.each { terminate!(_1) if _1.running? }
       raise
     end
 

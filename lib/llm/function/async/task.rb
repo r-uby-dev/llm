@@ -88,7 +88,8 @@ module LLM::Function::Async
           begin
             @window.running!
             @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-            @queue << function.call
+            r = function.call
+            @queue << r
             pushed = true
           rescue LLM::Interrupt => ex
             @queue << ex
@@ -117,27 +118,7 @@ module LLM::Function::Async
     end
 
     ##
-    # Tells the tool, and lets it answer.
-    #
-    # A running tool is the one the interrupt belongs to: it handles it, or
-    # it lets it raise, and either way the block above is what the caller
-    # hears from - its value, or the exception it forwards.
-    #
-    # The tool is told from inside the reactor, not here, so that a tool
-    # whose state belongs to the reactor's thread sees that thread.
-    #
-    # **The ask is the window's, from wherever it is made.** This runs on
-    # the caller's thread, which can be the reactor's, so it asks without
-    # waiting: a call that is running is asked about at once, one that has
-    # finished asks nothing, and one that has not opened holds the ask until
-    # it does. A cancel that arrived before the block ran is the same ask,
-    # made by the block.
-    #
-    # Nothing is done to the reactor here. Where it is stopped is `#wait`'s
-    # own `ensure`, the only point at which it is known to be idle, and the
-    # point a group's `wait` already stops it from: a task cannot tell
-    # whether it owns its reactor or shares it with siblings, and stopping
-    # one for all of them from a cancel is the wrong half of that guess.
+    # Interrupt
     # @return [nil]
     def interrupt!
       @alive = false
@@ -178,7 +159,8 @@ module LLM::Function::Async
     # @return [LLM::Function::Return, LLM::Interrupt]
     def pop
       loop do
-        break @queue.pop(true)
+        v = @queue.pop(true)
+        break v
       rescue ThreadError
         break @return.error(ex: $!) unless @reactor&.thread&.alive?
         sleep 0.01
