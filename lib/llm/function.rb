@@ -566,7 +566,7 @@ class LLM::Function
     self.return(runner.call(**kwargs))
   rescue LLM::Interrupt
     raise
-  rescue => ex
+  rescue Exception => ex
     self.return(
       error: true,
       type: ex.class.name,
