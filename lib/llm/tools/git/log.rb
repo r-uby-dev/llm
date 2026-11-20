@@ -11,7 +11,9 @@ class LLM::Tool::Git
     parameter :path, String, "only commits that touch this path"
     parameter :max_count, Integer, "how many commits to return"
     parameter :timeout, Integer, "the maximum allowed time for git to run (in seconds)"
-    defaults rev: "HEAD", path: nil, max_count: 10, timeout: DEFAULT_TIMEOUT
+    parameter :max_bytes, Integer, "max number of bytes to emit"
+    defaults rev: "HEAD", path: nil, max_count: 10, timeout: DEFAULT_TIMEOUT,
+             max_bytes: -> { max_bytes }
 
     ##
     # @param [String] rev
@@ -22,15 +24,19 @@ class LLM::Tool::Git
     #  The maximum number of commits to return
     # @param [Integer] timeout
     #  The maximum time to allow git to run, in seconds
+    # @param [Integer] max_bytes
+    #  The max number of bytes to emit
     # @param [String, nil] cwd
     #  The directory git runs in
     # @return [Hash]
-    def call(rev: "HEAD", path: nil, max_count: 10, timeout: DEFAULT_TIMEOUT, cwd: nil)
+    def call(rev: "HEAD", path: nil, max_count: 10, timeout: DEFAULT_TIMEOUT, cwd: nil,
+             max_bytes: self.class.max_bytes)
       exec(
         command: "git",
         arguments: [*chdir(cwd), *parse!(rev:, path:, max_count:)],
         env:,
-        timeout:
+        timeout:,
+        max_bytes:
       )
     end
 

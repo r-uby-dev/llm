@@ -11,8 +11,9 @@ class LLM::Tool::Git
     parameter :repository, String, "the repository to clone"
     parameter :directory, String, "the directory to clone into"
     parameter :timeout, Integer, "the maximum allowed time for git to run (in seconds)"
+    parameter :max_bytes, Integer, "max number of bytes to emit"
     required %i[repository]
-    defaults directory: nil, timeout: DEFAULT_TIMEOUT
+    defaults directory: nil, timeout: DEFAULT_TIMEOUT, max_bytes: -> { max_bytes }
 
     ##
     # @param [String] repository
@@ -22,15 +23,19 @@ class LLM::Tool::Git
     #  to the name of the repository
     # @param [Integer] timeout
     #  The maximum time to allow git to run, in seconds
+    # @param [Integer] max_bytes
+    #  The max number of bytes to emit
     # @param [String, nil] cwd
     #  The directory git runs in
     # @return [Hash]
-    def call(repository:, directory: nil, timeout: DEFAULT_TIMEOUT, cwd: nil)
+    def call(repository:, directory: nil, timeout: DEFAULT_TIMEOUT, cwd: nil,
+             max_bytes: self.class.max_bytes)
       exec(
         command: "git",
         arguments: [*chdir(cwd), *parse!(repository:, directory:)],
         env:,
-        timeout:
+        timeout:,
+        max_bytes:
       )
     end
 

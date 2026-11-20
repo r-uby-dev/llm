@@ -13,7 +13,8 @@ class LLM::Tool::Git
     parameter :path, String, "restore this path from ref"
     required %i[ref]
     parameter :timeout, Integer, "the maximum allowed time for git to run (in seconds)"
-    defaults create: false, path: nil, timeout: DEFAULT_TIMEOUT
+    parameter :max_bytes, Integer, "max number of bytes to emit"
+    defaults create: false, path: nil, timeout: DEFAULT_TIMEOUT, max_bytes: -> { max_bytes }
 
     ##
     # @param [String] ref
@@ -24,15 +25,19 @@ class LLM::Tool::Git
     #  An optional path to restore from ref
     # @param [Integer] timeout
     #  The maximum time to allow git to run, in seconds
+    # @param [Integer] max_bytes
+    #  The max number of bytes to emit
     # @param [String, nil] cwd
     #  The directory git runs in
     # @return [Hash]
-    def call(ref:, create: false, path: nil, timeout: DEFAULT_TIMEOUT, cwd: nil)
+    def call(ref:, create: false, path: nil, timeout: DEFAULT_TIMEOUT, cwd: nil,
+             max_bytes: self.class.max_bytes)
       exec(
         command: "git",
         arguments: [*chdir(cwd), *parse!(ref:, create:, path:)],
         env:,
-        timeout:
+        timeout:,
+        max_bytes:
       )
     end
 

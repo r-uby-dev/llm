@@ -22,7 +22,7 @@ RSpec.describe LLM::Tool::Git::Authors do
     let(:params) { described_class.function.params }
 
     it "defines the path, timeout and cwd parameters" do
-      expect(params.properties.keys).to contain_exactly("path", "timeout", "cwd")
+      expect(params.properties.keys).to contain_exactly("path", "timeout", "max_bytes", "cwd")
     end
   end
 

@@ -12,7 +12,8 @@ class LLM::Tool::Git
     parameter :all, Boolean, "commit every tracked change"
     required %i[message]
     parameter :timeout, Integer, "the maximum allowed time for git to run (in seconds)"
-    defaults paths: [], all: false, timeout: DEFAULT_TIMEOUT
+    parameter :max_bytes, Integer, "max number of bytes to emit"
+    defaults paths: [], all: false, timeout: DEFAULT_TIMEOUT, max_bytes: -> { max_bytes }
 
     ##
     # @param [String] message
@@ -25,15 +26,19 @@ class LLM::Tool::Git
     #  When all: and paths: are given together
     # @param [Integer] timeout
     #  The maximum time to allow git to run, in seconds
+    # @param [Integer] max_bytes
+    #  The max number of bytes to emit
     # @param [String, nil] cwd
     #  The directory git runs in
     # @return [Hash]
-    def call(message:, paths: [], all: false, timeout: DEFAULT_TIMEOUT, cwd: nil)
+    def call(message:, paths: [], all: false, timeout: DEFAULT_TIMEOUT, cwd: nil,
+             max_bytes: self.class.max_bytes)
       exec(
         command: "git",
         arguments: [*chdir(cwd), *parse!(message:, paths:, all:)],
         env:,
-        timeout:
+        timeout:,
+        max_bytes:
       )
     end
 

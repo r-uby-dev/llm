@@ -69,14 +69,21 @@ RSpec.describe LLM::Tool::Git do
 
       it "passes the default timeout to #exec" do
         expect(tool).to receive(:exec)
-          .with(command: "git", arguments: an_instance_of(Array), env: {}, timeout: 5)
+          .with(hash_including(command: "git", timeout: 5))
+          .and_return(exec_result)
+        tool.call(**arguments)
+      end
+
+      it "passes max_bytes to #exec" do
+        expect(tool).to receive(:exec)
+          .with(hash_including(max_bytes: tool_class.max_bytes))
           .and_return(exec_result)
         tool.call(**arguments)
       end
 
       it "passes an explicit timeout to #exec" do
         expect(tool).to receive(:exec)
-          .with(command: "git", arguments: an_instance_of(Array), env: {}, timeout: 19)
+          .with(hash_including(command: "git", timeout: 19))
           .and_return(exec_result)
         tool.call(**arguments, timeout: 19)
       end

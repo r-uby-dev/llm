@@ -26,7 +26,7 @@ RSpec.describe LLM::Tool::Git::Clone do
     let(:params) { described_class.function.params }
 
     it "defines the repository, directory and timeout parameters" do
-      expect(params.properties.keys).to contain_exactly("repository", "directory", "timeout", "cwd")
+      expect(params.properties.keys).to contain_exactly("repository", "directory", "timeout", "max_bytes", "cwd")
     end
 
     it "marks repository as required" do

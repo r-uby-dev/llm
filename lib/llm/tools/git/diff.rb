@@ -14,7 +14,9 @@ class LLM::Tool::Git
     parameter :stat, Boolean, "show a diffstat instead of a patch"
     parameter :context, Integer, "how many context lines to show"
     parameter :timeout, Integer, "the maximum allowed time for git to run (in seconds)"
-    defaults rev: nil, path: nil, staged: false, stat: false, context: nil, timeout: DEFAULT_TIMEOUT
+    parameter :max_bytes, Integer, "max number of bytes to emit"
+    defaults rev: nil, path: nil, staged: false, stat: false, context: nil,
+             timeout: DEFAULT_TIMEOUT, max_bytes: -> { max_bytes }
 
     ##
     # @param [String, nil] rev
@@ -29,15 +31,19 @@ class LLM::Tool::Git
     #  The number of context lines to show
     # @param [Integer] timeout
     #  The maximum time to allow git to run, in seconds
+    # @param [Integer] max_bytes
+    #  The max number of bytes to emit
     # @param [String, nil] cwd
     #  The directory git runs in
     # @return [Hash]
-    def call(rev: nil, path: nil, staged: false, stat: false, context: nil, timeout: DEFAULT_TIMEOUT, cwd: nil)
+    def call(rev: nil, path: nil, staged: false, stat: false, context: nil,
+             timeout: DEFAULT_TIMEOUT, cwd: nil, max_bytes: self.class.max_bytes)
       exec(
         command: "git",
         arguments: [*chdir(cwd), *parse!(rev:, path:, staged:, stat:, context:)],
         env:,
-        timeout:
+        timeout:,
+        max_bytes:
       )
     end
 

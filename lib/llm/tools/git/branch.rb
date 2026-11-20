@@ -10,7 +10,8 @@ class LLM::Tool::Git
     parameter :action, Enum["list", "create", "delete"], "what to do"
     parameter :name, String, "the branch name (create and delete)"
     parameter :timeout, Integer, "the maximum allowed time for git to run (in seconds)"
-    defaults action: "list", name: nil, timeout: DEFAULT_TIMEOUT
+    parameter :max_bytes, Integer, "max number of bytes to emit"
+    defaults action: "list", name: nil, timeout: DEFAULT_TIMEOUT, max_bytes: -> { max_bytes }
 
     ##
     # @param [String] action
@@ -21,15 +22,19 @@ class LLM::Tool::Git
     #  When a branch name is required and not given
     # @param [Integer] timeout
     #  The maximum time to allow git to run, in seconds
+    # @param [Integer] max_bytes
+    #  The max number of bytes to emit
     # @param [String, nil] cwd
     #  The directory git runs in
     # @return [Hash]
-    def call(action: "list", name: nil, timeout: DEFAULT_TIMEOUT, cwd: nil)
+    def call(action: "list", name: nil, timeout: DEFAULT_TIMEOUT, cwd: nil,
+             max_bytes: self.class.max_bytes)
       exec(
         command: "git",
         arguments: [*chdir(cwd), *parse!(action:, name:)],
         env:,
-        timeout:
+        timeout:,
+        max_bytes:
       )
     end
 

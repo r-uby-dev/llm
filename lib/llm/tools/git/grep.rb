@@ -22,11 +22,12 @@ class LLM::Tool::Git
     parameter :cached, Boolean, "search the index rather than the working tree (--cached)"
     parameter :untracked, Boolean, "search untracked files as well (--untracked)"
     parameter :timeout, Integer, "the maximum allowed time for git to run (in seconds)"
+    parameter :max_bytes, Integer, "max number of bytes to emit"
     required %i[pattern]
     defaults paths: [], rev: nil, ignore_case: false, word: false, invert: false,
              extended: false, fixed: false, line_number: false,
              files_with_matches: false, count: false, cached: false,
-             untracked: false, timeout: DEFAULT_TIMEOUT
+             untracked: false, timeout: DEFAULT_TIMEOUT, max_bytes: -> { max_bytes }
 
     ##
     # @param [String] pattern
@@ -57,13 +58,15 @@ class LLM::Tool::Git
     #  Search untracked files as well
     # @param [Integer] timeout
     #  The maximum time to allow git to run, in seconds
+    # @param [Integer] max_bytes
+    #  The max number of bytes to emit
     # @param [String, nil] cwd
     #  The directory git runs in
     # @return [Hash]
     def call(pattern:, paths: [], rev: nil, ignore_case: false, word: false,
              invert: false, extended: false, fixed: false, line_number: false,
              files_with_matches: false, count: false, cached: false,
-             untracked: false, timeout: DEFAULT_TIMEOUT, cwd: nil)
+             untracked: false, timeout: DEFAULT_TIMEOUT, cwd: nil, max_bytes: self.class.max_bytes)
       exec(
         command: "git",
         arguments: [
@@ -75,7 +78,8 @@ class LLM::Tool::Git
           )
         ],
         env:,
-        timeout:
+        timeout:,
+        max_bytes:
       )
     end
 

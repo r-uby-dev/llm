@@ -23,7 +23,7 @@ RSpec.describe LLM::Tool::Git::Grep do
       expect(described_class.function.params.properties.keys).to contain_exactly(
         "pattern", "paths", "rev", "ignore_case", "word", "invert", "extended",
         "fixed", "line_number", "files_with_matches", "count", "cached",
-        "untracked", "timeout", "cwd"
+        "untracked", "timeout", "max_bytes", "cwd"
       )
     end
 
