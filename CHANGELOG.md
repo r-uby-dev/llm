@@ -13,7 +13,16 @@ Older releases:
 
 ## What's next
 
-*No unreleased changes yet. Check back after the next release.*
+* **tools: the git tools take a `max_bytes`** <br>
+  Each tool that
+  [`LLM::Tool::Git`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git.html)
+  provides declares a `max_bytes` parameter now, so a model that needs less of a
+  `git-log` or a `git-diff` asks for it on the call instead of taking what the
+  class was configured to return. The parameter defaults to the tool's own
+  `max_bytes`, so a call that passes none is capped as it was, and the number
+  reaches
+  [`LLM::Tool::Utils::Process#exec`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Utils/Process.html#exec-instance_method)
+  per call rather than from the class alone.
 
 ## v21.1.0
 
@@ -138,6 +147,13 @@ no longer stops a reactor it shares, while
   [`LLM::Command#wait`](https://r.uby.dev/api-docs/llm.rb/LLM/Command.html#wait-instance_method)
   measures its deadline with.
 
+* **gem: `Gem.win_platform?` is Ractor-safe** <br>
+  [`LLM::Gem#win_platform?`](https://r.uby.dev/api-docs/llm.rb/LLM/Gem.html#win_platform?-instance_method)
+  returns a value that is computed when the library loads, where RubyGems' own
+  method memoizes into a class variable on first use, which a Ractor can't set.
+  It is what `LLM::Command` asks on every call, so a tool that spawns a command
+  under the `:ractor` strategy is where it showed.
+
 * **function: a tool that raises what is not a `StandardError` returns the error** <br>
   [`LLM::Function#call`](https://r.uby.dev/api-docs/llm.rb/LLM/Function.html#call-instance_method)
   returns an error to the model when the tool it ran raises an exception that
@@ -185,6 +201,19 @@ no longer stops a reactor it shares, while
   does not report it twice, and a fork or a ractor task reports as its child
   ends - before the caller waits, where every tool was reported after all of
   them had been waited on.
+
+* **intercept: `LLM::Intercept::Multi` takes an intercept instance** <br>
+  [`LLM::Intercept::Multi`](https://r.uby.dev/api-docs/llm.rb/LLM/Intercept/Multi.html)
+  accepts an instance of an intercept, as well as the subclass it accepted
+  before, so `LLM::Intercept.multi(llm, Logging.new(llm), Auditing)` builds a
+  group of two. A subclass is still built with `#new`, and an instance is used
+  as it is given, where it was sent `#new` and raised `NoMethodError`.
+
+* **agent: a file attachment reaches the first request of a turn** <br>
+  [`LLM::Agent#ask`](https://r.uby.dev/api-docs/llm.rb/LLM/Agent.html#ask-instance_method)
+  attaches the files it is given when a turn starts, and drops `with:` from the
+  requests the tool loop sends after that, so a turn that runs tool calls
+  attaches a file once, where the loop carried `with:` on every request.
 
 ## v21.0.0
 
