@@ -52,9 +52,9 @@ RSpec.shared_examples "a persisted agent record" do
   end
 
   it "reads agent defaults from the model class" do
-    expect(record.class.agent.model).to eq("gpt-5.4-mini")
-    expect(record.class.agent.instructions).to eq("You are concise.")
-    expect(record.class.agent.concurrency).to eq(:thread)
+    expect(record.class.__agent__.model).to eq("gpt-5.4-mini")
+    expect(record.class.__agent__.instructions).to eq("You are concise.")
+    expect(record.class.__agent__.concurrency).to eq(:thread)
   end
 
   it "resolves an agent field declared as a symbol against the record" do

@@ -24,7 +24,7 @@ module LLM::Sequel
       options = DEFAULTS.merge(options)
       model.db.extension :pg_json if %i[json jsonb].include?(options[:format])
       model.instance_variable_set(:@llm_agent_options, options.freeze)
-      block_given? ? model.instance_exec(model.agent, &block) : nil
+      block_given? ? model.instance_exec(model.__agent__, &block) : nil
     end
 
     module ClassMethods
@@ -34,11 +34,14 @@ module LLM::Sequel
 
       ##
       # @return [Class<LLM::Agent>]
-      def agent
-        return @agent if defined?(@agent)
-        @agent = Class.new(LLM::Agent)
-        @agent.name(self)
-        @agent
+      def __agent__
+        if defined?(@_agent)
+          return @_agent
+        else
+          @_agent = Class.new(LLM::Agent)
+          @_agent.name(self)
+          @_agent
+        end
       end
 
       ##
@@ -68,7 +71,7 @@ module LLM::Sequel
       # @raise [KeyError] when a property key does not match a class-level accessor
       # @return [void]
       def set(properties)
-        agent.set(properties)
+        __agent__.set(properties)
       end
     end
 
@@ -92,7 +95,7 @@ module LLM::Sequel
           options = self.class.llm_plugin_options
           columns = Agent::Utils.columns(options)
           params = Agent::Utils.resolve_options(self, options[:context], Agent::EMPTY_HASH).dup
-          ctx = self.class.agent.new(llm, params.compact.merge(record: self))
+          ctx = self.class.__agent__.new(llm, params.compact.merge(record: self))
           data = self[columns[:data_column]]
           if data.nil? || data == ""
             ctx

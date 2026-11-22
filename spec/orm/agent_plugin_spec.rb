@@ -84,7 +84,7 @@ RSpec.describe "plugin :agent" do
   end
 
   it "forwards confirm to the internal agent class" do
-    expect(agent.agent.confirm).to eq(["delete-file"])
+    expect(agent.__agent__.confirm).to eq(["delete-file"])
   end
 
   describe "the internal agent class name" do
@@ -99,7 +99,7 @@ RSpec.describe "plugin :agent" do
     end
 
     it "derives the name from the model class" do
-      expect(model_class.agent.name).to eq("spec-agent-model")
+      expect(model_class.__agent__.name).to eq("spec-agent-model")
     end
   end
 
@@ -120,7 +120,7 @@ RSpec.describe "plugin :agent" do
     end
 
     it "forwards the block to the internal agent class" do
-      expect(agent.agent.tools).to be_a(Proc)
+      expect(agent.__agent__.tools).to be_a(Proc)
     end
   end
 

@@ -24,27 +24,18 @@ module LLM::ActiveRecord
     module ClassMethods
       ##
       # @return [Class<LLM::Agent>]
-      def agent
-        return @agent if defined?(@agent)
-        @agent = Class.new(LLM::Agent)
-        @agent.name(self)
-        @agent
+      def __agent__
+        if defined?(@_agent)
+          return @_agent
+        else
+          @_agent = Class.new(LLM::Agent)
+          @_agent.name(self)
+          @_agent
+        end
       end
 
       ##
       # Bulk-assign class-level agent defaults.
-      #
-      # Each key is resolved by calling the corresponding class method on the
-      # internal agent subclass.
-      #
-      # @example
-      #   class Agent < ApplicationRecord
-      #     acts_as_agent
-      #     set instructions: "You are a system administrator",
-      #         model: "gpt-4.1-nano",
-      #         tools: [LLM::Tool::Exec]
-      #   end
-      #
       # @param [Hash] properties
       # @option properties [String] :instructions
       # @option properties [String] :model
@@ -58,7 +49,7 @@ module LLM::ActiveRecord
       # @raise [KeyError] when a property key does not match a class-level accessor
       # @return [void]
       def set(properties)
-        agent.set(properties)
+        __agent__.set(properties)
       end
     end
 
@@ -102,7 +93,7 @@ module LLM::ActiveRecord
       class_attribute :llm_plugin_options, instance_accessor: false, default: DEFAULTS unless respond_to?(:llm_plugin_options)
       self.llm_plugin_options = options.freeze
       extend Hooks
-      block_given? ? class_exec(agent, &block) : nil
+      block_given? ? class_exec(__agent__, &block) : nil
     end
 
     module InstanceMethods
@@ -137,7 +128,7 @@ module LLM::ActiveRecord
         @__context__ ||= begin
           options = self.class.llm_plugin_options
           params = Utils.resolve_options(self, options[:context], EMPTY_HASH).dup
-          ctx = self.class.agent.new(llm, params.compact.merge(record: self))
+          ctx = self.class.__agent__.new(llm, params.compact.merge(record: self))
           columns = Utils.columns(options)
           data = self[columns[:data_column]]
           if data.nil? || data == ""
