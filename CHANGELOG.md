@@ -13,6 +13,14 @@ Older releases:
 
 ## What's next
 
+### Breaking
+
+#### Migration
+
+| Old | New |
+|-----|-----|
+| `Model.agent`, on a model that `acts_as_agent` or `plugin :agent` | `Model.__agent__` |
+
 * **tools: the git tools take a `max_bytes`** <br>
   Each tool that
   [`LLM::Tool::Git`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git.html)
@@ -23,6 +31,30 @@ Older releases:
   reaches
   [`LLM::Tool::Utils::Process#exec`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Utils/Process.html#exec-instance_method)
   per call rather than from the class alone.
+
+* **orm: `Model.agent` is `Model.__agent__`** <br>
+  [`LLM::ActiveRecord::ActsAsAgent::ClassMethods#__agent__`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord/ActsAsAgent/ClassMethods.html#__agent__-instance_method)
+  returns the agent class a model wraps, and the Sequel plugin has the same
+  method as
+  [`LLM::Sequel::Agent::ClassMethods#__agent__`](https://r.uby.dev/api-docs/llm.rb/LLM/Sequel/Agent/ClassMethods.html#__agent__-instance_method).
+  The name was `agent`, which is what an application is likely to define for
+  itself, so a model with a column, an association or a method of that name
+  shadowed the wrapper and lost the agent class with it. The old name is not
+  an alias, so `Model.agent` has to be renamed where it is called.
+  `Model.set` bulk-assigns the class-level defaults as it did, and the block
+  that `acts_as_agent` or `plugin :agent` is given still runs against the
+  agent class this method returns.
+
+* **console: the status line no longer outlives the turn** <br>
+  [`LLM::Console`](https://r.uby.dev/api-docs/llm.rb/LLM/Console.html) drains
+  the queue its stream is written to in one go, where it drained four
+  messages per pass, and it sets the status line from a terminal message
+  before it paints the stream that preceded it. A fast model queued more
+  chunks than four, so the turn ended with chunks still queued and the status
+  line sat on the "Thinking" text until the backlog had been painted - ten
+  seconds or more after the turn had ended. A run of chunks is painted once
+  now, with the last of the run, because a chunk holds the whole message so
+  far rather than a delta.
 
 ## v21.1.0
 
