@@ -34,6 +34,16 @@ module LLM
                 :name, :path
 
     ##
+    # The messages that end a turn.
+    # @api private
+    TERMINAL = %i[done cancel error].freeze
+
+    ##
+    # The status line each terminal message leaves behind.
+    # @api private
+    TERMINAL_STATUS = {done: "idle", cancel: "Idle", error: "error"}.freeze
+
+    ##
     # @param [LLM::Agent] agent
     # @param [String, nil] name
     #  The agent's name (optional)
@@ -258,30 +268,41 @@ module LLM
     # This method reads from the queue that is written to
     # by a second thread. The queue is managed or written
     # to by a subclass of {LLM::Stream LLM::Stream}.
+    #
+    # A model can stream faster than the UI can paint, and a
+    # chunk is the whole message so far rather than a delta,
+    # so the queue is drained in one go and a run of chunks is
+    # painted once - with the last of the run. The status line
+    # follows the turn, not the backlog: when a terminal message
+    # is in the batch, the status is set from it before the
+    # stream that preceded it is painted, so "Thinking" cannot
+    # outlive the turn that produced it.
     # @api private
     def read!
-      burst, max_burst = 0, 4
-      loop do
-        type, value = @queue.pop(true)
+      batch = []
+      begin
+        loop { batch << @queue.pop(true) }
+      rescue ThreadError
+      end
+      return if batch.empty?
+      terminal = batch.reverse.find { |(type, _)| TERMINAL.include?(type) }
+      started = batch.rindex { |(type, _)| type == :start }
+      terminal = nil if terminal && started && batch.rindex(terminal) < started
+      status.text = TERMINAL_STATUS[terminal.first] if terminal
+      batch.slice_when { |a, b| !(a[0] == :stream && b[0] == :stream) }.each do |run|
+        type, value = run.last
         case type
         when :start
           buffer.open
           stream.clear
         when :stream
           ##
-          # A fast model can push many small chunks faster than the
-          # UI can repaint. Cap the stream chunks drained per call so
-          # read! gives control back to the key loop: leftover chunks
-          # stay queued and are drained by the next read!.
-          #
           # A turn that was cancelled can still have chunks queued, and
           # they arrive after the buffer is closed. There is no active
           # row to replace at that point, so they are dropped.
           next unless buffer.open?
-          status.text = think_text if stream.tools.empty?
+          status.text = think_text if stream.tools.empty? && terminal.nil?
           write_message name, markdown(value), method: :replace
-          burst += 1
-          break if burst >= max_burst
         when :status
           self.status = value
         when :done

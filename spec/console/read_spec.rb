@@ -29,24 +29,24 @@ RSpec.describe LLM::Console do
       queue
     end
 
-    it "drains at most 4 stream chunks per call" do
+    it "drains the whole backlog in one call" do
       queue = enqueue(*Array.new(20) { |i| [:stream, "chunk #{i}"] })
-      expect(queue.size).to eq(16)
-    end
-
-    it "performs at most 4 redraws with a large backlog" do
-      enqueue(*Array.new(20) { |i| [:stream, "chunk #{i}"] })
-      expect(redraws).to be <= 4
-    end
-
-    it "passes a :done message that arrives within the burst" do
-      queue = enqueue(*Array.new(3) { |i| [:stream, "chunk #{i}"] }, [:done])
       expect(queue).to be_empty
     end
 
-    it "defers a :done message that arrives after the burst" do
-      queue = enqueue(*Array.new(5) { |i| [:stream, "chunk #{i}"] }, [:done])
-      expect(queue.size).to be > 0
+    it "paints a run of chunks once" do
+      enqueue(*Array.new(20) { |i| [:stream, "chunk #{i}"] })
+      expect(redraws).to eq(1)
+    end
+
+    it "shows Thinking while the stream is running" do
+      enqueue(*Array.new(3) { |i| [:stream, "chunk #{i}"] })
+      expect(console.status.text).to eq(console.think_text)
+    end
+
+    it "ends the turn as soon as it is queued, backlog or not" do
+      enqueue(*Array.new(20) { |i| [:stream, "chunk #{i}"] }, [:done, "final"])
+      expect(console.status.text).to eq("idle")
     end
   end
 end
