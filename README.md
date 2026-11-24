@@ -1959,7 +1959,7 @@ a large-ish company.
       </p>
     </td>
     <td align="right" valign="middle" width="128">
-      <a title="r.uby.dev" href="https://www.youtube.com/watch?v=s-1u-hSVZvk">
+      <a title="r.uby.dev" href="https://www.youtube.com/watch?v=EX_HgUmnkcw">
         <img src="cerealkiller-128.png" width="128" alt="r.uby.dev">
       </a>
     </td>
