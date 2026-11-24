@@ -35,7 +35,7 @@ RSpec.describe LLM::Registry do
     include_examples "model exists", "gpt-4.1"
     include_examples "model exists", "gpt-5.3-codex"
     include_examples "fallback exists", "gpt-4.1-2025-01-01", "gpt-4.1"
-    include_examples "fallback exists", "gpt-4-0613", "gpt-4"
+    include_examples "fallback exists", "gpt-4o-2024-08-06", "gpt-4o"
   end
 
   context "when given google" do
@@ -160,8 +160,9 @@ RSpec.describe LLM::Registry do
     end
 
     it "orders cheaper models before expensive ones" do
-      cheap = LLM::Registry.for(:openai).models.find { it.id == "gpt-4o-mini" }
-      expensive = LLM::Registry.for(:openai).models.find { it.id == "o1-pro" }
+      models = LLM::Registry.for(:openai).models.reject { it.input_cost.nil? }
+      cheap = models.find { it.id == "gpt-4o-mini" }
+      expensive = models.max_by { [it.input_cost, it.output_cost] }
       expect(cheap).to be < expensive
     end
 
