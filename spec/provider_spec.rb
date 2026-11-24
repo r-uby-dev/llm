@@ -104,14 +104,68 @@ RSpec.describe LLM::Provider do
       end
     end
 
-    context "when a scoped header is set while another fiber reads" do
+    context "when a scoped header is read from another fiber for the same request owner" do
+      it "keeps the header available across the fiber hop" do
+        owner = Object.new
+        allow(provider).to receive(:request_owner).and_return(owner)
+        scope = Fiber.new do
+          provider.with("x-session-id" => "abc") { Fiber.yield }
+        end
+        reader = Fiber.new do
+          Fiber.yield
+          provider.send(:headers)
+        end
+
+        scope.resume
+        reader.resume
+        headers = reader.resume
+        scope.resume
+
+        expect(headers).to include("x-session-id" => "abc")
+      end
+    end
+
+    context "when scoped headers are active in two fibers" do
+      it "keeps each scope isolated when the other fiber exits" do
+        allow(provider).to receive(:request_owner) { Fiber.current }
+        values = {}
+        first = Fiber.new do
+          provider.with("x-session-id" => "first") do
+            values[:first_before] = provider.send(:headers)["x-session-id"]
+            Fiber.yield
+            values[:first_after] = provider.send(:headers)["x-session-id"]
+          end
+        end
+        second = Fiber.new do
+          provider.with("x-session-id" => "second") do
+            values[:second_before] = provider.send(:headers)["x-session-id"]
+            Fiber.yield
+            values[:second_after] = provider.send(:headers)["x-session-id"]
+          end
+        end
+
+        first.resume
+        second.resume
+        first.resume
+        second.resume
+
+        expect(values).to eq(
+          first_before: "first",
+          first_after: "first",
+          second_before: "second",
+          second_after: "second"
+        )
+      end
+    end
+
+    context "when a scoped header is set while another thread reads" do
       let(:other) { Thread.new { provider.send(:headers) } }
 
       before do
         provider.with("x-session-id" => "abc") { other.value }
       end
 
-      it "does not leak the header to the other fiber" do
+      it "does not leak the header to the other thread" do
         expect(other.value).not_to include("x-session-id" => "abc")
       end
     end
@@ -303,6 +357,41 @@ RSpec.describe LLM::Provider do
 
       it "ends the tracer when the last scope exits" do
         expect(events).to eq([:outer, :other_thread, :exit])
+      end
+    end
+
+    context "when scopes are active in two fibers" do
+      it "keeps each tracer isolated when the other fiber exits" do
+        allow(provider).to receive(:request_owner) { Fiber.current }
+        first_tracer = LLM::Tracer::Null.new(provider)
+        second_tracer = LLM::Tracer::Null.new(provider)
+        values = {}
+        first = Fiber.new do
+          provider.with_tracer(first_tracer) do
+            values[:first_before] = provider.tracer
+            Fiber.yield
+            values[:first_after] = provider.tracer
+          end
+        end
+        second = Fiber.new do
+          provider.with_tracer(second_tracer) do
+            values[:second_before] = provider.tracer
+            Fiber.yield
+            values[:second_after] = provider.tracer
+          end
+        end
+
+        first.resume
+        second.resume
+        first.resume
+        second.resume
+
+        expect(values).to eq(
+          first_before: first_tracer,
+          first_after: first_tracer,
+          second_before: second_tracer,
+          second_after: second_tracer
+        )
       end
     end
   end

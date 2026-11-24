@@ -286,8 +286,8 @@ class LLM::Provider
   # Add one or more headers to all requests, or scope them to a block.
   #
   # Without a block the headers are merged into the provider's defaults
-  # permanently. With a block the headers apply only to the current fiber,
-  # for the duration of the block, then the previous headers are restored.
+  # permanently. With a block the headers apply only to the current request
+  # owner for the duration of the block, then the previous headers are restored.
   # This is useful for a header that varies per context, such as
   # OpenRouter's `x-session-id`.
   # @example Permanent
@@ -311,7 +311,8 @@ class LLM::Provider
   def with(**headers, &block)
     headers = headers.merge(headers.delete(:headers) || {})
     if block
-      wm = weakmaps.header
+      key = request_owner
+      wm = weakmaps.header[key] ||= ObjectSpace::WeakKeyMap.new
       previous = wm[self]
       wm[self] = (previous || {}).merge(headers)
       block.call
@@ -400,7 +401,7 @@ class LLM::Provider
   # @return [LLM::Tracer]
   #  Returns the current scoped tracer override or provider default tracer
   def tracer
-    weakmaps.tracer[self] || @tracer || LLM::Tracer::Null.new(self)
+    weakmaps.tracer[request_owner]&.[](self) || @tracer || LLM::Tracer::Null.new(self)
   end
 
   ##
@@ -427,7 +428,7 @@ class LLM::Provider
   end
 
   ##
-  # Override the tracer for the current fiber while the block runs.
+  # Override the tracer for the current request owner while the block runs.
   # This is useful when you want per-request or per-turn tracing without
   # replacing the provider's default tracer.
   # @example
@@ -439,7 +440,8 @@ class LLM::Provider
   # @return [Object]
   def with_tracer(tracer)
     scoped = tracer || LLM::Tracer::Null.new(self)
-    wm = weakmaps.tracer
+    key = request_owner
+    wm = weakmaps.tracer[key] ||= ObjectSpace::WeakKeyMap.new
     had_override = wm.key?(self)
     previous = wm[self]
     wm[self] = scoped
@@ -588,24 +590,29 @@ class LLM::Provider
 
   ##
   # Returns the temporary headers set by {#with}
-  # for the current fiber.
+  # for the current request owner.
   # @api private
   # @return [Hash]
   def temporary_headers
-    weakmaps.header[self] || {}
+    weakmaps.header[request_owner]&.[](self) || {}
   end
 
   ##
   # @return [LLM::Object]
   def weakmaps
-    if thread["llm.#{name}.weakmaps"]
-      thread["llm.#{name}.weakmaps"]
+    key = "llm.#{name}.weakmaps"
+    if thread.thread_variable_get(key)
+      thread.thread_variable_get(key)
     else
       weakmaps = LLM::Object.from(
-        tracer: ObjectSpace::WeakMap.new,
+        tracer: ObjectSpace::WeakKeyMap.new,
         header: ObjectSpace::WeakKeyMap.new
       )
-      thread["llm.#{name}.weakmaps"] = weakmaps
+      # Thread#[] is fiber-local, so keep this store shared across fibers on
+      # one thread. The scoped maps below are keyed by request_owner to retain
+      # request isolation, while the thread variable isolates separate threads.
+      thread.thread_variable_set(key, weakmaps)
+      weakmaps
     end
   end
 end
