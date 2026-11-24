@@ -26,6 +26,9 @@ Works with and without Rails.
 It requires nothing but Ruby's standard library.  
 It can be extended with optional, opt-in dependencies.
 
+It ships builtin tools that are loaded on-demand.  
+All builtin tools and MCP/A2A tools are Ractor-safe **by default**.
+
 ## Install
 
 ##### v17
