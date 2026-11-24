@@ -56,6 +56,31 @@ Older releases:
   now, with the last of the run, because a chunk holds the whole message so
   far rather than a delta.
 
+* **mcp: the HTTP transport asks for JSON and an event stream** <br>
+  [`LLM::MCP::Transport::HTTP`](https://r.uby.dev/api-docs/llm.rb/LLM/MCP/Transport/HTTP.html)
+  sends `Accept: application/json, text/event-stream` with every request, where
+  it left the header to the caller. The MCP spec asks for both media types,
+  because a server may return one JSON document or a stream of server-sent
+  events, and a server that enforces the header rejected a request that came
+  without it. A header that is passed in `headers:` is merged over the default,
+  so a caller that wants another value still sets it.
+
+* **mcp: the HTTP transport keeps the session id a server returns** <br>
+  [`LLM::MCP::Transport::HTTP#write`](https://r.uby.dev/api-docs/llm.rb/LLM/MCP/Transport/HTTP.html#write-instance_method)
+  remembers the `mcp-session-id` a response carries and sends it with every
+  request after that, which is how a server that keeps state per session follows
+  one transport through the requests it makes. A response that carries no id
+  leaves the id that is held alone, so a transport that was given no session
+  sends none.
+
+* **mcp: a failed write raises the reason the server gives** <br>
+  [`LLM::MCP::Transport::HTTP#write`](https://r.uby.dev/api-docs/llm.rb/LLM/MCP/Transport/HTTP.html#write-instance_method)
+  reads the body of a response that is not a success and appends it to the
+  [`LLM::MCP::Error`](https://r.uby.dev/api-docs/llm.rb/LLM/MCP.html#Error-constant)
+  it raises, so the reason a server gives - a method it does not know, a
+  parameter it rejects - reaches the caller, where the error named the status
+  code alone. An empty body leaves the message as it was.
+
 ## v21.1.0
 
 Changes since `v21.0.0`.
@@ -726,16 +751,23 @@ the compactor and intercept readers.
 
 ### ORM
 
-* **orm: add `#compactor`, `#compactor_options`, `#intercept` and `#intercept_options` to the Sequel plugins** <br>
+* **orm: add `#compactor` and `#compactor_options` to the Sequel plugins** <br>
   A record that uses `plugin :llm` or `plugin :agent` responds to
-  [`#compactor`](https://r.uby.dev/api-docs/llm.rb/LLM/Sequel/Plugin/InstanceMethods.html#compactor-instance_method),
-  [`#compactor_options`](https://r.uby.dev/api-docs/llm.rb/LLM/Sequel/Plugin/InstanceMethods.html#compactor_options-instance_method),
+  [`#compactor`](https://r.uby.dev/api-docs/llm.rb/LLM/Sequel/Plugin/InstanceMethods.html#compactor-instance_method)
+  and
+  [`#compactor_options`](https://r.uby.dev/api-docs/llm.rb/LLM/Sequel/Plugin/InstanceMethods.html#compactor_options-instance_method)
+  now, as a record that `acts_as_llm` or `acts_as_agent` does. Both read the
+  compactor and its options from the record's runtime, an `LLM::Context` for
+  `plugin :llm` and an `LLM::Agent` for `plugin :agent`.
+
+* **orm: add `#intercept` and `#intercept_options` to the Sequel plugins** <br>
+  A record that uses `plugin :llm` or `plugin :agent` responds to
   [`#intercept`](https://r.uby.dev/api-docs/llm.rb/LLM/Sequel/Plugin/InstanceMethods.html#intercept-instance_method)
   and
   [`#intercept_options`](https://r.uby.dev/api-docs/llm.rb/LLM/Sequel/Plugin/InstanceMethods.html#intercept_options-instance_method)
-  now, as a record that `acts_as_llm` or `acts_as_agent` does. All four
-  read from the record's runtime, an `LLM::Context` for `plugin :llm` and an
-  `LLM::Agent` for `plugin :agent`.
+  now, as a record that `acts_as_llm` or `acts_as_agent` does. Both read the
+  intercept and its options from the record's runtime, an `LLM::Context` for
+  `plugin :llm` and an `LLM::Agent` for `plugin :agent`.
 
 ## v20.0.0
 
