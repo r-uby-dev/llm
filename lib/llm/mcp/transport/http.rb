@@ -27,6 +27,7 @@ module LLM::MCP::Transport
       @queue = []
       @monitor = Monitor.new
       @running = false
+      @session_id = nil
       @transport = resolve_transport(host: uri.host, port: uri.port, ssl: uri.scheme == "https", timeout:, persistent:, transport:)
     end
 
@@ -64,11 +65,19 @@ module LLM::MCP::Transport
     # @return [void]
     def write(message)
       raise LLM::MCP::Error, "MCP transport is not running" unless running?
-      req = LLM::Transport::Request.post(uri.request_uri, headers.merge("content-type" => "application/json"))
+      req = LLM::Transport::Request.post(uri.request_uri, request_headers)
       req.body = LLM.json.dump(message)
       res = transport.request(req, owner: self) { consume(_1) }
       res = LLM::Transport::Response.from(res)
-      raise LLM::MCP::Error, "MCP transport write failed with HTTP #{res.code}" unless res.success?
+      @session_id = res["mcp-session-id"] || @session_id
+      if not res.success?
+        body = +""
+        res.read_body { body << _1 }
+        detail = body.strip
+        message = "MCP transport write failed with HTTP #{res.code}"
+        message = "#{message}: #{detail}" unless detail.empty?
+        raise LLM::MCP::Error, message
+      end
     end
 
     ##
@@ -96,6 +105,16 @@ module LLM::MCP::Transport
     private
 
     attr_reader :uri, :headers, :transport
+
+    ##
+    # @return [Hash]
+    def request_headers
+      headers
+        .merge({
+          "content-type" => "application/json",
+          "mcp-session-id" => @session_id
+        }.compact)
+    end
 
     def consume(res)
       res = LLM::Transport::Response.from(res)
