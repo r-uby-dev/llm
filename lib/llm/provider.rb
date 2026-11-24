@@ -598,9 +598,9 @@ class LLM::Provider
   end
 
   ##
-  # Returns the weak-map store. Storage is thread-local (rather than
-  # fiber-local) but keyed by the request owner, so storage is effectively
-  # isolated per request and shared across the fibers a request runs on.
+  # We use thread-local storage (rather than fiber-local storage)
+  # but key by the Fiber that a request is active on. This effectively
+  # isolates storage per-fiber but through thread-local storage.
   # @return [LLM::Object]
   def weakmaps
     key = "llm.#{name}.weakmaps"
