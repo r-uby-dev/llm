@@ -16,6 +16,21 @@ Older releases:
 
 ## What's next
 
+*No unreleased changes yet. Check back after the next release.*
+
+## v22.0.0
+
+Changes since `v21.1.0`.
+
+This is a major release, and only because of one rename: `Model.agent` is
+`Model.__agent__` now, on both the ActiveRecord and Sequel plugins, since
+`agent` is a name an application may define for itself. The rest is small.
+The git tools take a per-call `max_bytes`, the console drains its stream in
+one go so the status line no longer outlives the turn, the MCP HTTP
+transport asks for JSON and an event stream, keeps the session id a server
+returns, and raises the reason a server gives, and a scoped header or
+tracer is keyed by the request owner rather than the fiber.
+
 ### Breaking
 
 #### Migration
