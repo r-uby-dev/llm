@@ -598,6 +598,9 @@ class LLM::Provider
   end
 
   ##
+  # We use thread-local storage (rather than fiber-local storage)
+  # but key by the Fiber that a request is active on. This effectively
+  # isolates storage per-fiber but through thread-local storage.
   # @return [LLM::Object]
   def weakmaps
     key = "llm.#{name}.weakmaps"
@@ -608,9 +611,6 @@ class LLM::Provider
         tracer: ObjectSpace::WeakKeyMap.new,
         header: ObjectSpace::WeakKeyMap.new
       )
-      # Thread#[] is fiber-local, so keep this store shared across fibers on
-      # one thread. The scoped maps below are keyed by request_owner to retain
-      # request isolation, while the thread variable isolates separate threads.
       thread.thread_variable_set(key, weakmaps)
       weakmaps
     end
