@@ -23,7 +23,7 @@ module LLM::MCP::Transport
     # @return [LLM::MCP::Transport::HTTP]
     def initialize(url:, headers: {}, timeout: nil, persistent: false, transport: nil)
       @uri = URI.parse(url)
-      @headers = headers
+      @headers = {"Accept" => "application/json, text/event-stream"}.merge!(headers)
       @queue = []
       @monitor = Monitor.new
       @running = false
