@@ -81,6 +81,21 @@ Older releases:
   parameter it rejects - reaches the caller, where the error named the status
   code alone. An empty body leaves the message as it was.
 
+### LLM::Provider
+
+* **provider: a scoped header or tracer is keyed by the request owner** <br>
+  [`LLM::Provider#with`](https://r.uby.dev/api-docs/llm.rb/LLM/Provider.html#with-instance_method)
+  and
+  [`LLM::Provider#with_tracer`](https://r.uby.dev/api-docs/llm.rb/LLM/Provider.html#with_tracer-instance_method)
+  keep what they scope in a map that belongs to the current request owner, and
+  that map is held by the thread rather than by the fiber. The request owner is
+  the async task when there is one and the fiber otherwise, so a request that is
+  resumed on another fiber of the scheduler keeps the header and the tracer its
+  scope set, where the scope went with the fiber it was opened on. The map is
+  keyed by the owner before the provider, so two owners that are active at once
+  on one thread do not overwrite each other's scope, and a scope restores only
+  the entry its own owner opened. Separate threads stay apart as they did.
+
 ## v21.1.0
 
 Changes since `v21.0.0`.
