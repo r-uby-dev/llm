@@ -21,6 +21,8 @@ Older releases:
 |-----|-----|
 | `Model.agent`, on a model that `acts_as_agent` or `plugin :agent` | `Model.__agent__` |
 
+### LLM::Tool
+
 * **tools: the git tools take a `max_bytes`** <br>
   Each tool that
   [`LLM::Tool::Git`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Git.html)
@@ -31,6 +33,8 @@ Older releases:
   reaches
   [`LLM::Tool::Utils::Process#exec`](https://r.uby.dev/api-docs/llm.rb/LLM/Tool/Utils/Process.html#exec-instance_method)
   per call rather than from the class alone.
+
+### ORM
 
 * **orm: `Model.agent` is `Model.__agent__`** <br>
   [`LLM::ActiveRecord::ActsAsAgent::ClassMethods#__agent__`](https://r.uby.dev/api-docs/llm.rb/LLM/ActiveRecord/ActsAsAgent/ClassMethods.html#__agent__-instance_method)
@@ -45,6 +49,8 @@ Older releases:
   that `acts_as_agent` or `plugin :agent` is given still runs against the
   agent class this method returns.
 
+### Console
+
 * **console: the status line no longer outlives the turn** <br>
   [`LLM::Console`](https://r.uby.dev/api-docs/llm.rb/LLM/Console.html) drains
   the queue its stream is written to in one go, where it drained four
@@ -55,6 +61,8 @@ Older releases:
   seconds or more after the turn had ended. A run of chunks is painted once
   now, with the last of the run, because a chunk holds the whole message so
   far rather than a delta.
+
+### LLM::MCP
 
 * **mcp: the HTTP transport asks for JSON and an event stream** <br>
   [`LLM::MCP::Transport::HTTP`](https://r.uby.dev/api-docs/llm.rb/LLM/MCP/Transport/HTTP.html)
