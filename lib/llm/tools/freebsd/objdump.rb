@@ -73,8 +73,8 @@ class LLM::Tool::FreeBSD
 
     ##
     # The commands `--all-headers` is equivalent to.
-    # @return [Array<String>]
-    ALL_HEADERS = %w[
+    # @return [Array<Symbol>]
+    ALL_HEADERS = %i[
       archive_headers file_headers private_headers reloc section_headers syms
     ].freeze
 

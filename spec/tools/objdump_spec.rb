@@ -34,8 +34,9 @@ RSpec.describe LLM::Tool::FreeBSD::ObjDump do
       expect(params.properties[:dwarf_frames]).to be_a(LLM::Schema::Boolean)
     end
 
-    it "defines the syntax as an enum of att and intel" do
-      expect(params.properties[:syntax]).to be_a(LLM::Schema::Enum)
+    it "defines the syntax as a string of att or intel" do
+      expect(params.properties[:syntax]).to be_a(LLM::Schema::String)
+      expect(params.properties[:syntax].enum).to eq(%w[att intel])
     end
 
     it "defaults the timeout to 30 seconds" do
