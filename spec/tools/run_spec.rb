@@ -34,6 +34,7 @@ tools = {
   LLM::Tool::Unix::Man => {name: "printf"},
   LLM::Tool::Unix::Mkdir => {path: "a-directory"},
   LLM::Tool::Unix::Nm => {paths: ["foo.o"]},
+  LLM::Tool::FreeBSD::ObjDump => {paths: ["foo.o"], syms: true},
   LLM::Tool::FreeBSD::PkgInstall => {packages: ["zsh"]},
   LLM::Tool::FreeBSD::PkgSearch => {pattern: "zsh"},
   LLM::Tool::FreeBSD::Truss => {command: "ls"},

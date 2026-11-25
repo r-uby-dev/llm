@@ -18,7 +18,10 @@ class LLM::Tool
   # before `pkg install`. `sh` is the third: it is
   # FreeBSD's shell, a POSIX sh with a few Berkeley
   # extensions, and it is the one command here that
-  # takes a script instead of an argv.
+  # takes a script instead of an argv. `objdump` is the
+  # fourth, and it makes the point of `truss` again:
+  # FreeBSD ships LLVM's dumper where a Linux box ships
+  # GNU's, and the two do not take the same arguments.
   #
   # Tools that work anywhere are not FreeBSD tools even
   # when they are named after a command that began
@@ -28,6 +31,7 @@ class LLM::Tool
   #
   # @abstract
   # @see LLM::Tool.freebsd
+  # @see LLM::Tool::FreeBSD::ObjDump
   # @see LLM::Tool::FreeBSD::PkgInstall
   # @see LLM::Tool::FreeBSD::PkgSearch
   # @see LLM::Tool::FreeBSD::ProcStat
@@ -40,6 +44,7 @@ class LLM::Tool
     require_relative "utils/process"
     include LLM::Tool::Utils::Process
 
+    require_relative "freebsd/objdump"
     require_relative "freebsd/pkg_install"
     require_relative "freebsd/pkg_search"
     require_relative "freebsd/proc-stat"

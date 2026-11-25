@@ -36,8 +36,8 @@ RSpec.describe LLM::Tool::FreeBSD do
 
     it "returns the tools that depend on a BSD facility" do
       expect(names).to contain_exactly(
-        "freebsd-pkg-install", "freebsd-pkg-search", "freebsd-procstat",
-        "freebsd-sh", "freebsd-sockstat", "freebsd-truss"
+        "freebsd-objdump", "freebsd-pkg-install", "freebsd-pkg-search",
+        "freebsd-procstat", "freebsd-sh", "freebsd-sockstat", "freebsd-truss"
       )
     end
 
