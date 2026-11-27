@@ -49,10 +49,15 @@ class LLM::Agent
     def interrupt!
       if thread.equal?(Thread.current)
         if fiber
+          ##
+          # The owner is an Async::Task when the agent
+          # runs under a scheduler, and a scheduler
+          # interrupts a Fiber.
+          target = fiber.respond_to?(:fiber) ? fiber.fiber : fiber
           if scheduler
-            scheduler.fiber_interrupt(fiber, LLM::Interrupt.new("agent interrupted"))
+            scheduler.fiber_interrupt(target, LLM::Interrupt.new("agent interrupted"))
           else
-            fiber.raise(LLM::Interrupt, "agent interrupted")
+            target.raise(LLM::Interrupt, "agent interrupted")
           end
         end
       else
